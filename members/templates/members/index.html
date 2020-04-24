@@ -26,7 +26,7 @@
     <!-- navigationbar2 -->
     <nav class="sticky">
         <ul>
-            <li class= "float_right"><a href="{% url 'logout' %}?next=""">Logout</a></li>
+            <li class= "float_right"><a href="{% url 'logout' %}?next=/">Logout</a></li>
             <li class= "float_right"><a href="#">Profil</a></li>
             <li class= "float_left"><a href="#">Jams</a></li>
             <li class= "float_left"><a href="#">Vereinskleidung</a></li>
@@ -56,7 +56,7 @@
                         <ol class="schedule_ul">
                             <li class="session_weekday"> {{session.day}} </li>
                             <li class="session_info"> {{session.website_title}} </li>
-                            <li class="session_info"> Zeit: {{session.start_time}} - {{session.end_time}} </li>
+                            <li class="session_info"> {{session.start_time}} - {{session.end_time}} </li>
                             <li class="session_info"> {{session.spot.title}}  </li>
                             {% if session.hinweis %}
                                 <li class="session_alert"> {{session.hinweis}} </li>
