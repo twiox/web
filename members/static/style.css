@@ -1,0 +1,150 @@
+body {
+    background-color: #262626;
+    color:#d1d1d1;
+    margin:0px;
+    border:0px;
+    padding:0px;
+}
+ol{
+    overflow:hidden;
+}
+li{
+    overflow:hidden;
+}
+header {
+  border:0px;
+  margin:0px;
+  padding: 20px;
+  height: 10%;
+  text-align: center;
+  background: #191919;
+}
+header img{
+  top: 50%;
+  left: 50%;
+  min-height: 15%;
+  min-width: 15%;
+}
+/*Navigationsleiste */
+nav ul{
+  font-size: 14px;
+  font-weight: 500;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #191919;
+}
+.float_left{
+  float: left;
+}
+.float_right{
+  float: right;
+}
+.sticky{
+  position: sticky;
+  top: 0;
+}
+.equal_3{
+    float:left;
+    width: 33.33%;
+}
+nav li a{
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+nav li a:hover {
+  background-color: #111;
+  color: white;
+}
+/*Main Picture*/
+.member_img_fixed{
+    background-image: url("media/home.jpg");
+    background-attachment:fixed;
+    background-size:cover;
+    background-position: bottom center; 
+    height:450px;
+}
+/*Content*/
+section{
+    margin-right:10%;
+    margin-left:10%;
+}
+h1{
+    font-size:2.5rem;
+}
+h2{
+    font-size:2rem;
+}
+/*Trainingssessions*/
+.schedule{
+    margin:0px;
+    background-color: #333333;
+}
+.schedule_ul{
+    list-style-type: none;
+    padding:0px;
+    padding-bottom:10px;
+}
+.session_divs{
+    float:left;
+    width: 30%;
+    padding-right:15px;
+    padding-bottom:15px;
+}
+.session_weekday{
+    text-align:center;
+    width: 10%;
+    padding:10px;
+    font-size:1rem;
+    background-color: #088eaa;
+}
+.session_info{
+    list-style-type: none;
+    padding-left:15px;
+    padding-top:5px;
+}
+.session_alert{
+    display: block;  
+    text-align: center; 
+    background-color: #7b1b42; 
+    padding-bottom:5px;
+    margin: 0px;
+}
+    
+/*Eventcalender*/
+.event_title{
+    text-align:center;
+    width: 100%;
+    padding:10px;
+    font-size:1rem;
+    background-color: #088eaa;
+}
+.event_date{
+    text-align:center;
+    width: 100%;
+    font-size:1rem;
+    padding-bottom:10px;
+    padding-top:10px;
+}
+.event_descr{
+    font-size:0.8rem;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: justify;
+}
+.event_more_info{
+    text-align:center;
+    padding-top:10px;
+}
+.more_info_button{
+    text-decoration: none;
+    text-align:center;
+    color:#088eaa;
+}
+.more_info_button:hover{
+    color:#69CCE1;
+}

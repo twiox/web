@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Twio X e.V. - Parkour Leipzig</title>
+        <meta name="description" content="Der Internetauftritt vom Parkour Verein Twio X e.V. aus Leipzig">
+        <link rel="stylesheet" href="{{ STATIC_URL }}/static/style.css"/>
+  </head>
+  <body>
+    <!-- header -->
+    <header>
+        <a href="">
+            <img src="{{ STATIC_URL }}/static/media/twiox_logo.svg">
+        </a>
+    </header>
+    <!-- navigationbar -->
+    <nav class="sticky">
+        <ul>
+            <li class= "equal_3"><a href="{% url 'logout' %}?next=''">MITGLIEDER</a></li>
+            <li class= "equal_3"><a href="#">INTERESSIERTE</a></li>
+            <li class= "equal_3"><a href="#">VERANSTALTER</a></li>
+        </ul> 
+    </nav>
+    <!-- main picture -->
+    <div class="member_img_fixed"> </div>
+    <!-- navigationbar2 -->
+    <nav class="sticky">
+        <ul>
+            <li class= "float_right"><a href="{% url 'logout' %}?next=""">Logout</a></li>
+            <li class= "float_right"><a href="#">Profil</a></li>
+            <li class= "float_left"><a href="#">Jams</a></li>
+            <li class= "float_left"><a href="#">Vereinskleidung</a></li>
+            <li class= "float_left"><a href="#">Chat</a></li>
+        </ul> 
+    </nav>
+    <!-- Website Content -->
+    <!-- Nice Greeting -->
+    <section>
+        <h1> Willkommen {{request.user.first_name}} </h1>
+    </section>
+    <!-- Here the Messanges if any -->
+    <section>
+        <ul style="padding:0px; list-style-type: none;">
+            <li style=" display: block; color: white; text-align: center; background-color: #7b1b42; padding-bottom:10px; "> Hinweise Platzhalter</li>
+            <li style=" display: block; color: white; text-align: center; background-color: #333333; font-size: 1rem">TITEL</li>
+            <li style=" display: block; color: white; text-align: center; background-color: #333333;">Und hier kann ein Hinweis stehen</li>
+        </ul>
+    </section>
+    <!-- And the container for the Sessions -->
+    <div style="margin-right:10%; margin-left:10%; background-color:#262626;">
+        <h2>Trainingszeiten für deine {{group}}</h2>
+        <ol style="list-style-type: none; padding-left:0px;">
+            {% for session in group.schedule.all %}
+                <li class="session_divs">
+                    <div class="schedule">
+                        <ol class="schedule_ul">
+                            <li class="session_weekday"> {{session.day}} </li>
+                            <li class="session_info"> {{session.website_title}} </li>
+                            <li class="session_info"> Zeit: {{session.start_time}} - {{session.end_time}} </li>
+                            <li class="session_info"> {{session.spot.title}}  </li>
+                            {% if session.hinweis %}
+                                <li class="session_alert"> {{session.hinweis}} </li>
+                            {% endif %}
+                        </ol>
+                    </div>
+                </li>
+            {% endfor %}
+        </ol>
+    </div>
+    <!-- Here the Messanges if any -->
+    <section>
+        <ul style="padding:0px; list-style-type: none;">
+            <li style=" display: block; color: white; text-align: center; background-color: #7b1b42; padding-bottom:10px; "> Hinweise Platzhalter</li>
+            <li style=" display: block; color: white; text-align: center; background-color: #333333; font-size: 1rem">TITEL</li>
+            <li style=" display: block; color: white; text-align: center; background-color: #333333;">Und hier kann ein Hinweis stehen</li>
+        </ul>
+    </section>
+    <!-- Here the Container for the Events -->
+    <section>
+        <div>
+            <h2>Eventkalender</h2>
+            <ol style="list-style-type: none; padding-left:0px;">
+            {% for event in group.group_events.all %}
+                <li class="session_divs">
+                    <div class="schedule"> 
+                        <ol class="schedule_ul">
+                            <li class="event_title">{{event.titel}}</li>
+                            <li class="event_date">{{event.start_date|date:'d.m' }} - {{event.end_date|date:'d.m.Y' }}</p>
+                            <li class="event_descr">{{event.description }} </p>
+                            {% if event.hinweis %}
+                                <li class="session_alert"> {{event.hinweis}} </li>
+                            {% endif %}
+                            <li class="event_more_info"> 
+                                <a class="more_info_button" href="">weitere Informationen<a>
+                            </li>
+                        </ol>
+                    </div>
+                </li>
+            {% endfor %} 
+            </ol>
+        </div>
+    </section>
+  </body>
+</html>
