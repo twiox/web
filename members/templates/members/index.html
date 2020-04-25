@@ -75,6 +75,7 @@
             <li style=" display: block; color: white; text-align: center; background-color: #333333;">Und hier kann ein Hinweis stehen</li>
         </ul>
     </section>
+    {% if group.group_events.all %}
     <!-- Here the Container for the Events -->
     <section>
         <div>
@@ -84,14 +85,14 @@
                 <li class="session_divs">
                     <div class="schedule"> 
                         <ol class="schedule_ul">
-                            <li class="event_title">{{event.titel}}</li>
-                            <li class="event_date">{{event.start_date|date:'d.m' }} - {{event.end_date|date:'d.m.Y' }}</p>
-                            <li class="event_descr">{{event.description }} </p>
+                            <li class="event_title">{{event.title}}</li>
+                            <li class="event_date">{{event.start_date|date:'d.m' }} - {{event.end_date|date:'d.m.Y' }}</li>
+                            <li class="event_descr">{{event.description }} </li>
                             {% if event.hinweis %}
                                 <li class="session_alert"> {{event.hinweis}} </li>
                             {% endif %}
                             <li class="event_more_info"> 
-                                <a class="more_info_button" href="">weitere Informationen<a>
+                                <a class="more_info_button" href="">weitere Informationen</a>
                             </li>
                         </ol>
                     </div>
@@ -100,5 +101,28 @@
             </ol>
         </div>
     </section>
+    {% endif %}
+    {% if group.trainer.all %} 
+    <!-- Here the Container for the Trainer -->
+    <section>
+        <div>
+            <h2>Deine Trainer</h2>
+            <ol style="list-style-type: none; padding-left:0px;">
+            {% for trainer in group.trainer.all %}
+                <li class="trainer_section">
+                    <article>
+                        <img class="round_profile_pic" src="{{trainer.user.profile.image.url}}">
+                        <div class="trainer_info">
+                            <h3>{{ trainer.user.first_name}}</h3>
+                            <p style="margin-bottom: 5px;">{{trainer.trainer_telnr}}</p>
+                            <p style="margin:0px;">{{trainer.trainer_email}}</p>
+                        </div>
+                    </article>
+                </li>
+            {% endfor %} 
+            </ol>
+        </div>
+    </section>
+    {% endif %}
   </body>
 </html>

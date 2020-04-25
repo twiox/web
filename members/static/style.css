@@ -148,3 +148,22 @@ h2{
 .more_info_button:hover{
     color:#69CCE1;
 }
+/*TrainerOverview*/
+.trainer_section{
+    float:left;
+    width: 25%;
+    padding: 15px;
+    margin-right:15px;
+    margin-bottom:15p;
+    background-color:#333333;
+}
+.round_profile_pic{
+    border-radius: 50%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
+.trainer_info{
+    text-align:center;
+}
