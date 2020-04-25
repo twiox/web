@@ -48,7 +48,7 @@ class Event(models.Model):
         
 class Message(models.Model):
     choices = (("sessions","Sessions"),("events","Events"))
-    title = models.CharField(max_length=30)
+    title = models.CharField("Titel",max_length=30)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.TextField(default = "Deine Nachricht hier")
     expire_date = models.DateTimeField(default=datetime.now())
@@ -58,7 +58,7 @@ class Message(models.Model):
         return f"Message {self.title}"
 
 class Trainer(models.Model):
-    user = models.OneToOneField("Welche Person", User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     trainer_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, default = "Hier die Nummer für die Website")
     trainer_email = models.CharField("Öffentliche Email", max_length=150, default = "Hier die Email für die Website")
     image = models.ImageField("Profilbild", default = "default.jpg", upload_to="profile_pics/")
@@ -67,10 +67,10 @@ class Trainer(models.Model):
         return f"Trainer: {self.user.username}"
 
 class Group(models.Model):
-    group_id = models.CharField("Gruppenname", max_length=10)
-    schedule = models.ManyToManyField("Trainingszeiten", Session, blank=True)
-    group_events = models.ManyToManyField("Veranstaltungen für die Gruppe", Event, blank=True)
-    trainer = models.ManyToManyField("Trainer der Gruppe", Trainer)
+    group_id = models.CharField("Gruppe (z.B 'A')", max_length=10)
+    schedule = models.ManyToManyField(Session, blank=True)
+    group_events = models.ManyToManyField(Event, blank=True)
+    trainer = models.ManyToManyField(Trainer)
 
     def __str__(self):
         return f"Gruppe: {self.group_id}"
@@ -78,7 +78,7 @@ class Group(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     member_num = models.CharField("Mitgliedsnummer", blank=True, max_length=30)
-    group = models.ForeignKey("Trainingsgruppe", Group, blank=True, null=True, on_delete=models.SET_NULL)
+    group = models.ForeignKey(Group, blank=True, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return f"{self.user.username}\'s Profile"

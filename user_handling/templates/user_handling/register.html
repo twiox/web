@@ -1,0 +1,24 @@
+<head>
+</head>
+<body>
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background-color:green;">
+                {{message}}
+            </div>
+        {% endfor %}
+    {% endif %}    
+    <div>
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset>
+                <legend> Join Today </legend>
+                {{form2.as_p}}
+                {{form.as_p}}
+            </fieldset>
+            <div>
+                <button type="submit"> Sign Up </button>
+            </div>
+        </form>
+    </div>
+</body>

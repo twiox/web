@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'members',
+    'members.apps.MembersConfig',
+    'user_handling.apps.UserHandlingConfig',
 ]
 
 MIDDLEWARE = [
@@ -117,3 +118,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "media") #where are the files at the file-system?
 MEDIA_URL ="/media/" #how do we access the media in the browser?
+#for the login
+LOGIN_REDIRECT_URL = "index"
+LOGIN_URL = 'login'

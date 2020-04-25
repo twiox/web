@@ -11,3 +11,4 @@ def index(request):
     #get the group of the logged in user
     group = Profile.objects.filter(user = request.user)[0].group
     return render(request, "members/index.html",{"group":group})
+
