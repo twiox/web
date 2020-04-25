@@ -27,10 +27,12 @@
     <nav class="sticky">
         <ul>
             <li class= "float_right"><a href="{% url 'logout' %}">Logout</a></li>
-            <li class= "float_right"><a href="#">Profil</a></li>
             <li class= "float_left"><a href="#">Jams</a></li>
             <li class= "float_left"><a href="#">Vereinskleidung</a></li>
             <li class= "float_left"><a href="#">Chat</a></li>
+            {% if perms.auth.add_user %}
+                <li class= "float_right"><a href="{% url 'register' %}">Mitglied Hinzufügen</a></li>
+            {% endif %}
         </ul> 
     </nav>
     <!-- Website Content -->

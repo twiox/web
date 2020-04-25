@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import permission_required, login_required
 
 #register user
 @login_required
-@permission_required('user.can_create', raise_exception=True)
+@permission_required('auth.add_user', raise_exception=True)
 def register(request):
     if(request.method == "POST"): #if the form is filled out
         form = MemberCreationForm(request.POST) 
