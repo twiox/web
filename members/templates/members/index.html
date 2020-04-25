@@ -36,7 +36,8 @@
     <!-- Website Content -->
     <!-- Nice Greeting -->
     <section>
-        <h1> Willkommen {{request.user.first_name}} </h1>
+        <h1 style="margin-bottom: 0px;"> Willkommen {{request.user.first_name}} </h1>
+        <p style="margin-top:0px;"> Mitgliedsnummer {{request.user.profile.member_num}}</p>
     </section>
     <!-- Here the Messanges if any -->
     <section>

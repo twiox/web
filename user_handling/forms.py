@@ -14,10 +14,10 @@ class MemberCreationForm(UserCreationForm):
         fields = ["username","first_name","last_name","email","password1","password2"]
 
 class ProfileCreationForm(forms.ModelForm):
-    mitgl_nr = forms.CharField(label="Mitgl.Nr.")
+    member_num = forms.CharField(label="Mitgl.Nr.")
     #make sure, that the group-choices are dynamicly
     group = forms.ModelChoiceField(label="Gruppe",queryset=Group.objects.all())
     
     class Meta:
         model = Profile
-        fields = ["mitgl_nr", "group"]
+        fields = ["member_num", "group"]
