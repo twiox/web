@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from members.models import Profile, Group
+from members.models import Profile, Group, Trainer
 
 class MemberCreationForm(UserCreationForm):
     first_name = forms.CharField(label="Vorname")
@@ -21,3 +21,17 @@ class ProfileCreationForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ["member_num", "group"]
+        
+class TrainerCreationForm(forms.ModelForm):
+    user = forms.ModelChoiceField(label="Wer?",queryset=User.objects.all())
+    trainer_telnr = forms.CharField(label = "Öffentliche TelNr.")
+    trainer_email = forms.CharField(label = "Öffentliche Email")
+    image = forms.ImageField(required=False)
+    
+    class Meta:
+        model = Trainer
+        fields = ["user", "trainer_telnr","trainer_email","image"]
+        
+class GroupForm(forms.Form):
+    groups = forms.ModelMultipleChoiceField(label='Für welche Gruppen', queryset=Group.objects.all())
+    

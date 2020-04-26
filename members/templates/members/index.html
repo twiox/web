@@ -32,6 +32,7 @@
             <li class= "float_left"><a href="#">Chat</a></li>
             {% if perms.auth.add_user %}
                 <li class= "float_right"><a href="{% url 'register' %}">Mitglied Hinzufügen</a></li>
+                <li class= "float_right"><a href="{% url 'register_trainer' %}">Neuer Trainer</a></li>
             {% endif %}
         </ul> 
     </nav>
@@ -115,7 +116,7 @@
                 {% for trainer in group.trainer.all %}
                     <li class="trainer_section">
                         <article>
-                            <img class="round_profile_pic" src="{{trainer.user.profile.image.url}}">
+                            <img class="round_profile_pic" src="{{trainer.image.url}}">
                             <div class="trainer_info">
                                 <h3>{{ trainer.user.first_name}}</h3>
                                 <p style="margin-bottom: 5px;">{{trainer.trainer_telnr}}</p>
