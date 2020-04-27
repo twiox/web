@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en", style="padding-bottom:0px;">
     <head>
         <meta charset="utf-8">
         <title>Twio X e.V. - Parkour Leipzig</title>
@@ -51,84 +51,164 @@
         </ul>
     </section>
     <!-- And the container for the Sessions -->
-    {% if group %}
-        <div style="margin-right:10%; margin-left:10%; background-color:#262626;">
-            <h2>Trainingszeiten für deine {{group}}</h2>
-            <ol style="list-style-type: none; padding-left:0px;">
-                {% for session in group.schedule.all %}
-                    <li class="session_divs">
-                        <div class="schedule">
-                            <ol class="schedule_ul">
-                                <li class="session_weekday"> {{session.day}} </li>
-                                <li class="session_info"> {{session.website_title}} </li>
-                                <li class="session_info"> {{session.start_time}} - {{session.end_time}} </li>
-                                <li class="session_info"> {{session.spot.title}}  </li>
-                                {% if session.hinweis %}
-                                    <li class="session_alert"> {{session.hinweis}} </li>
-                                {% endif %}
-                            </ol>
+    <div style="margin-right:10%; margin-left:10%; background-color:#262626;">
+        <h2>Trainingszeiten Gruppe {{group.group_id}}</h2>
+        <ul style="list-style-type: none; padding-left:0px; overflow:hidden;">
+            {% for session in sessions %}
+                <li class="session_divs">
+                    <div class="wrapper">
+                        <div class="first_section">
+                            <div class="session_weekday">
+                                <p><strong> {{session.day}} </strong></p>
+                            </div>
                         </div>
-                    </li>
-                {% endfor %}
-            </ol>
-        </div>
-        <!-- Here the Messanges if any -->
-        <section>
-            <ul style="padding:0px; list-style-type: none;">
-                <li style=" display: block; color: white; text-align: center; background-color: #7b1b42; padding-bottom:10px; "> Hinweise Platzhalter</li>
-                <li style=" display: block; color: white; text-align: center; background-color: #333333; font-size: 1rem">TITEL</li>
-                <li style=" display: block; color: white; text-align: center; background-color: #333333;">Und hier kann ein Hinweis stehen</li>
-            </ul>
-        </section>
-        {% if group.group_events.all %}
+                        <div class="second_section">
+                            <h3> {{session.website_title}} </h3>
+                            <p> {{session.format_start_time}} - {{session.format_end_time}} Uhr </p>
+                        </div>
+                        <div class="third_session">
+                            <p style="margin-bottom:0px;">Ort: {{session.spot.title}}</p>
+                            <p>Trainer:</p>
+                            {% for trainer in session.trainer.all %}
+                                <p style="padding-left:15%; padding-bottom:3px; margin:0px;">Name: {{trainer.user.first_name}}</p>
+                            {% endfor %}
+                            
+                        </div>
+                        {% if session.hinweis %}
+                            <div style="float:right;">
+                                <p class="session_alert"> {{session.hinweis}} </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </li>
+            {% empty %}
+                <li> Leider gibt es im Moment keine Einheiten für dich </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <!-- For the trainers -->
+    {% if trainer_sessions %}
+    <div style="margin-right:10%; margin-left:10%; background-color:#262626;">
+        <h2>Trainingszeiten die du gibst</h2>
+        <ol style="list-style-type: none; padding-left:0px;">
+            {% for session in trainer_sessions %}
+                <li class="session_divs">
+                    <div class="wrapper">
+                        <div class="first_section">
+                            <div class="session_weekday">
+                                <p><strong> {{session.day}} </strong></p>
+                            </div>
+                        </div>
+                        <div class="second_section">
+                            <h3> {{session.website_title}}</h3>
+                            <p> Gruppe {{session.group.group_id}}: {{session.format_start_time}} - {{session.format_end_time}} Uhr </p>
+                        </div>
+                        <div class="third_session">
+                            <p style="margin-bottom:0px;">Ort: {{session.spot.title}}</p>
+                            <p>Trainer:</p>
+                            {% for trainer in session.trainer.all %}
+                                <p style="padding-left:15%; padding-bottom:3px; margin:0px;">Name: {{trainer.user.first_name}}</p>
+                            {% endfor %}
+                            
+                        </div>
+                        {% if session.hinweis %}
+                            <div style="float:right;">
+                                <p class="session_alert"> {{session.hinweis}} </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </li>
+            {% empty %}
+                <li> Leider gibt es im Moment keine Einheiten für dich </li>
+            {% endfor %}
+        </ol>
+    </div>
+    {% endif %}
+    <!-- Here the Messanges if any -->
+    <section>
+        <ul style="padding:0px; list-style-type: none;">
+            <li style=" display: block; color: white; text-align: center; background-color: #7b1b42; padding-bottom:10px; "> Hinweise Platzhalter</li>
+            <li style=" display: block; color: white; text-align: center; background-color: #333333; font-size: 1rem">TITEL</li>
+            <li style=" display: block; color: white; text-align: center; background-color: #333333;">Und hier kann ein Hinweis stehen</li>
+        </ul>
+    </section>
+    {% if events %}
         <!-- Here the Container for the Events -->
         <section>
             <div>
                 <h2>Eventkalender</h2>
                 <ol style="list-style-type: none; padding-left:0px;">
-                {% for event in group.group_events.all %}
-                    <li class="session_divs">
-                        <div class="schedule"> 
-                            <ol class="schedule_ul">
-                                <li class="event_title">{{event.title}}</li>
-                                <li class="event_date">{{event.start_date|date:'d.m' }} - {{event.end_date|date:'d.m.Y' }}</li>
-                                <li class="event_descr">{{event.description }} </li>
-                                {% if event.hinweis %}
-                                    <li class="session_alert"> {{event.hinweis}} </li>
+                    {% for event in events %}
+                        <!-- check if the event is not long over -->
+                        {% if not event.is_past_due %}
+                            <li class="session_divs">
+                                {% if user in event.participants.all %}
+                                <p style="background-color:green;margin:0px;"> Du bist angemeldet </p>
                                 {% endif %}
-                                <li class="event_more_info"> 
-                                    <a class="more_info_button" href="">weitere Informationen</a>
+                                <div class="wrapper">
+                                    <div class="first_section">
+                                        <div class="session_weekday">
+                                            <p><strong> {{event.start_date|date:'M' }} </strong></p>
+                                        </div>
+                                    </div>
+                                    <div class="second_section">
+                                        <h3> {{event.title}} </h3>
+                                        <p> {{event.start_date|date:'d.m' }} - {{event.end_date|date:'d.m.Y' }}</p>
+                                    </div>
+                                    <div class="third_session" style="text-align:center;">
+                                        <a class="more_info_button" style= href="">weitere Informationen</a>
+                                    </div>
+                                    
+                                    {% if event.hinweis %}
+                                    <div style="float:right;">
+                                        <p class="session_alert"> {{event.hinweis}} </p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% endif %}
+                    {% endfor %} 
+                </ol>
+            </div>
+        </section>
+    {% endif %}
+    <footer>
+        {% if chairmen %}
+            <div>
+                <h2> Deine Ansprechpartner </h2>
+                <ol style="padding:0px;">
+                {% for chairman in chairmen %}
+                    <li class="chairman_section">
+                            <ol style="padding:0px;">
+                                <li style="float:left">
+                                    <div class="round_chairman_pic">
+                                        <img src="{{chairman.image.url}}">
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="chairman_info">
+                                        <h3>{{chairman.user.first_name}} {{chairman.user.last_name}}</h3>
+                                        <p>{{chairman.trainer_email}}</p>
+                                        <p>{{chairman.trainer_telnr}}</p>
+                                        <p>{{chairman.competences}}</p>
+                                    </div>
                                 </li>
                             </ol>
-                        </div>
                     </li>
-                {% endfor %} 
+                {% endfor %}
                 </ol>
             </div>
-        </section>
         {% endif %}
-        {% if group.trainer.all %} 
-        <!-- Here the Container for the Trainer -->
-        <section>
-            <div>
-                <h2>Deine Trainer</h2>
-                <ol style="list-style-type: none; padding-left:0px;">
-                {% for trainer in group.trainer.all %}
-                    <li class="trainer_section">
-                        <article>
-                            <img class="round_profile_pic" src="{{trainer.image.url}}">
-                            <div class="trainer_info">
-                                <h3>{{ trainer.user.first_name}}</h3>
-                                <p style="margin-bottom: 5px;">{{trainer.trainer_telnr}}</p>
-                                <p style="margin:0px;">{{trainer.trainer_email}}</p>
-                            </div>
-                        </article>
-                    </li>
-                {% endfor %} 
-                </ol>
-            </div>
-        </section>
-        {% endif %}
-    {% endif %}
+        <div>
+            <ol class="social_media">
+                <li>
+                    <div>
+                        <img >
+                        <p> </p>
+                    </div>
+                </li>
+            </ol>
+        </div>
+    </footer>
   </body>
 </html>

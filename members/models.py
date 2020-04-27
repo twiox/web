@@ -3,7 +3,6 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse
 from datetime import datetime
-import weekday_field
 
 # Create your models here.
 
@@ -16,22 +15,16 @@ class Spot(models.Model):
     def __str__(self):
         return f"Spot: {self.title}"
 
-class Session(models.Model):
-    title = models.CharField("Titel für uns", max_length=50, default="Halle_GruppeA_Sa")
-    website_title = models.CharField("Titel für Website", max_length=50, default="Hallentraining")
-    spot = models.ForeignKey(Spot, blank=True, null=True, on_delete=models.SET_NULL)
-    day = models.CharField("Tag",max_length=2, default="Mo")
-    start_time = models.TimeField("Beginn",default=datetime.now())
-    end_time = models.TimeField("Ende",default=datetime.now())
-    hinweis = models.CharField("Hinweise (rote Anzeige)", blank=True, max_length=50)
-    
-    class Meta:
-        ordering = ["day"]
+class Group(models.Model):
+    group_id = models.CharField("Gruppe (z.B 'A')", max_length=10)
 
     def __str__(self):
-        return f"Session: {self.title}"
+        return f"Gruppe: {self.group_id}"
 
 class Event(models.Model):
+    allowed_groups = models.ManyToManyField(Group)
+    participants = models.ManyToManyField(User)
+    
     title = models.CharField("Event-name", max_length=100)
     description = models.TextField("Beschreibung", blank=True)
     start_date = models.DateTimeField("Datum Beginn", default=datetime.now())
@@ -41,11 +34,49 @@ class Event(models.Model):
     #if we query over events, we want the most recent one firsthand 
     class Meta:
         ordering = ["start_date"]
-
+    
+    @property
+    def is_past_due(self):
+        return datetime.now().replace(tzinfo=None) > self.start_date.replace(tzinfo=None)
+    
     def __str__(self):
         return f"Event: {self.title}"
-        
-        
+
+class Trainer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    trainer_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, default = "Hier die Nummer für die Website")
+    trainer_email = models.CharField("Öffentliche Email", max_length=150, default = "Hier die Email für die Website")
+    image = models.ImageField("Profilbild", default = "default.jpg", upload_to="profile_pics/")
+    
+    def __str__(self):
+        return f"Trainer: {self.user.username}"
+
+class Session(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, blank=True, null=True)
+    trainer = models.ManyToManyField(Trainer)
+    spot = models.ForeignKey(Spot, blank=True, null=True, on_delete=models.SET_NULL)
+    
+    title = models.CharField("Titel für uns", max_length=50, default="Halle_GruppeA_Sa")
+    website_title = models.CharField("Titel für Website", max_length=50, default="Hallentraining")
+    day = models.CharField("Tag",max_length=2, default="Mo")
+    start_time = models.TimeField("Beginn",default="17:00")
+    end_time = models.TimeField("Ende",default="19:00")
+    hinweis = models.CharField("Hinweise (rote Anzeige)", blank=True, max_length=50)
+    
+    @property
+    def format_start_time(self):
+        return self.start_time.strftime("%H:%M")
+    
+    @property
+    def format_end_time(self):
+        return self.end_time.strftime("%H:%M")
+    
+    class Meta:
+        ordering = ["day"]
+
+    def __str__(self):
+        return f"Session: {self.title}"
+
 class Message(models.Model):
     choices = (("sessions","Sessions"),("events","Events"))
     title = models.CharField("Titel",max_length=30)
@@ -57,23 +88,15 @@ class Message(models.Model):
     def __str__(self):
         return f"Message {self.title}"
 
-class Trainer(models.Model):
+class Chairman(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    trainer_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, default = "Hier die Nummer für die Website")
-    trainer_email = models.CharField("Öffentliche Email", max_length=150, default = "Hier die Email für die Website")
+    public_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, default = "Hier die Nummer für die Website")
+    public_email = models.CharField("Öffentliche Email", max_length=150, default = "Hier die Email für die Website")
+    competences = models.TextField("Zuständigkeiten (mit Komma getrennt)")
     image = models.ImageField("Profilbild", default = "default.jpg", upload_to="profile_pics/")
     
     def __str__(self):
-        return f"Trainer: {self.user.username}"
-
-class Group(models.Model):
-    group_id = models.CharField("Gruppe (z.B 'A')", max_length=10)
-    schedule = models.ManyToManyField(Session, blank=True)
-    group_events = models.ManyToManyField(Event, blank=True)
-    trainer = models.ManyToManyField(Trainer)
-
-    def __str__(self):
-        return f"Gruppe: {self.group_id}"
+        return f"Vorstand: {self.user.username}"
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

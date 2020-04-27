@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Session, Spot, Event, Group, Trainer, Message
+from .models import Profile, Session, Spot, Event, Group, Trainer, Message, Chairman
 
 # Register your models here.
 admin.site.register(Profile)
@@ -9,3 +9,4 @@ admin.site.register(Group)
 admin.site.register(Event)
 admin.site.register(Trainer)
 admin.site.register(Message)
+admin.site.register(Chairman)

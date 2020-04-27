@@ -35,21 +35,14 @@ def register(request):
 def register_trainer(request):
     if(request.method == "POST"): #if the form is filled out
         form = TrainerCreationForm(request.POST) 
-        form2 = GroupForm(request.POST)
-        if(form.is_valid() and form2.is_valid()): #and the form is valid (= submitted and passwords match etc.)
+        if(form.is_valid()): #and the form is valid (= submitted and passwords match etc.)
             new_trainer = form.save() #save the trainer
-            all_groups = form2.cleaned_data["groups"] #get the choosen groups
-            
-            for group in all_groups:
-                group.trainer.add(new_trainer) 
-                group.save()
-            
+
             messages.success(request, "Trainer created")
             return redirect("register_trainer")
     else:
         form = TrainerCreationForm()
-        form2 = GroupForm()
-    return render(request, 'user_handling/register_trainer.html', context={"form":form,"form2":form2})
+    return render(request, 'user_handling/register_trainer.html', context={"form":form})
     
     
     

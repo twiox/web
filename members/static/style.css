@@ -4,6 +4,7 @@ body {
     margin:0px;
     border:0px;
     padding:0px;
+
 }
 ol{
     overflow:hidden;
@@ -80,69 +81,72 @@ h2{
     font-size:2rem;
 }
 /*Trainingssessions*/
-.schedule{
-    margin:0px;
-    background-color: #333333;
-}
-.schedule_ul{
-    list-style-type: none;
-    padding:0px;
-    padding-bottom:10px;
-}
 .session_divs{
     float:left;
     width: 30%;
-    padding-right:15px;
-    padding-bottom:15px;
+    margin-right:15px;
+    margin-bottom:15px;
+}
+.wrapper{
+    height:100%;
+}
+.first_section{
+    float:left;
+    width:25%;
+    height:50%;
+    overflow:hidden;
+    background-color:#333333;
 }
 .session_weekday{
     text-align:center;
-    width: 10%;
+    height: 50%;
     padding:10px;
-    font-size:1rem;
+    font-size:1.1rem;
     background-color: #088eaa;
+    oerflow:hidden;
 }
-.session_info{
-    list-style-type: none;
-    padding-left:15px;
-    padding-top:5px;
+
+.second_section{
+    float:left;
+    text-align:center;
+    width:75%;
+    height:50%;
+    background-color:#333333;
+    }
+.second_section h3{
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+    font-size:1.3rem;
+    }
+.second_section p{
+    margin-top: 0px;
+    font-size: 0.9rem;
+    }
+.third_session{
+    margin-top:1px;
+    float:left;
+    width:100%;
+    padding:5%;
+    background-color:#333333;s
+}
+.third_session p{
+    padding-left:10%;
+    font-size: 1rem;
+    padding:0px;
+    margin-top:0px;
 }
 .session_alert{
-    display: block;  
     text-align: center; 
     background-color: #7b1b42; 
-    padding-bottom:5px;
-    margin: 0px;
+    padding:3px;
+    margin:0px;
 }
+
+
     
 /*Eventcalender*/
-.event_title{
-    text-align:center;
-    width: 100%;
-    padding:10px;
-    font-size:1rem;
-    background-color: #088eaa;
-}
-.event_date{
-    text-align:center;
-    width: 100%;
-    font-size:1rem;
-    padding-bottom:10px;
-    padding-top:10px;
-}
-.event_descr{
-    font-size:0.8rem;
-    padding-left: 10px;
-    padding-right: 10px;
-    text-align: justify;
-}
-.event_more_info{
-    text-align:center;
-    padding-top:10px;
-}
 .more_info_button{
     text-decoration: none;
-    text-align:center;
     color:#088eaa;
 }
 .more_info_button:hover{
@@ -162,8 +166,42 @@ h2{
     display: block;
     margin-left: auto;
     margin-right: auto;
-    width: 50%;
+    width: 150px;
 }
 .trainer_info{
     text-align:center;
+}
+/*footer*/
+footer{
+    padding-right:10%;
+    padding-left:10%;
+    padding-bottom:3%;
+    padding-top:15px;
+    display:block; 
+    background-color:#191919;" 
+}
+.chairman_section{
+    float:left;
+    padding: 15px;
+    margin-left:0px;
+    margin-right:15px;
+    margin-bottom:15px;
+}
+.round_chairman_pic img{
+    border-radius: 50%;
+    width: 150px;
+    height:150px;
+    align:center;
+}
+.chairman_info{
+    padding-left: 20px;
+    align:center;
+}
+.chairman_info h3{
+    margin-top: 0px;
+    align:center;
+}
+.chairman_info p{
+    margin: 0px;
+    align:center;
 }
