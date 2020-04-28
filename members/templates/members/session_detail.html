@@ -1,7 +1,25 @@
-<div>
-<h1> SESSION </h1>
-<p>{{object.title}}<p>
-<p>{{object.description}}<p>
-<p>{{object.start_time_format}}<p>
-<p>{{object.end_time_format}}<p>
-</div>
+{% extends "members/base.html" %}
+{%block content %}
+    <section>
+        <h2>{{object.website_title|upper}}</h2>
+        <p> Gruppe {{object.group.group_id}}</p>
+        <p> Spot {{object.spot.title}} --> Hier kommt dann die Karte</p>
+        <p>{{object.start_time_format}} - {{object.end_time_format}}</p>
+        {% for trainer in object.trainer.all %}
+            <div>
+                <ol>
+                    <li>Trainer:</li>
+                    <li>{{trainer.user.first_name }}</li>
+                    <li>{{trainer.trainer_email }}</li>
+                    <li>{{trainer.trainer_telnr}}</li>
+                </ol>
+            </div>
+        {% endfor %}
+        <a href="{% url 'index' %}">Zurück</a>
+        {% if is_trainer %}
+            <a href="{% url 'session_update' object.id  %}">Bearbeiten</a>
+        {% endif %}
+    </section>
+{% endblock %}
+
+    

@@ -1,7 +1,12 @@
-<div>
-<h1> EVENT </h1>
-<p>{{object.title}}<p>
-<p>{{object.description}}<p>
-<p>{{object.start_date}}<p>
-<p>{{object.end_date}}<p>
-</div>
+{% extends "members/base.html" %}
+{%block content %}
+    <section>
+        <h2>{{object.title|upper}}</h2>
+        {% for group in object.allowed_groups.all %}
+            {{group}}
+        {% endfor %}
+        <p>{{object.start_date|date:'d.m'}} - {{object.end_date|date:'d.m.Y'}}</p>
+        <p>{{object.description}}<p>
+        <a href="{% url 'index' %}">Zurück</a>
+    </section>
+{% endblock %}

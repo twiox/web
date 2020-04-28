@@ -66,7 +66,7 @@ class Session(models.Model):
     start_time = models.TimeField("Beginn",default="17:00")
     end_time = models.TimeField("Ende",default="19:00")
     hinweis = models.CharField("Hinweise (rote Anzeige)", blank=True, max_length=50)
-    
+        
     @property
     def format_start_time(self):
         return self.start_time.strftime("%H:%M")

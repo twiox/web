@@ -32,9 +32,19 @@ def index(request):
          "trainer_sessions":trainer_sessions}
             )
 
-class EventDetailView(LoginRequiredMixin, DetailView):
+class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     #template: event_detail.html
     model = Event
+    
+    def get_context_data(self, **kwargs):
+        context = super(EventDetailView, self).get_context_data(**kwargs)
+        context['is_trainer'] = hasattr(request.user,"trainer")
+        return context
+    
+    def test_func(self):
+        user_group = self.request.user.profile.group
+        event = self.get_object()
+        return (user_group in event.allowed_groups.all())
 
 class EventCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     #template: event_detail.html
@@ -61,9 +71,24 @@ class EventDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         return hasattr(self.request.user, "trainer")
 
-class SessionDetailView(LoginRequiredMixin, DetailView):
+class SessionDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     #template: session_detail.html
     model = Session
+    
+    def get_context_data(self, **kwargs):
+        context = super(SessionDetailView, self).get_context_data(**kwargs)
+        context['is_trainer'] = hasattr(self.request.user,"trainer")
+        return context
+    
+    def test_func(self):
+        user_group = self.request.user.profile.group
+        session = self.get_object()
+        #The trainers of the group and the members
+        if(hasattr(self.request.user, "trainer")):
+            if(self.request.user.trainer in session.trainer.all()):
+                return True
+        return (user_group == session.group)
+    
 
 class SessionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     #template: event_form.html
