@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
-from django.urls import reverse
+from django.urls import reverse #to get absolut_urls
 from datetime import datetime
 
 # Create your models here.
@@ -23,7 +23,7 @@ class Group(models.Model):
 
 class Event(models.Model):
     allowed_groups = models.ManyToManyField(Group)
-    participants = models.ManyToManyField(User)
+    participants = models.ManyToManyField(User, blank=True)
     
     title = models.CharField("Event-name", max_length=100)
     description = models.TextField("Beschreibung", blank=True)
@@ -34,6 +34,10 @@ class Event(models.Model):
     #if we query over events, we want the most recent one firsthand 
     class Meta:
         ordering = ["start_date"]
+    
+    #This we need to return the url on creating a new event 
+    def get_absolute_url(self):
+        return reverse('event_detail', kwargs={"pk": self.pk})
     
     @property
     def is_past_due(self):
@@ -70,6 +74,9 @@ class Session(models.Model):
     @property
     def format_end_time(self):
         return self.end_time.strftime("%H:%M")
+    
+    def get_absolute_url(self):
+        return reverse('session_detail', kwargs={"pk": self.pk})
     
     class Meta:
         ordering = ["day"]

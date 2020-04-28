@@ -1,7 +1,24 @@
-<!-- templates/registration/login.html -->
-<h2>Login</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Login</button>
-</form>
+{% extends "members/base.html" %}
+{% block content %}
+<h3 style="color: white; text-align: center; background-color: #088eaa; padding:10px; margin-top:0px;"> MITGLIEDERBEREICH </h3>
+<section style="text-align: center;">
+    <h2>Login</h2>
+    {% if form.errors %}
+        <p style="color: white; text-align: center; background-color: #7b1b42; padding:10px; margin-top:0px;"> Nutzername oder Passwort falsch </h3>
+    {% endif %}
+    <form method="post">
+        <ul style="list-style: none; padding:0px;">
+            {% csrf_token %}
+            {% for field in form %}
+            <li>
+                <div style="float:center;">
+                        <p style="margin-bottom:0px;">{{field.label}}</p>
+                        <p style="margin:0px;">{{field}}</p>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+      <button type="submit">Login</button>
+    </form>
+</section>
+{% endblock %}

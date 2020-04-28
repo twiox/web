@@ -1,0 +1,9 @@
+<div>
+<h1>WILLST DU DAS EVENT LÖSCHEN??</h1>
+<h2>{{object.title}}</h2>
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit">Jawoll</button>
+    <a href="{% url 'event_detail' object.id %}">Nope</a>
+</form>
+</div>

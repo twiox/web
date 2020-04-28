@@ -1,10 +1,13 @@
 body {
-    background-color: #262626;
+    background-color:#191919;
     color:#d1d1d1;
     margin:0px;
     border:0px;
     padding:0px;
-
+}
+.body_wrapper{
+    background-color: #262626;
+    padding-bottom:10%;
 }
 ol{
     overflow:hidden;
@@ -105,7 +108,6 @@ h2{
     background-color: #088eaa;
     oerflow:hidden;
 }
-
 .second_section{
     float:left;
     text-align:center;
@@ -141,10 +143,7 @@ h2{
     padding:3px;
     margin:0px;
 }
-
-
-    
-/*Eventcalender*/
+   /*Eventcalender*/
 .more_info_button{
     text-decoration: none;
     color:#088eaa;
@@ -171,6 +170,29 @@ h2{
 .trainer_info{
     text-align:center;
 }
+/*Trainer UI for events and sessions*/
+.ui_div ul{
+  font-size: 14px;
+  font-weight: 500;
+  list-style-type: none;
+  margin:0px;
+  margin-left: 10%;
+  margin-right: 10%;
+  padding: 0;
+  overflow: hidden;
+  background: #333333;
+}
+.ui_div a{
+  display: block;
+  color: white;
+  text-align: center;
+  font-size:0.9rem;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+.ui_div li a:hover {
+  background-color: #088eaa;
+}
 /*footer*/
 footer{
     padding-right:10%;
@@ -178,7 +200,7 @@ footer{
     padding-bottom:3%;
     padding-top:15px;
     display:block; 
-    background-color:#191919;" 
+    background-color:#191919;
 }
 .chairman_section{
     float:left;

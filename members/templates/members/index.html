@@ -1,48 +1,16 @@
-<!doctype html>
-<html lang="en", style="padding-bottom:0px;">
-    <head>
-        <meta charset="utf-8">
-        <title>Twio X e.V. - Parkour Leipzig</title>
-        <meta name="description" content="Der Internetauftritt vom Parkour Verein Twio X e.V. aus Leipzig">
-        <link rel="stylesheet" href="{{ STATIC_URL }}/static/style.css"/>
-  </head>
-  <body>
-    <!-- header -->
-    <header>
-        <a href="">
-            <img src="{{ STATIC_URL }}/static/media/twiox_logo.svg">
-        </a>
-    </header>
-    <!-- navigationbar -->
-    <nav class="sticky">
-        <ul>
-            <li class= "equal_3"><a href="{% url 'logout' %}">MITGLIEDER</a></li>
-            <li class= "equal_3"><a href="#">INTERESSIERTE</a></li>
-            <li class= "equal_3"><a href="#">VERANSTALTER</a></li>
-        </ul> 
-    </nav>
-    <!-- main picture -->
+{% extends "members/base.html" %}
+    {% block picture %}
     <div class="member_img_fixed"> </div>
-    <!-- navigationbar2 -->
-    <nav class="sticky">
-        <ul>
-            <li class= "float_right"><a href="{% url 'logout' %}">Logout</a></li>
-            <li class= "float_left"><a href="#">Jams</a></li>
-            <li class= "float_left"><a href="#">Vereinskleidung</a></li>
-            <li class= "float_left"><a href="#">Chat</a></li>
-            {% if perms.auth.add_user %}
-                <li class= "float_right"><a href="{% url 'register' %}">Mitglied Hinzufügen</a></li>
-                <li class= "float_right"><a href="{% url 'register_trainer' %}">Neuer Trainer</a></li>
-            {% endif %}
-        </ul> 
-    </nav>
-    <!-- Website Content -->
+    {% endblock %}
+
+    {% block content %}
     <!-- Nice Greeting -->
     <section>
-        <h1 style="margin-bottom: 0px;"> Willkommen {{request.user.first_name}} </h1>
-        <p style="margin-top:0px;"> Mitgliedsnummer {{request.user.profile.member_num}}</p>
+        <h1 style="margin-bottom: 0px;"> WILLKOMMEN {{request.user.first_name | upper}} </h1>
+        <h3 style="margin:0px;"> Mitgliedsnummer {{request.user.profile.member_num}}</h3>
+        <h3 style="margin-top:0px;"> Trainingsgruppe {{group.group_id}}</h3>
     </section>
-    <!-- Here the Messanges if any -->
+        <!-- Here the Messanges if any -->
     <section>
         <ul style="padding:0px; list-style-type: none;">
             <li style=" display: block; color: white; text-align: center; background-color: #7b1b42; padding-bottom:10px; "> Hinweise Platzhalter</li>
@@ -50,9 +18,17 @@
             <li style=" display: block; color: white; text-align: center; background-color: #333333;">Und hier kann ein Hinweis stehen</li>
         </ul>
     </section>
-    <!-- And the container for the Sessions -->
+    <!-- The container for the Sessions -->
+    <h2 style="margin-bottom: 0px;padding-left:10%;">TRAININGSZEITEN</h2>
+    {% if trainer_sessions %}
+        <!-- Trainer UI -->
+        <div class="ui_div">
+            <ul>
+                <li class="float_left"> <a href="{% url 'session_create' %}"> Erstellen </a></li>
+            </ul>
+        </div>
+    {% endif %}
     <div style="margin-right:10%; margin-left:10%; background-color:#262626;">
-        <h2>Trainingszeiten Gruppe {{group.group_id}}</h2>
         <ul style="list-style-type: none; padding-left:0px; overflow:hidden;">
             {% for session in sessions %}
                 <li class="session_divs">
@@ -72,7 +48,9 @@
                             {% for trainer in session.trainer.all %}
                                 <p style="padding-left:15%; padding-bottom:3px; margin:0px;">Name: {{trainer.user.first_name}}</p>
                             {% endfor %}
-                            
+                        </div>
+                        <div class="third_session" style="text-align:center;">
+                            <a class="more_info_button" href="{% url 'session_detail' session.id %}">weitere Informationen</a>
                         </div>
                         {% if session.hinweis %}
                             <div style="float:right;">
@@ -89,7 +67,7 @@
     <!-- For the trainers -->
     {% if trainer_sessions %}
     <div style="margin-right:10%; margin-left:10%; background-color:#262626;">
-        <h2>Trainingszeiten die du gibst</h2>
+        <h2>GRUPPENEINHEITEN</h2>
         <ol style="list-style-type: none; padding-left:0px;">
             {% for session in trainer_sessions %}
                 <li class="session_divs">
@@ -110,6 +88,9 @@
                                 <p style="padding-left:15%; padding-bottom:3px; margin:0px;">Name: {{trainer.user.first_name}}</p>
                             {% endfor %}
                             
+                        </div>
+                        <div class="third_session" style="text-align:center;">
+                            <a class="more_info_button" href="{% url 'session_detail' session.id %}">weitere Informationen</a>
                         </div>
                         {% if session.hinweis %}
                             <div style="float:right;">
@@ -132,11 +113,19 @@
             <li style=" display: block; color: white; text-align: center; background-color: #333333;">Und hier kann ein Hinweis stehen</li>
         </ul>
     </section>
+    <!-- Here the Container for the Events -->
+    <h2 style="padding-left:10%;">VERANSTALTUNGEN</h2>
+    <div class="ui_div">
+    <!--Add Events -->
+        {% if trainer_sessions %}
+        <ul>
+            <li class="float_left"> <a href="{% url 'event_create' %}"> Erstellen </a></li>
+        </ul>
+        {% endif %}
+    </div>
     {% if events %}
-        <!-- Here the Container for the Events -->
         <section>
             <div>
-                <h2>Eventkalender</h2>
                 <ol style="list-style-type: none; padding-left:0px;">
                     {% for event in events %}
                         <!-- check if the event is not long over -->
@@ -156,7 +145,7 @@
                                         <p> {{event.start_date|date:'d.m' }} - {{event.end_date|date:'d.m.Y' }}</p>
                                     </div>
                                     <div class="third_session" style="text-align:center;">
-                                        <a class="more_info_button" style= href="">weitere Informationen</a>
+                                        <a class="more_info_button" href="{% url 'event_detail' event.id %}">weitere Informationen</a>
                                     </div>
                                     
                                     {% if event.hinweis %}
@@ -171,44 +160,7 @@
                 </ol>
             </div>
         </section>
+    {% else %}
+        <h3> Leider sind im Moment keine Events geplant </h3>
     {% endif %}
-    <footer>
-        {% if chairmen %}
-            <div>
-                <h2> Deine Ansprechpartner </h2>
-                <ol style="padding:0px;">
-                {% for chairman in chairmen %}
-                    <li class="chairman_section">
-                            <ol style="padding:0px;">
-                                <li style="float:left">
-                                    <div class="round_chairman_pic">
-                                        <img src="{{chairman.image.url}}">
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="chairman_info">
-                                        <h3>{{chairman.user.first_name}} {{chairman.user.last_name}}</h3>
-                                        <p>{{chairman.trainer_email}}</p>
-                                        <p>{{chairman.trainer_telnr}}</p>
-                                        <p>{{chairman.competences}}</p>
-                                    </div>
-                                </li>
-                            </ol>
-                    </li>
-                {% endfor %}
-                </ol>
-            </div>
-        {% endif %}
-        <div>
-            <ol class="social_media">
-                <li>
-                    <div>
-                        <img >
-                        <p> </p>
-                    </div>
-                </li>
-            </ol>
-        </div>
-    </footer>
-  </body>
-</html>
+    {% endblock %}

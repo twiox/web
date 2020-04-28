@@ -30,8 +30,7 @@ def register(request):
     return render(request, 'user_handling/register.html', context={"form":form, "form2":form2})
 
 @login_required
-#@permission_required('auth.add_user', raise_exception=True)
-
+@permission_required('auth.add_user', raise_exception=True)
 def register_trainer(request):
     if(request.method == "POST"): #if the form is filled out
         form = TrainerCreationForm(request.POST) 
