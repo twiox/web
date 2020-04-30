@@ -1,6 +1,5 @@
-<head>
-</head>
-<body>
+{% extends "members/base.html" %}
+{% block content %}
     {% if messages %}
         {% for message in messages %}
             <div style="background-color:green;">
@@ -21,4 +20,4 @@
             </div>
         </form>
     </div>
-</body>
+{% endblock %}

@@ -16,7 +16,7 @@
             </div>
         {% endfor %}
         <a href="{% url 'index' %}">Zurück</a>
-        {% if is_trainer %}
+        {% if perms.members.change_session %}
             <a href="{% url 'session_update' object.id  %}">Bearbeiten</a>
         {% endif %}
     </section>

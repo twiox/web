@@ -1,8 +1,11 @@
+{% extends "members/base.html" %}
+{%block content %}
 <div>
 <h1>SESSION {{object.title | upper }}</h1>
-<form method="POST">
-    {% csrf_token %}
-    {{form.as_p}}
-    <button type="submit">create</button>
-</form>
+    <form method="POST">
+        {% csrf_token %}
+        {{form.as_p}}
+        <button type="submit">create</button>
+    </form>
 </div>
+{% endblock %}

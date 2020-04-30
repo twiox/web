@@ -1,12 +1,28 @@
 {% extends "members/base.html" %}
 {%block content %}
+<h3 class="blue_header"> VERANSTALTUNG </h3>
     <section>
         <h2>{{object.title|upper}}</h2>
-        {% for group in object.allowed_groups.all %}
-            {{group}}
-        {% endfor %}
-        <p>{{object.start_date|date:'d.m'}} - {{object.end_date|date:'d.m.Y'}}</p>
+        <h3 style="margin-bottom:0px;">Termin: {{object.start_date|date:'d.m'}} - {{object.end_date|date:'d.m.Y'}} </h3>
+        {{object.place}}
+        {% if user in object.participants.all %}
+            <p style = "background-color:green; color:white;"> Du bist angemeldet </P>
+        {% endif %}
+        
         <p>{{object.description}}<p>
-        <a href="{% url 'index' %}">Zurück</a>
+        <p>
+            <a href="{% url 'index' %}">Zurück</a>
+            {% if user in object.participants.all %}
+                <a href="#">Abmelden</a>
+            {% else %}
+                <a href="{% url 'event_participate' object.id %}">Anmelden</a>
+            {% endif %}
+        </p>
+        {% if perms.members.change_event %}
+            <a href="{% url 'event_update' object.id  %}">Bearbeiten</a>
+        {% endif %}
+        {% if perms.members.delete_event %}
+            <a href="{% url 'event_delete' object.id  %}">Löschen</a>
+        {% endif %}
     </section>
 {% endblock %}

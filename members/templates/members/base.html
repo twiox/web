@@ -32,7 +32,7 @@
                         <li class= "float_right"><a href="{% url 'logout' %}">Logout</a></li>
                         <li class= "float_left"><a href="#">Jams</a></li>
                         <li class= "float_left"><a href="#">Vereinskleidung</a></li>
-                        <li class= "float_left"><a href="#">Chat</a></li>
+                        <li class= "float_left"><a href="{% url 'spot_list' %}">Spots</a></li>
                         {% if perms.auth.add_user %}
                             <li class= "float_right"><a href="{% url 'register' %}">Mitglied Hinzufügen</a></li>
                             <li class= "float_right"><a href="{% url 'register_trainer' %}">Neuer Trainer</a></li>
@@ -42,6 +42,9 @@
             {% endif %}
             <!-- Website Content -->
             <!-- And the container for the Sessions -->
+            {% for message in messages %}
+                <p> {{message}} </p>
+            {% endfor %}
             {% block content %} {% endblock %}
         </div>
             <footer>

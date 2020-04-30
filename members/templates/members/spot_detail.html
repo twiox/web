@@ -1,0 +1,10 @@
+{% extends "members/base.html" %}
+{%block content %}
+    <section>
+        <h2>{{object.title|upper}}</h2>
+        <a href="{% url 'spot_list' %}">Zurück</a>
+        {% if perms.members.change_spot %}
+            <a href="{% url 'spot_update' object.id  %}">Bearbeiten</a>
+        {% endif %}
+    </section>
+{% endblock %}

@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import HttpResponseRedirect
 from django.views.generic import (
     ListView, 
     DetailView, 
@@ -6,10 +7,12 @@ from django.views.generic import (
     UpdateView, 
     DeleteView 
     )
-from .models import Group, Event, Profile, Chairman, Session, Trainer
+from django.views import View
+from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
+from .forms import EventUpdateParticipantForm
+from django.contrib import messages
 # Create your views here.
 
 @login_required
@@ -32,85 +35,109 @@ def index(request):
          "trainer_sessions":trainer_sessions}
             )
 
+"""FOR THE EVENTS"""
+
 class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     #template: event_detail.html
     model = Event
     
-    def get_context_data(self, **kwargs):
-        context = super(EventDetailView, self).get_context_data(**kwargs)
-        context['is_trainer'] = hasattr(self.request.user,"trainer")
-        return context
-    
     def test_func(self):
         user_group = self.request.user.profile.group
         event = self.get_object()
-        return (user_group in event.allowed_groups.all())
+        return True if user_group in event.allowed_groups.all() else hasattr(self.request.user, "trainer")
 
-class EventCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+class EventCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     #template: event_detail.html
     model = Event
-    fields=["title","allowed_groups","description","start_date","end_date"]
-    def test_func(self):
-        return hasattr(self.request.user, "trainer")
+    fields=["title","allowed_groups","description","start_date","end_date","hinweis"]
+    permission_required = 'members.add_event'
     
-class EventUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class EventUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_detail.html
     model = Event
-    fields=["title","allowed_groups","description","start_date","end_date"]
-    
+    fields=["title","allowed_groups","description","start_date","end_date","hinweis"]
     #who can update the event?
-    #right now: All trainers
-    def test_func(self):
-        return hasattr(self.request.user, "trainer")
+    permission_required = 'members.change_event'
 
-class EventDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+class EventDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Event
     success_url = "/members/"
     #who can delete the event?
-    #right now: All trainers
+    permission_required = 'members.delete_event'
+
+class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    template_name = 'members/event_participate.html'
+    form_class = EventUpdateParticipantForm
+    model = Event
+       
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            event = self.get_object()
+            user = self.request.user
+            event.participants.add(self.request.user)
+            event.save()
+            messages.add_message(request, messages.INFO, 'Du bist erfolgreich angemeldet')
+            return HttpResponseRedirect(f"/members/events/{event.id}")
+        return render(request, self.template_name, {'form': form})
+        
     def test_func(self):
-        return hasattr(self.request.user, "trainer")
+        user_group = self.request.user.profile.group
+        event = self.get_object()
+        return True if user_group in event.allowed_groups.all() else hasattr(self.request.user, "trainer")
+        
+
+"""FOR THE SESSIONS"""
 
 class SessionDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     #template: session_detail.html
     model = Session
     
-    def get_context_data(self, **kwargs):
-        context = super(SessionDetailView, self).get_context_data(**kwargs)
-        context['is_trainer'] = hasattr(self.request.user,"trainer")
-        return context
-    
     def test_func(self):
         user_group = self.request.user.profile.group
         session = self.get_object()
-        #The trainers of the group and the members
-        if(hasattr(self.request.user, "trainer")):
-            if(self.request.user.trainer in session.trainer.all()):
-                return True
-        return (user_group == session.group)
-    
+        #The trainers and the members 
+        return True if user_group == session.group else hasattr(self.request.user, "trainer")
 
-class SessionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+class SessionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     #template: event_form.html
     model = Session
     fields=["group","trainer","spot","title","website_title","day","start_time","end_time","hinweis"]
-    def test_func(self):
-        return hasattr(self.request.user, "trainer")
-
-class SessionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    permission_required = 'members.add_session'
+    
+    
+class SessionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_form.html
     model = Session
     fields=["group","trainer","spot","title","website_title","day","start_time","end_time","hinweis"]
-    
-    #who can update the session?
-    #right now: All trainers
-    def test_func(self):
-        return hasattr(self.request.user, "trainer")
+    permission_required = 'members.change_session'
 
-class SessionDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+
+class SessionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Session
     success_url = "/members/"
-    #who can delete the event?
-    #right now: All trainers
-    def test_func(self):
-        return hasattr(self.request.user, "trainer")
+    permission_required = 'members.delete_session'
+
+"""FOR THE SPOTS"""
+class SpotListView(LoginRequiredMixin, ListView):
+    model = Spot
+
+class SpotDetailView(LoginRequiredMixin, DetailView):
+    model = Spot
+        
+class SpotCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    #template: event_form.html
+    model = Spot
+    fields=["title","coords","adress","picture"]
+    permission_required = 'members.add_spot'
+
+class SpotUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    #template: event_form.html
+    model = Spot
+    fields=["title","coords","adress","picture"]
+    permission_required = 'members.change_spot'
+ 
+class SpotDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Spot
+    success_url = "/members/"
+    permission_required = 'members.delete_spot'

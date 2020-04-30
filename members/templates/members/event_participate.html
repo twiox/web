@@ -1,8 +1,8 @@
 {% extends "members/base.html" %}
 {%block content %}
 <div>
-<h1>WILLST DU DAS EVENT LÖSCHEN??</h1>
-<h2>{{object.title}}</h2>
+<h1>WILLST DU AM EVENT TEILNEHMEN??</h1>
+<h3>{{object.title}}</h3>
 <form method="POST">
     {% csrf_token %}
     <button type="submit">Jawoll</button>

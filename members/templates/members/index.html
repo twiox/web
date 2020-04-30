@@ -20,7 +20,7 @@
     </section>
     <!-- The container for the Sessions -->
     <h2 style="margin-bottom: 0px;padding-left:10%;">TRAININGSZEITEN</h2>
-    {% if trainer_sessions %}
+    {% if perms.members.add_session %}
         <!-- Trainer UI -->
         <div class="ui_div">
             <ul>
@@ -117,7 +117,7 @@
     <h2 style="padding-left:10%;">VERANSTALTUNGEN</h2>
     <div class="ui_div">
     <!--Add Events -->
-        {% if trainer_sessions %}
+        {% if perms.members.add_event %}
         <ul>
             <li class="float_left"> <a href="{% url 'event_create' %}"> Erstellen </a></li>
         </ul>

@@ -23,7 +23,7 @@ class ProfileCreationForm(forms.ModelForm):
         fields = ["member_num", "group"]
         
 class TrainerCreationForm(forms.ModelForm):
-    user = forms.ModelChoiceField(label="Wer?",queryset=User.objects.all())
+    user = forms.ModelChoiceField(label="Wer?",queryset=User.objects.all()) #Find a way to filter??
     trainer_telnr = forms.CharField(label = "Öffentliche TelNr.")
     trainer_email = forms.CharField(label = "Öffentliche Email")
     image = forms.ImageField(required=False)
@@ -31,7 +31,5 @@ class TrainerCreationForm(forms.ModelForm):
     class Meta:
         model = Trainer
         fields = ["user", "trainer_telnr","trainer_email","image"]
-        
-class GroupForm(forms.Form):
-    groups = forms.ModelMultipleChoiceField(label='Für welche Gruppen', queryset=Group.objects.all())
+
     

@@ -1,0 +1,22 @@
+{% extends "members/base.html" %}
+{%block content %}
+    <section>
+        <h2> ALLE SPOTS </h2>
+        <ul>
+        {% for spot in object_list %}
+            <li>{{ spot.title|upper }}</li>
+            <li>{{ spot.coords }}</li>
+            <a href="{% url 'spot_detail' spot.id %}"> Details </a>
+            {% if perms.members.change_spot %}
+                <a href="{% url 'spot_update' spot.id %}"> Ändern </a>
+            {% endif %}
+            {% if perms.members.delete_spot %}
+                <a href="{% url 'spot_delete' spot.id %}"> Löschen </a>
+            {% endif %}
+            <p> </p>
+        {% empty %}
+            <li>Keine Spots</li>
+        {% endfor %}
+        </ul>
+    </section>
+{% endblock %}

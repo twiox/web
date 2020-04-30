@@ -14,6 +14,9 @@ class Spot(models.Model):
 
     def __str__(self):
         return f"Spot: {self.title}"
+    
+    def get_absolute_url(self):
+        return reverse('spot_detail', kwargs={"pk": self.pk})
 
 class Group(models.Model):
     group_id = models.CharField("Gruppe (z.B 'A')", max_length=10)
@@ -26,6 +29,7 @@ class Event(models.Model):
     participants = models.ManyToManyField(User, blank=True)
     
     title = models.CharField("Event-name", max_length=100)
+    place = models.CharField("Veranstaltungsort", max_length=200, blank=True, default="Leipzig")
     description = models.TextField("Beschreibung", blank=True)
     start_date = models.DateTimeField("Datum Beginn", default=datetime.now())
     end_date = models.DateTimeField("Datum Ende", default=datetime.now())
@@ -66,7 +70,7 @@ class Session(models.Model):
     start_time = models.TimeField("Beginn",default="17:00")
     end_time = models.TimeField("Ende",default="19:00")
     hinweis = models.CharField("Hinweise (rote Anzeige)", blank=True, max_length=50)
-        
+    
     @property
     def format_start_time(self):
         return self.start_time.strftime("%H:%M")

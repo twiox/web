@@ -1,12 +1,12 @@
 {% extends "members/base.html" %}
 {%block content %}
 <div>
-<h1>WILLST DU DAS EVENT LÖSCHEN??</h1>
+<h1>WILLST DU DEN SPOT LÖSCHEN??</h1>
 <h2>{{object.title}}</h2>
 <form method="POST">
     {% csrf_token %}
     <button type="submit">Jawoll</button>
-    <a href="{% url 'event_detail' object.id %}">Nope</a>
+    <a href="{% url 'spot_detail' object.id %}">Nope</a>
 </form>
 </div>
 {% endblock %}
