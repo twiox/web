@@ -1,25 +1,45 @@
 {% extends "members/base.html" %}
+{% block flag %}
+<h3 class="blue_header"> TRAININGSEINHEIT </h3>
+{%endblock%}
 {%block content %}
-    <section>
-        <h2>{{object.website_title|upper}}</h2>
-        <p> Gruppe {{object.group.group_id}}</p>
-        <p> Spot {{object.spot.title}} --> Hier kommt dann die Karte</p>
-        <p>{{object.start_time_format}} - {{object.end_time_format}}</p>
-        {% for trainer in object.trainer.all %}
-            <div>
-                <ol>
-                    <li>Trainer:</li>
-                    <li>{{trainer.user.first_name }}</li>
-                    <li>{{trainer.trainer_email }}</li>
-                    <li>{{trainer.trainer_telnr}}</li>
-                </ol>
-            </div>
-        {% endfor %}
-        <a href="{% url 'index' %}#training">Zurück</a>
-        {% if perms.members.change_session %}
-            <a href="{% url 'session_update' object.id  %}">Bearbeiten</a>
-        {% endif %}
-    </section>
+<section style="padding-top:5%;">
+    <div style="background-color:#333333;padding:20px; margin-bottom:5px;" >
+        <div>
+            <h2 style="margin-bottom:0px;" >{{object.website_title|upper}}</h2>
+            <hr  style="clear:both;border:0px;height:2px;background-color:white;">
+            <h3 style="margin-top:0px;margin-bottom:30px;"> Gruppe {{object.group.group_id}}</h3>
+            <p> {{object.weekday}} von {{object.start_time}} bis {{object.end_time}} Uhr</p>
+        </div>
+        <div>
+            <h3 style="margin-top:0px;margin-bottom:30px;">{{object.spot.title}}</h3>
+            <p>Here I would like to add a map/Adress... </p>
+        </div>
+    </div>
+    <div style="background-color:#333333;padding:20px;">
+        <div style="overflow:hidden;">
+            <h2 style="margin-bottom:30px;">ANSPRECHPARTNER</h2>
+            {% for trainer in object.trainer.all %}
+                <div class="session_divs col-5" style="overflow:hidden;">
+                    <div class="first_row">
+                        <div class="session_weekday">
+                            <img class="round_profile_pic" src="{{trainer.image.url}}">
+                        </div>
+                        <div class="trainer_info">
+                            <h3> {{trainer.user.first_name |upper}}</h3>
+                            <p> {{trainer.trainer_telnr}} </p>
+                            <p> {{trainer.trainer_email}} </p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <a class="float_left more_info_button button_padding" href="{% url 'index' %}#training">Zurück</a>
+            {% if perms.members.change_session %}
+                <a class="float_right more_info_button button_padding" href="{% url 'session_update' object.id  %}">Bearbeiten</a>
+            {% endif %}
+</section>
 {% endblock %}
 
     

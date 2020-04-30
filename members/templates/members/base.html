@@ -31,8 +31,6 @@
                 <nav class="sticky">
                     <ul>
                         <li class= "float_right"><a href="{% url 'logout' %}">Logout</a></li>
-                        <li class= "float_left"><a href="#">Jams</a></li>
-                        <li class= "float_left"><a href="#">Vereinskleidung</a></li>
                         <li class= "float_left"><a href="{% url 'spot_list' %}">Spots</a></li>
                         {% if perms.auth.add_user %}
                             <li class= "float_right"><a href="{% url 'register' %}">Mitglied Hinzufügen</a></li>
@@ -54,41 +52,17 @@
             </div>
         </div>
             <footer>
-                {% if chairmen %}
-                    <div>
-                        <h2> Deine Ansprechpartner </h2>
-                        <ol style="padding:0px;">
-                        {% for chairman in chairmen %}
-                            <li class="chairman_section">
-                                    <ol style="padding:0px;">
-                                        <li style="float:left">
-                                            <div class="round_chairman_pic">
-                                                <img src="{{chairman.image.url}}">
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="chairman_info">
-                                                <h3>{{chairman.user.first_name}} {{chairman.user.last_name}}</h3>
-                                                <p>{{chairman.trainer_email}}</p>
-                                                <p>{{chairman.trainer_telnr}}</p>
-                                                <p>{{chairman.competences}}</p>
-                                            </div>
-                                        </li>
-                                    </ol>
-                            </li>
-                        {% endfor %}
-                        </ol>
-                    </div>
-                {% endif %}
-                <div>
-                    <ol class="social_media">
-                        <li>
-                            <div>
-                                <img >
-                                <p> </p>
-                            </div>
-                        </li>
-                    </ol>
+                {% block chairmen %} {% endblock %}
+                <div class="grid-container">
+                    <p>FACEBOOK</p>
+                    <p>INSTAGRAM</p>
+                    <p>YOUTUBE</p>
+                    <p>TELEFON</p>
+                    <p>EMAIL</p>
+                </div>
+                <hr style="border:0px;height:1px;background-color:#262626;margin-top:30px;">
+                <div style="text-align:center;">
+                    <a class="more_info_button button_padding" href="#">Impressum</a> ⋅ <a href="#" class="more_info_button button_padding">Datenschutz</a>
                 </div>
             </footer>
         </body>

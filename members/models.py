@@ -85,6 +85,20 @@ class Session(models.Model):
     def format_end_time(self):
         return self.end_time.strftime("%H:%M")
     
+    @property
+    def weekday(self):
+        tag={
+        "Mo":"Montags",
+        "Di":"Dienstags",
+        "Mi":"Mittwochs",
+        "Do":"Donnerstags",
+        "Fr":"Freitags",
+        "Sa":"Samstags",
+        "So":"Sonntags",
+        }
+        return tag[self.day]
+    
+    
     def get_absolute_url(self):
         return reverse('session_detail', kwargs={"pk": self.pk})
     
@@ -114,6 +128,9 @@ class Chairman(models.Model):
     
     def __str__(self):
         return f"Vorstand: {self.user.username}"
+    @property
+    def complist(self):
+        return self.competences.split(",")
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
