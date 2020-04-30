@@ -16,8 +16,8 @@
             <div style="padding-top:30px;padding-bottom:5%;">
                 <p align="justify" style="padding:15px;">{{object.description}}<p>
             </div>
-            <div style="padding-right:40%;padding-left:40%;">
-                <p style="text-align:center;">
+            <div>
+                <p style="text-align:center;width:100px;margin:0 auto;">
                 {% if not object.deadline_reached %}
                     {% if user in object.participants.all %}
                         <a class="sign_down" href="{% url 'event_unparticipate' object.id %}">Abmelden</a>

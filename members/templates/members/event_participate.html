@@ -6,10 +6,10 @@
         <h2 style="margin-bottom:0px;">{{object.title|upper}}</h2>
         <hr style="border:0px;height:2px;background-color:white;">
         <h3 style="margin-top:0px;"> Bestätige deine Anmeldung </h3>
-        <div style="padding-right:40%;padding-left:40%;">
+        <div>
             <form style="text-align:center;padding:20px;" method="POST">
                 {% csrf_token %}
-                <button style="width:100%;border: 0;" type="submit" class="sign_up">Jawoll</button>
+                <button style="width:100px;border: 0; margin:0 auto;" type="submit" class="sign_up">Jawoll</button>
                 <a class="more_info_button button_padding" href="{% url 'event_detail' object.id %}">Nope</a>
             </form>
         </div>
