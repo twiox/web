@@ -49,13 +49,13 @@ class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 class EventCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     #template: event_detail.html
     model = Event
-    fields=["title","allowed_groups","description","start_date","end_date","hinweis"]
+    fields=["title","allowed_groups","description","start_date","end_date","hinweis","deadline"]
     permission_required = 'members.add_event'
     
 class EventUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_detail.html
     model = Event
-    fields=["title","allowed_groups","description","start_date","end_date","hinweis"]
+    fields=["title","allowed_groups","description","start_date","end_date","hinweis","deadline"]
     #who can update the event?
     permission_required = 'members.change_event'
 
@@ -85,7 +85,27 @@ class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         user_group = self.request.user.profile.group
         event = self.get_object()
         return True if user_group in event.allowed_groups.all() else hasattr(self.request.user, "trainer")
+
+class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    template_name = 'members/event_unparticipate.html'
+    form_class = EventUpdateParticipantForm
+    model = Event
+       
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            event = self.get_object()
+            user = self.request.user
+            event.participants.remove(self.request.user)
+            event.save()
+            messages.add_message(request, messages.INFO, 'Du bist erfolgreich agemeldet')
+            return HttpResponseRedirect(f"/members/events/{event.id}")
+        return render(request, self.template_name, {'form': form})
         
+    def test_func(self):
+        user_group = self.request.user.profile.group
+        event = self.get_object()
+        return True if user_group in event.allowed_groups.all() else hasattr(self.request.user, "trainer")        
 
 """FOR THE SESSIONS"""
 

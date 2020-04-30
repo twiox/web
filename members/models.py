@@ -24,6 +24,7 @@ class Group(models.Model):
     def __str__(self):
         return f"Gruppe: {self.group_id}"
 
+
 class Event(models.Model):
     allowed_groups = models.ManyToManyField(Group)
     participants = models.ManyToManyField(User, blank=True)
@@ -31,6 +32,7 @@ class Event(models.Model):
     title = models.CharField("Event-name", max_length=100)
     place = models.CharField("Veranstaltungsort", max_length=200, blank=True, default="Leipzig")
     description = models.TextField("Beschreibung", blank=True)
+    deadline = models.DateTimeField("Anmeldung/Abmeldung bis", default=datetime.now())
     start_date = models.DateTimeField("Datum Beginn", default=datetime.now())
     end_date = models.DateTimeField("Datum Ende", default=datetime.now())
     hinweis = models.CharField("Hinweis (rote Anzeige)", blank=True, max_length=50)
@@ -46,9 +48,13 @@ class Event(models.Model):
     @property
     def is_past_due(self):
         return datetime.now().replace(tzinfo=None) > self.start_date.replace(tzinfo=None)
+    @property
+    def deadline_reached(self):
+        return datetime.now().replace(tzinfo=None) > self.deadline.replace(tzinfo=None)
     
     def __str__(self):
         return f"Event: {self.title}"
+
 
 class Trainer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

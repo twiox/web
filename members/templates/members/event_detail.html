@@ -10,14 +10,20 @@
         {% endif %}
         
         <p>{{object.description}}<p>
-        <p>
-            <a href="{% url 'index' %}">Zurück</a>
-            {% if user in object.participants.all %}
-                <a href="#">Abmelden</a>
-            {% else %}
-                <a href="{% url 'event_participate' object.id %}">Anmelden</a>
-            {% endif %}
-        </p>
+        <a href="{% url 'index' %}">Zurück</a>
+        {% if not object.deadline_reached %}
+            <p>
+                {% if user in object.participants.all %}
+                    <a href="{% url 'event_unparticipate' object.id %}">Abmelden</a>
+                {% else %}
+                    <a href="{% url 'event_participate' object.id %}">Anmelden</a>
+                {% endif %}
+            </p>
+            <p>Die Anmeldung schließt am {{object.deadline |date:'d.m.Y'}}</p>
+                
+        {% else %}
+            <p> Anmeldung geschlossen </p>
+        {% endif %}
         {% if perms.members.change_event %}
             <a href="{% url 'event_update' object.id  %}">Bearbeiten</a>
         {% endif %}

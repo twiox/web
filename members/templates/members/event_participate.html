@@ -1,5 +1,6 @@
 {% extends "members/base.html" %}
 {%block content %}
+{% if not object.deadline_reached %}
 <div>
 <h1>WILLST DU AM EVENT TEILNEHMEN??</h1>
 <h3>{{object.title}}</h3>
@@ -9,4 +10,5 @@
     <a href="{% url 'event_detail' object.id %}">Nope</a>
 </form>
 </div>
+{% endif %}
 {% endblock %}

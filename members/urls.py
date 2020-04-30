@@ -9,6 +9,7 @@ urlpatterns = [
     path("events/<int:pk>/update/", views.EventUpdateView.as_view(),name="event_update"),
     path("events/<int:pk>/delete/", views.EventDeleteView.as_view(),name="event_delete"),
     path("events/<int:pk>/participate/", views.EventParticipateView.as_view(),name="event_participate"),
+    path("events/<int:pk>/unparticipate/", views.EventUnParticipateView.as_view(),name="event_unparticipate"),
     path("sessions/<int:pk>/", views.SessionDetailView.as_view(),name="session_detail"),
     path("sessions/new/", views.SessionCreateView.as_view(),name="session_create"),
     path("sessions/<int:pk>/update/", views.SessionUpdateView.as_view(),name="session_update"),
