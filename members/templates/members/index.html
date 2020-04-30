@@ -18,7 +18,7 @@
         </ul>
     </section>
     <!-- The container for the Sessions -->
-    <section>
+    <section id="training">
         <h2>TRAININGSZEITEN</h2>
         {% if perms.members.add_session %}
             <!-- Trainer UI -->
@@ -116,7 +116,7 @@
         </ul>
     </section>
     <!-- Here the Container for the Events -->
-    <section>
+    <section id="events">
         <h2>VERANSTALTUNGEN</h2>
         <!--Add Events -->
         {% if perms.members.add_event %}
@@ -131,9 +131,6 @@
             {% for event in events %}
                 {% if not event.is_past_due %}
                     <div class="session_divs col-4" id="container">
-                        {% if user in event.participants.all %}
-                        <p style="background-color:green;margin:0px;"> Du bist angemeldet </p>
-                        {% endif %}
                         <div style="overflow:hidden">
                             {% if event.hinweis %}
                                 <div id="info_position">
@@ -144,9 +141,14 @@
                                 <div class="session_weekday">
                                         <p><strong> {{event.start_date|date:'M' }} </strong></p>
                                 </div>
-                                <div class="second_section first_div">
+                                <div class="second_section first_div" id="container">
                                     <h3> {{event.title}}</h3>
                                     <p> {{event.start_date|date:'d.m' }} - {{event.end_date|date:'d.m.Y' }} </p>
+                                    {% if user in event.participants.all %}
+                                        <span class="dot_participate" id="info_position2"> </span>
+                                    {% else %}
+                                        <span class="dot_nonparticipate" id="info_position2"> </span>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="third_session">

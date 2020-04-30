@@ -34,6 +34,12 @@ margin-left:10%;
     right: 20px;
     z-index:2;
 }
+#info_position2{
+    position: absolute;
+    top: 3px;
+    left: 5px;
+    z-index:2;
+}
 body {
     background-color:#191919;
     color:#d1d1d1;
@@ -188,7 +194,52 @@ h2{
 .more_info_button:hover{
     color:#69CCE1;
 }
+.dot_participate {
+  height: 10px;
+  width: 10px;
+  background-color: green;
+  border-radius: 50%;
+}
+.dot_nonparticipate {
 
+  height: 10px;
+  width: 10px;
+  background-color: grey;
+  border-radius: 50%;
+}
+/*Event Detail */
+.sign_up{
+    display:block;
+    background-color:#088eaa;
+    color:white;
+    padding:10px;
+}
+.sign_up:hover{
+    display:block;
+    background-color:#69CCE1;
+    color:white;
+}
+.sign_down{
+    display:block;
+    background-color:#7b1b42;
+    color:white;
+    padding:10px;
+}
+.sign_down:hover{
+    display:block;
+    background-color:#a0305d;
+    color:white;
+}
+.button_padding{
+    padding-right:5px;
+    padding-left:5px;
+}
+.time_info{
+    color:grey;
+    text-align:center;
+    padding-top:3px;
+    font-size:0.7rem;
+}
 /*TrainerOverview*/
 .trainer_section{
     float:left;
@@ -223,7 +274,42 @@ h2{
 .ui_div li a:hover {
   background-color: #088eaa;
 }
-
+/*MESSAGES */
+.message_success{
+    margin-top:15px;
+    padding:10px;
+    text-align:center;
+    border: 3px solid green;
+    color:white;
+}
+.message_error{
+    margin-top:15px;
+    padding:10px;
+    text-align:center;
+    border: 3px solid red;
+    color:white;
+}
+.message_info{
+    margin-top:15px;
+    padding:10px;
+    text-align:center;
+    border: 3px solid yellow;
+    color:white;
+}
+.message_warning{
+    margin-top:15px;
+    padding:10px;
+    text-align:center;
+    border: 3px solid orange;
+    color:white;
+}
+.message_debug{
+    margin-top:15px;
+    padding:10px;
+    text-align:center;
+    border: 3px solid white;
+    color:white;
+}
 /*footer*/
 footer{
     padding-right:10%;

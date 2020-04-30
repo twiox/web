@@ -43,11 +43,13 @@
             {% endif %}
             <!-- Website Content -->
             <!-- And the container for the Sessions -->
-            {% for message in messages %}
-                <p> {{message}} </p>
-            
-            {% endfor %}
+            {% block flag %} {% endblock %}
+
             <div class="frame">
+            {% for message in messages %}
+                <p class="message_{{message.tags}}">{{message}} </p>
+            {% endfor %}
+            
             {% block content %} {% endblock %}
             </div>
         </div>

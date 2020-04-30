@@ -77,7 +77,7 @@ class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             user = self.request.user
             event.participants.add(self.request.user)
             event.save()
-            messages.add_message(request, messages.INFO, 'Du bist erfolgreich angemeldet')
+            messages.add_message(request, messages.SUCCESS, 'Du bist erfolgreich angemeldet')
             return HttpResponseRedirect(f"/members/events/{event.id}")
         return render(request, self.template_name, {'form': form})
         
@@ -98,7 +98,7 @@ class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
             user = self.request.user
             event.participants.remove(self.request.user)
             event.save()
-            messages.add_message(request, messages.INFO, 'Du bist erfolgreich agemeldet')
+            messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich abgemeldet')
             return HttpResponseRedirect(f"/members/events/{event.id}")
         return render(request, self.template_name, {'form': form})
         
