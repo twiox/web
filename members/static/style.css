@@ -1,23 +1,69 @@
+* {
+  box-sizing: border-box;
+  margin:0px;
+  padding:0px;
+}
+/* For mobile phones: */
+[class*="col-"] {
+  width: 100%;
+}
+@media only screen and (min-width: 768px) {
+   /*simple media query for responsive design*/
+  /* For desktop: */
+  .col-4 {width: 50%;}
+}
+@media only screen and (min-width: 1000px) {
+   /*simple media query for responsive design*/
+  /* For desktop: */
+  .col-4 {width: 33.33%;}
+}
+.frame{
+margin-right:10%;
+margin-left:10%;
+}
+.content_wrapper{
+    background-color: #262626;
+    padding-bottom:5%;
+}
+#container{
+    position:relative;
+}
+#info_position{
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    z-index:2;
+}
 body {
     background-color:#191919;
     color:#d1d1d1;
-    margin:0px;
-    border:0px;
-    padding:0px;
 }
-.body_wrapper{
-    background-color: #262626;
-    padding-bottom:10%;
+section{
+    padding-top: 20px;
+    padding-bottom:20px;
+    clear:both;
+    overflow:hidden;
+}
+section h2{
+    font-size:2rem;
+    margin-bottom: 20px;
+}
+.first_div{
+    padding-top:10px;
+    padding-bottom:10px;
+}
+ul{
+    list-style: none;
+    overflow:hidden;
 }
 ol{
+    list-style: none;
     overflow:hidden;
 }
-li{
-    overflow:hidden;
+a{
+    text-decoration: none;
 }
 header {
-  border:0px;
-  margin:0px;
   padding: 20px;
   height: 10%;
   text-align: center;
@@ -30,13 +76,12 @@ header img{
   min-width: 15%;
 }
 /*Navigationsleiste */
+nav{
+    z-index:5;
+}
 nav ul{
   font-size: 14px;
   font-weight: 500;
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
   background: #191919;
 }
 .float_left{
@@ -58,7 +103,6 @@ nav li a{
   color: white;
   text-align: center;
   padding: 14px 16px;
-  text-decoration: none;
 }
 nav li a:hover {
   background-color: #111;
@@ -73,10 +117,6 @@ nav li a:hover {
     height:450px;
 }
 /*Content*/
-section{
-    margin-right:10%;
-    margin-left:10%;
-}
 h1{
     font-size:2.5rem;
 }
@@ -84,44 +124,44 @@ h2{
     font-size:2rem;
 }
 /*Trainingssessions*/
+/*for smartphone */
 .session_divs{
-    float:left;
-    width: 30%;
-    margin-right:15px;
-    margin-bottom:15px;
+    padding-right:0px;
+    padding-bottom:20px;
 }
-.wrapper{
-    height:100%;
-}
-.first_section{
+@media only screen and (min-width: 768px) {
+  /* For desktop and tablet: */
+  .session_divs{
     float:left;
-    width:25%;
-    height:50%;
-    overflow:hidden;
-    background-color:#333333;
+    padding-right:15px;
+    padding-bottom:15px;
+  }
+}
+.first_row{
+    width:100%;
+    float:left;
+    display:table;
 }
 .session_weekday{
+    display:table-cell;
     text-align:center;
-    height: 50%;
-    padding:10px;
+    vertical-align:middle;
+    width:25%;
+    height:100%;
     font-size:1.1rem;
     background-color: #088eaa;
-    oerflow:hidden;
 }
 .second_section{
-    float:left;
-    text-align:center;
+    display:table-cell;
     width:75%;
-    height:50%;
+    text-align:center;
     background-color:#333333;
+    padding:15px;
     }
 .second_section h3{
-    padding-bottom: 0px;
-    margin-bottom: 0px;
     font-size:1.3rem;
     }
 .second_section p{
-    margin-top: 0px;
     font-size: 0.9rem;
     }
 .third_session{
@@ -129,28 +169,26 @@ h2{
     float:left;
     width:100%;
     padding:5%;
-    background-color:#333333;s
+    background-color:#333333;
 }
 .third_session p{
     padding-left:10%;
     font-size: 1rem;
-    padding:0px;
-    margin-top:0px;
 }
 .session_alert{
     text-align: center; 
     background-color: #7b1b42; 
     padding:3px;
-    margin:0px;
 }
-   /*Eventcalender*/
+
+/*Eventcalender*/
 .more_info_button{
-    text-decoration: none;
     color:#088eaa;
 }
 .more_info_button:hover{
     color:#69CCE1;
 }
+
 /*TrainerOverview*/
 .trainer_section{
     float:left;
@@ -170,16 +208,9 @@ h2{
 .trainer_info{
     text-align:center;
 }
+
 /*Trainer UI for events and sessions*/
 .ui_div ul{
-  font-size: 14px;
-  font-weight: 500;
-  list-style-type: none;
-  margin:0px;
-  margin-left: 10%;
-  margin-right: 10%;
-  padding: 0;
-  overflow: hidden;
   background: #333333;
 }
 .ui_div a{
@@ -188,11 +219,11 @@ h2{
   text-align: center;
   font-size:0.9rem;
   padding: 14px 16px;
-  text-decoration: none;
 }
 .ui_div li a:hover {
   background-color: #088eaa;
 }
+
 /*footer*/
 footer{
     padding-right:10%;
@@ -201,11 +232,11 @@ footer{
     padding-top:15px;
     display:block; 
     background-color:#191919;
+    clear:both;
 }
 .chairman_section{
     float:left;
     padding: 15px;
-    margin-left:0px;
     margin-right:15px;
     margin-bottom:15px;
 }
@@ -220,11 +251,9 @@ footer{
     align:center;
 }
 .chairman_info h3{
-    margin-top: 0px;
     align:center;
 }
 .chairman_info p{
-    margin: 0px;
     align:center;
 }
 .blue_header{
@@ -232,5 +261,4 @@ color: white;
 text-align: center; 
 background-color: #088eaa; 
 padding:10px; 
-margin-top:0px;"
 }

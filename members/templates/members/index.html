@@ -2,15 +2,14 @@
     {% block picture %}
     <div class="member_img_fixed"> </div>
     {% endblock %}
-
     {% block content %}
-    <!-- Nice Greeting -->
+    <!-- Say Hello -->
     <section>
         <h1 style="margin-bottom: 0px;"> WILLKOMMEN {{request.user.first_name | upper}} </h1>
         <h3 style="margin:0px;"> Mitgliedsnummer {{request.user.profile.member_num}}</h3>
         <h3 style="margin-top:0px;"> Trainingsgruppe {{group.group_id}}</h3>
     </section>
-        <!-- Here the Messanges if any -->
+    <!-- Here the Messanges -->
     <section>
         <ul style="padding:0px; list-style-type: none;">
             <li style=" display: block; color: white; text-align: center; background-color: #7b1b42; padding-bottom:10px; "> Hinweise Platzhalter</li>
@@ -19,93 +18,96 @@
         </ul>
     </section>
     <!-- The container for the Sessions -->
-    <h2 style="margin-bottom: 0px;padding-left:10%;">TRAININGSZEITEN</h2>
-    {% if perms.members.add_session %}
-        <!-- Trainer UI -->
-        <div class="ui_div">
-            <ul>
-                <li class="float_left"> <a href="{% url 'session_create' %}"> Erstellen </a></li>
-            </ul>
-        </div>
-    {% endif %}
-    <div style="margin-right:10%; margin-left:10%; background-color:#262626;">
-        <ul style="list-style-type: none; padding-left:0px; overflow:hidden;">
+    <section>
+        <h2>TRAININGSZEITEN</h2>
+        {% if perms.members.add_session %}
+            <!-- Trainer UI -->
+            <div class="ui_div first_div">
+                <ul>
+                    <li class="float_left"> <a href="{% url 'session_create' %}"> Erstellen </a></li>
+                </ul>
+            </div>
+        {% endif %}
+        <div>
             {% for session in sessions %}
-                <li class="session_divs">
-                    <div class="wrapper">
-                        <div class="first_section">
+                <div class="session_divs col-4" id="container">
+                    <div style="overflow:hidden">
+                        {% if session.hinweis %}
+                            <div id="info_position">
+                                <p class="session_alert"> {{session.hinweis}} </p>
+                            </div>
+                        {% endif %}
+                        <div class="first_row">
                             <div class="session_weekday">
-                                <p><strong> {{session.day}} </strong></p>
+                                    <p><strong> {{session.day}} </strong></p>
+                            </div>
+                            <div class="second_section first_div">
+                                <h3> {{session.website_title}}</h3>
+                                <p> {{session.format_start_time}} - {{session.format_end_time}} Uhr </p>
                             </div>
                         </div>
-                        <div class="second_section">
-                            <h3> {{session.website_title}} </h3>
-                            <p> {{session.format_start_time}} - {{session.format_end_time}} Uhr </p>
-                        </div>
+                        
                         <div class="third_session">
-                            <p style="margin-bottom:0px;">Ort: {{session.spot.title}}</p>
-                            <p>Trainer:</p>
+                            <p>Ort: {{session.spot.title}}</p>
+                            <p>Trainer:
                             {% for trainer in session.trainer.all %}
-                                <p style="padding-left:15%; padding-bottom:3px; margin:0px;">Name: {{trainer.user.first_name}}</p>
+                                {{trainer.user.first_name}},
                             {% endfor %}
+                            </p>
                         </div>
                         <div class="third_session" style="text-align:center;">
                             <a class="more_info_button" href="{% url 'session_detail' session.id %}">weitere Informationen</a>
                         </div>
-                        {% if session.hinweis %}
-                            <div style="float:right;">
-                                <p class="session_alert"> {{session.hinweis}} </p>
-                            </div>
-                        {% endif %}
                     </div>
-                </li>
+                </div>
             {% empty %}
-                <li> Leider gibt es im Moment keine Einheiten für dich </li>
+                <p> Leider gibt es im Moment keine Einheiten für dich </p>
             {% endfor %}
-        </ul>
-    </div>
-    <!-- For the trainers -->
+        </div>
+    </section>
+    <!-- The container for the Trainersessions -->
     {% if trainer_sessions %}
-    <div style="margin-right:10%; margin-left:10%; background-color:#262626;">
+    <section>
         <h2>GRUPPENEINHEITEN</h2>
-        <ol style="list-style-type: none; padding-left:0px;">
+        <div>
             {% for session in trainer_sessions %}
-                <li class="session_divs">
-                    <div class="wrapper">
-                        <div class="first_section">
+                <div class="session_divs col-4" id="container">
+                    <div style="overflow:hidden">
+                        {% if session.hinweis %}
+                            <div id="info_position">
+                                <p class="session_alert"> {{session.hinweis}} </p>
+                            </div>
+                        {% endif %}
+                        <div class="first_row">
                             <div class="session_weekday">
-                                <p><strong> {{session.day}} </strong></p>
+                                    <p><strong> {{session.day}} </strong></p>
+                            </div>
+                            <div class="second_section first_div">
+                                <h3> {{session.website_title}}</h3>
+                                <p> Gruppe {{session.group.group_id}}: {{session.format_start_time}} - {{session.format_end_time}} Uhr </p>
                             </div>
                         </div>
-                        <div class="second_section">
-                            <h3> {{session.website_title}}</h3>
-                            <p> Gruppe {{session.group.group_id}}: {{session.format_start_time}} - {{session.format_end_time}} Uhr </p>
-                        </div>
+                        
                         <div class="third_session">
-                            <p style="margin-bottom:0px;">Ort: {{session.spot.title}}</p>
-                            <p>Trainer:</p>
+                            <p>Ort: {{session.spot.title}}</p>
+                            <p>Trainer:
                             {% for trainer in session.trainer.all %}
-                                <p style="padding-left:15%; padding-bottom:3px; margin:0px;">Name: {{trainer.user.first_name}}</p>
+                                {{trainer.user.first_name}},
                             {% endfor %}
-                            
+                            </p>
                         </div>
                         <div class="third_session" style="text-align:center;">
                             <a class="more_info_button" href="{% url 'session_detail' session.id %}">weitere Informationen</a>
                         </div>
-                        {% if session.hinweis %}
-                            <div style="float:right;">
-                                <p class="session_alert"> {{session.hinweis}} </p>
-                            </div>
-                        {% endif %}
                     </div>
-                </li>
+                </div>
             {% empty %}
-                <li> Leider gibt es im Moment keine Einheiten für dich </li>
+                <p> Leider gibt es im Moment keine Einheiten für dich </p>
             {% endfor %}
-        </ol>
-    </div>
+        </div>
+    </section>
     {% endif %}
-    <!-- Here the Messanges if any -->
+    <!-- Here the Messanges No2 -->
     <section>
         <ul style="padding:0px; list-style-type: none;">
             <li style=" display: block; color: white; text-align: center; background-color: #7b1b42; padding-bottom:10px; "> Hinweise Platzhalter</li>
@@ -114,53 +116,54 @@
         </ul>
     </section>
     <!-- Here the Container for the Events -->
-    <h2 style="padding-left:10%;">VERANSTALTUNGEN</h2>
-    <div class="ui_div">
-    <!--Add Events -->
+    <section>
+        <h2>VERANSTALTUNGEN</h2>
+        <!--Add Events -->
         {% if perms.members.add_event %}
-        <ul>
-            <li class="float_left"> <a href="{% url 'event_create' %}"> Erstellen </a></li>
-        </ul>
-        {% endif %}
-    </div>
-    {% if events %}
-        <section>
-            <div>
-                <ol style="list-style-type: none; padding-left:0px;">
-                    {% for event in events %}
-                        <!-- check if the event is not long over -->
-                        {% if not event.is_past_due %}
-                            <li class="session_divs">
-                                {% if user in event.participants.all %}
-                                <p style="background-color:green;margin:0px;"> Du bist angemeldet </p>
-                                {% endif %}
-                                <div class="wrapper">
-                                    <div class="first_section">
-                                        <div class="session_weekday">
-                                            <p><strong> {{event.start_date|date:'M' }} </strong></p>
-                                        </div>
-                                    </div>
-                                    <div class="second_section">
-                                        <h3> {{event.title}} </h3>
-                                        <p> {{event.start_date|date:'d.m' }} - {{event.end_date|date:'d.m.Y' }}</p>
-                                    </div>
-                                    <div class="third_session" style="text-align:center;">
-                                        <a class="more_info_button" href="{% url 'event_detail' event.id %}">weitere Informationen</a>
-                                    </div>
-                                    
-                                    {% if event.hinweis %}
-                                    <div style="float:right;">
-                                        <p class="session_alert"> {{event.hinweis}} </p>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </li>
-                        {% endif %}
-                    {% endfor %} 
-                </ol>
+            <div class="ui_div first_div">
+                <ul>
+                    <li class="float_left"> <a href="{% url 'event_create' %}"> Erstellen </a></li>
+                </ul>
             </div>
-        </section>
-    {% else %}
-        <h3> Leider sind im Moment keine Events geplant </h3>
-    {% endif %}
+        {% endif %}
+        {% if events %}
+        <div>
+            {% for event in events %}
+                {% if not event.is_past_due %}
+                    <div class="session_divs col-4" id="container">
+                        {% if user in event.participants.all %}
+                        <p style="background-color:green;margin:0px;"> Du bist angemeldet </p>
+                        {% endif %}
+                        <div style="overflow:hidden">
+                            {% if event.hinweis %}
+                                <div id="info_position">
+                                    <p class="session_alert"> {{event.hinweis}} </p>
+                                </div>
+                            {% endif %}
+                            <div class="first_row">
+                                <div class="session_weekday">
+                                        <p><strong> {{event.start_date|date:'M' }} </strong></p>
+                                </div>
+                                <div class="second_section first_div">
+                                    <h3> {{event.title}}</h3>
+                                    <p> {{event.start_date|date:'d.m' }} - {{event.end_date|date:'d.m.Y' }} </p>
+                                </div>
+                            </div>
+                            <div class="third_session">
+                                <p>Ort: {{event.place}}</p>
+                            </div>
+                            <div class="third_session" style="text-align:center;">
+                                <a class="more_info_button" href="{% url 'event_detail' event.id %}">weitere Informationen</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% empty %}
+                <p> Leider gibt es im Moment keine Einheiten für dich </p>
+            {% endfor %}
+        </div>
+        {% else %}
+            <h3> Leider sind im Moment keine Events geplant </h3>
+        {% endif %}
+    </section>
     {% endblock %}

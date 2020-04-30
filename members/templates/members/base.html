@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="{{ STATIC_URL }}/static/style.css"/>
   </head>
     <body>
-        <div class="body_wrapper">
+        <div class="content_wrapper">
             <!-- header -->
             <header>
                 <a href="{% url 'index' %}">
@@ -45,8 +45,11 @@
             <!-- And the container for the Sessions -->
             {% for message in messages %}
                 <p> {{message}} </p>
+            
             {% endfor %}
+            <div class="frame">
             {% block content %} {% endblock %}
+            </div>
         </div>
             <footer>
                 {% if chairmen %}
