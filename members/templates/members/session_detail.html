@@ -16,7 +16,14 @@
             <p>Here I would like to add a map/Adress... </p>
         </div>
     </div>
-    <div style="background-color:#333333;padding:20px;">
+    <a class="float_left more_info_button button_padding" href="{% url 'index' %}#training">Zurück</a>
+            {% if perms.members.change_session %}
+                <a class="float_right more_info_button button_padding" href="{% url 'session_update' object.id  %}">Bearbeiten</a>
+            {% endif %}
+            {% if perms.members.delete_session %}
+                <a class="float_right more_info_button button_padding" href="{% url 'session_delete' object.id  %}">Löschen</a>
+            {% endif %}
+    <div style="background-color:#333333;padding:20px;clear:both;">
         <div style="overflow:hidden;">
             <h2 style="margin-bottom:30px;">ANSPRECHPARTNER</h2>
             {% for trainer in object.trainer.all %}
@@ -35,10 +42,6 @@
             {% endfor %}
         </div>
     </div>
-    <a class="float_left more_info_button button_padding" href="{% url 'index' %}#training">Zurück</a>
-            {% if perms.members.change_session %}
-                <a class="float_right more_info_button button_padding" href="{% url 'session_update' object.id  %}">Bearbeiten</a>
-            {% endif %}
 </section>
 {% endblock %}
 

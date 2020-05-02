@@ -10,18 +10,22 @@
         <p style="color: white; text-align: center; background-color: #7b1b42; padding:10px; margin-top:0px;"> Nutzername oder Passwort falsch </h3>
     {% endif %}
     <form method="post">
-        <ul style="list-style: none; padding:0px;">
             {% csrf_token %}
+            <div class="col-4" style="padding:10px; border: solid 1px; margin:0 auto;">
             {% for field in form %}
-            <li>
-                <div style="float:center;">
-                        <p style="margin-bottom:0px;">{{field.label}}</p>
-                        <p style="margin:0px;">{{field}}</p>
+                <div class="col-4" style="margin:0 auto;" id="container">
+                        <div style="position:absolute;left:0;width:50%;">
+                            <a style="position:absolute; right:5px;">{{field.label}} </a>
+                        </div>
+                        <div style="position:absolute;right:0;width:50%;">
+                            <a style="position:absolute; left:5px;;">{{field}}</a>
+                        </div>
                 </div>
-            </li>
+                <br>
             {% endfor %}
-        </ul>
-      <button type="submit">Login</button>
+            </div>
+      <button style="margin-top:30px;" type="submit">Login</button>
     </form>
+    <a href="{% url 'password_reset' %}" class="more_info_button button_padding">Reset Password</a>
 </section>
 {% endblock %}

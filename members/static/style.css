@@ -288,28 +288,28 @@ h2{
     padding:10px;
     text-align:center;
     border: 3px solid green;
-    color:white;
+    color:green;
 }
 .message_error{
     margin-top:15px;
     padding:10px;
     text-align:center;
     border: 3px solid red;
-    color:white;
+    color:red;
 }
 .message_info{
     margin-top:15px;
     padding:10px;
     text-align:center;
     border: 3px solid yellow;
-    color:white;
+    color:yellow;
 }
 .message_warning{
     margin-top:15px;
     padding:10px;
     text-align:center;
     border: 3px solid orange;
-    color:white;
+    color:orange;
 }
 .message_debug{
     margin-top:15px;

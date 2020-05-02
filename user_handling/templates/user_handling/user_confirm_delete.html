@@ -1,18 +1,18 @@
 {% extends "members/base.html" %}
 {% block flag %}
-<h3 class="blue_header"> VERANSTALTUNG </h3>
+<h3 class="blue_header"> Mitgliederbereich </h3>
 {% endblock %}
 {%block content %}
 <section style="padding-top:5%;">
     <div style="background-color:#333333;padding:20px;">
-        <h2 style="margin-bottom:0px;">Veranstaltung löschen</h2>
+        <h2 style="margin-bottom:0px;">Benutzer löschen</h2>
         <hr style="border:0px;height:2px;background-color:white;">
-        <h3 style="margin-top:0px;"> {{object.title}} </h3>
+        <h3 style="margin-top:0px;"> {{object.first_name}} mit Nutzername {{object.username}} </h3>
         <div>
             <form style="text-align:center;padding:20px;" method="POST">
                 {% csrf_token %}
                 <button style="width:100px;border: 0; margin:0 auto;" type="submit" class="sign_down">Jawoll</button>
-                <a class="more_info_button button_padding" href="{% url 'event_detail' object.id %}">Nope</a>
+                <a class="more_info_button button_padding" href="{% url 'session_detail' object.id %}">Nope</a>
             </form>
         </div>
     </div>

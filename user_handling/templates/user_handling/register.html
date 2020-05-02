@@ -1,23 +1,43 @@
 {% extends "members/base.html" %}
+{% block flag %}
+<h3 class="blue_header"> Mitgliederbereich </h3>
+{% endblock %}
+
 {% block content %}
-    {% if messages %}
-        {% for message in messages %}
-            <div style="background-color:green;">
-                {{message}}
-            </div>
-        {% endfor %}
-    {% endif %}    
-    <div>
-        <form method="POST">
+<section style="text-align: center;">
+    <h2>NEUEN ACCOUNT HINZUFÜGEN</h2>
+    <form method="post">
             {% csrf_token %}
-            <fieldset>
-                <legend> Mitglied Hinzufügen </legend>
-                {{form2.as_p}}
-                {{form.as_p}}
-            </fieldset>
-            <div>
-                <button type="submit"> Hinzufügen </button>
+            <div class="col-5" style="padding:10px; border: solid 1px; overflow:hidden; margin: 0 auto;">
+            {% for field in form2 %}
+                <div style="width:100%;">
+                        <div class="col-5" align="right" style="float:left;width:50%;">
+                            <a style="padding-right:10px;">{{field.label}} </a>
+                        </div>
+                        <div align="left" style="float:left;width:50%;">
+                            <a>{{field}}</a>
+                        </div>
+                        <br>
+                </div>
+            {% endfor %}
+            {% for field in form %}
+                {% if not 'Passwort' in field.label %}
+                <div style="width:100%;">
+                        <div align="right" style="float:left;width:50%;">
+                            <a style="padding-right:10px;">{{field.label}} </a>
+                        </div>
+                        <div align="left" style="float:left;width:50%;">
+                            <a>{{field}}</a>
+                        </div>
+                        <br>
+                </div>
+                {% endif %}
+            {% endfor %}
             </div>
-        </form>
-    </div>
+            <div style="clear:both;">
+                <button style="margin-top:30px;" type="submit"> Hinzufügen </button>
+            </div>
+    </form>
+    <a href="{% url 'index' %}" class="more_info_button button_padding">Zurück</a>
+</section>
 {% endblock %}

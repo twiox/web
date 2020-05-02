@@ -67,7 +67,7 @@ class Trainer(models.Model):
 
 class Session(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE, blank=True, null=True)
-    trainer = models.ManyToManyField(Trainer)
+    trainer = models.ManyToManyField(Trainer, blank=True)
     spot = models.ForeignKey(Spot, blank=True, null=True, on_delete=models.SET_NULL)
     
     title = models.CharField("Titel für uns", max_length=50, default="Halle_GruppeA_Sa")

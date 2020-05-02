@@ -122,7 +122,7 @@ class SessionDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 class SessionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     #template: event_form.html
     model = Session
-    fields=["group","trainer","spot","title","website_title","day","start_time","end_time","hinweis"]
+    fields=["group","spot","title","website_title","day","start_time","end_time","hinweis","trainer"]
     permission_required = 'members.add_session'
     
     

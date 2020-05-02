@@ -24,8 +24,17 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("members/", include('members.urls')),
     path('register/', user_views.register, name="register"),
+    path('remove/', user_views.remove_user, name="remove"),
+    path('change_group/', user_views.change_group, name="change_group"),
+    path('remove/user/<int:pk>/', user_views.UserDeleteView.as_view(), name="remove_user"),
     path('register_trainer/', user_views.register_trainer, name="register_trainer"),
+    path('remove_trainer/', user_views.remove_trainer, name="remove_trainer"),
     path("login/", auth_views.LoginView.as_view(template_name="user_handling/login.html"), name="login"),
     path("logout/", auth_views.LogoutView.as_view(template_name="user_handling/logout.html"), name="logout"),
+    path("activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/", user_views.activate, name="activate"),
+    path("reset_pw/", auth_views.PasswordResetView.as_view(template_name="user_handling/password_reset.html"), name="password_reset"),
+    path("reset_pw_done/", auth_views.PasswordResetDoneView.as_view(template_name="user_handling/password_reset_done.html"), name="password_reset_done"),
+    path(r"reset_pw/confirm/(<uidb64>[0-9A-Za-z]+)-<token>/$", auth_views.PasswordResetConfirmView.as_view(template_name="user_handling/password_reset_confirm.html"), name="password_reset_confirm"),
+    path("reset_pw/complete/",auth_views.PasswordResetCompleteView.as_view(template_name="user_handling/password_reset_complete.html"), name="password_reset_complete"),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

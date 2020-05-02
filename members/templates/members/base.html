@@ -33,8 +33,10 @@
                         <li class= "float_right"><a href="{% url 'logout' %}">Logout</a></li>
                         <li class= "float_left"><a href="{% url 'spot_list' %}">Spots</a></li>
                         {% if perms.auth.add_user %}
-                            <li class= "float_right"><a href="{% url 'register' %}">Mitglied Hinzufügen</a></li>
+                            <li class= "float_right"><a href="{% url 'register' %}">Account Hinzufügen</a></li>
+                            <li class= "float_right"><a href="{% url 'remove' %}">Account löschen</a></li>
                             <li class= "float_right"><a href="{% url 'register_trainer' %}">Neuer Trainer</a></li>
+                            <li class= "float_right"><a href="{% url 'remove_trainer' %}">Trainer entfernen</a></li>
                         {% endif %}
                     </ul> 
                 </nav>

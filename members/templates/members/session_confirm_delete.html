@@ -1,12 +1,20 @@
 {% extends "members/base.html" %}
+{% block flag %}
+<h3 class="blue_header"> TRAININGSEINHEIT </h3>
+{% endblock %}
 {%block content %}
-<div>
-<h1>WILLST DU DIE SESSION LÖSCHEN??</h1>
-<h2>{{object.title}}</h2>
-<form method="POST">
-    {% csrf_token %}
-    <button type="submit">Jawoll</button>
-    <a href="{% url 'event_detail' object.id %}">Nope</a>
-</form>
-</div>
+<section style="padding-top:5%;">
+    <div style="background-color:#333333;padding:20px;">
+        <h2 style="margin-bottom:0px;">Trainingszeit löschen</h2>
+        <hr style="border:0px;height:2px;background-color:white;">
+        <h3 style="margin-top:0px;"> {{object.website_title}} für Gruppe {{object.group.group_id}} </h3>
+        <div>
+            <form style="text-align:center;padding:20px;" method="POST">
+                {% csrf_token %}
+                <button style="width:100px;border: 0; margin:0 auto;" type="submit" class="sign_down">Jawoll</button>
+                <a class="more_info_button button_padding" href="{% url 'session_detail' object.id %}">Nope</a>
+            </form>
+        </div>
+    </div>
+</section>
 {% endblock %}
