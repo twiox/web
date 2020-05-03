@@ -86,7 +86,7 @@ class UserDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
 
 @login_required
-@permission_required('auth.remove_user', raise_exception=True)
+@permission_required('auth.delete_user', raise_exception=True)
 def remove_user(request):
     if(request.method == "POST"): #if the form is filled out
         form = MemberDeletionForm(request.POST) 
@@ -119,7 +119,7 @@ def register_trainer(request):
     return render(request, 'user_handling/register_trainer.html', context={"form":form})
 
 @login_required
-@permission_required('members.remove_trainer', raise_exception=True)
+@permission_required('members.delete_trainer', raise_exception=True)
 def remove_trainer(request):
     if(request.method == "POST"): #if the form is filled out
         form = TrainerDeletionForm(request.POST) 
@@ -141,7 +141,7 @@ def remove_trainer(request):
         return render(request, "user_handling/remove_trainer.html", context={"form":form})
 
 @login_required
-@permission_required('members.remove_trainer', raise_exception=True)
+@permission_required('members.delete_trainer', raise_exception=True)
 def change_group(request):
     if(request.method == "POST"): #if the form is filled out
         form = GroupChangeForm(request.POST) 
@@ -157,17 +157,3 @@ def change_group(request):
         form = GroupChangeForm() 
         return render(request, "user_handling/change_group.html", context={"form":form})
 
-
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    

@@ -74,7 +74,6 @@ class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         form = self.form_class(request.POST)
         if form.is_valid():
             event = self.get_object()
-            user = self.request.user
             event.participants.add(self.request.user)
             event.save()
             messages.add_message(request, messages.SUCCESS, 'Du bist erfolgreich angemeldet')
@@ -95,7 +94,6 @@ class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
         form = self.form_class(request.POST)
         if form.is_valid():
             event = self.get_object()
-            user = self.request.user
             event.participants.remove(self.request.user)
             event.save()
             messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich abgemeldet')
