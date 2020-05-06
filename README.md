@@ -18,7 +18,7 @@ EMAIL_HOST_USER="your_email@gmail.com"\
 EMAIL_HOST_PASSWORD="your_pw"
 
 go back to the base-directory. To create a sqlite3-database and to initiate the models within it, run
-`python3 manage.py makemigrations`
+`python3 manage.py makemigrations`\
 `python3 manage.py migrate`
 
 to access the site and the admin-panel, you should create a super-user:
@@ -46,7 +46,7 @@ To change/create pages make sure to think of the 3 things below:
 3. There is a **template** specified in the view which is send as a respond to the request to the browser
 
 The html templates can be found in:
-**/members/templates/members/*.html** and
+**/members/templates/members/*.html** and\
 **/user_handling/templates/user_handling/*.html**
 
 the corresponding views are in:
