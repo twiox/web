@@ -51,7 +51,7 @@ The html templates can be found in:\
 
 the corresponding views are in:
 **/members/views.py**\
-**user_handling/views.py**\
+**user_handling/views.py**
 
 the urls leading to the views can be found in:
 **/twio_web/urls.py** and\
