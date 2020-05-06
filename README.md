@@ -49,10 +49,10 @@ The html templates can be found in:\
 **/members/templates/members/*.html** and\
 **/user_handling/templates/user_handling/*.html**
 
-the corresponding views are in:
+the corresponding views are in:\
 **/members/views.py**\
 **user_handling/views.py**
 
-the urls leading to the views can be found in:
+the urls leading to the views can be found in:\
 **/twio_web/urls.py** and\
 **/members/urls.py**
