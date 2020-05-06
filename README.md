@@ -12,9 +12,9 @@ conda activate django`
  open **twio_web/settings.py**
  at the very bottom include:
  
-EMAIL_USE_TLS = True
-EMAIL_HOST ="smtp.gmail.com"
-EMAIL_HOST_USER="your_email@gmail.com"
+EMAIL_USE_TLS = True\
+EMAIL_HOST ="smtp.gmail.com"\
+EMAIL_HOST_USER="your_email@gmail.com"\
 EMAIL_HOST_PASSWORD="your_pw"
 
 go back to the base-directory. To create a sqlite3-database and to initiate the models within it, run
@@ -50,9 +50,9 @@ The html templates can be found in:
 **/user_handling/templates/user_handling/*.html**
 
 the corresponding views are in:
-**/members/views.py**
-**user_handling/views.py**
+**/members/views.py**\
+**user_handling/views.py**\
 
 the urls leading to the views can be found in:
-**/twio_web/urls.py** and
+**/twio_web/urls.py** and\
 **/members/urls.py**
