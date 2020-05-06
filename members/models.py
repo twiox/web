@@ -14,7 +14,7 @@ class Spot(models.Model):
 
     def __str__(self):
         return f"Spot: {self.title}"
-    
+        
     def get_absolute_url(self):
         return reverse('spot_detail', kwargs={"pk": self.pk})
 

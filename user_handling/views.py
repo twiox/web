@@ -10,12 +10,12 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm,PasswordChangeForm
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group as Permission_group
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
-from django.views.generic import DeleteView 
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin, UserPassesTestMixin
+from django.views.generic import DeleteView, UpdateView
 
 
 #register user
@@ -156,4 +156,4 @@ def change_group(request):
     else:
         form = GroupChangeForm() 
         return render(request, "user_handling/change_group.html", context={"form":form})
-
+        

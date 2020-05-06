@@ -1,6 +1,6 @@
 #we need this to add custom fields to our UserCreationForm
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User
 from members.models import Profile, Group, Trainer
 
@@ -52,6 +52,6 @@ class MemberDeletionForm(forms.Form):
 
 class GroupChangeForm(forms.Form):
     user = forms.ModelChoiceField(label="Wer?",queryset=User.objects.all())
-    group = forms.ModelChoiceField(label="In welche Gruppe verschieben?",queryset=Group.objects.all())
+    group = forms.ModelChoiceField(label="In welche Gruppe verschieben?",queryset=Group.objects.exclude(group_id="T"))
     class Meta:
         fields = ["user", "group"]
