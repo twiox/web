@@ -2,7 +2,7 @@
 This project is meant to provide a scaled version of the current web-page at https://twio-x.com/mitglieder.
 ### 1. Set Up ###
 To run a version of the webapp on your local machine, run:\
-`git clone https://github.com/MerlinSzymanski/twio_web`\
+`git clone https://github.com/MerlinSzymanski/twio_web`
 
 change into the project directory. Using conda you can now create an environment with all the requirements by typing: 
 
@@ -26,7 +26,7 @@ to access the site and the admin-panel, you should create a super-user:\
 
 ### 2. Run the current version ###
 To run the server:\
-`python3 manage.py runserver`\
+`python3 manage.py runserver`
 
 Now open your browser and navigate to:\
 **localhost:8000/members**\
