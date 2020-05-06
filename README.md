@@ -44,6 +44,7 @@ To change/create pages make sure to think of the 3 things below:
 1. The **url** to your page is mentioned in the /twio_web/urls.py file or forwarded from there to another urls.py file
 2. There is a corresponding **view** in an imported views.py module the url points to
 3. There is a **template** specified in the view which is send as a respond to the request to the browser
+
 The css-file is in\
 **/members/static/**
 
