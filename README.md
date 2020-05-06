@@ -1,12 +1,12 @@
 ## Web-App Twio X Member-Area ##
 This project is meant to provide a scaled version of the current web-page at https://twio-x.com/mitglieder.
 ### 1. Set Up ###
-To run a version of the webapp on your local machine, run:
-`git clone https://github.com/MerlinSzymanski/twio_web`
+To run a version of the webapp on your local machine, run:\
+`git clone https://github.com/MerlinSzymanski/twio_web`\
 
 change into the project directory. Using conda you can now create an environment with all the requirements by typing: 
 
-`conda env create -f django.yml &&
+`conda env create -f django.yml &&\
 conda activate django`
  
  open **twio_web/settings.py**
@@ -21,19 +21,19 @@ go back to the base-directory. To create a sqlite3-database and to initiate the 
 `python3 manage.py makemigrations`\
 `python3 manage.py migrate`
 
-to access the site and the admin-panel, you should create a super-user:
+to access the site and the admin-panel, you should create a super-user:\
 `python3 manage.py createsuperuser`
 
 ### 2. Run the current version ###
-To run the server:
-`python3 manage.py runserver`
+To run the server:\
+`python3 manage.py runserver`\
 
-Now open your browser and navigate to:
-**localhost:8000/members**
+Now open your browser and navigate to:\
+**localhost:8000/members**\
 you can log in with your superuser credentials
 
-To add members, sessions and events, you need at first to create some Trainingsgroups and Spots (This will be available at a later point from the main page too) . So navigate to 
-**localhost:8000/admin/**
+To add members, sessions and events, you need at first to create some Trainingsgroups and Spots (This will be available at a later point from the main page too) . So navigate to \
+**localhost:8000/admin/**\
 There you should add:
 - Group "T" (necessary if you want to add a trainer)
 - One more Trainingsgroup if needed
@@ -45,7 +45,7 @@ To change/create pages make sure to think of the 3 things below:
 2. There is a corresponding **view** in an imported views.py module the url points to
 3. There is a **template** specified in the view which is send as a respond to the request to the browser
 
-The html templates can be found in:
+The html templates can be found in:\
 **/members/templates/members/*.html** and\
 **/user_handling/templates/user_handling/*.html**
 
