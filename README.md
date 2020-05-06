@@ -6,7 +6,7 @@ To run a version of the webapp on your local machine, run:\
 
 change into the project directory. Using conda you can now create an environment with all the requirements by typing: 
 
-`conda env create -f django.yml &&\
+`conda env create -f django.yml &&
 conda activate django`
  
  open **twio_web/settings.py**
