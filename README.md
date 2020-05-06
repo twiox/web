@@ -17,7 +17,7 @@ EMAIL_HOST ="smtp.gmail.com"\
 EMAIL_HOST_USER="your_email@gmail.com"\
 EMAIL_HOST_PASSWORD="your_pw"
 
-go back to the base-directory. To create a sqlite3-database and to initiate the models within it, run
+go back to the base-directory. To create a sqlite3-database and to initiate the models within it, run\
 `python3 manage.py makemigrations`\
 `python3 manage.py migrate`
 
