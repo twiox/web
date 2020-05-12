@@ -8,8 +8,9 @@ from datetime import datetime
 
 class Spot(models.Model):
     title = models.CharField("Spotname", max_length=30)
-    coords = models.CharField("Coordinaten", max_length=100)
-    adress = models.TextField("Adresse/Wegbeschreibung", blank=True)
+    lat = models.CharField("Latitude", max_length=30, default="51.347127")
+    long = models.CharField("Longitude", max_length=30,default="12.350504")
+    description = models.TextField("Beschreibung, Zusatzinformation", default="Lorem Ipsum")
     picture = models.ImageField("Foto vom Spot", default = "spot_placeholder.jpg", upload_to="spot_pics/")
 
     def __str__(self):

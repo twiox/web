@@ -11,12 +11,34 @@
             <h3 style="margin-top:0px;margin-bottom:30px;"> Gruppe {{object.group.group_id}}</h3>
             <p> {{object.weekday}} von {{object.start_time}} bis {{object.end_time}} Uhr</p>
         </div>
-        <div>
+        <div style="overflow:hidden;">
             <h3 style="margin-top:0px;margin-bottom:30px;">{{object.spot.title}}</h3>
-            <p>Here I would like to add a map/Adress... </p>
+            <div class="col-5" id="map" style="float:left;"> </div>
+            
+            <script>
+                // Initialize and add the map
+                function initMap() {
+                  var spot = {lat: {{object.spot.lat}}, lng: {{object.spot.long}}};
+                  var map = new google.maps.Map(
+                      document.getElementById('map'), {zoom: 17, center: spot});
+                  var marker = new google.maps.Marker({position: spot, map: map});
+                }
+            </script>
+            <script async defer
+                src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
+            </script>
+            
+            <div class="col-5" style="float:right;">
+                <p style="text-align:center; margin-bottom:20px;">{{object.spot.description}}</p>
+                <p style="text-align:center;">
+                    <a class="more_info_button button_padding" target="_blank" href="https://www.google.de/maps/dir//{{object.spot.lat}},{{object.spot.long}}/@{{object.spot.lat}},{{object.spot.long}},17z">Route</a>
+                </p>
+            </div>
         </div>
     </div>
     <a class="float_left more_info_button button_padding" href="{% url 'index' %}#training">Zurück</a>
+   
+   
             {% if perms.members.change_session %}
                 <a class="float_right more_info_button button_padding" href="{% url 'session_update' object.id  %}">Bearbeiten</a>
             {% endif %}

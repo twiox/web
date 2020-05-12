@@ -245,6 +245,10 @@ h2{
     background-color: #7b1b42; 
     padding:3px;
 }
+/* Google Maps enbedded */
+#map {
+        height: 400px;  /* The height is 400 pixels */
+       }
 
 /*Eventcalender*/
 .more_info_button{
