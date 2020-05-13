@@ -1,0 +1,30 @@
+{% extends "members/base.html" %}
+{% block content %}
+<section>
+        <h2>TWIO X WEBSHOP</h2>
+        <div>
+            {% for item in item_list %}
+                <div style="margin-bottom:15px;">
+                    <div style="overflow:hidden">
+                        <div class="first_row">
+                            <div class="session_weekday blue_bg">
+                                    <p><strong> {{item.title}} </strong></p>
+                            </div>
+                            <div class="second_section first_div">
+                                <h3> {{item.category}}</h3>
+                            </div>
+                        </div>
+                        <div class="third_session">
+                            <p>Preis {{item.price}}</p>
+                        </div>
+                        <div class="third_session" style="text-align:center;">
+                            <a class="more_info_button" href="#">weitere Informationen</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p> Leider gibt es im Moment keine Artikel im Webshop </p>
+            {% endfor %}
+        </div>
+</section>
+{% endblock %}

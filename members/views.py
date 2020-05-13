@@ -8,7 +8,7 @@ from django.views.generic import (
     DeleteView 
     )
 from django.views import View
-from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot
+from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
 from .forms import EventUpdateParticipantForm
@@ -22,6 +22,8 @@ def index(request):
     sessions = Session.objects.filter(group=group)
     events = Event.objects.filter(allowed_groups=group)
     chairmen = Chairman.objects.all()
+    training_messags = Message.objects.filter(groups=group).filter(display="sessions")
+    event_messags = Message.objects.filter(groups=group).filter(display="events")
     if(hasattr(request.user, "trainer")):
         trainer_sessions = Session.objects.filter(trainer=Trainer.objects.get(user=request.user))
     else:
@@ -32,7 +34,10 @@ def index(request):
          "chairmen":chairmen, 
          "sessions":sessions, 
          "events":events,
-         "trainer_sessions":trainer_sessions}
+         "trainer_sessions":trainer_sessions,
+         "training_messags":training_messags,
+         "event_messags":event_messags,
+         }
             )
 
 """FOR THE EVENTS"""

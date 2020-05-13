@@ -1,7 +1,9 @@
 {% extends "members/base.html" %}
-{% block flag %}
-<h3 class="blue_header"> TRAININGSEINHEIT </h3>
-{%endblock%}
+{% block navbar2 %} 
+<div class="navbar_blue">
+    <a class="float_left" href="{% url 'index' %}#training">Zurück</a>
+</div>
+{% endblock %}
 {%block content %}
 <section style="padding-top:5%;">
     <div style="background-color:#333333;padding:20px; margin-bottom:5px;" >
@@ -25,26 +27,23 @@
                 }
             </script>
             <script async defer
-                src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
+                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAkB8V0wOMLikUsZilD_5LEz49Isbqr-0k&callback=initMap">
             </script>
             
             <div class="col-5" style="float:right;">
                 <p style="text-align:center; margin-bottom:20px;">{{object.spot.description}}</p>
-                <p style="text-align:center;">
-                    <a class="more_info_button button_padding" target="_blank" href="https://www.google.de/maps/dir//{{object.spot.lat}},{{object.spot.long}}/@{{object.spot.lat}},{{object.spot.long}},17z">Route</a>
+                <p style="text-align:center; padding-right: 25%;padding-left: 25%;">
+                    <a class="sign_up button_padding" target="_blank" href="https://www.google.de/maps/dir//{{object.spot.lat}},{{object.spot.long}}/@{{object.spot.lat}},{{object.spot.long}},17z">Route</a>
                 </p>
             </div>
         </div>
     </div>
-    <a class="float_left more_info_button button_padding" href="{% url 'index' %}#training">Zurück</a>
-   
-   
-            {% if perms.members.change_session %}
-                <a class="float_right more_info_button button_padding" href="{% url 'session_update' object.id  %}">Bearbeiten</a>
-            {% endif %}
-            {% if perms.members.delete_session %}
-                <a class="float_right more_info_button button_padding" href="{% url 'session_delete' object.id  %}">Löschen</a>
-            {% endif %}
+        {% if perms.members.change_session %}
+            <a class="float_right more_info_button button_padding" href="{% url 'session_update' object.id  %}">Bearbeiten</a>
+        {% endif %}
+        {% if perms.members.delete_session %}
+            <a class="float_right more_info_button button_padding" href="{% url 'session_delete' object.id  %}">Löschen</a>
+        {% endif %}
     <div style="background-color:#333333;padding:20px;clear:both;">
         <div style="overflow:hidden;">
             <h2 style="margin-bottom:30px;">ANSPRECHPARTNER</h2>

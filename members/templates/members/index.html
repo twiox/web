@@ -1,6 +1,33 @@
 {% extends "members/base.html" %}
+    {% block whoamI %}
+    <div>
+        <span class="equal_3 float_left" style="height:2px; background-color:#088eaa;"></span>
+        <span class="equal_3 float_left" style="height:2px; background-color:#191919;"></span>
+        <span class="equal_3 float_left" style="height:2px; background-color:#191919;"></span>
+    </div> 
+    {% endblock %}
     {% block picture %}
     <div class="member_img_fixed"> </div>
+    {% endblock %}
+    {% block navbar2 %}
+    {% if user.is_authenticated %}
+    <div class="navbar">
+        <a class="float_right" href="{% url 'logout' %}">Logout</a>
+        <!--<a class="float_left" href="{% url 'spot_list' %}">Spots</a>-->
+        {% if perms.auth.add_user %}
+        <div class= "dropdown float_right">
+            <button class="dropbtn">Accountverwaltung</button>
+            <div class="dropdown-content">
+                <a href="{% url 'register' %}">Account Hinzufügen</a>
+                <a href="{% url 'remove' %}">Account löschen</a>
+                <a href="{% url 'register_trainer' %}">Neuer Trainer</a>
+                <a href="{% url 'remove_trainer' %}">Trainer entfernen</a>
+                <a href="{% url 'change_group'%}">Gruppe wechseln</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
     {% endblock %}
     {% block content %}
     <!-- Say Hello -->
@@ -9,17 +36,22 @@
         <h3 style="margin:0px;"> Mitgliedsnummer {{request.user.profile.member_num}}</h3>
         <h3 style="margin-top:0px;"> Trainingsgruppe {{group.group_id}}</h3>
     </section>
-    <!-- Here the Messanges -->
-    <section>
-        <ul style="padding:0px; list-style-type: none;">
-            <li style=" display: block; color: white; text-align: center; background-color: #7b1b42; padding-bottom:10px; "> Hinweise Platzhalter</li>
-            <li style=" display: block; color: white; text-align: center; background-color: #333333; font-size: 1rem">TITEL</li>
-            <li style=" display: block; color: white; text-align: center; background-color: #333333;">Und hier kann ein Hinweis stehen</li>
-        </ul>
-    </section>
     <!-- The container for the Sessions -->
     <section id="training">
         <h2>TRAININGSZEITEN</h2>
+        <!-- Here the Messanges -->
+        {% if training_messags %}
+        <div style="margin-bottom:30px;">
+            <div class="message_header"><p> Wichtige Hinweise </p></div>
+            <div class="message_body">
+            {% for msg in training_messags %}
+                <h1><strong>{{msg.title}}</strong></h1>
+                <p>{{msg.message}}</p>
+                <br>
+            {% endfor %}
+            </div>
+        </div>
+        {% endif %}
         {% if perms.members.add_session %}
             <!-- Trainer UI -->
             <div class="ui_div first_div">
@@ -48,12 +80,14 @@
                         </div>
                         
                         <div class="third_session">
-                            <p>Ort: {{session.spot.title}}</p>
+                            <p>Spot: {{session.spot.title}}</p>
+                            <!--
                             <p>Trainer:
                             {% for trainer in session.trainer.all %}
                                 {{trainer.user.first_name}},
                             {% endfor %}
                             </p>
+                            -->
                         </div>
                         <div class="third_session" style="text-align:center;">
                             <a class="more_info_button" href="{% url 'session_detail' session.id %}">weitere Informationen</a>
@@ -68,7 +102,7 @@
     <!-- The container for the Trainersessions -->
     {% if trainer_sessions %}
     <section>
-        <h2>GRUPPENEINHEITEN</h2>
+        <h2>DEINE GRUPPEN</h2>
         <div>
             {% for session in trainer_sessions %}
                 <div class="session_divs col-4" id="container">
@@ -108,16 +142,23 @@
     </section>
     {% endif %}
     <!-- Here the Messanges No2 -->
+    {% if event_messags %}
     <section>
-        <ul style="padding:0px; list-style-type: none;">
-            <li style=" display: block; color: white; text-align: center; background-color: #7b1b42; padding-bottom:10px; "> Hinweise Platzhalter</li>
-            <li style=" display: block; color: white; text-align: center; background-color: #333333; font-size: 1rem">TITEL</li>
-            <li style=" display: block; color: white; text-align: center; background-color: #333333;">Und hier kann ein Hinweis stehen</li>
-        </ul>
+        <div>
+            <div class="message_header"><p> Wichtige Hinweise </p></div>
+            <div class="message_body">
+            {% for msg in event_messags %}
+                <h1><strong>{{msg.title}}</strong></h1>
+                <p align="justify">{{msg.message}}</p>
+                <br>
+            {% endfor %}
+            </div>
+        </div>
     </section>
+    {% endif %}
     <!-- Here the Container for the Events -->
     <section id="events">
-        <h2>VERANSTALTUNGEN</h2>
+        <h2>EVENTKALENDER</h2>
         <!--Add Events -->
         {% if perms.members.add_event %}
             <div class="ui_div first_div">
@@ -171,25 +212,25 @@
     {% endblock %}
     {% block chairmen %}
         {% if chairmen %}
-        <div style="overflow:hidden; margin-top:50px;">
-            <h2 style="margin-bottom:30px;">ANSPRECHPARTNER</h2>
+        <div style="overflow:hidden; margin-top:30px;">
+            <h1>DEINE ANSPRECHPARTNER</h1>
             {% for chairman in chairmen.all %}
-                <div class="session_divs col-5" style="overflow:hidden;">
-                    <div class="first_row">
-                        <div class="session_weekday">
-                            <img class="round_profile_pic" src="{{chairman.image.url}}">
-                        </div>
-                        <div class="trainer_info" id="container">
-                            <h3> {{chairman.user.first_name |upper}} {{chairman.user.last_name |upper}}</h3>
-                            <ul style="list-style-type: circle; padding:25px;">
+                <div class="session_divs col-5">
+                    <div class="chair_col-4 float_left">
+                        <img class="round_profile_pic_chairman" src="{{chairman.image.url}}">
+                    </div>
+                    <div class="chair_col-5 float_left" style="padding:15px;">
+                        <h3> {{chairman.user.first_name |upper}} {{chairman.user.last_name |upper}}</h3>
+                        <div>
+                            <ul class="competences" id="container">
                                 {% for comp in chairman.complist %}
                                     <li> {{comp}} </li>
                                 {% endfor %}
                             </ul>
-                            <div style="position:absolute; bottom:0;">
-                                <p> {{chairman.public_telnr}} </p>
-                                <p> {{chairman.public_email}} </p>
-                            </div>
+                        </div>
+                        <div>
+                            <p> {{chairman.public_telnr}} </p>
+                            <p> {{chairman.public_email}} </p>
                         </div>
                     </div>
                 </div>

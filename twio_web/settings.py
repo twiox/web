@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'members.apps.MembersConfig',
     'user_handling.apps.UserHandlingConfig',
+    'shop.apps.ShopConfig',
     'six'
 ]
 
@@ -122,4 +123,3 @@ MEDIA_URL ="/media/" #how do we access the media in the browser?
 #for the login
 LOGIN_REDIRECT_URL = "index"
 LOGIN_URL = 'login'
-#

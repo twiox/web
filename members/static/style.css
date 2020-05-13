@@ -1,3 +1,6 @@
+html{
+    font-size: 15px;
+}
 * {
   box-sizing: border-box;
   margin:0px;
@@ -6,18 +9,6 @@
 /* For mobile phones: */
 [class*="col-"] {
   width: 100%;
-}
-@media only screen and (min-width: 768px) {
-   /*simple media query for responsive design*/
-  /* For desktop: */
-  .col-4 {width: 50%;}
-  .col-5 {width: 50%;}
-}
-@media only screen and (min-width: 1000px) {
-   /*simple media query for responsive design*/
-  /* For desktop: */
-  .col-4 {width: 33.33%;}
-  .col-5 {width: 50%;}
 }
 .frame{
 margin-right:10%;
@@ -51,16 +42,14 @@ margin-left:10%;
 body {
     background-color:#191919;
     color:#d1d1d1;
+    font-family: Catamaran Noto sans-serif;
+    line-height: 1.2;
 }
 section{
     padding-top: 20px;
     padding-bottom:20px;
     clear:both;
     overflow:hidden;
-}
-section h2{
-    font-size:2rem;
-    margin-bottom: 20px;
 }
 .first_div{
     padding-top:10px;
@@ -84,8 +73,6 @@ header {
   background: #191919;
 }
 header img{
-  top: 50%;
-  left: 50%;
   min-height: 15%;
   min-width: 15%;
 }
@@ -93,31 +80,54 @@ header img{
 nav{
     z-index:5;
 }
-nav ul{
-  font-size: 14px;
-  font-weight: 500;
+.three_grid {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  justify-content: space-around;
+  font-size: .9rem;
   background-color: #191919;
-}
-.float_left{
-  float: left;
-}
-nav li a{
-  display: block;
-  color: white;
+  overflow:hidden;
+  font-family: Roboto Noto SansSerif;
+  font-weight:500;
+  }
+.three_grid a{
+  display:block;
   text-align: center;
-  padding: 14px 16px;
+  color: #d1d1d1;
+  padding-top:12px;
+  padding-bottom:12px;
 }
-nav li a:hover {
-  background-color: #111;
+.three_grid a:hover {
   color: white;
+}
+
+.float_left{
+ float: left;
+}
+.float_right{
+  float: right;
 }
 /* Dropdown Menu */
 
 .navbar {
+  clear:both;
   overflow: hidden;
   background-color: #191919;
 }
 .navbar a {
+  font-size: 14px;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+.navbar_blue {
+  padding-left: 5%;
+  clear:both;
+  overflow: hidden;
+  background-color: #088eaa;
+}
+.navbar_blue a{
   font-size: 14px;
   color: white;
   text-align: center;
@@ -158,10 +168,6 @@ nav li a:hover {
   display: block;
 }
 
-
-.float_right{
-  float: right;
-}
 .sticky{
   position: sticky;
   top: 0;
@@ -181,13 +187,46 @@ nav li a:hover {
 }
 /*Content*/
 h1{
-    font-size:2.5rem;
+    font-size:2rem;
+    font-weight:300;
+    color:#fff;
+    padding-bottom: 15px;
 }
 h2{
-    font-size:2rem;
+    color:#fff;
+    font-size:1.75rem;
+    font-weight:300;
+    padding-bottom: 10px;
+}
+h3{
+    font-weight:300;
+    font-size:1.2rem;
 }
 /*Trainingssessions*/
-/*for smartphone */
+/*Wichtige Hinweise*/
+.message_header{
+    align-items: center;
+    color: #fff;
+    width: 100%;
+    height: 42px;
+    background-color: #7b1b42;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 10px 10px;
+    font-size:16px;
+}
+.message_body{
+    color: #fff;
+    width: 100%;
+    background-color: #333333;
+    padding: 20px;
+}
+.message_body h1{
+    font-weight:700;
+    font-size: 1.2rem;
+    padding-bottom:5px;
+}
+
 .session_divs{
     padding-right:0px;
     padding-bottom:20px;
@@ -308,6 +347,10 @@ h2{
     border-radius: 50%;;
     max-height: 150px;
 }
+.round_profile_pic_chairman{
+    border-radius: 50%;;
+    max-height: 120px;
+}
 .trainer_info{
     display:table-cell;
     width:75%;
@@ -381,27 +424,13 @@ footer{
     background-color:#191919;
     clear:both;
 }
-.chairman_section{
-    float:left;
+.competences{
+    list-style-type: circle; 
     padding: 15px;
-    margin-right:15px;
-    margin-bottom:15px;
+    text-align:left;
 }
-.round_chairman_pic img{
-    border-radius: 50%;
-    width: 150px;
-    height:150px;
-    align:center;
-}
-.chairman_info{
-    padding-left: 20px;
-    align:center;
-}
-.chairman_info h3{
-    align:center;
-}
-.chairman_info p{
-    align:center;
+.first_row_chairman{
+    text-align:center;
 }
 .blue_header{
 color: white; 

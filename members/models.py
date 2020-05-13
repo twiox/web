@@ -110,12 +110,20 @@ class Session(models.Model):
         return f"Session: {self.title}"
 
 class Message(models.Model):
-    choices = (("sessions","Sessions"),("events","Events"))
+    choices =(
+        ("sessions","Sessions"),
+        ("events","Events")
+    )
     title = models.CharField("Titel",max_length=30)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.TextField(default = "Deine Nachricht hier")
     expire_date = models.DateTimeField(default=datetime.now())
     display = models.CharField(max_length=20, choices=choices)
+    groups = models.ManyToManyField(Group)
+    
+    @property
+    def is_over(self):
+        return datetime.now().replace(tzinfo=None) > self.expire_date.replace(tzinfo=None)
     
     def __str__(self):
         return f"Message {self.title}"

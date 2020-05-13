@@ -23,6 +23,7 @@ from user_handling import views as user_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("members/", include('members.urls')),
+    path("shop/", include('shop.urls')),
     path('register/', user_views.register, name="register"),
     path('remove/', user_views.remove_user, name="remove"),
     path('change_group/', user_views.change_group, name="change_group"),

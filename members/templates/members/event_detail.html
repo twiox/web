@@ -1,7 +1,9 @@
 {% extends "members/base.html" %}
-{% block flag %}
-<h3 class="blue_header"> VERANSTALTUNG </h3>
-{%endblock%}
+{% block navbar2 %} 
+<div class="navbar_blue">
+    <a class="float_left" href="{% url 'index' %}#events">Zurück</a>
+</div>
+{% endblock %}
 {%block content %}
     <section style="padding-top:5%;">
         {% if user in object.participants.all %}
@@ -38,7 +40,6 @@
             {% if perms.members.change_event %}
                 <a class="float_right more_info_button button_padding" href="{% url 'event_update' object.id  %}">Bearbeiten</a>
             {% endif %}
-            <a class="float_left more_info_button button_padding" href="{% url 'index' %}#events">Zurück</a>
         </div>
     </section>
 {% endblock %}
