@@ -34,3 +34,7 @@ h3{
 .element span{
     display:flex;
 }
+.image_wrapper img{
+    width: 100%;
+    height:auto;
+}

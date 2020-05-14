@@ -479,3 +479,20 @@ padding:10px;
   padding:1.250rem 0;
   margin-top:70px;
 }
+.image_wrapper{
+    position:relative;
+    overflow:hidden;
+    align-items:center;
+    justify-content:center;
+    height:60vh;
+    display:flex;
+    width: 100%;
+}
+.image_wrapper img{
+    position:absolute;
+    pointer-events:none;
+    object-fit:cover;
+    bottom: 0;
+    height: 120%;
+    width:auto;
+}
