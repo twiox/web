@@ -26,3 +26,6 @@ h3{
     font-weight:300;
     font-size:1.5rem;
 }
+.element span{
+    display:flex;
+}

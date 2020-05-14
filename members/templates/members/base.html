@@ -4,9 +4,10 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://kit.fontawesome.com/55165a9737.js" crossorigin="anonymous"></script>
+        
         <title>Twio X e.V. - Parkour Leipzig</title>
         <meta name="description" content="Der Internetauftritt vom Parkour Verein Twio X e.V. aus Leipzig">
-        
         <link rel="icon" href="{{ STATIC_URL }}/static/media/favicon.ico">
         <link rel="stylesheet" href="{{ STATIC_URL }}/static/style.css"/>
         <link rel="stylesheet" media="only screen and (min-width: 600px)" href="{{ STATIC_URL }}/static/tablet_style.css">
@@ -50,12 +51,37 @@
         </div>
             <footer >
                 {% block chairmen %} {% endblock %}
-                <div class="grid-container" style="clear:both;">
-                    <p>FACEBOOK</p>
-                    <p>INSTAGRAM</p>
-                    <p>YOUTUBE</p>
-                    <p>TELEFON</p>
-                    <p>EMAIL</p>
+                <div class="social" style="clear:both;">
+                    <div class="element">
+                        <a href="https://www.facebook.com/twioxev/" target="_blank">
+                            <i class='fab fa-facebook-square' style='font-size:27px'></i>
+                            <span>facebook.com/twioxev</span>
+                        </a>
+                    </div>
+                    <div class="element">
+                        <a href="https://www.instagram.com/twio_x/" target="_blank">
+                            <i class="fab fa-instagram" style='font-size:27px'></i>
+                            <span>instagram.com/twio_x</span>
+                        </a>
+                    </div>
+                    <div class="element">
+                        <a href="https://www.youtube.com/twio-x" target="_blank">
+                            <i class='fab fa-youtube' style='font-size:27px'></i>
+                            <span>youtube.com/twio-x</span>
+                        </a>
+                    </div>
+                    <div class="element">
+                        <a href="tel:+491772119322" target="_blank">
+                            <i class="fas fa-phone-alt" style='font-size:27px'></i>
+                            <span>+49 177 211 93 22</span>
+                        </a>
+                    </div>
+                    <div class="element">
+                        <a href="mailto:parkour@twio-x" target="_blank">
+                            <i class="far fa-envelope" style='font-size:27px'></i>
+                            <span>parkour@twio-x.de</span>
+                        </a>
+                    </div>
                 </div>
                 <hr style="border:0px;height:1px;background-color:#262626;margin-top:30px;">
                 <div style="text-align:center;">

@@ -240,17 +240,21 @@ h3{
   }
 }
 .first_row{
-    width:100%;
-    float:left;
-    display:table;
+  display:flex;
+  background:#333;
 }
 .session_weekday{
     display:table-cell;
     text-align:center;
     vertical-align:middle;
-    width:25%;
+    width:64px;
     height:100%;
-    font-size:1.1rem;
+    padding:20px;
+    font-size:1.2rem;
+    font-weight:300;
+    clip-path:polygon(0 0,100% 0%,100% 78%,0% 100%);
+    background-color: #088eaa;
+}
 }
 .blue_bg{
     background-color: #088eaa;
@@ -264,6 +268,7 @@ h3{
     }
 .second_section h3{
     font-size:1.3rem;
+    color:#fff;
     }
 .second_section p{
     font-size: 0.9rem;
@@ -439,8 +444,38 @@ background-color: #088eaa;
 padding:10px; 
 }
 .grid-container {
+    
   padding-top:50px;
   display: grid;
   grid-template-columns: auto auto auto auto auto;
   justify-content: space-around;
+}
+.element{
+    text-align:center;
+    
+}
+.element:hover {
+  transform:scale(1.2);
+}
+.element:hover a{
+    color:#088eaa;
+}
+
+.element a{
+    text-decoration: none;
+    color: #fff;
+}
+
+.element span{
+    font-size:1.1rem;
+    font-weight:300;
+    padding:5px;
+    display:none;
+}
+.social {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:1.250rem 0;
+  margin-top:70px;
 }

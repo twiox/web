@@ -1,7 +1,11 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
 <div class="navbar_blue">
-    <a class="float_left" href="{% url 'index' %}#training">Zurück</a>
+    <div>
+        <a class="float_left" href="{% url 'index' %}#training">
+            <i class="fas fa-chevron-left" style="font-size:32px;"></i>
+        </a>
+    </div>
 </div>
 {% endblock %}
 {%block content %}
@@ -31,7 +35,7 @@
             </script>
             
             <div class="col-5" style="float:right;">
-                <p style="text-align:center; margin-bottom:20px;">{{object.spot.description}}</p>
+                <p style="padding:20px;" align="justify">{{object.spot.description}}</p>
                 <p style="text-align:center; padding-right: 25%;padding-left: 25%;">
                     <a class="sign_up button_padding" target="_blank" href="https://www.google.de/maps/dir//{{object.spot.lat}},{{object.spot.long}}/@{{object.spot.lat}},{{object.spot.long}},17z">Route</a>
                 </p>
@@ -48,15 +52,15 @@
         <div style="overflow:hidden;">
             <h2 style="margin-bottom:30px;">ANSPRECHPARTNER</h2>
             {% for trainer in object.trainer.all %}
-                <div class="session_divs col-5" style="overflow:hidden;">
-                    <div class="first_row">
-                        <div class="session_weekday">
-                            <img class="round_profile_pic" src="{{trainer.image.url}}">
-                        </div>
-                        <div class="trainer_info">
-                            <h3> {{trainer.user.first_name |upper}}</h3>
+                <div class="session_divs col-5">
+                    <div class="chair_col-4 float_left">
+                        <img class="round_profile_pic_chairman" src="{{trainer.image.url}}">
+                    </div>
+                    <div class="chair_col-5 float_left" style="padding:15px;">
+                        <h3> {{trainer.user.first_name |upper}}</h3>
+                        <div>
                             <p> {{trainer.trainer_telnr}} </p>
-                            <p> {{trainer.trainer_email}} </p>
+                            <p> {{trainer.trainer_email}}  </p>
                         </div>
                     </div>
                 </div>

@@ -1,7 +1,11 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
 <div class="navbar_blue">
-    <a class="float_left" href="{% url 'index' %}#events">Zurück</a>
+    <div>
+        <a class="float_left" href="{% url 'index' %}#training">
+            <i class="fas fa-chevron-left" style="font-size:32px;"></i>
+        </a>
+    </div>
 </div>
 {% endblock %}
 {%block content %}

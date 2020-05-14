@@ -74,20 +74,9 @@
                                     <p><strong> {{session.day}} </strong></p>
                             </div>
                             <div class="second_section first_div">
-                                <h3> {{session.website_title}}</h3>
-                                <p> {{session.format_start_time}} - {{session.format_end_time}} Uhr </p>
+                                <p> {{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
+                                <h3> {{session.spot.title}}</h3>
                             </div>
-                        </div>
-                        
-                        <div class="third_session">
-                            <p>Spot: {{session.spot.title}}</p>
-                            <!--
-                            <p>Trainer:
-                            {% for trainer in session.trainer.all %}
-                                {{trainer.user.first_name}},
-                            {% endfor %}
-                            </p>
-                            -->
                         </div>
                         <div class="third_session" style="text-align:center;">
                             <a class="more_info_button" href="{% url 'session_detail' session.id %}">weitere Informationen</a>
@@ -117,18 +106,9 @@
                                     <p><strong> {{session.day}} </strong></p>
                             </div>
                             <div class="second_section first_div">
-                                <h3> {{session.website_title}}</h3>
-                                <p> Gruppe {{session.group.group_id}}: {{session.format_start_time}} - {{session.format_end_time}} Uhr </p>
+                                <p> {{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
+                                <h3> {{session.spot.title}}</h3>
                             </div>
-                        </div>
-                        
-                        <div class="third_session">
-                            <p>Ort: {{session.spot.title}}</p>
-                            <p>Trainer:
-                            {% for trainer in session.trainer.all %}
-                                {{trainer.user.first_name}},
-                            {% endfor %}
-                            </p>
                         </div>
                         <div class="third_session" style="text-align:center;">
                             <a class="more_info_button" href="{% url 'session_detail' session.id %}">weitere Informationen</a>
@@ -174,26 +154,24 @@
                     <div class="session_divs col-4" id="container">
                         <div style="overflow:hidden">
                             {% if event.hinweis %}
-                                <div id="info_position">
-                                    <p class="session_alert"> {{event.hinweis}} </p>
-                                </div>
+                                    <div id="info_position">
+                                        <p class="session_alert"> {{event.hinweis}} </p>
+                                    </div>
                             {% endif %}
                             <div class="first_row">
                                 <div class="session_weekday blue_bg">
                                         <p><strong> {{event.start_date|date:'M' }} </strong></p>
                                 </div>
                                 <div class="second_section first_div" id="container">
-                                    <h3> {{event.title}}</h3>
                                     <p> {{event.start_date|date:'d.m' }} - {{event.end_date|date:'d.m.Y' }} </p>
+                                    <h3>{{event.title}}</h3>
+                                    <p style="color:grey;"> {{event.place}}</p>
                                     {% if user in event.participants.all %}
-                                        <span class="dot_participate" id="info_position2"> </span>
+                                            <span class="dot_participate" id="info_position2"> </span>
                                     {% else %}
-                                        <span class="dot_nonparticipate" id="info_position2"> </span>
+                                            <span class="dot_nonparticipate" id="info_position2"> </span>
                                     {% endif %}
                                 </div>
-                            </div>
-                            <div class="third_session">
-                                <p>Ort: {{event.place}}</p>
                             </div>
                             <div class="third_session" style="text-align:center;">
                                 <a class="more_info_button" href="{% url 'event_detail' event.id %}">weitere Informationen</a>
