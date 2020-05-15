@@ -115,10 +115,10 @@ class Message(models.Model):
         ("events","Events")
     )
     title = models.CharField("Titel",max_length=30)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     message = models.TextField(default = "Deine Nachricht hier")
     expire_date = models.DateTimeField(default=datetime.now())
-    display = models.CharField(max_length=20, choices=choices)
+    display = models.CharField(max_length=20, choices=choices, blank=True)
     groups = models.ManyToManyField(Group)
     
     @property
@@ -127,6 +127,9 @@ class Message(models.Model):
     
     def __str__(self):
         return f"Message {self.title}"
+    
+    def get_absolute_url(self):
+        return reverse('index')
 
 class Chairman(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

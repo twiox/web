@@ -11,13 +11,21 @@
 {%block content %}
 <section style="padding-top:5%;">
     <div style="background-color:#333333;padding:20px; margin-bottom:5px;" >
-        <div>
+        <div id="container">
             <h2 style="margin-bottom:0px;" >{{object.website_title|upper}}</h2>
-            <hr  style="clear:both;border:0px;height:2px;background-color:white;">
+            <div class="trainer_ui">
+            {% if perms.members.change_session %}
+                <a class="blue_font" href="{% url 'session_update' object.id  %}"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+            {% endif %}
+            {% if perms.members.delete_session %}
+                <a class="red_font" href="{% url 'session_delete' object.id  %}"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
+            {% endif %}
+            </div>
+            <hr style="clear:both;border:0px;height:2px;background-color:white;">
             <h3 style="margin-top:0px;margin-bottom:30px;"> Gruppe {{object.group.group_id}}</h3>
             <p> {{object.weekday}} von {{object.start_time}} bis {{object.end_time}} Uhr</p>
         </div>
-        <div style="overflow:hidden;">
+        <div style="overflow:hidden;" >
             <h3 style="margin-top:0px;margin-bottom:30px;">{{object.spot.title}}</h3>
             <div class="col-5" id="map" style="float:left;"> </div>
             
@@ -37,17 +45,11 @@
             <div class="col-5" style="float:right;">
                 <p style="padding:20px;" align="justify">{{object.spot.description}}</p>
                 <p style="text-align:center; padding-right: 25%;padding-left: 25%;">
-                    <a class="sign_up button_padding" target="_blank" href="https://www.google.de/maps/dir//{{object.spot.lat}},{{object.spot.long}}/@{{object.spot.lat}},{{object.spot.long}},17z">Route</a>
+                    <a class="sign_up button_padding" target="_blank" href="https://www.google.de/maps/dir//{{object.spot.lat}},{{object.spot.long}}/@{{object.spot.lat}},{{object.spot.long}},17z"><i class="fas fa-external-link-alt" style="padding:5px;"> Route</i></a>
                 </p>
             </div>
         </div>
     </div>
-        {% if perms.members.change_session %}
-            <a class="float_right more_info_button button_padding" href="{% url 'session_update' object.id  %}">Bearbeiten</a>
-        {% endif %}
-        {% if perms.members.delete_session %}
-            <a class="float_right more_info_button button_padding" href="{% url 'session_delete' object.id  %}">Löschen</a>
-        {% endif %}
     <div style="background-color:#333333;padding:20px;clear:both;">
         <div style="overflow:hidden;">
             <h2 style="margin-bottom:30px;">ANSPRECHPARTNER</h2>

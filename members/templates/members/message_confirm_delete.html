@@ -2,26 +2,24 @@
 {% block navbar2 %} 
 <div class="navbar_blue">
     <div>
-        <a class="float_left" href="{% url 'event_detail' object.id %}">
+        <a class="float_left" href="{% url 'index' %}">
             <i class="fas fa-chevron-left" style="font-size:32px;"></i>
         </a>
     </div>
 </div>
 {% endblock %}
 {%block content %}
-{% if not object.deadline_reached %}
 <section style="padding-top:5%;">
     <div style="background-color:#333333;padding:20px;">
-        <h2 style="margin-bottom:0px;">{{object.title|upper}}</h2>
+        <h2 style="margin-bottom:0px;">Warnhinweis löschen</h2>
+        <h2 style="margin-bottom:0px;">{{object.title}}</h2>
         <hr style="border:0px;height:2px;background-color:white;">
-        <h3 style="margin-top:0px;"> Bestätige deine Abmeldung </h3>
         <div>
             <form style="text-align:center;padding:20px;" method="POST">
                 {% csrf_token %}
-                <button style="width:100px; border: 0; margin:0 auto;" type="submit" class="sign_down">Jawoll</button>
+                <button style="width:100px;border: 0; margin:0 auto;" type="submit" class="sign_down">Jawoll</button>
             </form>
         </div>
     </div>
 </section>
-{% endif %}
 {% endblock %}

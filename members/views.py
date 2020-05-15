@@ -151,16 +151,55 @@ class SpotDetailView(LoginRequiredMixin, DetailView):
 class SpotCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     #template: event_form.html
     model = Spot
-    fields=["title","coords","adress","picture"]
+    fields=["title","lat","long","description"]
     permission_required = 'members.add_spot'
 
 class SpotUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_form.html
     model = Spot
-    fields=["title","coords","adress","picture"]
+    fields=["title","lat","long","description"]
     permission_required = 'members.change_spot'
  
 class SpotDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Spot
     success_url = "/members/"
     permission_required = 'members.delete_spot'
+
+
+"""For The Messages"""
+class MessageEveCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    #template: event_detail.html
+    model = Message
+    fields=["title","message","expire_date","groups"]
+    permission_required = 'members.add_message'
+    
+    def form_valid(self, form):
+        message = form.save()
+        message.author = self.request.user
+        message.display = "events"
+        message.save()
+        return super(MessageEveCreateView, self).form_valid(form)
+
+class MessageSessCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    #template: event_detail.html
+    model = Message
+    fields=["title","message","groups"]
+    permission_required = 'members.add_message'
+    
+    def form_valid(self, form):
+        message = form.save()
+        message.author = self.request.user
+        message.display = "sessions"
+        message.save()
+        return super(MessageSessCreateView, self).form_valid(form)
+        
+class MessageDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Message
+    success_url = "/members/"
+    permission_required = 'members.delete_message'
+
+class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    #template: event_form.html
+    model = Message
+    fields=["title","message","groups"]
+    permission_required = 'members.change_message'

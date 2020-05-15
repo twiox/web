@@ -17,6 +17,7 @@ margin-left:10%;
 .content_wrapper{
     background-color: #262626;
     padding-bottom:5%;
+    overflow:hidden;
 }
 #container{
     position:relative;
@@ -122,7 +123,7 @@ nav{
   text-decoration: none;
 }
 .navbar_blue {
-  padding-left: 5%;
+  padding-left: 10%;
   clear:both;
   overflow: hidden;
   background-color: #088eaa;
@@ -131,7 +132,7 @@ nav{
   font-size: 14px;
   color: white;
   text-align: center;
-  padding: 14px 16px;
+  padding: 10px;
   text-decoration: none;
 }
 .dropdown {
@@ -258,6 +259,15 @@ h3{
 }
 .blue_bg{
     background-color: #088eaa;
+    }
+.blue_font{
+    color: #088eaa;
+    }
+.red_bg{
+    background-color: #7b1b42;
+    }
+.red_font{
+    color: #7b1b42;
     }
 .second_section{
     display:table-cell;
@@ -484,7 +494,7 @@ padding:10px;
     overflow:hidden;
     align-items:center;
     justify-content:center;
-    height:60vh;
+    height:350px;
     display:flex;
     width: 100%;
 }
@@ -495,4 +505,15 @@ padding:10px;
     bottom: 0;
     height: 120%;
     width:auto;
+}
+.trainer_ui{
+    text-align:left;
+    overflow:hidden;
+}
+.trainer_ui a{
+    float:left;
+    padding:5px;
+}
+.trainer_ui:after{
+    clear:both;
 }

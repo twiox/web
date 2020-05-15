@@ -1,10 +1,53 @@
 {% extends "members/base.html" %}
-{%block content %}
-    <section>
-        <h2>{{object.title|upper}}</h2>
-        <a href="{% url 'spot_list' %}">Zurück</a>
-        {% if perms.members.change_spot %}
-            <a href="{% url 'spot_update' object.id  %}">Bearbeiten</a>
-        {% endif %}
-    </section>
+{% block navbar2 %} 
+<div class="navbar_blue">
+    <div>
+        <a class="float_left" href="{% url 'spot_list' %}">
+            <i class="fas fa-chevron-left" style="font-size:32px;"></i>
+        </a>
+    </div>
+</div>
 {% endblock %}
+{%block content %}
+<section style="padding-top:5%;">
+    <div style="background-color:#333333;padding:20px; margin-bottom:5px;" >
+        <div id="container">
+            <h2 style="margin-bottom:0px;" >{{object.title|upper}}</h2>
+            <p>{{spot.lat}},{{spot.long}}</p>
+            <div class="trainer_ui">
+                {% if perms.members.change_spot %}
+                    <a class="blue_font" href="{% url 'spot_update' object.id  %}"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+                {% endif %}
+                {% if perms.members.delete_spot %}
+                    <a class="red_font" href="{% url 'spot_delete' object.id  %}"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
+                {% endif %}
+            </div>
+            <hr style="clear:both;border:0px;height:2px;background-color:white; margin-bottom:10px;">
+        </div>
+        <div style="overflow:hidden;" >
+            <div class="col-5" id="map" style="float:left;"> </div>
+            <script>
+                // Initialize and add the map
+                function initMap() {
+                  var spot = {lat: {{object.lat}}, lng: {{object.long}}};
+                  var map = new google.maps.Map(
+                      document.getElementById('map'), {zoom: 17, center: spot});
+                  var marker = new google.maps.Marker({position: spot, map: map});
+                }
+            </script>
+            <script async defer
+                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAkB8V0wOMLikUsZilD_5LEz49Isbqr-0k&callback=initMap">
+            </script>
+            
+            <div class="col-5" style="float:right;">
+                <p style="padding:20px;" align="justify">{{object.description}}</p>
+                <p style="text-align:center; padding-right: 25%;padding-left: 25%;">
+                    <a class="sign_up button_padding" target="_blank" href="https://www.google.de/maps/dir//{{object.spot.lat}},{{object.spot.long}}/@{{object.spot.lat}},{{object.spot.long}},17z"><i class="fas fa-external-link-alt" style="padding:5px;"> Route</i></a>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+    

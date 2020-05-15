@@ -34,6 +34,9 @@ h3{
 .element span{
     display:flex;
 }
+.image_wrapper{
+    height:450px;
+}
 .image_wrapper img{
     width: 100%;
     height:auto;

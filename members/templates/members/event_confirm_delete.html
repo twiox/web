@@ -1,6 +1,12 @@
 {% extends "members/base.html" %}
-{% block flag %}
-<h3 class="blue_header"> VERANSTALTUNG </h3>
+{% block navbar2 %} 
+<div class="navbar_blue">
+    <div>
+        <a class="float_left" href="{% url 'event_detail' object.id %}">
+            <i class="fas fa-chevron-left" style="font-size:32px;"></i>
+        </a>
+    </div>
+</div>
 {% endblock %}
 {%block content %}
 <section style="padding-top:5%;">
@@ -12,7 +18,6 @@
             <form style="text-align:center;padding:20px;" method="POST">
                 {% csrf_token %}
                 <button style="width:100px;border: 0; margin:0 auto;" type="submit" class="sign_down">Jawoll</button>
-                <a class="more_info_button button_padding" href="{% url 'event_detail' object.id %}">Nope</a>
             </form>
         </div>
     </div>

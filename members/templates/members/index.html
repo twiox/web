@@ -46,27 +46,41 @@
     </section>
     <!-- The container for the Sessions -->
     <section id="training">
+        <div id="container">
         <h2>TRAININGSZEITEN</h2>
+            <div class="trainer_ui">
+                {% if perms.members.add_session %}
+                    <a class="blue_font" href="{% url 'session_create' %}"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
+                {% endif %}
+                {% if perms.members.add_message %}
+                    <a class="blue_font" href="{% url 'message_sess_create' %}"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
+                {% endif %}
+                {% if perms.members.add_spot %}
+                    <a class="blue_font" href="{% url 'spot_list' %}"><i class="fas fa-map-marker-alt" style="font-size:27px;"></i></a>
+                {% endif %}
+            </div>
+        </div>
         <!-- Here the Messanges -->
         {% if training_messags %}
         <div style="margin-bottom:30px;">
             <div class="message_header"><p> Wichtige Hinweise </p></div>
             <div class="message_body">
             {% for msg in training_messags %}
-                <h1><strong>{{msg.title}}</strong></h1>
-                <p>{{msg.message}}</p>
-                <br>
+                <div id="container" style="padding-bottom:20px;">
+                    <h1><strong>{{msg.title}}</strong></h1>
+                    <p>{{msg.message}}</p>
+                    <div class="trainer_ui">
+                    {% if perms.members.delete_message %}
+                        <a class="red_font" href="{% url 'message_delete' msg.id %} "><i class="far fa-minus-square" style="font-size:15px;"></i></a>
+                    {% endif %}
+                    {% if perms.members.update_message %}
+                        <a class="blue_font" href="{% url 'message_update' msg.id %} "><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
+                    {% endif %}
+                    </div>
+                </div>
             {% endfor %}
             </div>
         </div>
-        {% endif %}
-        {% if perms.members.add_session %}
-            <!-- Trainer UI -->
-            <div class="ui_div first_div">
-                <ul>
-                    <li class="float_left"> <a href="{% url 'session_create' %}"> Erstellen </a></li>
-                </ul>
-            </div>
         {% endif %}
         <div>
             {% for session in sessions %}
@@ -130,31 +144,41 @@
     </section>
     {% endif %}
     <!-- Here the Messanges No2 -->
-    {% if event_messags %}
-    <section>
-        <div>
+    <!-- Here the Container for the Events -->
+    <section id="events">
+        <div id="container">
+            <h2>EVENTKALENDER</h2>
+            <div class="trainer_ui">
+                {% if perms.members.add_event %}
+                    <a class="blue_font" href="{% url 'event_create' %}"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
+                {% endif %}
+                {% if perms.members.add_message %}
+                    <a class="blue_font" href="{% url 'message_eve_create' %}"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
+                {% endif %}
+            </div>
+        </div>
+        {% if event_messags %}
+        <div style="margin-bottom:30px;">
             <div class="message_header"><p> Wichtige Hinweise </p></div>
             <div class="message_body">
             {% for msg in event_messags %}
-                <h1><strong>{{msg.title}}</strong></h1>
-                <p align="justify">{{msg.message}}</p>
-                <br>
+                <div id="container" style="padding-bottom:20px;">
+                    <h1><strong>{{msg.title}}</strong></h1>
+                    <p>{{msg.message}}</p>
+                    <div class="trainer_ui">
+                    {% if perms.members.delete_message %}
+                        <a class="red_font" href="{% url 'message_delete' msg.id %} "><i class="far fa-minus-square" style="font-size:15px;"></i></a>
+                    {% endif %}
+                    {% if perms.members.update_message %}
+                        <a class="blue_font" href="{% url 'message_update' msg.id %} "><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
+                    {% endif %}
+                    </div>
+                </div>
             {% endfor %}
             </div>
         </div>
     </section>
     {% endif %}
-    <!-- Here the Container for the Events -->
-    <section id="events">
-        <h2>EVENTKALENDER</h2>
-        <!--Add Events -->
-        {% if perms.members.add_event %}
-            <div class="ui_div first_div">
-                <ul>
-                    <li class="float_left"> <a href="{% url 'event_create' %}"> Erstellen </a></li>
-                </ul>
-            </div>
-        {% endif %}
         {% if events %}
         <div>
             {% for event in events %}
