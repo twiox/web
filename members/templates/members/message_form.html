@@ -1,17 +1,16 @@
 {% extends "members/base.html" %}
-{% block flag %}
-<h3 class="blue_header">Warnhinweis</h3>
+{% block navbar2 %} 
+<div class="navbar_blue">
+    <div>
+        <a class="float_left" href="{% url 'index' %}#training">
+            <i class="fas fa-chevron-left" style="font-size:32px;"></i>
+        </a>
+    </div>
+</div>
 {% endblock %}
-
 {% block content %}
 <section style="text-align: center;">
-    <form method="post">
-            {% csrf_token %}
-            {% include "members/form_snippet.html" %}
-            <div style="clear:both;">
-                <button style="margin-top:30px;" type="submit">Speichern</button>
-            </div>
-    </form>
+    {% include "members/form_snippet.html" %}
     <a href="{% url 'index' %}#training" class="more_info_button button_padding">Zurück</a>
 </section>
 {% endblock %}
