@@ -30,7 +30,7 @@ urlpatterns = [
     path('remove/user/<int:pk>/', user_views.UserDeleteView.as_view(), name="remove_user"),
     path('register_trainer/', user_views.register_trainer, name="register_trainer"),
     path('remove_trainer/', user_views.remove_trainer, name="remove_trainer"),
-    path("login/", auth_views.LoginView.as_view(template_name="user_handling/login.html"), name="login"),
+    path("login/", user_views.LoginView.as_view(template_name="user_handling/login.html"), name="login"),
     path("logout/", auth_views.LogoutView.as_view(template_name="user_handling/logout.html"), name="logout"),
     path("activate/<str:uidb64>/<str:token>/", user_views.activate, name="activate"),
     path("reset_pw/", auth_views.PasswordResetView.as_view(template_name="user_handling/password_reset.html"), name="password_reset"),

@@ -114,10 +114,12 @@ nav{
   clear:both;
   overflow: hidden;
   background-color: #191919;
+  padding-right:10%;
+  padding-left: 10%;
 }
 .navbar a {
-  font-size: 14px;
-  color: white;
+  font-size:14px;
+  color: #088eaa;
   text-align: center;
   padding: 14px 16px;
   text-decoration: none;
@@ -138,16 +140,20 @@ nav{
 .dropdown {
   overflow: hidden;
 }
-.dropdown .dropbtn {
-  font-size: 14px;  
+.dropdown .dropbtn {  
+  font-size:13px;
   background-color:#191919;
   border: none;
   outline: none;
-  color: white;
+  color: #088eaa;
+  font-size:12px;
   padding: 14px 16px;
 }
-.navbar a:hover, .dropdown:hover .dropbtn {
-  background-color:#088eaa;
+.navbar a:hover, .dropdown:hover .dropbtn:hover {
+  color:white;
+}
+.dropdown:hover .dropbtn {
+  color:#088eaa;
 }
 .dropdown-content {
   display: none;
@@ -405,8 +411,8 @@ h3{
     margin-top:15px;
     padding:10px;
     text-align:center;
-    border: 3px solid red;
-    color:red;
+    border: 2px solid #7b1b42;
+    color:#7b1b42;
 }
 .message_info{
     margin-top:15px;
@@ -516,4 +522,79 @@ padding:10px;
 }
 .trainer_ui:after{
     clear:both;
+}
+/*For the forms */
+.form_wrapper{
+    display:flex;
+    padding:2rem;
+    width:100%;
+    margin: 0px auto;
+}
+.inner_form{
+    background-color: #333333;
+    display:inline-block;
+    padding:2rem;
+    width:100%;
+}
+
+.field_wrapper{
+    padding:2% 5%;
+    text-align:left;
+    width:100%; 
+}
+.field_wrapper:after{
+    clear:both;
+}
+.field_wrapper label{
+    width:100%;
+    display:block;
+    font-size:1rem;
+}
+.field_wrapper input{
+    width:100%;
+    border:none;
+    color:white;
+    background-color: #333333;
+}
+.field_wrapper textarea{
+    width:100%;
+    color:white;
+    border:none;
+    height: auto;
+    resize: none;
+    outline:none;
+    background-color: #333333;
+}
+.field_wrapper select{
+    width:100%;
+    color:white;
+    border:none;
+    height: auto;
+    resize: none;
+    outline:none;
+    background-color: #333333;
+}
+.field_wrapper div{
+    margin:10px;
+    border-bottom: solid 1px #fff;
+    }
+ .field_wrapper div:hover{
+    border-bottom: solid 1px #088eaa;
+    }
+form{
+    margin: 0 auto;
+    width:auto;
+    
+}
+form button{
+    color:white;
+    display:block;
+    padding:10px;
+    border:none;
+    border-radius:5%;
+    margin: 0 auto;
+    background-color:#088eaa;
+}
+form button:hover{
+    background-color:#69CCE1;
 }

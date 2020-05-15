@@ -1,0 +1,29 @@
+<div class="form_wrapper">
+    <form method="POST" >
+        {% if form.errors %}
+            {% for error in field.errors %}
+            <p style="color: #7b1b42">{{error}}</p>
+            {% endfor %}
+        {% endif %}
+        {% csrf_token %}
+        <div class ="inner_form">
+            {% for field in form %}
+            <div class="field_wrapper">
+                <div>
+                {{ field.label_tag }} {{ field }}
+                </div>
+            </div>
+            {% endfor %}
+            <button type="submit">
+                <span>OK</span>
+            </button>
+        </div>
+    </form>
+</div>   
+        <!--
+        <script>
+            addEventListener("focusin", function(){
+                document.activeElement.style.backgroundColor="red"; 
+            })
+        </script>
+            -->

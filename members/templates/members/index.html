@@ -20,11 +20,11 @@
     {% block navbar2 %}
     {% if user.is_authenticated %}
     <div class="navbar">
-        <a class="float_right" href="{% url 'logout' %}">Logout</a>
+        <a class="float_right" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt" style="font-size:27px;"></i></a>
         <!--<a class="float_left" href="{% url 'spot_list' %}">Spots</a>-->
         {% if perms.auth.add_user %}
-        <div class= "dropdown float_right">
-            <button class="dropbtn">Accountverwaltung</button>
+        <div class= "dropdown float_left">
+            <button class="dropbtn"><i class="fas fa-user-cog" style="font-size:25px;"></i></button>
             <div class="dropdown-content">
                 <a href="{% url 'register' %}">Account Hinzufügen</a>
                 <a href="{% url 'remove' %}">Account löschen</a>

@@ -1,11 +1,16 @@
 {% extends "members/base.html" %}
-{%block content %}
-<div>
-<h1>Neuer Spot</h1>
-<form method="POST">
-    {% csrf_token %}
-    {{form.as_p}}
-    <button type="submit">Erstellen</button>
-</form>
+{% block navbar2 %} 
+<div class="navbar_blue">
+    <div>
+        <a class="float_left" href="{% url 'spot_list' %}">
+            <i class="fas fa-chevron-left" style="font-size:32px;"></i>
+        </a>
+    </div>
 </div>
+{% endblock %}
+{%block content %}
+<section style="text-align:center; padding-top:5%;">
+    <h1>SPOT HINZUFÜGEN</h1>
+    {% include "members/form_snippet.html" %}
+</section>
 {% endblock %}

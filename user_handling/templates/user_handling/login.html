@@ -6,26 +6,7 @@
 {% block content %}
 <section style="text-align: center;">
     <h2>Login</h2>
-    {% if form.errors %}
-        <p style="color: white; text-align: center; background-color: #7b1b42; padding:10px; margin-top:0px;"> Nutzername oder Passwort falsch </h3>
-    {% endif %}
-    <form method="post">
-            {% csrf_token %}
-            <div class="col-4" style="padding:10px; border: solid 1px; margin:0 auto;">
-            {% for field in form %}
-                <div class="col-4" style="margin:0 auto;" id="container">
-                        <div style="position:absolute;left:0;width:50%;">
-                            <a style="position:absolute; right:5px;">{{field.label}} </a>
-                        </div>
-                        <div style="position:absolute;right:0;width:50%;">
-                            <a style="position:absolute; left:5px;;">{{field}}</a>
-                        </div>
-                </div>
-                <br>
-            {% endfor %}
-            </div>
-      <button style="margin-top:30px;" type="submit">Login</button>
-    </form>
+    {% include "members/form_snippet.html" %}
     <a href="{% url 'password_reset' %}" class="more_info_button button_padding">Reset Password</a>
 </section>
 {% endblock %}

@@ -1,50 +1,22 @@
 {% extends "members/base.html" %}
-{% block flag %}
-<h3 class="blue_header"> Trainingszeiten </h3>
+{% block navbar2 %} 
+<div class="navbar_blue">
+    <div>
+        <a class="float_left" href="{% url 'index' %}#training">
+            <i class="fas fa-chevron-left" style="font-size:32px;"></i>
+        </a>
+    </div>
+</div>
 {% endblock %}
 
 {% block content %}
-<section style="text-align: center;">
+<section style="text-align:center; padding-top:5%;">
     {% if object.group %}
         <h2>SESSION {{object.website_title | upper }}</h2>
         <h3>Gruppe {{object.group.group_id}}</h3>
     {% else %}
         <h2>NEUE SESSION</h2>
     {% endif %}
-    <form method="post">
-            {% csrf_token %}
-            <div>
-                <div class="col-5" style="padding:10px; border: solid 1px; float:left;">
-                {% for field in form %}
-                    {% if not "Trainer" in field.label %}
-                    <div id="container">
-                            <div style="position:absolute;left:0;width:50%;">
-                                <a style="position:absolute; right:5px;">{{field.label}} </a>
-                            </div>
-                            <div style="position:absolute;right:0;width:50%;">
-                                <a style="position:absolute; left:5px;">{{field}}</a>
-                            </div>
-                    </div>
-                    <br>
-                    {% endif %}
-                {% endfor %}
-                </div>
-                <div class="col-5" style="padding:10px; border: solid 1px; float:left; height:100%">
-                {% for field in form %}
-                    {% if "Trainer" in field.label %}
-                    <div id="container">
-                                <a>{{field.label}} </a>
-                                <a>{{field}}
-                    </div>
-                    <br>
-                    {% endif %}
-                {% endfor %}
-                </div>
-            </div>
-            <div style="clear:both;">
-                <button style="margin-top:30px;" type="submit">Speichern</button>
-            </div>
-    </form>
-    <a href="{% url 'index' %}#training" class="more_info_button button_padding">Zurück</a>
+    {% include "members/form_snippet.html" %}
 </section>
 {% endblock %}
