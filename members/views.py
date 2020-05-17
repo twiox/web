@@ -170,7 +170,7 @@ class SpotDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 class MessageEveCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     #template: event_detail.html
     model = Message
-    fields=["title","message","expire_date","groups"]
+    fields=["title","message","groups"]
     permission_required = 'members.add_message'
     
     def form_valid(self, form):

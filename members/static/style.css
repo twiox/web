@@ -536,51 +536,73 @@ padding:10px;
     padding:2rem;
     width:100%;
 }
+.focused {
+    padding:5px;
+    font-size:0.8rem;
+    color:#078fab;
+}
 
 .field_wrapper{
-    padding:2% 5%;
+    padding:5px 5%;
     text-align:left;
     width:100%; 
 }
 .field_wrapper:after{
     clear:both;
 }
-.field_wrapper label{
+.field_wrapper div label{
     width:100%;
     display:block;
-    font-size:1rem;
+    font-size:1.1rem;
+    padding:15px;
+    color:white;
+    font-weight:500;
+    position:absolute;
+    top:0;
+    left:0;
 }
-.field_wrapper input{
+.field_wrapper div input{
     width:100%;
     border:none;
     color:white;
-    background-color: #333333;
+    background-color: inherit;
+    box-shadow: none;
 }
-.field_wrapper textarea{
-    width:100%;
-    color:white;
-    border:none;
-    height: auto;
-    resize: none;
-    outline:none;
-    background-color: #333333;
-}
-.field_wrapper select{
+.field_wrapper div textarea{
     width:100%;
     color:white;
     border:none;
     height: auto;
     resize: none;
     outline:none;
-    background-color: #333333;
+    background-color: inherit;
+    padding:15px;
+    box-shadow: none;
+}
+.field_wrapper div select{
+    width:100%;
+    color:white;
+    border:none;
+    height: auto;
+    resize: none;
+    outline:none;
+    background-color: inherit;
+    padding:15px;
+    box-shadow: none;
+    
 }
 .field_wrapper div{
-    margin:10px;
-    border-bottom: solid 1px #fff;
+    margin:3px;
+    padding-top:30px;
+    padding-left:10px;
+    padding-right:10px;
+    padding-bottom:10px;
+    border-bottom: solid 1px;
+    border-bottom-color:#fff;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
     }
- .field_wrapper div:hover{
-    border-bottom: solid 1px #088eaa;
-    }
+
 form{
     margin: 0 auto;
     width:auto;
