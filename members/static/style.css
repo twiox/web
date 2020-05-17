@@ -520,6 +520,12 @@ padding:10px;
     float:left;
     padding:5px;
 }
+.trainer_ui p{
+    font-size:0.7rem;
+    color:grey;
+    padding:5px;
+    float:left;
+}
 .trainer_ui:after{
     clear:both;
 }
@@ -554,8 +560,11 @@ padding:10px;
     width:100%;
     display:block;
     font-size:1.1rem;
-    padding:15px;
-    color:white;
+    padding-top:30px;
+    padding-left:10px;
+    padding-right:10px;
+    padding-bottom:10px;
+    color:grey;
     font-weight:500;
     position:absolute;
     top:0;
@@ -581,6 +590,8 @@ padding:10px;
 }
 .field_wrapper div select{
     width:100%;
+    -moz-appearance: none;
+    appearance: none;
     color:white;
     border:none;
     height: auto;
@@ -602,10 +613,31 @@ padding:10px;
     border-top-right-radius: 5px;
     border-top-left-radius: 5px;
     }
+.field_wrapper ul{
+    padding:15px;
+    }
+.field_wrapper ul label{
+    position:relative;
+    padding:5px;
+    padding-left:20px;
+    color:white;
+    }
+.field_wrapper li{
+    position:relative;
+    }
+.field_wrapper li label input{
+    position:absolute;
+    margin:auto;
+    top: 0; 
+    bottom: 0; 
+    left:0;
+    width:auto;
+    }
 
 form{
     margin: 0 auto;
     width:auto;
+    width:100%;
     
 }
 form button{
@@ -618,5 +650,18 @@ form button{
     background-color:#088eaa;
 }
 form button:hover{
+    background-color:#69CCE1;
+}
+.form_button{
+    color:white;
+    display:block;
+    padding:10px;
+    border:none;
+    border-radius:5px;
+    margin: 0 auto;
+    width: 100px;
+    background-color:#088eaa;
+}
+.form_button:hover{
     background-color:#69CCE1;
 }

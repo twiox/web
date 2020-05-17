@@ -52,6 +52,6 @@ class MemberDeletionForm(forms.Form):
 
 class GroupChangeForm(forms.Form):
     user = forms.ModelChoiceField(label="Wer?",queryset=User.objects.all())
-    group = forms.ModelChoiceField(label="In welche Gruppe verschieben?",queryset=Group.objects.exclude(group_id="T"))
+    group = forms.ModelChoiceField(label="In welche Gruppe verschieben?",queryset=Group.objects.all())
     class Meta:
         fields = ["user", "group"]

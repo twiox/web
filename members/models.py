@@ -27,7 +27,7 @@ class Group(models.Model):
 
 
 class Event(models.Model):
-    allowed_groups = models.ManyToManyField(Group)
+    allowed_groups = models.ManyToManyField(Group, verbose_name="Für die Gruppen")
     participants = models.ManyToManyField(User, blank=True)
     
     title = models.CharField("Event-name", max_length=100)
@@ -36,7 +36,7 @@ class Event(models.Model):
     deadline = models.DateTimeField("Anmeldung/Abmeldung bis", default=datetime.now())
     start_date = models.DateTimeField("Datum Beginn", default=datetime.now())
     end_date = models.DateTimeField("Datum Ende", default=datetime.now())
-    hinweis = models.CharField("Hinweis (rote Anzeige)", blank=True, max_length=50)
+    hinweis = models.CharField("Hinweis", blank=True, max_length=50)
 
     #if we query over events, we want the most recent one firsthand 
     class Meta:
@@ -64,19 +64,18 @@ class Trainer(models.Model):
     image = models.ImageField("Profilbild", default = "default.jpg", upload_to="profile_pics/")
     
     def __str__(self):
-        return f"Trainer: {self.user.username}"
+        return f"{self.user.first_name}"
 
 class Session(models.Model):
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, blank=True, null=True)
-    trainer = models.ManyToManyField(Trainer, blank=True)
-    spot = models.ForeignKey(Spot, blank=True, null=True, on_delete=models.SET_NULL)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name = u"Gruppe",blank=True, null=True,)
+    trainer = models.ManyToManyField(Trainer, blank=True, verbose_name =u"Trainer")
+    spot = models.ForeignKey(Spot, blank=True, null=True, on_delete=models.SET_NULL, verbose_name=u"Spot")
     
-    title = models.CharField("Titel für uns", max_length=50, default="Halle_GruppeA_Sa")
-    website_title = models.CharField("Titel für Website", max_length=50, default="Hallentraining")
+    title = models.CharField("Titel", max_length=50, default="Hallentraining")
     day = models.CharField("Tag",max_length=2, default="Mo")
     start_time = models.TimeField("Beginn",default="17:00")
     end_time = models.TimeField("Ende",default="19:00")
-    hinweis = models.CharField("Hinweise (rote Anzeige)", blank=True, max_length=50)
+    hinweis = models.CharField("Hinweis", blank=True, max_length=50)
     
     @property
     def format_start_time(self):
@@ -107,7 +106,7 @@ class Session(models.Model):
         ordering = ["day"]
 
     def __str__(self):
-        return f"Session: {self.title}"
+        return f"{self.title}_{self.group.group_id_self.day}"
 
 class Message(models.Model):
     choices =(
@@ -116,14 +115,10 @@ class Message(models.Model):
     )
     title = models.CharField("Titel",max_length=30)
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    message = models.TextField(default = "Deine Nachricht hier")
-    expire_date = models.DateTimeField(default=datetime.now())
+    message = models.TextField("Hinweis",default = "Deine Nachricht hier")
+    date = models.DateTimeField(default=datetime.now())
     display = models.CharField(max_length=20, choices=choices, blank=True)
-    groups = models.ManyToManyField(Group)
-    
-    @property
-    def is_over(self):
-        return datetime.now().replace(tzinfo=None) > self.expire_date.replace(tzinfo=None)
+    groups = models.ManyToManyField(Group,verbose_name="Für die Gruppen")
     
     def __str__(self):
         return f"Message {self.title}"

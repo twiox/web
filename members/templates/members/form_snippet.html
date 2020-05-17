@@ -29,7 +29,10 @@
             }
             looseFocus = function(field, label, parent){
                 if(field.value == ""){
-                    label.style.padding = "15px";
+                    label.style.paddingTop = "30px";
+                    label.style.paddingLeft = "10px";
+                    label.style.paddingRight = "10px";
+                    label.style.paddingBottom = "10px";
                     label.style.fontSize = "1.2rem";
                     parent.style.backgroundColor="inherit";
                     
@@ -37,7 +40,7 @@
                         label.style.color = "red";
                         parent.style.borderBottomColor = "red";
                     } else {
-                        label.style.color = "white";
+                        label.style.color = "grey";
                         parent.style.borderBottomColor = "white";
                     }
                 }else{
@@ -60,16 +63,24 @@
                     parent.style.borderBottomColor = "white";
                     }
                 }
-            var fields = document.querySelectorAll("input,select,textarea");
+            var fields = document.querySelectorAll("input,select,textarea,ul");
             fields.forEach(field => {
-                field.autofocus = false;
                 const parent = field.parentElement;
                 const label = field.previousElementSibling;
                 if(field.value != "" && label != null){
                     focus(label, parent);
                     }
+                if(field.options){
+                    field.selectedIndex = 1;
+                    focus(label, parent);
+                }
                 field.addEventListener("focusin", () => {
                     focus(label, parent);
+                });
+                field.addEventListener("input", () => {
+                    if(field.value != ""){
+                    focus(label, parent);
+                    }
                 });
                 field.addEventListener("focusout", () => {
                     looseFocus(field, label, parent);

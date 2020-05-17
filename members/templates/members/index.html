@@ -70,6 +70,7 @@
                     <h1><strong>{{msg.title}}</strong></h1>
                     <p>{{msg.message}}</p>
                     <div class="trainer_ui">
+                    <p>[{{msg.author.first_name}},{{msg.date |date:'d.m.Y'}}]</p>
                     {% if perms.members.delete_message %}
                         <a class="red_font" href="{% url 'message_delete' msg.id %} "><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                     {% endif %}
@@ -166,6 +167,7 @@
                     <h1><strong>{{msg.title}}</strong></h1>
                     <p>{{msg.message}}</p>
                     <div class="trainer_ui">
+                    <p>[{{msg.author.first_name}},{{msg.date |date:'d.m.Y'}}]</p>
                     {% if perms.members.delete_message %}
                         <a class="red_font" href="{% url 'message_delete' msg.id %} "><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                     {% endif %}
@@ -189,6 +191,14 @@
                                     <div id="info_position">
                                         <p class="session_alert"> {{event.hinweis}} </p>
                                     </div>
+                            {% endif %}
+                            {% if perms.members.update_event %}
+                                <p style="position:absolute; bottom:15px; left:3px; font-size:0.8rem; color:grey;">
+                                    Gruppen:
+                                    {% for group in event.allowed_groups.all %}
+                                        {{group.group_id}}
+                                    {%endfor%}
+                                </p>
                             {% endif %}
                             <div class="first_row">
                                 <div class="session_weekday blue_bg">

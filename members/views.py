@@ -11,8 +11,9 @@ from django.views import View
 from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
-from .forms import EventUpdateParticipantForm
+from .forms import EventUpdateParticipantForm, SessionForm, EventForm
 from django.contrib import messages
+from datetime import datetime
 # Create your views here.
 
 @login_required
@@ -26,6 +27,9 @@ def index(request):
     event_messags = Message.objects.filter(groups=group).filter(display="events")
     if(hasattr(request.user, "trainer")):
         trainer_sessions = Session.objects.filter(trainer=Trainer.objects.get(user=request.user))
+        events = Event.objects.all()
+        training_messags = Message.objects.all().filter(display="sessions")
+        event_messags = Message.objects.all().filter(display="events")
     else:
         trainer_sessions = None
     return render(
@@ -54,19 +58,19 @@ class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 class EventCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     #template: event_detail.html
     model = Event
-    fields=["title","allowed_groups","description","start_date","end_date","hinweis","deadline"]
+    form_class = EventForm
     permission_required = 'members.add_event'
     
 class EventUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_detail.html
     model = Event
-    fields=["title","allowed_groups","description","start_date","end_date","hinweis","deadline"]
+    form_class = EventForm
     #who can update the event?
     permission_required = 'members.change_event'
 
 class EventDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Event
-    success_url = "/members/"
+    success_url = "/members/#events"
     #who can delete the event?
     permission_required = 'members.delete_event'
 
@@ -125,20 +129,19 @@ class SessionDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 class SessionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     #template: event_form.html
     model = Session
-    fields=["group","spot","title","website_title","day","start_time","end_time","hinweis","trainer"]
+    form_class = SessionForm
     permission_required = 'members.add_session'
-    
     
 class SessionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_form.html
     model = Session
-    fields=["group","trainer","spot","title","website_title","day","start_time","end_time","hinweis"]
+    form_class = SessionForm
     permission_required = 'members.change_session'
 
 
 class SessionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Session
-    success_url = "/members/"
+    success_url = "/members/#training"
     permission_required = 'members.delete_session'
 
 """FOR THE SPOTS"""
@@ -203,3 +206,10 @@ class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
     model = Message
     fields=["title","message","groups"]
     permission_required = 'members.change_message'
+    
+    def form_valid(self, form):
+        message = form.save()
+        message.author = self.request.user
+        message.date = datetime.now()
+        message.save()
+        return super(MessageUpdateView, self).form_valid(form)

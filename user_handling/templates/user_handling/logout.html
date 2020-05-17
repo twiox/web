@@ -1,7 +1,11 @@
 {% extends "members/base.html" %}
+{% block flag %}
+<h3 style="color: white; text-align: center; background-color: #088eaa; padding:10px; margin-top:0px;"> MITGLIEDERBEREICH </h3>
+{% endblock %}
+
 {% block content %}
-<section style="text-align: center;">
+<section style="text-align: center;padding-top:100px;">
     <h2>Du bist nun ausgeloggt</h2>
-    <a class="more_info_button button_padding" href="{% url 'login' %}"> Zurück </a>
+    <a class="form_button" href="{% url 'login' %}"> Zurück </a>
 </section>
 {% endblock %}
