@@ -12,7 +12,6 @@ class Item(models.Model):
     price = models.FloatField()
     category = models.CharField("Kategorie", choices=CATEGORY_CHOICES, max_length=30)
     description = models.TextField("Beschreibung")
-    image = models.ImageField("Bild hochladen")
 
     def __str__(self):
         return self.title
@@ -23,7 +22,14 @@ class QuantityCounter(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     
     def __str__(self):
-        return self.category
+        return f'{self.item.title}_{self.category}'
+        
+class ItemImages(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    img1 = models.ImageField("Bild1 hochladen", upload_to="webshop")
+    img2 = models.ImageField("Bild2 hochladen", blank=True, upload_to="webshop")
+    img3 = models.ImageField("Bild3 hochladen", blank=True, upload_to="webshop")
+
 
 class OrderItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -36,38 +42,3 @@ class OrderItem(models.Model):
 
     def get_total_item_price(self):
         return self.quantity * self.item.price
-
-"""
-class Order(models.Model):
-    user = models.ForeignKey(User,on_delete=models.CASCADE)
-    ref_code = models.CharField(max_length=20, blank=True, null=True)
-    items = models.ManyToManyField(OrderItem)
-    start_date = models.DateTimeField(auto_now_add=True)
-    ordered_date = models.DateTimeField()
-    ordered = models.BooleanField(default=False)
-    shipping_address = models.ForeignKey(
-        'Address', related_name='shipping_address', on_delete=models.SET_NULL, blank=True, null=True)
-    billing_address = models.ForeignKey(
-        'Address', related_name='billing_address', on_delete=models.SET_NULL, blank=True, null=True)
-    payment = models.ForeignKey(
-        'Payment', on_delete=models.SET_NULL, blank=True, null=True)
-    coupon = models.ForeignKey(
-        'Coupon', on_delete=models.SET_NULL, blank=True, null=True)
-    being_delivered = models.BooleanField(default=False)
-    received = models.BooleanField(default=False)
-    refund_requested = models.BooleanField(default=False)
-    refund_granted = models.BooleanField(default=False)
-
-
-
-    def __str__(self):
-        return self.user.username
-
-    def get_total(self):
-        total = 0
-        for order_item in self.items.all():
-            total += order_item.get_final_price()
-        if self.coupon:
-            total -= self.coupon.amount
-        return total
-"""
