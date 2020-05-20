@@ -1,27 +1,27 @@
 {% extends "members/base.html" %}
 {% block content %}
 <section>
-        <h2>TWIO X WEBSHOP</h2>
+        <h1>WEBSHOP</h1>
         <div>
             {% for item in item_list %}
-                <div style="margin-bottom:15px;">
-                    <div style="overflow:hidden">
-                        <div class="first_row">
-                            <div class="session_weekday blue_bg">
-                                    <p><strong> {{item.title}} </strong></p>
-                            </div>
-                            <div class="second_section first_div">
-                                <h3> {{item.category}}</h3>
-                            </div>
+            <div style="margin-bottom:30px; padding:10px; overflow:hidden;">
+                <div style="padding:30px;width:100%;background-color:blue;text-align:center;">
+                    <p><strong> {{item.title}} </strong></p>
+                </div>
+                <div style="overflow:hidden; display:flex;" class="col-6">
+                    <div class="col-5" >
+                        <img style="max-width:100%;" src="{{item.image.url}}"></img>
+                    </div>
+                    <div class="col-5" style="float:left;" align="justify">
+                        <div style="height:50%;">
+                        <p>{% lorem 50 w random %}</p>
                         </div>
-                        <div class="third_session">
-                            <p>Preis {{item.price}}</p>
-                        </div>
-                        <div class="third_session" style="text-align:center;">
-                            <a class="more_info_button" href="#">weitere Informationen</a>
+                        <div  style="height:50%;">
+                            <span> Mehr Infos </span>
                         </div>
                     </div>
                 </div>
+            </div>
             {% empty %}
                 <p> Leider gibt es im Moment keine Artikel im Webshop </p>
             {% endfor %}
