@@ -168,6 +168,20 @@ class SpotDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     success_url = "/members/"
     permission_required = 'members.delete_spot'
 
+"""For the Groups"""
+class GroupCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = Group
+    permission_required = "members.create_group"
+    fields = ["group_id"]
+
+class GroupDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Group
+    permission_required = "members.delete_crew"
+    success_url = '/members/group/'
+
+class GroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = Group
+    permission_required = 'members.delete_spot'
 
 """For The Messages"""
 class MessageEveCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):

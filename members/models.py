@@ -25,6 +25,9 @@ class Group(models.Model):
     def __str__(self):
         return f"Gruppe: {self.group_id}"
 
+    def get_absolute_url(self):
+        return reverse('group_list')
+
 
 class Event(models.Model):
     allowed_groups = models.ManyToManyField(Group, verbose_name="Für die Gruppen")

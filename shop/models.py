@@ -24,7 +24,7 @@ class QuantityCounter(models.Model):
     def __str__(self):
         return f'{self.item.title}_{self.category}'
         
-class ItemImages(models.Model):
+class ItemImage(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     img1 = models.ImageField("Bild1 hochladen", upload_to="webshop")
     img2 = models.ImageField("Bild2 hochladen", blank=True, upload_to="webshop")

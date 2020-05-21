@@ -665,3 +665,30 @@ form button:hover{
 .form_button:hover{
     background-color:#69CCE1;
 }
+.item_wrapper{
+	overflow:hidden; 
+	display:flex; 
+	padding:15px;
+}
+.item_button{
+	position:absolute; 
+	top:45%; 
+	right:12%;	
+}
+
+.item_button span{
+	border-radius:50%;
+	background-color:#088eaa;
+	color:white;
+	height:35px; 
+	width:35px;
+	display:inline-block;
+	text-align:center;
+	vertical-align: middle;
+}
+.item_button:hover span{
+	background-color:#69CCE1;
+}
+.item_button i{
+	margin-top:30%;
+}

@@ -23,5 +23,8 @@ urlpatterns = [
     path("message/new/session/", views.MessageSessCreateView.as_view(),name="message_sess_create"),
     path("message/<int:pk>/delete/", views.MessageDeleteView.as_view(),name="message_delete"),
     path("message/<int:pk>/update/", views.MessageUpdateView.as_view(),name="message_update"),
+    path("group/", views.GroupListView.as_view(),name="group_list"),
+    path("group/new/", views.GroupCreateView.as_view(),name="group_create"),
+    path("group/<int:pk>/delete/", views.GroupDeleteView.as_view(),name="group_delete"),
 ]
 
