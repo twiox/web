@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User
-from members.models import Profile, Group, Trainer
+from members.models import Profile, Group, Trainer, Chairman
 
 class MemberCreationForm(UserCreationForm):
     first_name = forms.CharField(label="Vorname")
@@ -30,10 +30,10 @@ class ProfileCreationForm(forms.ModelForm):
         fields = ["member_num", "group"]
         
 class TrainerCreationForm(forms.ModelForm):
-    user = forms.ModelChoiceField(label="Wer?",queryset=User.objects.exclude(profile__group__group_id = "T")) #Find a way to filter??
+    user = forms.ModelChoiceField(label="Wer?",queryset=User.objects.exclude(trainer__user__username__contains=""))
     trainer_telnr = forms.CharField(label = "Öffentliche TelNr.")
     trainer_email = forms.CharField(label = "Öffentliche Email")
-    image = forms.ImageField(required=False)
+    image = forms.ImageField(label="Profilbild")
     
     class Meta:
         model = Trainer
@@ -44,6 +44,11 @@ class TrainerDeletionForm(forms.Form):
     group = forms.ModelChoiceField(label="In welche Gruppe verschieben?",queryset=Group.objects.all())
     class Meta:
         fields = ["trainer", "group"]
+
+class TrainerChooseForm(forms.Form):
+    trainer = forms.ModelChoiceField(label="Wer?",queryset=Trainer.objects.all())
+    class Meta:
+        fields = ["trainer"]
         
 class MemberDeletionForm(forms.Form):
     member = forms.ModelChoiceField(label="Wer?",queryset=User.objects.all())

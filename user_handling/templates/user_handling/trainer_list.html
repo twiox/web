@@ -11,34 +11,34 @@
 {%block content %}
 <section id="training">
         <div id="container">
-        <h2>GRUPPENLISTE</h2>
+        <h2>TRAINERLISTE</h2>
             <div class="trainer_ui">
-                {% if perms.members.add_group %}
-                    <a class="blue_font" href="{% url 'group_create' %}"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
+                {% if perms.members.add_trainer %}
+                    <a class="blue_font" href="{% url 'register_trainer' %}"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
                 {% endif %}
             </div>
         </div>
         <div>
             {% for object in object_list %}
                 <div class="session_divs col-4" id="container">
-                    {% if perms.members.delete_group %}
-			<a class="red_font" href="{% url 'group_delete' object.id %} ">
-				<i class="far fa-minus-square" style="font-size:15px;"></i>
-			</a>
-		    {% endif %}
+                    {% if perms.members.change_trainer %}
+                    <a style="color:yellow;" href="{% url 'trainer_update_form' object.id%} ">
+                        <i class="far fa-edit" style="font-size:15px;"></i>
+                    </a>
+                    {% endif %}
                     <div style="overflow:hidden">
                         <div class="first_row">
                             <div class="session_weekday blue_bg">
                                     <p><strong>  </strong></p>
                             </div>
                             <div class="second_section first_div">
-                                <h3> {{object.group_id}}</h3>
+                                <h3> {{object.user.first_name}}</h3>
                             </div>
                         </div>
                     </div>
                 </div>
             {% empty %}
-                <p> Leider gibt es im Moment keine Gruppen </p>
+                <p> Leider gibt es im Moment keine Trainer </p>
             {% endfor %}
         </div>
     </section>

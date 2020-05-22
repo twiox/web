@@ -1,0 +1,16 @@
+{% extends "members/base.html" %}
+{% block navbar2 %} 
+<div class="navbar_blue">
+    <div>
+        <a class="float_left" href="{% url 'index' %}">
+            <i class="fas fa-chevron-left" style="font-size:32px;"></i>
+        </a>
+    </div>
+</div>
+{% endblock %}
+{%block content %}
+<section style="text-align:center; padding-top:5%;">
+    <h1>VORSTAND HINZUFÜGEN/ÄNDERN</h1>
+    {% include "members/form_snippet.html" %}
+</section>
+{% endblock %}

@@ -24,15 +24,28 @@
         <!--<a class="float_left" href="{% url 'spot_list' %}">Spots</a>-->
         {% if perms.auth.add_user %}
         <div class= "dropdown float_left">
-            <button class="dropbtn"><i class="fas fa-user-cog" style="font-size:25px;"></i></button>
+            <button class="dropbtn"><i class="fas fa-user" style="font-size:25px;"></i></button>
             <div class="dropdown-content">
                 <a href="{% url 'register' %}">Account Hinzufügen</a>
-                <a href="{% url 'remove' %}">Account löschen</a>
-                <a href="{% url 'register_trainer' %}">Neuer Trainer</a>
-                <a href="{% url 'remove_trainer' %}">Trainer entfernen</a>
+                <a href="{% url 'remove' %}">Account entfernen</a>
                 <a href="{% url 'change_group'%}">Gruppe wechseln</a>
                 <a href="{% url 'group_create'%}">Gruppe hinzufügen</a>
                 <a href="{% url 'group_list'%}">Alle Gruppen</a>
+            </div>
+        </div>
+        <div class= "dropdown float_left">
+            <button class="dropbtn"><i class="fas fa-user-cog" style="font-size:26px;"></i></button>
+            <div class="dropdown-content">
+                <a href="{% url 'register_trainer' %}">Trainer hinzufügen</a>
+                <a href="{% url 'remove_trainer' %}">Trainer entfernen</a>
+                <a href="{% url 'trainer_update'%}">Trainer bearbeiten</a>
+            </div>
+        </div>
+        <div class= "dropdown float_left">
+            <button class="dropbtn"><i class="fas fa-user-tie" style="font-size:27px;"></i></button>
+            <div class="dropdown-content">
+                <a href="{% url 'chairman_create' %}">Vorstand Hinzufügen</a>
+                <a href="{% url 'chairman_list'%}">Vorstand bearbeiten</a>
             </div>
         </div>
         {% endif %}
@@ -76,7 +89,7 @@
                     {% if perms.members.delete_message %}
                         <a class="red_font" href="{% url 'message_delete' msg.id %} "><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                     {% endif %}
-                    {% if perms.members.update_message %}
+                    {% if perms.members.change_message %}
                         <a class="blue_font" href="{% url 'message_update' msg.id %} "><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
                     {% endif %}
                     </div>
@@ -173,7 +186,7 @@
                     {% if perms.members.delete_message %}
                         <a class="red_font" href="{% url 'message_delete' msg.id %} "><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                     {% endif %}
-                    {% if perms.members.update_message %}
+                    {% if perms.members.change_message %}
                         <a class="blue_font" href="{% url 'message_update' msg.id %} "><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
                     {% endif %}
                     </div>

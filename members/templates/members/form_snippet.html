@@ -1,5 +1,5 @@
 <div class="form_wrapper">
-    <form method="POST" >
+    <form method="POST" enctype="multipart/form-data">
         {% if form.errors %}
             {% for error in field.errors %}
             <p style="color: #7b1b42">{{error}}</p>

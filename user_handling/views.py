@@ -1,6 +1,7 @@
 from .forms import *
 from .tokens import account_activation_token
-from members.models import Group
+from .permissions import trainer_permissions, chairman_permissions
+from members.models import Group, Chairman
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from django.core.mail import EmailMessage
@@ -12,10 +13,10 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth.forms import UserCreationForm,PasswordChangeForm
 from django.contrib.auth.decorators import permission_required, login_required
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from django.contrib.auth.models import Group as Permission_group
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin, UserPassesTestMixin
-from django.views.generic import DeleteView, UpdateView
+from django.views.generic import DeleteView, UpdateView, CreateView, ListView
 from django.contrib.auth.views import LoginView
 
 class LoginView(LoginView):
@@ -108,17 +109,29 @@ def remove_user(request):
 @permission_required('members.add_trainer', raise_exception=True)
 def register_trainer(request):
     if(request.method == "POST"): #if the form is filled out
-        form = TrainerCreationForm(request.POST) 
-        if(form.is_valid()): #and the form is valid (= submitted and passwords match etc.)
+        form = TrainerCreationForm(request.POST,request.FILES) 
+        if(form.is_valid()):
             new_trainer = form.save() #save the trainer
             user = new_trainer.user
-            user.profile.group = Group.objects.get(group_id="T")
-            trainer_group = Permission_group.objects.get(name='Trainer') 
-            trainer_group.user_set.add(user)
-            trainer_group.save()
-            user.save()
-            messages.add_message(request, messages.SUCCESS, "Trainer angelegt. Gruppe wurde auf 'T' gesetzt")
-            return redirect("register_trainer")
+            group_t,_ = Group.objects.get_or_create(group_id="T")
+            user.profile.group = group_t
+            try:
+                trainer_group = Permission_group.objects.get(name='Trainer') 
+            except:
+                trainer_group = Permission_group(name="Trainer")
+                trainer_group.save()
+                for perm in trainer_permissions():
+                    trainer_group.permissions.add(perm)
+            finally:
+                trainer_group.user_set.add(user)
+                trainer_group.save()
+                user.save()
+                new_trainer.save()
+                messages.add_message(request, messages.SUCCESS, "Trainer angelegt. Gruppe wurde auf 'T' gesetzt")
+                return redirect("register_trainer")
+        else:
+            messages.add_message(request, messages.ERROR, "Daten ungültig")
+            return render(request, 'user_handling/register_trainer.html', context={'form': form})
     else:
         form = TrainerCreationForm()
     return render(request, 'user_handling/register_trainer.html', context={"form":form})
@@ -145,6 +158,18 @@ def remove_trainer(request):
         form = TrainerDeletionForm() 
         return render(request, "user_handling/remove_trainer.html", context={"form":form})
 
+class TrainerListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = Trainer
+    permission_required = 'members.change_trainer'
+    template_name = "user_handling/trainer_list.html"
+
+class TrainerUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    #template: event_form.html
+    model = Trainer
+    fields=["trainer_telnr","trainer_email","image"]
+    template_name="user_handling/trainer_form.html"
+    permission_required = 'members.change_trainer'
+
 @login_required
 @permission_required('members.delete_trainer', raise_exception=True)
 def change_group(request):
@@ -162,3 +187,54 @@ def change_group(request):
         form = GroupChangeForm() 
         return render(request, "user_handling/change_group.html", context={"form":form})
         
+class ChairmanCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    #template: event_detail.html
+    model = Chairman
+    fields=["user","public_telnr","public_email","competences","image","show"]
+    template_name="user_handling/chairman_form.html"
+    permission_required = 'members.add_chairman'
+    
+    def form_valid(self, form):
+        self.object = form.save()
+        user = self.object.user
+        try:
+            chairman_group = Permission_group.objects.get(name='Vorstand') 
+        except:
+            chairman_group = Permission_group(name="Vorstand")
+            chairman_group.save()
+            for perm in chairman_permissions():
+                chairman_group.permissions.add(perm)
+        finally:
+            chairman_group.user_set.add(user)
+            chairman_group.save()
+            user.save()
+        return super().form_valid(form)
+        
+class ChairmanDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Chairman
+    success_url = "/members/"
+    template_name = "user_handling/chairman_confirm_delete.html"
+    permission_required = 'members.delete_chairman'
+    
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        user=self.object.user
+        success_url = self.get_success_url()
+        chairman_group = Permission_group.objects.get(name='Vorstand')
+        chairman_group.user_set.remove(user)
+        chairman_group.save()
+        self.object.delete()
+        return HttpResponseRedirect(success_url)
+
+class ChairmanUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    #template: event_form.html
+    model = Chairman
+    fields=["user","public_telnr","public_email","competences","image","show"]
+    template_name="user_handling/chairman_form.html"
+    permission_required = 'members.change_chairman'
+    
+class ChairmanListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = Chairman
+    permission_required = 'members.change_chairman'
+    template_name = "user_handling/chairman_list.html"
+

@@ -22,7 +22,7 @@ def index(request):
     group = Profile.objects.get(user = request.user).group
     sessions = Session.objects.filter(group=group)
     events = Event.objects.filter(allowed_groups=group)
-    chairmen = Chairman.objects.all()
+    chairmen = Chairman.objects.filter(show__contains="member_site")
     training_messags = Message.objects.filter(groups=group).filter(display="sessions")
     event_messags = Message.objects.filter(groups=group).filter(display="events")
     if(hasattr(request.user, "trainer")):
@@ -32,6 +32,12 @@ def index(request):
         event_messags = Message.objects.all().filter(display="events")
     else:
         trainer_sessions = None
+    if(hasattr(request.user, "chairman")):
+        sessions = Session.objects.all()
+        events = Event.objects.all()
+        training_messags = Message.objects.all().filter(display="sessions")
+        event_messags = Message.objects.all().filter(display="events")
+
     return render(
         request, "members/index.html",
         {"group":group, 
@@ -53,7 +59,8 @@ class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     def test_func(self):
         user_group = self.request.user.profile.group
         event = self.get_object()
-        return True if user_group in event.allowed_groups.all() else hasattr(self.request.user, "trainer")
+        perms = bool(hasattr(self.request.user, "trainer")+ hasattr(self.request.user,"chairman"))
+        return True if user_group in event.allowed_groups.all() else perms
 
 class EventCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     #template: event_detail.html
@@ -92,7 +99,8 @@ class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         user_group = self.request.user.profile.group
         event = self.get_object()
-        return True if user_group in event.allowed_groups.all() else hasattr(self.request.user, "trainer")
+        perms = bool(hasattr(self.request.user, "trainer")+ hasattr(self.request.user,"chairman"))
+        return True if user_group in event.allowed_groups.all() else perms
 
 class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = 'members/event_unparticipate.html'
@@ -112,7 +120,8 @@ class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
     def test_func(self):
         user_group = self.request.user.profile.group
         event = self.get_object()
-        return True if user_group in event.allowed_groups.all() else hasattr(self.request.user, "trainer")        
+        perms = bool(hasattr(self.request.user, "trainer")+ hasattr(self.request.user,"chairman"))
+        return True if user_group in event.allowed_groups.all() else perms
 
 """FOR THE SESSIONS"""
 
@@ -123,8 +132,9 @@ class SessionDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     def test_func(self):
         user_group = self.request.user.profile.group
         session = self.get_object()
+        perms = bool(hasattr(self.request.user, "trainer")+ hasattr(self.request.user,"chairman"))
         #The trainers and the members 
-        return True if user_group == session.group else hasattr(self.request.user, "trainer")
+        return True if user_group == session.group else perms
 
 class SessionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     #template: event_form.html

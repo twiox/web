@@ -3,6 +3,8 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse #to get absolut_urls
 from datetime import datetime
+from multiselectfield import MultiSelectField
+
 
 # Create your models here.
 
@@ -64,10 +66,13 @@ class Trainer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     trainer_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, default = "Hier die Nummer für die Website")
     trainer_email = models.CharField("Öffentliche Email", max_length=150, default = "Hier die Email für die Website")
-    image = models.ImageField("Profilbild", default = "default.jpg", upload_to="profile_pics/")
+    image = models.ImageField("Profilbild", upload_to="profile_pics/")
     
     def __str__(self):
         return f"{self.user.first_name}"
+    
+    def get_absolute_url(self):
+        return reverse('trainer_update')
 
 class Session(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name = u"Gruppe",blank=True, null=True,)
@@ -130,17 +135,25 @@ class Message(models.Model):
         return reverse('index')
 
 class Chairman(models.Model):
+    choices = (('member_site', 'Anzeige Mitglieder'),
+              ('interested_site', 'Anzeige Interessierte'),
+              ('event_site', 'Anzeige Veranstalter'))
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     public_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, default = "Hier die Nummer für die Website")
     public_email = models.CharField("Öffentliche Email", max_length=150, default = "Hier die Email für die Website")
     competences = models.TextField("Zuständigkeiten (mit Komma getrennt)")
-    image = models.ImageField("Profilbild", default = "default.jpg", upload_to="profile_pics/")
+    image = models.ImageField("Profilbild", upload_to="profile_pics/")
+    show = MultiSelectField(choices=choices, blank=True)
     
     def __str__(self):
         return f"Vorstand: {self.user.username}"
     @property
     def complist(self):
         return self.competences.split(",")
+    
+    def get_absolute_url(self):
+        return reverse('index')
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
