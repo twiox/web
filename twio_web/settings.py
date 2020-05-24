@@ -40,7 +40,9 @@ INSTALLED_APPS = [
     'members.apps.MembersConfig',
     'user_handling.apps.UserHandlingConfig',
     'shop.apps.ShopConfig',
-    'six'
+    'six',
+    'multiselectfield',
+    'compressor'
 ]
 
 MIDDLEWARE = [
@@ -84,6 +86,11 @@ DATABASES = {
     }
 }
 
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder'
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -113,11 +120,16 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
+#this is used fr SCSS
+COMPRESS_PRECOMPILERS = (
+    ('text/x-scss', 'django_libsass.SassCompiler'),
+)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 MEDIA_ROOT = os.path.join(BASE_DIR, "media") #where are the files at the file-system?
 MEDIA_URL ="/media/" #how do we access the media in the browser?
 #for the login

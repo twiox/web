@@ -15,16 +15,16 @@
         {% csrf_token %}
         <div class ="inner_form">
             {% for field in form2 %}
-            <div class="field_wrapper">
-                <div>
+            <div class="field_wrapper" >
+                <div id="container">
                 {{ field.label_tag }} {{ field }}
                 </div>
             </div>
             {% endfor %}
             {% for field in form %}
             {% if not 'Passwort' in field.label %}
-            <div class="field_wrapper">
-                <div>
+            <div class="field_wrapper" >
+                <div id="container">
                 {{ field.label_tag }} {{ field }}
                 </div>
             </div>
@@ -36,4 +36,77 @@
         </div>
     </form>
 </section>
+<script>
+    focus = function(label, parent){
+        label.style.padding = "5px";
+        label.style.fontSize = "0.8rem";
+        label.style.color = "#078fab";
+        parent.style.backgroundColor="#2e2e2e";
+    }
+    looseFocus = function(field, label, parent){
+        if(field.value == ""){
+            label.style.paddingTop = "30px";
+            label.style.paddingLeft = "10px";
+            label.style.paddingRight = "10px";
+            label.style.paddingBottom = "10px";
+            label.style.fontSize = "1.2rem";
+            parent.style.backgroundColor="inherit";
+            
+            if(field.required){
+                label.style.color = "red";
+                parent.style.borderBottomColor = "red";
+            } else {
+                label.style.color = "grey";
+                parent.style.borderBottomColor = "white";
+            }
+        }else{
+            parent.style.borderBottomColor = "white";
+        }
+    }
+    hover_on = function(parent,field){
+        if(field.value == ""){
+            parent.style.backgroundColor="#303030";
+        }
+        parent.style.borderBottomColor = "#078fab";
+    }
+    hover_off = function(parent,field, label){
+        if(field.value == ""){
+            parent.style.backgroundColor="inherit";
+        }
+        if(label.style.color == "red"){
+                parent.style.borderBottomColor = "red";
+            }else{
+            parent.style.borderBottomColor = "white";
+            }
+        }
+    var fields = document.querySelectorAll("input,select,textarea,ul");
+    fields.forEach(field => {
+        const parent = field.parentElement;
+        const label = field.previousElementSibling;
+        if(field.value != "" && label != null){
+            focus(label, parent);
+            }
+        if(field.options){
+            field.selectedIndex = 1;
+            focus(label, parent);
+        }
+        field.addEventListener("focusin", () => {
+            focus(label, parent);
+        });
+        field.addEventListener("input", () => {
+            if(field.value != ""){
+            focus(label, parent);
+            }
+        });
+        field.addEventListener("focusout", () => {
+            looseFocus(field, label, parent);
+        });
+        parent.addEventListener("mouseenter", () => {
+            hover_on(parent,field);
+        });
+        parent.addEventListener("mouseleave", () => {
+            hover_off(parent,field,label);
+        });
+    })
+</script>
 {% endblock %}

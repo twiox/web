@@ -1,4 +1,11 @@
+{% load compress %}
 {% load static %}
+{% compress css %}
+    <link type="text/x-scss" href="{% static 'style.scss' %}" rel="stylesheet" media="screen">
+{% endcompress %}
+
+
+
 <!doctype html>
 <html lang="en", style="padding-bottom:0px;">
     <head>
