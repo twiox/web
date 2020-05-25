@@ -1,4 +1,11 @@
+{% load compress %}
 {% load static %}
+{% compress css %}
+    <link type="text/x-scss" href="{% static 'style.scss' %}" rel="stylesheet" media="screen">
+{% endcompress %}
+
+
+
 <!doctype html>
 <html lang="en", style="padding-bottom:0px;">
     <head>
@@ -15,6 +22,7 @@
         
         <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Google+Sans:400,500,700">
         <link href="https://fonts.googleapis.com/css?family=Catamaran:200,600" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   </head>
     <body>
         <div class="content_wrapper">

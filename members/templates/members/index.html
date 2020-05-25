@@ -98,9 +98,30 @@
             </div>
         </div>
         {% endif %}
+        {% if chairman %}
+        <section>
+            <ul style="display:flex;">
+            {% for group in groups %}
+                <li ><button style="margin: 0 10px;" class="form_button gruppe{{group.group_id}} training_button">Gruppe {{group.group_id}} </button> <li>
+            {% endfor %}
+            </ul>
+            <!-- Show only selected groups -->
+            <script>
+                $(document).ready(function(){ 
+                    $(".training").hide();
+                });
+                
+                $(".training_button").click(function(){
+                    $(".training").hide();
+                    var group = $(this).attr("class").split(/\s+/)[1];
+                    $("div."+group).show();
+                });
+            </script>
+        </section>
+        {% endif %}
         <div>
             {% for session in sessions %}
-                <div class="session_divs col-4" id="container">
+                <div class="session_divs col-4 training gruppe{{session.group.group_id}}" id="container">
                     <div style="overflow:hidden">
                         {% if session.hinweis %}
                             <div id="info_position">
