@@ -47,6 +47,8 @@ def index(request):
          "trainer_sessions":trainer_sessions,
          "training_messags":training_messags,
          "event_messags":event_messags,
+         "chairman":hasattr(request.user, "chairman"),
+         "groups":Group.objects.all(),
          }
             )
 
