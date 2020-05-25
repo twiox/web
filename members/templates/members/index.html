@@ -100,9 +100,9 @@
         {% endif %}
         {% if chairman %}
         <section>
-            <ul style="display:flex;">
+            <ul style="display:flex; flex-wrap: wrap">
             {% for group in groups %}
-                <li ><button style="margin: 0 10px;" class="form_button gruppe{{group.group_id}} training_button">Gruppe {{group.group_id}} </button> <li>
+                <li ><button style="margin: 10px; 10px;" class="form_button gruppe{{group.group_id}} training_button">Gruppe {{group.group_id}} </button> </li>
             {% endfor %}
             </ul>
             <!-- Show only selected groups -->
@@ -115,11 +115,14 @@
                     $(".training").hide();
                     var group = $(this).attr("class").split(/\s+/)[1];
                     $("div."+group).show();
+                    var gr_id = $(this).text().split(/\s+/)[1];
+                    $("#group_header").show().text("Trainingszeiten Gruppe "+gr_id);
                 });
             </script>
         </section>
         {% endif %}
         <div>
+            <h2 id="group_header" style="display:none;"> </h2>
             {% for session in sessions %}
                 <div class="session_divs col-4 training gruppe{{session.group.group_id}}" id="container">
                     <div style="overflow:hidden">
