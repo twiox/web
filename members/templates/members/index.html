@@ -1,13 +1,5 @@
 {% extends "members/base.html" %}
-    {% block whoamI %}
-    <div>
-        <span class="equal_3 float_left" style="height:2px; background-color:#088eaa;"></span>
-        <span class="equal_3 float_left" style="height:2px; background-color:#191919;"></span>
-        <span class="equal_3 float_left" style="height:2px; background-color:#191919;"></span>
-    </div> 
-    {% endblock %}
     {% block picture %}
-    <!--<div class="member_img_fixed"> </div>-->
     <div class="image_wrapper">
         <img src="{{ STATIC_URL }}/static/media/home.jpg" id='home_view'>
         <script type="text/javascript">
@@ -19,7 +11,7 @@
     {% endblock %}
     {% block navbar2 %}
     {% if user.is_authenticated %}
-    <div class="navbar">
+    <div class="navbar primary_bg">
         <a class="float_right" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt" style="font-size:27px;"></i></a>
         <!--<a class="float_left" href="{% url 'spot_list' %}">Spots</a>-->
         {% if perms.auth.add_user %}
@@ -55,245 +47,40 @@
     {% block content %}
     <!-- Say Hello -->
     <section>
-        <h1 style="margin-bottom: 0px;"> WILLKOMMEN {{request.user.first_name | upper}} </h1>
-        <h3 style="margin:0px;"> Mitgliedsnummer {{request.user.profile.member_num}}</h3>
-        <h3 style="margin-top:0px;"> Trainingsgruppe {{group.group_id}}</h3>
+        <h1> Willkommen {{request.user.first_name}} </h1>
+        <p> Mitgliedsnummer {{request.user.profile.member_num}}</p>
+        <p> Trainingsgruppe {{group.group_id}}</p>
     </section>
     <!-- The container for the Sessions -->
-    <section id="training">
-        <div id="container">
-        <h2>TRAININGSZEITEN</h2>
-            <div class="trainer_ui">
-                {% if perms.members.add_session %}
-                    <a class="blue_font" href="{% url 'session_create' %}"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
-                {% endif %}
-                {% if perms.members.add_message %}
-                    <a class="blue_font" href="{% url 'message_sess_create' %}"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
-                {% endif %}
-                {% if perms.members.add_spot %}
-                    <a class="blue_font" href="{% url 'spot_list' %}"><i class="fas fa-map-marker-alt" style="font-size:27px;"></i></a>
-                {% endif %}
-            </div>
-        </div>
-        <!-- Here the Messanges -->
-        {% if training_messags %}
-        <div style="margin-bottom:30px;">
-            <div class="message_header"><p> Wichtige Hinweise </p></div>
-            <div class="message_body">
-            {% for msg in training_messags %}
-                <div id="container" style="padding-bottom:20px;">
-                    <h1><strong>{{msg.title}}</strong></h1>
-                    <p>{{msg.message}}</p>
-                    <div class="trainer_ui">
-                    <p>[{{msg.author.first_name}},{{msg.date |date:'d.m.Y'}}]</p>
-                    {% if perms.members.delete_message %}
-                        <a class="red_font" href="{% url 'message_delete' msg.id %} "><i class="far fa-minus-square" style="font-size:15px;"></i></a>
-                    {% endif %}
-                    {% if perms.members.change_message %}
-                        <a class="blue_font" href="{% url 'message_update' msg.id %} "><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
-                    {% endif %}
-                    </div>
-                </div>
-            {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-        {% if chairman %}
-        <section>
-            <ul style="display:flex; flex-wrap: wrap">
-            {% for group in groups %}
-                <li ><button style="margin: 10px; 10px;" class="form_button gruppe{{group.group_id}} training_button">Gruppe {{group.group_id}} </button> </li>
-            {% endfor %}
-            </ul>
-            <!-- Show only selected groups -->
-            <script>
-                $(document).ready(function(){ 
-                    $(".training").hide();
-                });
-                
-                $(".training_button").click(function(){
-                    $(".training").hide();
-                    var group = $(this).attr("class").split(/\s+/)[1];
-                    $("div."+group).show();
-                    var gr_id = $(this).text().split(/\s+/)[1];
-                    $("#group_header").show().text("Trainingszeiten Gruppe "+gr_id);
-                });
-            </script>
-        </section>
-        {% endif %}
-        <div>
-            <h2 id="group_header" style="display:none;"> </h2>
-            {% for session in sessions %}
-                <div class="session_divs col-4 training gruppe{{session.group.group_id}}" id="container">
-                    <div style="overflow:hidden">
-                        {% if session.hinweis %}
-                            <div id="info_position">
-                                <p class="session_alert"> {{session.hinweis}} </p>
-                            </div>
-                        {% endif %}
-                        <div class="first_row">
-                            <div class="session_weekday blue_bg">
-                                    <p><strong> {{session.day}} </strong></p>
-                            </div>
-                            <div class="second_section first_div">
-                                <p> {{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
-                                <h3> {{session.spot.title}}</h3>
-                            </div>
-                        </div>
-                        <div class="third_session" style="text-align:center;">
-                            <a class="more_info_button" href="{% url 'session_detail' session.id %}">weitere Informationen</a>
-                        </div>
-                    </div>
-                </div>
-            {% empty %}
-                <p> Leider gibt es im Moment keine Einheiten für dich </p>
-            {% endfor %}
-        </div>
-    </section>
-    <!-- The container for the Trainersessions -->
-    {% if trainer_sessions %}
-    <section>
-        <h2>DEINE GRUPPEN</h2>
-        <div>
-            {% for session in trainer_sessions %}
-                <div class="session_divs col-4" id="container">
-                    <div style="overflow:hidden">
-                        {% if session.hinweis %}
-                            <div id="info_position">
-                                <p class="session_alert"> {{session.hinweis}} </p>
-                            </div>
-                        {% endif %}
-                        <div class="first_row">
-                            <div class="session_weekday blue_bg">
-                                    <p><strong> {{session.day}} </strong></p>
-                            </div>
-                            <div class="second_section first_div">
-                                <p> {{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
-                                <h3> {{session.spot.title}}</h3>
-                            </div>
-                        </div>
-                        <div class="third_session" style="text-align:center;">
-                            <a class="more_info_button" href="{% url 'session_detail' session.id %}">weitere Informationen</a>
-                        </div>
-                    </div>
-                </div>
-            {% empty %}
-                <p> Leider gibt es im Moment keine Einheiten für dich </p>
-            {% endfor %}
-        </div>
-    </section>
-    {% endif %}
-    <!-- Here the Messanges No2 -->
+    {% include "members/snippets/trainingszeiten.html"%}
     <!-- Here the Container for the Events -->
-    <section id="events">
-        <div id="container">
-            <h2>EVENTKALENDER</h2>
-            <div class="trainer_ui">
-                {% if perms.members.add_event %}
-                    <a class="blue_font" href="{% url 'event_create' %}"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
-                {% endif %}
-                {% if perms.members.add_message %}
-                    <a class="blue_font" href="{% url 'message_eve_create' %}"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
-                {% endif %}
-            </div>
-        </div>
-        {% if event_messags %}
-        <div style="margin-bottom:30px;">
-            <div class="message_header"><p> Wichtige Hinweise </p></div>
-            <div class="message_body">
-            {% for msg in event_messags %}
-                <div id="container" style="padding-bottom:20px;">
-                    <h1><strong>{{msg.title}}</strong></h1>
-                    <p>{{msg.message}}</p>
-                    <div class="trainer_ui">
-                    <p>[{{msg.author.first_name}},{{msg.date |date:'d.m.Y'}}]</p>
-                    {% if perms.members.delete_message %}
-                        <a class="red_font" href="{% url 'message_delete' msg.id %} "><i class="far fa-minus-square" style="font-size:15px;"></i></a>
-                    {% endif %}
-                    {% if perms.members.change_message %}
-                        <a class="blue_font" href="{% url 'message_update' msg.id %} "><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
-                    {% endif %}
-                    </div>
-                </div>
-            {% endfor %}
-            </div>
-        </div>
-    </section>
-    {% endif %}
-        {% if events %}
-        <div>
-            {% for event in events %}
-                {% if not event.is_past_due %}
-                    <div class="session_divs col-4" id="container">
-                        <div style="overflow:hidden">
-                            {% if event.hinweis %}
-                                    <div id="info_position">
-                                        <p class="session_alert"> {{event.hinweis}} </p>
-                                    </div>
-                            {% endif %}
-                            {% if perms.members.update_event %}
-                                <p style="position:absolute; bottom:15px; left:3px; font-size:0.8rem; color:grey;">
-                                    Gruppen:
-                                    {% for group in event.allowed_groups.all %}
-                                        {{group.group_id}}
-                                    {%endfor%}
-                                </p>
-                            {% endif %}
-                            <div class="first_row">
-                                <div class="session_weekday blue_bg">
-                                        <p><strong> {{event.start_date|date:'M' }} </strong></p>
-                                </div>
-                                <div class="second_section first_div" id="container">
-                                    <p> {{event.start_date|date:'d.m' }} - {{event.end_date|date:'d.m.Y' }} </p>
-                                    <h3>{{event.title}}</h3>
-                                    <p style="color:grey;"> {{event.place}}</p>
-                                    {% if user in event.participants.all %}
-                                            <span class="dot_participate" id="info_position2"> </span>
-                                    {% else %}
-                                            <span class="dot_nonparticipate" id="info_position2"> </span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="third_session" style="text-align:center;">
-                                <a class="more_info_button" href="{% url 'event_detail' event.id %}">weitere Informationen</a>
-                            </div>
-                        </div>
-                    </div>
-                {% endif %}
-            {% empty %}
-                <p> Leider gibt es im Moment keine Einheiten für dich </p>
-            {% endfor %}
-        </div>
-        {% else %}
-            <h3> Leider sind im Moment keine Events geplant </h3>
-        {% endif %}
-    </section>
+    {% include "members/snippets/eventkalender.html"%}
     {% endblock %}
     {% block chairmen %}
-        {% if chairmen %}
-        <div style="overflow:hidden; margin-top:30px;">
-            <h1>DEINE ANSPRECHPARTNER</h1>
-            {% for chairman in chairmen.all %}
-                <div class="session_divs col-5">
-                    <div class="chair_col-4 float_left">
-                        <img class="round_profile_pic_chairman" src="{{chairman.image.url}}">
+    {% if chairmen %}
+    <section class="padding_all_big">
+        <h1>DEINE ANSPRECHPARTNER</h1>
+        {% for chairman in chairmen.all %}
+            <div class="col-5">
+                <div class="chair_col-4 float_left">
+                    <img class="round_profile_pic_chairman" src="{{chairman.image.url}}">
+                </div>
+                <div class="chair_col-5 float_left" style="padding:15px;">
+                    <h3> {{chairman.user.first_name |upper}} {{chairman.user.last_name |upper}}</h3>
+                    <div>
+                        <ul class="competences" id="container">
+                            {% for comp in chairman.complist %}
+                                <li> {{comp}} </li>
+                            {% endfor %}
+                        </ul>
                     </div>
-                    <div class="chair_col-5 float_left" style="padding:15px;">
-                        <h3> {{chairman.user.first_name |upper}} {{chairman.user.last_name |upper}}</h3>
-                        <div>
-                            <ul class="competences" id="container">
-                                {% for comp in chairman.complist %}
-                                    <li> {{comp}} </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        <div>
-                            <p> {{chairman.public_telnr}} </p>
-                            <p> {{chairman.public_email}} </p>
-                        </div>
+                    <div>
+                        <p> {{chairman.public_telnr}} </p>
+                        <p> {{chairman.public_email}} </p>
                     </div>
                 </div>
-            {% endfor %}
-        </div>
+            </div>
+        </section>
+    {% endfor %}
     {% endif %}
     {% endblock %}

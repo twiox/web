@@ -1,6 +1,6 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
-<div class="navbar_blue">
+<div class="navbar primary">
     <div>
         <a class="float_left" href="{% url 'spot_list' %}">
             <i class="fas fa-chevron-left" style="font-size:32px;"></i>
@@ -9,17 +9,17 @@
 </div>
 {% endblock %}
 {%block content %}
-<section style="padding-top:5%;">
-    <div style="background-color:#333333;padding:20px; margin-bottom:5px;" >
+<section>
+    <div class="secondary_bg padding_all_med" style="margin-bottom:5px;" >
         <div id="container">
-            <h2 style="margin-bottom:0px;" >{{object.title|upper}}</h2>
+            <h1>{{object.title|upper}}</h1>
             <p>{{spot.lat}},{{spot.long}}</p>
             <div class="trainer_ui">
                 {% if perms.members.change_spot %}
-                    <a class="blue_font" href="{% url 'spot_update' object.id  %}"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+                <a href="{% url 'spot_update' object.id  %}"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
                 {% endif %}
                 {% if perms.members.delete_spot %}
-                    <a class="red_font" href="{% url 'spot_delete' object.id  %}"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
+                <a href="{% url 'spot_delete' object.id  %}"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
                 {% endif %}
             </div>
             <hr style="clear:both;border:0px;height:2px;background-color:white; margin-bottom:10px;">

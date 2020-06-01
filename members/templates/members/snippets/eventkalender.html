@@ -1,0 +1,75 @@
+<section id="events">
+    <div id="container">
+        <h1>EVENTKALENDER</h1>
+        <div class="trainer_ui">
+            {% if perms.members.add_event %}
+                <a href="{% url 'event_create' %}"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
+            {% endif %}
+            {% if perms.members.add_message %}
+                <a href="{% url 'message_eve_create' %}"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
+            {% endif %}
+        </div>
+    </div>
+    {% if event_messags %}
+    <section>
+        <div class="secondary padding_all_med"><h4 class="strong">Wichtige Hinweise</h4></div>
+        <div class="tertiary_bg padding_tb_small">
+        {% for msg in event_messags %}
+            <div class="padding_all_big" id="container">
+                <h5>{{msg.title}}</h5>
+                <p class="padding_rl_small">{{msg.message}}</p>
+                <div class="trainer_ui padding_all_big">
+                    <p>[{{msg.author.first_name}},{{msg.date |date:'d.m.Y'}}]</p>
+                {% if perms.members.delete_message %}
+                    <a href="{% url 'message_delete' msg.id %} "><i class="far fa-minus-square" style="font-size:15px;"></i></a>
+                {% endif %}
+                {% if perms.members.change_message %}
+                    <a href="{% url 'message_update' msg.id %} "><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
+                {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    
+    {% if events %}
+    <section>
+        {% for event in events %}
+            {% if not event.is_past_due %}
+                <div class="padding_all_small float_left col-4" id="container">
+                    <div>
+                        {% if event.hinweis %}
+                                <div id="info_position">
+                                    <p class="session_alert"> {{event.hinweis}} </p>
+                                </div>
+                        {% endif %}
+                        <div style="display:flex;" class="tertiary_bg">
+                            <div class="padding_all_big polygon primary">
+                                    <p class="strong">{{event.start_date|date:'M' }}</p>
+                            </div>
+                            <div class="second_section padding_all_big" id="container">
+                                <p> {{event.start_date|date:'d.m' }} - {{event.end_date|date:'d.m.Y' }} </p>
+                                <h4>{{event.title}}</h4>
+                                <p style="color:grey;"> {{event.place}}</p>
+                                {% if user in event.participants.all %}
+                                        <span class="dot_participate" id="info_position2"> </span>
+                                {% else %}
+                                        <span class="dot_nonparticipate" id="info_position2"> </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="third_session tertiary_bg padding_all_med">
+                            <a class="more_info_button" href="{% url 'event_detail' event.id %}">weitere Informationen</a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% empty %}
+            <p> Leider gibt es im Moment keine Einheiten für dich </p>
+        {% endfor %}
+    </section>
+    {% else %}
+        <h3> Leider sind im Moment keine Events geplant </h3>
+    {% endif %}
+</section>

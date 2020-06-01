@@ -1,6 +1,6 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
-<div class="navbar_blue">
+<div class="navbar primary">
     <div>
         <a class="float_left" href="{% url 'event_detail' object.id %}">
             <i class="fas fa-chevron-left" style="font-size:32px;"></i>
@@ -10,17 +10,14 @@
 {% endblock %}
 {%block content %}
 {% if not object.deadline_reached %}
-<section style="padding-top:5%;">
-    <div style="background-color:#333333;padding:20px;">
-        <h2 style="margin-bottom:0px;">{{object.title|upper}}</h2>
-        <hr style="border:0px;height:2px;background-color:white;">
-        <h3 style="margin-top:0px;"> Bestätige deine Abmeldung </h3>
-        <div>
-            <form style="text-align:center;padding:20px;" method="POST">
-                {% csrf_token %}
-                <button style="width:100px; border: 0; margin:0 auto;" type="submit" class="sign_down">Jawoll</button>
-            </form>
-        </div>
+<section>
+    <div class="tertiary_bg padding_all_big" style="text-align:center;">
+        <h1>{{object.title|upper}}</h1>
+        <p> Bitte bestätige deine Abmeldung </p>
+        <form style="text-align:center;padding:20px;" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="form_button_sec">Jawoll</button>
+        </form>
     </div>
 </section>
 {% endif %}

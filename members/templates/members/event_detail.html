@@ -1,6 +1,6 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
-<div class="navbar_blue">
+<div class="navbar primary">
     <div>
         <a class="float_left" href="{% url 'index' %}#events">
             <i class="fas fa-chevron-left" style="font-size:32px;"></i>
@@ -9,36 +9,34 @@
 </div>
 {% endblock %}
 {%block content %}
-    <section style="padding-top:5%;">
-        {% if user in object.participants.all %}
-            <p style = "color:green"> angemeldet </P>
-        {% endif %}
+    <section>
         <div style="background-color:#333333;padding:20px;">
             <div id="container">
-                {{object.place}} 
-                <h2 style="margin-bottom:0px;">{{object.title|upper}}</h2>
+                
+                <h1>{{object.title|upper}}</h1>
                 <div class="trainer_ui">
-                {% if perms.members.change_event %}
-                    <a class="blue_font" href="{% url 'event_update' object.id  %}"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
-                {% endif %}
-                {% if perms.members.delete_event %}
-                    <a class="red_font" href="{% url 'event_delete' object.id  %}"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
-                {% endif %}
+                    {% if perms.members.change_event %}
+                    <a href="{% url 'event_update' object.id  %}"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+                    {% endif %}
+                    {% if perms.members.delete_event %}
+                    <a href="{% url 'event_delete' object.id  %}"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
+                    {% endif %}
                 </div>
                 <hr style="border:0px;height:2px;background-color:white;">
-                <h3 style="margin-top:0px;">{{object.start_date|date:'d.m'}} - {{object.end_date|date:'d.m.Y'}} </h3>
+                <h4>{{object.place}}</h4>
+                <p>{{object.start_date|date:'d.m'}} - {{object.end_date|date:'d.m.Y'}} </p>
                 
-                <div style="padding-top:30px;padding-bottom:5%;">
-                    <p align="justify" style="padding:15px;">{{object.description}}<p>
+                <div class="padding_all_big">
+                    <p align="justify">{{object.description}}<p>
                 </div>
             </div>
             <div>
                 <p style="text-align:center;width:100px;margin:0 auto;">
                 {% if not object.deadline_reached %}
                     {% if user in object.participants.all %}
-                        <a class="sign_down" href="{% url 'event_unparticipate' object.id %}">Abmelden</a>
+                        <a class="form_button_sec" href="{% url 'event_unparticipate' object.id %}">Abmelden</a>
                     {% else %}
-                        <a class="sign_up" href="{% url 'event_participate' object.id %}">Anmelden</a>
+                        <a class="form_button" href="{% url 'event_participate' object.id %}">Anmelden</a>
                         <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
                     {% endif %}
                 {% else %}

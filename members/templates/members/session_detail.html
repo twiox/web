@@ -1,6 +1,6 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
-<div class="navbar_blue">
+<div class="navbar primary">
     <div>
         <a class="float_left" href="{% url 'index' %}#training">
             <i class="fas fa-chevron-left" style="font-size:32px;"></i>
@@ -9,24 +9,24 @@
 </div>
 {% endblock %}
 {%block content %}
-<section style="padding-top:5%;">
-    <div style="background-color:#333333;padding:20px; margin-bottom:5px;" >
-        <div id="container">
-            <h2 style="margin-bottom:0px;" >{{object.title|upper}}</h2>
+<section>
+    <div class="padding_all_big tertiary_bg" style="margin-bottom:5px;" >
+        <div class="padding_tb_small" id="container">
+            <h1>{{object.title|upper}}</h1>
             <div class="trainer_ui">
-            {% if perms.members.change_session %}
+                {% if perms.members.change_session %}
                 <a class="blue_font" href="{% url 'session_update' object.id  %}"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
-            {% endif %}
-            {% if perms.members.delete_session %}
+                {% endif %}
+                {% if perms.members.delete_session %}
                 <a class="red_font" href="{% url 'session_delete' object.id  %}"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
-            {% endif %}
+                {% endif %}
             </div>
             <hr style="clear:both;border:0px;height:2px;background-color:white;">
-            <h3 style="margin-top:0px;margin-bottom:30px;"> Gruppe {{object.group.group_id}}</h3>
+            <h4> Gruppe {{object.group.group_id}}</h4>
             <p> {{object.weekday}} von {{object.start_time}} bis {{object.end_time}} Uhr</p>
         </div>
-        <div style="overflow:hidden;" >
-            <h3 style="margin-top:0px;margin-bottom:30px;">{{object.spot.title}}</h3>
+        <div class="padding_tb_big">
+            <h2>{{object.spot.title}}</h2>
             <div class="col-5" id="map" style="float:left;"> </div>
             
             <script>
@@ -43,29 +43,29 @@
             </script>
             
             <div class="col-5" style="float:right;">
-                <p style="padding:20px;" align="justify">{{object.spot.description}}</p>
-                <p style="text-align:center; padding-right: 25%;padding-left: 25%;">
-                    <a class="sign_up button_padding" target="_blank" href="https://www.google.de/maps/dir//{{object.spot.lat}},{{object.spot.long}}/@{{object.spot.lat}},{{object.spot.long}},17z"><i class="fas fa-external-link-alt" style="padding:5px;"> Route</i></a>
+                <p class="padding_all_big" align="justify">{{object.spot.description}}</p>
+                <p style="padding-right: 25%;padding-left: 25%;">
+                    <a class="form_button" target="_blank" href="https://www.google.de/maps/dir//{{object.spot.lat}},{{object.spot.long}}/@{{object.spot.lat}},{{object.spot.long}},17z"><i class="fas fa-external-link-alt"> Route</i></a>
                 </p>
             </div>
         </div>
     </div>
     <div style="background-color:#333333;padding:20px;clear:both;">
-        <div style="overflow:hidden;">
-            <h2 style="margin-bottom:30px;">ANSPRECHPARTNER</h2>
+        <div>
+            <h1>ANSPRECHPARTNER</h1>
             {% for trainer in object.trainer.all %}
-                <div class="session_divs col-5">
-                    <div class="chair_col-4 float_left">
-                        <img class="round_profile_pic_chairman" src="{{trainer.image.url}}">
-                    </div>
-                    <div class="chair_col-5 float_left" style="padding:15px;">
-                        <h3> {{trainer.user.first_name |upper}}</h3>
-                        <div>
-                            <p> {{trainer.trainer_telnr}} </p>
-                            <p> {{trainer.trainer_email}}  </p>
-                        </div>
+            <div class="col-5">
+                <div class="chair_col-4 float_left">
+                    <img class="round_profile_pic_chairman padding_all_small" src="{{trainer.image.url}}">
+                </div>
+                <div class="chair_col-5 float_left" style="padding:15px;">
+                    <h3> {{trainer.user.first_name |upper}} {{trainer.user.last_name |upper}}</h3>
+                    <div>
+                        <p> {{trainer.trainer_telnr}} </p>
+                        <p> {{trainer.trainer_email}} </p>
                     </div>
                 </div>
+            </div>
             {% endfor %}
         </div>
     </div>
