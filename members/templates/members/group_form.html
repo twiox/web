@@ -1,16 +1,35 @@
 {% extends "members/base.html" %}
-{% block navbar2 %} 
-<div class="navbar_blue">
-    <div>
-        <a class="float_left" href="{% url 'index' %}">
-            <i class="fas fa-chevron-left" style="font-size:32px;"></i>
-        </a>
-    </div>
+{% block navbar2 %}
+{% if object.group_id %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'group_list' %}#nav">
+        Gruppenliste </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> {{object.group_id}} </a>
 </div>
-{% endblock %}
+{% else %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'group_list' %}#nav">
+        Gruppenliste </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Neu </a>
+</div>
+{% endif %}
+{% endblock %} 
+
 {% block content %}
-<section style="text-align:center; padding-top:5%;">
-    <h2>NEUE GRUPPE</h2>
+<section style="text-align:center;">
+{% if object.group_id %}
+<h1>GRUPPE {{object.group_id}}</h1>
+{% else %}
+<h1>NEUE GRUPPE</h1>
+{% endif %}
     {% include "members/form_snippet.html" %}
 </section>
 {% endblock %}

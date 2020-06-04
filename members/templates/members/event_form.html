@@ -1,19 +1,31 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
-<div class="navbar_blue">
-    <div>
-        <a class="float_left" href="{% url 'index' %}#events">
-            <i class="fas fa-chevron-left" style="font-size:32px;"></i>
-        </a>
-    </div>
+{% if object.title %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#events">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_detail' object.id %}#nav">
+        {{object.title}} </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Bearbeiten </a>
 </div>
+{% else %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#events">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Neu </a>
+</div>
+{% endif %}
 {% endblock %}
+
 {% block content %}
-<section style="text-align:center; padding-top:5%;">
-    {% if object.name %}
-        <h2>EVENT {{object.name | upper }}</h2>
+<section style="text-align:center;">
+    {% if object.title %}
+        <h1>{{object.title}}</h1>
     {% else %}
-        <h2>NEUE VERANSTALTUNG</h2>
+        <h1>NEUE VERANSTALTUNG</h1>
     {% endif %}
     {% include "members/form_snippet.html" %}
 </section>

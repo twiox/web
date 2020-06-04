@@ -7,7 +7,7 @@
         <a href="{% url 'message_delete' msg.id %} "><i class="far fa-minus-square" style="font-size:15px;"></i></a>
     {% endif %}
     {% if perms.members.change_message %}
-        <a href="{% url 'message_update' msg.id %} "><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
+        <a href="{% url 'message_update' msg.id %}#nav"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
     {% endif %}
     </div>
 </div>

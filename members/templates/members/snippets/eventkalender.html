@@ -3,10 +3,10 @@
         <h1>EVENTKALENDER</h1>
         <div class="trainer_ui">
             {% if perms.members.add_event %}
-                <a href="{% url 'event_create' %}"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
+                <a href="{% url 'event_create' %}#nav"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
             {% endif %}
             {% if perms.members.add_message %}
-                <a href="{% url 'message_eve_create' %}"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
+                <a href="{% url 'message_eve_create' %}#nav"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
             {% endif %}
         </div>
     </div>
@@ -24,7 +24,7 @@
                     <a href="{% url 'message_delete' msg.id %} "><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                 {% endif %}
                 {% if perms.members.change_message %}
-                    <a href="{% url 'message_update' msg.id %} "><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
+                    <a href="{% url 'message_update' msg.id %}#nav"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
                 {% endif %}
                 </div>
             </div>
@@ -60,7 +60,7 @@
                             </div>
                         </div>
                         <div class="third_session tertiary_bg padding_all_med">
-                            <a class="more_info_button" href="{% url 'event_detail' event.id %}">weitere Informationen</a>
+                            <a class="more_info_button" href="{% url 'event_detail' event.id %}#nav">weitere Informationen</a>
                         </div>
                     </div>
                 </div>

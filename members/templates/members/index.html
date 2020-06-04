@@ -18,26 +18,26 @@
         <div class= "dropdown float_left">
             <button class="dropbtn"><i class="fas fa-user" style="font-size:25px;"></i></button>
             <div class="dropdown-content">
-                <a href="{% url 'register' %}">Account Hinzufügen</a>
-                <a href="{% url 'remove' %}">Account entfernen</a>
-                <a href="{% url 'change_group'%}">Gruppe wechseln</a>
-                <a href="{% url 'group_create'%}">Gruppe hinzufügen</a>
-                <a href="{% url 'group_list'%}">Alle Gruppen</a>
+                <a href="{% url 'register' %}#nav">Account Hinzufügen</a>
+                <a href="{% url 'remove' %}#nav">Account entfernen</a>
+                <a href="{% url 'change_group'%}#nav">Gruppe wechseln</a>
+                <a href="{% url 'group_create'%}#nav">Gruppe hinzufügen</a>
+                <a href="{% url 'group_list'%}#nav">Alle Gruppen</a>
             </div>
         </div>
         <div class= "dropdown float_left">
             <button class="dropbtn"><i class="fas fa-user-cog" style="font-size:26px;"></i></button>
             <div class="dropdown-content">
-                <a href="{% url 'register_trainer' %}">Trainer hinzufügen</a>
-                <a href="{% url 'remove_trainer' %}">Trainer entfernen</a>
-                <a href="{% url 'trainer_update'%}">Trainer bearbeiten</a>
+                <a href="{% url 'register_trainer' %}#nav">Trainer hinzufügen</a>
+                <a href="{% url 'remove_trainer' %}#nav">Trainer entfernen</a>
+                <a href="{% url 'trainer_update'%}#nav">Trainer bearbeiten</a>
             </div>
         </div>
         <div class= "dropdown float_left">
             <button class="dropbtn"><i class="fas fa-user-tie" style="font-size:27px;"></i></button>
             <div class="dropdown-content">
-                <a href="{% url 'chairman_create' %}">Vorstand Hinzufügen</a>
-                <a href="{% url 'chairman_list'%}">Vorstand bearbeiten</a>
+                <a href="{% url 'chairman_create' %}#nav">Vorstand Hinzufügen</a>
+                <a href="{% url 'chairman_list'%}#nav">Vorstand bearbeiten</a>
             </div>
         </div>
         {% endif %}
@@ -61,7 +61,7 @@
     <section class="padding_all_big">
         <h1>DEINE ANSPRECHPARTNER</h1>
         {% for chairman in chairmen.all %}
-            <div class="col-5">
+            <div class="col-5 float_left">
                 <div class="chair_col-4 float_left">
                     <img class="round_profile_pic_chairman" src="{{chairman.image.url}}">
                 </div>

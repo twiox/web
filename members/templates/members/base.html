@@ -34,7 +34,7 @@
                 </a>
             </header>
             <!-- navigationbar -->
-            <nav class="sticky">
+            <nav class="sticky" id="nav">
                 <div class="three_grid">
                     <a class="here_I_am" href="{% url 'index' %}">MITGLIEDER</a>
                     <a href="#">INTERESSIERTE</a>
@@ -58,7 +58,7 @@
             {% block content %} {% endblock %}
             </div>
         </div>
-        <footer >
+        <footer class="padding_tb_big">
             {% block chairmen %} {% endblock %}
             <div class="social" style="clear:both;">
                 <div class="element">
@@ -74,7 +74,7 @@
                     </a>
                 </div>
                 <div class="element">
-                    <a href="https://www.youtube.com/twio-x" target="_blank">
+                    <a href="https://www.youtube.com/channel/UCvvzqAyNrdy79eBQzdCwFUw/videos" target="_blank">
                         <i class='fab fa-youtube' style='font-size:27px'></i>
                         <span>youtube.com/twio-x</span>
                     </a>

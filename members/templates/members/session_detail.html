@@ -1,34 +1,32 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
-<div class="navbar primary">
-    <div>
-        <a class="float_left" href="{% url 'index' %}#training">
-            <i class="fas fa-chevron-left" style="font-size:32px;"></i>
-        </a>
-    </div>
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#training">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> {{object.title}} </a>
 </div>
 {% endblock %}
 {%block content %}
 <section>
-    <div class="padding_all_big tertiary_bg" style="margin-bottom:5px;" >
+    <h1>{{object.title|upper}}</h1>
+    
+    <div class="padding_all_big tertiary_bg">
         <div class="padding_tb_small" id="container">
-            <h1>{{object.title|upper}}</h1>
             <div class="trainer_ui">
                 {% if perms.members.change_session %}
-                <a class="blue_font" href="{% url 'session_update' object.id  %}"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+                <a href="{% url 'session_update' object.id  %}#nav"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
                 {% endif %}
                 {% if perms.members.delete_session %}
-                <a class="red_font" href="{% url 'session_delete' object.id  %}"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
+                <a href="{% url 'session_delete' object.id  %}"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
                 {% endif %}
             </div>
-            <hr style="clear:both;border:0px;height:2px;background-color:white;">
-            <h4> Gruppe {{object.group.group_id}}</h4>
-            <p> {{object.weekday}} von {{object.start_time}} bis {{object.end_time}} Uhr</p>
+            <h3> Gruppe {{object.group.group_id}}</h3>
+            <p> {{object.weekday}}: {{object.start_time}} bis {{object.end_time}} Uhr</p>
         </div>
         <div class="padding_tb_big">
-            <h2>{{object.spot.title}}</h2>
+            <h3>{{object.spot.title}}</h3>
             <div class="col-5" id="map" style="float:left;"> </div>
-            
             <script>
                 // Initialize and add the map
                 function initMap() {
@@ -42,23 +40,23 @@
                 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAkB8V0wOMLikUsZilD_5LEz49Isbqr-0k&callback=initMap">
             </script>
             
-            <div class="col-5" style="float:right;">
+            <div class="col-5 float_right">
                 <p class="padding_all_big" align="justify">{{object.spot.description}}</p>
-                <p style="padding-right: 25%;padding-left: 25%;">
+                <p class="flex_center padding_all_big">
                     <a class="form_button" target="_blank" href="https://www.google.de/maps/dir//{{object.spot.lat}},{{object.spot.long}}/@{{object.spot.lat}},{{object.spot.long}},17z"><i class="fas fa-external-link-alt"> Route</i></a>
                 </p>
             </div>
         </div>
     </div>
-    <div style="background-color:#333333;padding:20px;clear:both;">
+    <h1 class="padding_tb_big">ANSPRECHPARTNER</h1>
+    <div class="tertiary_bg padding_all_big" style="clear:both;">
         <div>
-            <h1>ANSPRECHPARTNER</h1>
             {% for trainer in object.trainer.all %}
-            <div class="col-5">
+            <div class="col-5 float_left">
                 <div class="chair_col-4 float_left">
                     <img class="round_profile_pic_chairman padding_all_small" src="{{trainer.image.url}}">
                 </div>
-                <div class="chair_col-5 float_left" style="padding:15px;">
+                <div class="chair_col-5 float_left padding_all_small">
                     <h3> {{trainer.user.first_name |upper}} {{trainer.user.last_name |upper}}</h3>
                     <div>
                         <p> {{trainer.trainer_telnr}} </p>

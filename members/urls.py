@@ -25,6 +25,7 @@ urlpatterns = [
     path("message/<int:pk>/update/", views.MessageUpdateView.as_view(),name="message_update"),
     path("group/", views.GroupListView.as_view(),name="group_list"),
     path("group/new/", views.GroupCreateView.as_view(),name="group_create"),
+    path("group/<int:pk>/update", views.GroupUpdateView.as_view(),name="group_update"),
     path("group/<int:pk>/delete/", views.GroupDeleteView.as_view(),name="group_delete"),
 ]
 

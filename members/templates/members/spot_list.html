@@ -1,43 +1,40 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
-<div class="navbar_blue">
-    <div>
-        <a class="float_left" href="{% url 'index' %}#training">
-            <i class="fas fa-chevron-left" style="font-size:27px;"></i>
-        </a>
-    </div>
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#training">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Spotliste </a>
 </div>
 {% endblock %}
 {%block content %}
 <section id="training">
         <div id="container">
-        <h2>SPOTLISTE</h2>
+        <h1>SPOTLISTE</h1>
             <div class="trainer_ui">
                 {% if perms.members.add_spot %}
-                    <a class="blue_font" href="{% url 'spot_create' %}"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
+                    <a class="blue_font" href="{% url 'spot_create' %}#nav"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
                 {% endif %}
             </div>
         </div>
         <div>
             {% for spot in object_list %}
-                <div class="session_divs col-4" id="container">
-                    <div style="overflow:hidden">
-                        <div class="first_row">
-                            <div class="session_weekday blue_bg">
-                                    <p><strong>  </strong></p>
-                            </div>
-                            <div class="second_section first_div">
-                                <h3> {{spot.title}}</h3>
-                                <p> {{spot.lat}},{{spot.long}}</p>
-                            </div>
-                        </div>
-                        <div class="third_session" style="text-align:center;">
-                            <a class="more_info_button" href="{% url 'spot_detail' spot.id %}">weitere Informationen</a>
-                        </div>
+            <div class="padding_all_small float_left col-4" id="container">
+                <div style="display:flex;" class="tertiary_bg">
+                    <div class="padding_all_big polygon primary">
+                            <p class="strong"><p>
+                    </div>
+                    <div class="second_section padding_all_big">
+                        <h3> {{spot.title}}</h3>
+                        <p> {{spot.lat}},{{spot.long}}</p>
                     </div>
                 </div>
+                <div class="third_session tertiary_bg padding_all_med">
+                    <a class="more_info_button" href="{% url 'spot_detail' spot.id %}#nav">weitere Informationen</a>
+                </div>
+            </div>
             {% empty %}
-                <p> Leider gibt es im Moment keine Spots für dich </p>
+                <h1> Noch keine Spots </h1>
             {% endfor %}
         </div>
     </section>

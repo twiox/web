@@ -1,12 +1,8 @@
 {% extends "members/base.html" %}
-{% block flag %}
-<h3 style="color: white; text-align: center; background-color: #088eaa; padding:10px; margin-top:0px;"> MITGLIEDERBEREICH </h3>
-{% endblock %}
-
 {% block content %}
-<section style="text-align: center;padding-top:100px;">
-    <h2>Login</h2>
+<section style="text-align:center;">
+    <h1>Login</h1>
     {% include "members/form_snippet.html" %}
-    <a href="{% url 'password_reset' %}" class="more_info_button button_padding">Passwort zurücksetzen</a>
+    <a href="{% url 'password_reset' %}" class="more_info_button padding_all_small flex_center">Passwort zurücksetzen</a>
 </section>
 {% endblock %}

@@ -1,31 +1,27 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
-<div class="navbar primary">
-    <div>
-        <a class="float_left" href="{% url 'index' %}#events">
-            <i class="fas fa-chevron-left" style="font-size:32px;"></i>
-        </a>
-    </div>
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#events">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{object.title}}</a>
 </div>
 {% endblock %}
 {%block content %}
     <section>
-        <div style="background-color:#333333;padding:20px;">
+        <h1>{{object.title|upper}}</h1>
+        <div class="tertiary_bg padding_all_big">
             <div id="container">
-                
-                <h1>{{object.title|upper}}</h1>
                 <div class="trainer_ui">
                     {% if perms.members.change_event %}
-                    <a href="{% url 'event_update' object.id  %}"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+                    <a href="{% url 'event_update' object.id  %}#nav"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
                     {% endif %}
                     {% if perms.members.delete_event %}
                     <a href="{% url 'event_delete' object.id  %}"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
                     {% endif %}
                 </div>
-                <hr style="border:0px;height:2px;background-color:white;">
                 <h4>{{object.place}}</h4>
                 <p>{{object.start_date|date:'d.m'}} - {{object.end_date|date:'d.m.Y'}} </p>
-                
                 <div class="padding_all_big">
                     <p align="justify">{{object.description}}<p>
                 </div>
@@ -34,9 +30,10 @@
                 <p style="text-align:center;width:100px;margin:0 auto;">
                 {% if not object.deadline_reached %}
                     {% if user in object.participants.all %}
-                        <a class="form_button_sec" href="{% url 'event_unparticipate' object.id %}">Abmelden</a>
+                        <a class="form_button_sec" href="{% url 'event_unparticipate' object.id %}#nav">Abmelden</a>
+                        <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
                     {% else %}
-                        <a class="form_button" href="{% url 'event_participate' object.id %}">Anmelden</a>
+                        <a class="form_button" href="{% url 'event_participate' object.id %}#nav">Anmelden</a>
                         <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
                     {% endif %}
                 {% else %}

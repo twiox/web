@@ -195,6 +195,13 @@ class GroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Group
     permission_required = 'members.delete_spot'
 
+class GroupUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    #template: event_detail.html
+    model = Group
+    #who can update the event?
+    permission_required = 'members.change_group'
+    fields = ["group_id"]
+
 """For The Messages"""
 class MessageEveCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     #template: event_detail.html

@@ -135,3 +135,4 @@ MEDIA_URL ="/media/" #how do we access the media in the browser?
 #for the login
 LOGIN_REDIRECT_URL = "index"
 LOGIN_URL = 'login'
+

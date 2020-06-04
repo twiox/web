@@ -1,95 +1,49 @@
-<div class="form_wrapper">
-    <form method="POST" enctype="multipart/form-data">
+<div class="form_wrapper padding_all_big">
+    <form class="form_wrapper" method="POST" enctype="multipart/form-data">
         {% if form.errors %}
             {% for error in field.errors %}
-            <p style="color: #7b1b42">{{error}}</p>
+            <p class="sec_font">{{error}}</p>
             {% endfor %}
         {% endif %}
         {% csrf_token %}
-        <div class ="inner_form">
+        <div class ="inner_form padding_all_big">
             {% for field in form %}
-            <div class="field_wrapper">
+            <div class="field_wrapper unfocused">
                 <div id="container">
                 {{ field.label_tag }} {{ field }}
                 </div>
             </div>
             {% endfor %}
-            <button type="submit">
-                <span>OK</span>
+            <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
+                <span >OK</span>
             </button>
         </div>
     </form>
-</div>   
-        <script>
-            focus = function(label, parent){
-                label.style.padding = "5px";
-                label.style.fontSize = "0.8rem";
-                label.style.color = "#078fab";
-                parent.style.backgroundColor="#2e2e2e";
-            }
-            looseFocus = function(field, label, parent){
-                if(field.value == ""){
-                    label.style.paddingTop = "30px";
-                    label.style.paddingLeft = "10px";
-                    label.style.paddingRight = "10px";
-                    label.style.paddingBottom = "10px";
-                    label.style.fontSize = "1.2rem";
-                    parent.style.backgroundColor="inherit";
-                    
-                    if(field.required){
-                        label.style.color = "red";
-                        parent.style.borderBottomColor = "red";
-                    } else {
-                        label.style.color = "grey";
-                        parent.style.borderBottomColor = "white";
-                    }
-                }else{
-                    parent.style.borderBottomColor = "white";
-                }
-            }
-            hover_on = function(parent,field){
-                if(field.value == ""){
-                    parent.style.backgroundColor="#303030";
-                }
-                parent.style.borderBottomColor = "#078fab";
-            }
-            hover_off = function(parent,field, label){
-                if(field.value == ""){
-                    parent.style.backgroundColor="inherit";
-                }
-                if(label.style.color == "red"){
-                        parent.style.borderBottomColor = "red";
-                    }else{
-                    parent.style.borderBottomColor = "white";
-                    }
-                }
-            var fields = document.querySelectorAll("input,select,textarea,ul");
-            fields.forEach(field => {
-                const parent = field.parentElement;
-                const label = field.previousElementSibling;
-                if(field.value != "" && label != null){
-                    focus(label, parent);
-                    }
-                if(field.options){
-                    field.selectedIndex = 1;
-                    focus(label, parent);
-                }
-                field.addEventListener("focusin", () => {
-                    focus(label, parent);
-                });
-                field.addEventListener("input", () => {
-                    if(field.value != ""){
-                    focus(label, parent);
-                    }
-                });
-                field.addEventListener("focusout", () => {
-                    looseFocus(field, label, parent);
-                });
-                parent.addEventListener("mouseenter", () => {
-                    hover_on(parent,field);
-                });
-                parent.addEventListener("mouseleave", () => {
-                    hover_off(parent,field,label);
-                });
-            })
-        </script>
+</div>  
+<script>
+$(document).ready(function(){
+    $(".field_wrapper").each(function(){
+        if($(this).find("input").val() !== ""){
+            $(this).addClass("focused");
+            $(this).removeClass("unfocused");
+        }
+    });
+});
+$(".field_wrapper").focusin(function(){
+    $(this).addClass("focused");
+    $(this).removeClass("unfocused");
+    $(this).removeClass("required");
+    });
+$(".field_wrapper").focusout(function(){
+    if($(this).find("input").val() == ""){
+        if($(this).find("input").prop("required") == true){
+            $(this).addClass("required");
+        }
+        $(this).addClass("unfocused");
+        $(this).removeClass("focused");
+    }
+    else{
+        $(this).removeClass("required");
+    }
+});
+</script>

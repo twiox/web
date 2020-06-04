@@ -1,24 +1,16 @@
 {% extends "members/base.html" %}
-{% block navbar2 %} 
-<div class="navbar_blue">
-    <div>
-        <a class="float_left" href="{% url 'group_list' %}">
-            <i class="fas fa-chevron-left" style="font-size:32px;"></i>
-        </a>
-    </div>
-</div>
-{% endblock %}
 {%block content %}
-<section style="padding-top:5%;">
-    <div style="background-color:#333333;padding:20px;">
-        <h2 style="margin-bottom:0px;">Gruppe löschen</h2>
-        <hr style="border:0px;height:2px;background-color:white;">
-        <h3 style="margin-top:0px;"> Gruppe {{object.group_id}} </h3>
-        <div>
-            <form style="text-align:center;padding:20px;" method="POST">
+<section style="text-align:center;">
+    <h1>Gruppe {{object.group_id}}</h1>
+    <div class="flex_center">
+        <div class="tertiary_bg padding_all_big col-5" style="text-align:center;">
+            <p> Willst du die Gruppe wirklich löschen?</p>
+            <p> alle Mitglieder der Gruppe müssen MANUELL neu verteilt werden</p>
+            <form class="padding_all_big" method="POST">
                 {% csrf_token %}
-                <button style="width:100px;border: 0; margin:0 auto;" type="submit" class="sign_down">Jawoll</button>
+                <button type="submit" class="form_button_sec" style="margin: 0 auto;">Jawoll</button>
             </form>
+            <a class="padding_all_small more_info_button" href="{% url 'group_list' %}#nav">Nope</a>
         </div>
     </div>
 </section>

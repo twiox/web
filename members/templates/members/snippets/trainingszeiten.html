@@ -3,13 +3,13 @@
         <h1>TRAININGSZEITEN</h1>
             <div class="trainer_ui">
                 {% if perms.members.add_session %}
-                    <a href="{% url 'session_create' %}"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
+                    <a href="{% url 'session_create' %}#nav"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
                 {% endif %}
                 {% if perms.members.add_message %}
-                    <a href="{% url 'message_sess_create' %}"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
+                    <a href="{% url 'message_sess_create' %}#nav"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
                 {% endif %}
                 {% if perms.members.add_spot %}
-                    <a href="{% url 'spot_list' %}"><i class="fas fa-map-marker-alt" style="font-size:27px;"></i></a>
+                    <a href="{% url 'spot_list' %}#nav"><i class="fas fa-map-marker-alt" style="font-size:27px;"></i></a>
                 {% endif %}
             </div>
         </div>
@@ -25,10 +25,10 @@
                     <div class="padding_all_med trainer_ui">
                         <p>[{{msg.author.first_name}},{{msg.date |date:'d.m.Y'}}]</p>
                         {% if perms.members.delete_message %}
-                        <a href="{% url 'message_delete' msg.id %} "><i class="far fa-minus-square" style="font-size:15px;"></i></a>
+                        <a href="{% url 'message_delete' msg.id %}"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                         {% endif %}
                         {% if perms.members.change_message %}
-                        <a href="{% url 'message_update' msg.id %} "><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
+                        <a href="{% url 'message_update' msg.id %}#nav"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
                         {% endif %}
                     </div>
                 </div>
@@ -79,7 +79,7 @@
                         </div>
                     </div>
                     <div class="third_session tertiary_bg padding_all_med">
-                        <a class="more_info_button" href="{% url 'session_detail' session.id %}">weitere Informationen</a>
+                        <a class="more_info_button" href="{% url 'session_detail' session.id %}#nav">weitere Informationen</a>
                     </div>
                 </div>
             </div>
@@ -111,7 +111,7 @@
                         </div>
                     </div>
                     <div class="third_session tertiary_bg padding_all_med">
-                        <a class="more_info_button" href="{% url 'session_detail' session.id %}">weitere Informationen</a>
+                        <a class="more_info_button" href="{% url 'session_detail' session.id %}#nav">weitere Informationen</a>
                     </div>
                 </div>
             </div>
