@@ -78,12 +78,15 @@ class Trainer(models.Model):
         return reverse('trainer_update')
 
 class Session(models.Model):
+
     group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name = u"Gruppe",blank=True, null=True,)
     trainer = models.ManyToManyField(Trainer, blank=True, verbose_name =u"Trainer")
     spot = models.ForeignKey(Spot, blank=True, null=True, on_delete=models.SET_NULL, verbose_name=u"Spot")
     
     title = models.CharField("Titel", max_length=50, default="Hallentraining")
     day = models.CharField("Tag",max_length=2, default="Mo")
+    day_key = models.IntegerField("Key", default=1)
+    
     start_time = models.TimeField("Beginn",default="17:00")
     end_time = models.TimeField("Ende",default="19:00")
     hinweis = models.CharField("Hinweis", blank=True, max_length=50)
@@ -107,17 +110,20 @@ class Session(models.Model):
         "Sa":"Samstags",
         "So":"Sonntags",
         }
-        return tag[self.day]
+        if(self.day in tag):
+            return tag[self.day]
+        else: 
+            return "Irgendwann"
     
     
     def get_absolute_url(self):
         return reverse('session_detail', kwargs={"pk": self.pk})
-    
-    class Meta:
-        ordering = ["day"]
 
     def __str__(self):
         return f"{self.title}_{self.group.group_id_self.day}"
+        
+    class Meta:
+        ordering = ["day_key"]
 
 class Message(models.Model):
     choices =(

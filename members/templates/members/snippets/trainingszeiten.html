@@ -1,99 +1,102 @@
 <section id="training">
-        <div id="container">
+    <div id="container">
         <h1>TRAININGSZEITEN</h1>
-            <div class="trainer_ui">
-                {% if perms.members.add_session %}
-                    <a href="{% url 'session_create' %}#nav"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
-                {% endif %}
-                {% if perms.members.add_message %}
-                    <a href="{% url 'message_sess_create' %}#nav"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
-                {% endif %}
-                {% if perms.members.add_spot %}
-                    <a href="{% url 'spot_list' %}#nav"><i class="fas fa-map-marker-alt" style="font-size:27px;"></i></a>
-                {% endif %}
-            </div>
+        <div class="trainer_ui">
+            {% if perms.members.add_session %}
+                <a href="{% url 'session_create' %}#nav"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
+            {% endif %}
+            {% if perms.members.add_message %}
+                <a href="{% url 'message_sess_create' %}#nav"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
+            {% endif %}
+            {% if perms.members.add_spot %}
+                <a href="{% url 'spot_list' %}#nav"><i class="fas fa-map-marker-alt" style="font-size:27px;"></i></a>
+            {% endif %}
         </div>
-        <!-- Here the Messanges -->
-        {% if training_messags %}
-        <section>
-            <div class="secondary padding_all_med"><h4 class="strong">Wichtige Hinweise</h4></div>
-            <div class="tertiary_bg padding_tb_small">
-                {% for msg in training_messags %}
-                <div class="padding_all_med" id="container">
-                    <h5>{{msg.title}}</h5>
-                    <p class="padding_rl_small">{{msg.message}}</p>
-                    <div class="padding_all_med trainer_ui">
-                        <p>[{{msg.author.first_name}},{{msg.date |date:'d.m.Y'}}]</p>
-                        {% if perms.members.delete_message %}
-                        <a href="{% url 'message_delete' msg.id %}"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
-                        {% endif %}
-                        {% if perms.members.change_message %}
-                        <a href="{% url 'message_update' msg.id %}#nav"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-        {% endif %}
-        <!--Now add Group-Sessions and Links to group -->
-        {% if chairman %}
-        <section>
-            <div class="padding_all_big">
-                <ul style="display:flex; flex-wrap: wrap;">
-                {% for group in groups %}
-                    <li style="padding:5px;"> <button class="web_button gruppe{{group.group_id}} training_button padding_all_small">Gruppe {{group.group_id}} </button> </li>
-                {% endfor %}
-                </ul>
-            </div>
-            <!-- Show only selected groups -->
-            <script>
-                $(document).ready(function(){ 
-                    $(".training").hide();
-                });
-                
-                $(".training_button").click(function(){
-                    $(".training").hide();
-                    var group = $(this).attr("class").split(/\s+/)[1];
-                    $("div."+group).show();
-                    var gr_id = $(this).text().split(/\s+/)[1];
-                    $("#group_header").show().text("Trainingszeiten Gruppe "+gr_id);
-                });
-            </script>
-        </section>
-        {% endif %}
-        <div>
-            <h3 id="group_header" style="display:none;"> </h3>
-            {% for session in sessions %}
-            <div class="padding_all_small float_left col-4 training gruppe{{session.group.group_id}}" id="container">
-                <div>
-                    {% if session.hinweis %}
-                        <div id="info_position">
-                            <p class="session_alert"> {{session.hinweis}} </p>
-                        </div>
+    </div>
+    <!-- Here the Messages -->
+    {% if training_messags %}
+    <section>
+        <div class="secondary padding_all_med"><h4 class="strong">Wichtige Hinweise</h4></div>
+        <div class="tertiary_bg padding_tb_small">
+            {% for msg in training_messags %}
+            <div class="padding_all_med" id="container">
+                <h5>{{msg.title}}</h5>
+                <p class="padding_rl_small">{{msg.message}}</p>
+                <div class="padding_all_med trainer_ui">
+                    <p>[{{msg.author.first_name}},{{msg.date |date:'d.m.Y'}}]</p>
+                    {% if perms.members.delete_message %}
+                    <a href="{% url 'message_delete' msg.id %}"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                     {% endif %}
-                    <div style="display:flex;" class="tertiary_bg">
-                        <div class="padding_all_big polygon primary">
-                                <p class="strong">{{session.day}}<p>
-                        </div>
-                        <div class="second_section padding_all_big">
-                            <p> {{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
-                            <h4> {{session.spot.title}}</h4>
-                        </div>
-                    </div>
-                    <div class="third_session tertiary_bg padding_all_med">
-                        <a class="more_info_button" href="{% url 'session_detail' session.id %}#nav">weitere Informationen</a>
-                    </div>
+                    {% if perms.members.change_message %}
+                    <a href="{% url 'message_update' msg.id %}#nav"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
+                    {% endif %}
                 </div>
             </div>
-            {% empty %}
-            <h3> Leider gibt es im Moment keine Einheiten für dich </h3>
             {% endfor %}
         </div>
     </section>
+    {% endif %}
+    <!--Now add Group-Sessions and Links to group -->
+    {% if chairman %}
+    <div>
+        <div class="padding_all_big">
+            <ul style="display:flex; flex-wrap: wrap;">
+            {% for group in groups %}
+                <li style="padding:5px;"> <button class="web_button gruppe{{group.group_id}} training_button padding_all_small">Gruppe {{group.group_id}} </button> </li>
+            {% endfor %}
+            </ul>
+        </div>
+        <!-- Show only selected groups -->
+        <script>
+            $(document).ready(function(){ 
+                $(".training").hide();
+            });
+            
+            $(".training_button").click(function(){
+                $(".training").hide();
+                var group = $(this).attr("class").split(/\s+/)[1];
+                $("div."+group).show();
+                var gr_id = $(this).text().split(/\s+/)[1];
+                $("#group_header").show().text("Trainingszeiten Gruppe "+gr_id);
+            });
+        </script>
+    </div>
+    {% endif %}
+    <div>
+        {% if trainer_sessions and not chairman %}
+        <h3 class="padding_tb_big">DEINE TRAININGSZEITEN</h3>
+        {% endif %}
+        <h3 id="group_header" style="display:none;"></h3>
+        {% for session in sessions %}
+        <div class="padding_all_small float_left col-4 training gruppe{{session.group.group_id}}" id="container">
+            <div>
+                {% if session.hinweis %}
+                    <div id="info_position">
+                        <p class="session_alert"> {{session.hinweis}} </p>
+                    </div>
+                {% endif %}
+                <div style="display:flex;" class="tertiary_bg">
+                    <div class="padding_all_big polygon primary">
+                            <p class="strong">{{session.day}}<p>
+                    </div>
+                    <div class="second_section padding_all_big">
+                        <p> {{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
+                        <h4> {{session.spot.title}}</h4>
+                    </div>
+                </div>
+                <div class="third_session tertiary_bg padding_all_med">
+                    <a class="more_info_button" href="{% url 'session_detail' session.id %}#nav">weitere Informationen</a>
+                </div>
+            </div>
+            
+        </div>
+        {% empty %}
+        <h3> Leider gibt es im Moment keine Einheiten für dich </h3>
+        {% endfor %}
+    </div>
     <!-- The container for the Trainersessions -->
     {% if trainer_sessions %}
-    <section>
+    <div>
         <h3 class="padding_tb_big">DEINE GRUPPEN</h3>
         <div class="padding_rl_big">
             <ul style="display:flex; flex-wrap: wrap;">
@@ -102,7 +105,8 @@
             {% endfor %}
             </ul>
         </div>
-        <div class="padding_tb_big" >
+        <h3 class="padding_tb_big">DEINE Einheiten</h3>
+        <div>
             {% for session in trainer_sessions %}
             <div class="padding_all_small float_left col-4" id="container">
                 <div>
@@ -113,7 +117,7 @@
                     {% endif %}
                     <div style="display:flex;" class="tertiary_bg">
                         <div class="padding_all_big polygon primary">
-                                <p class="strong">{{session.day}}<p>
+                            <p class="strong">{{session.day}}</p>
                         </div>
                         <div class="second_section padding_all_big">
                             <p> {{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
@@ -129,6 +133,6 @@
                 <p> Leider gibt es im Moment keine Einheiten für dich </p>
             {% endfor %}
         </div>
-    </section>
+    </div>
     {% endif %}
 </section>

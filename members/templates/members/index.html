@@ -58,8 +58,9 @@
     {% endblock %}
     {% block chairmen %}
     {% if chairmen %}
-    <section class="padding_all_big">
+    <section>
         <h1>DEINE ANSPRECHPARTNER</h1>
+        <div class="padding_tb_big">
         {% for chairman in chairmen.all %}
             <div class="col-5 float_left">
                 <div class="chair_col-4 float_left">
@@ -80,7 +81,8 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
     {% endfor %}
     {% endif %}
     {% endblock %}

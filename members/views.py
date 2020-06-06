@@ -129,6 +129,14 @@ class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
         perms = bool(hasattr(self.request.user, "trainer")+ hasattr(self.request.user,"chairman"))
         return True if user_group in event.allowed_groups.all() else perms
 
+class EventParticipantsView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    model = Event
+    template_name = 'members/event_participants.html'
+    
+    def test_func(self):
+        perms = bool(hasattr(self.request.user, "trainer")+ hasattr(self.request.user,"chairman"))
+        return perms
+
 """FOR THE SESSIONS"""
 
 class SessionDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
@@ -148,11 +156,25 @@ class SessionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView)
     form_class = SessionForm
     permission_required = 'members.add_session'
     
+    def form_valid(self, form):
+        key={"Mo":1,"Di":2,"Mi":3,"Do":4,"Fr":5,"Sa":6,"So":7}
+        self.object = form.save()
+        if(self.object.day in key):
+            self.object.day_key = key[self.object.day]
+        return super().form_valid(form)
+    
 class SessionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_form.html
     model = Session
     form_class = SessionForm
     permission_required = 'members.change_session'
+    
+    def form_valid(self, form):
+        key={"Mo":1,"Di":2,"Mi":3,"Do":4,"Fr":5,"Sa":6,"So":7}
+        self.object = form.save()
+        if(self.object.day in key):
+            self.object.day_key = key[self.object.day]
+        return super().form_valid(form)
 
 
 class SessionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):

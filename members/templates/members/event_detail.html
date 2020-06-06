@@ -5,6 +5,11 @@
         Mitglieder </a>
     <a class="float_left"> > </a>
     <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{object.title}}</a>
+    {% if perms.members.delete_event %}
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_participants' object.id %}#nav">
+        Teilnehmer </a>
+    {% endif %}
 </div>
 {% endblock %}
 {%block content %}
