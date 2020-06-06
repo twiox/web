@@ -36,13 +36,16 @@
             </div>
         </section>
         {% endif %}
+        <!--Now add Group-Sessions and Links to group -->
         {% if chairman %}
         <section>
-            <ul style="display:flex; flex-wrap: wrap">
-            {% for group in groups %}
-                <li> <button style="margin:5px; padding:5px;" class="form_button gruppe{{group.group_id}} training_button">Gruppe {{group.group_id}} </button> </li>
-            {% endfor %}
-            </ul>
+            <div class="padding_all_big">
+                <ul style="display:flex; flex-wrap: wrap;">
+                {% for group in groups %}
+                    <li style="padding:5px;"> <button class="web_button gruppe{{group.group_id}} training_button padding_all_small">Gruppe {{group.group_id}} </button> </li>
+                {% endfor %}
+                </ul>
+            </div>
             <!-- Show only selected groups -->
             <script>
                 $(document).ready(function(){ 
@@ -91,10 +94,17 @@
     <!-- The container for the Trainersessions -->
     {% if trainer_sessions %}
     <section>
-        <h3>DEINE GRUPPEN</h3>
-        <div>
+        <h3 class="padding_tb_big">DEINE GRUPPEN</h3>
+        <div class="padding_rl_big">
+            <ul style="display:flex; flex-wrap: wrap;">
+            {% for group in trainer_groups.all %}
+                <li style="padding:5px;"> <a class="web_button gruppe{{group.group_id}} training_button padding_all_small" href="{% url 'group_detail' group.id %}">Gruppe {{group.group_id}} </a> </li>
+            {% endfor %}
+            </ul>
+        </div>
+        <div class="padding_tb_big" >
             {% for session in trainer_sessions %}
-                <div class="padding_all_small float_left col-4" id="container">
+            <div class="padding_all_small float_left col-4" id="container">
                 <div>
                     {% if session.hinweis %}
                         <div id="info_position">

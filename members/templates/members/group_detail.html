@@ -1,0 +1,40 @@
+{% extends "members/base.html" %}
+{% block navbar2 %} 
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    {%if perms.members.change_group %}
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'group_list' %}#nav">
+    Gruppenliste </a>
+    <a class="float_left"> > </a>
+    {% endif %}
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Gruppe {{object.group_id}} </a>
+</div>
+{% endblock %}
+
+
+
+{% block content %}
+<section>
+    <div style="text-align:center">
+        <h1> Teilnehmer</h1>
+    </div>
+    <div class="flex_center">
+        <div class="padding_all_big tertiary_bg col-5">
+            <table >
+            <tr> 
+                <th><h5> Vorname </h5></th>
+                <th><h5> Nachname </h5></th>
+            </tr>
+            {% for member in member_list %}
+            <tr> 
+                <td> {{member.first_name}} </td>
+                <td> {{member.last_name}} </td>
+            </tr>
+            {% endfor %}
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

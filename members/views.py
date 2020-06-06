@@ -10,6 +10,7 @@ from django.views.generic import (
 from django.views import View
 from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
 from .forms import EventUpdateParticipantForm, SessionForm, EventForm
 from django.contrib import messages
@@ -30,8 +31,10 @@ def index(request):
         events = Event.objects.all()
         training_messags = Message.objects.all().filter(display="sessions")
         event_messags = Message.objects.all().filter(display="events")
+        trainer_groups = Group.objects.filter(session__trainer=Trainer.objects.get(user=request.user)).distinct()
     else:
         trainer_sessions = None
+        trainer_groups = None
     if(hasattr(request.user, "chairman")):
         sessions = Session.objects.all()
         events = Event.objects.all()
@@ -45,6 +48,7 @@ def index(request):
          "sessions":sessions, 
          "events":events,
          "trainer_sessions":trainer_sessions,
+         "trainer_groups":trainer_groups,
          "training_messags":training_messags,
          "event_messags":event_messags,
          "chairman":hasattr(request.user, "chairman"),
@@ -188,12 +192,42 @@ class GroupCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
 class GroupDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Group
-    permission_required = "members.delete_crew"
+    permission_required = "members.delete_group"
     success_url = '/members/group/'
+    
+    def delete(self, request, *args, **kwargs):
+        """
+        Call the delete() method on the fetched object and then redirect to the
+        success URL.
+        """
+        self.object = self.get_object()
+        
+        if(len(User.objects.filter(profile__group = self.object)) == 0):
+            success_url = self.get_success_url()
+            self.object.delete()
+            return HttpResponseRedirect(success_url)
+        
+        else:
+            messages.add_message(request, messages.ERROR, 'Fehler. Die Gruppe ist nicht leer')
+            return HttpResponseRedirect(f"/members/group/{self.object.id}/delete/")
 
 class GroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Group
-    permission_required = 'members.delete_spot'
+    permission_required = 'members.delete_group'
+
+class GroupDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
+    model = Group
+    permission_required = "members.see_group"
+    
+    def get_context_data(self, **kwargs):
+        context = {"member_list":User.objects.filter(profile__group = self.object)}
+        if self.object:
+            context['object'] = self.object
+            context_object_name = self.get_context_object_name(self.object)
+            if context_object_name:
+                context[context_object_name] = self.object
+        context.update(kwargs)
+        return super().get_context_data(**context)
 
 class GroupUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_detail.html

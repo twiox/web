@@ -23,7 +23,10 @@ class Spot(models.Model):
 
 class Group(models.Model):
     group_id = models.CharField("Gruppe (z.B 'A')", max_length=10)
-
+    
+    class Meta:
+        permissions = [('see_group', 'Can see members of the group')]
+    
     def __str__(self):
         return f"Gruppe: {self.group_id}"
 

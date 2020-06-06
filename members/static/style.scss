@@ -165,6 +165,16 @@ $padding_small: 10px;
         color:#69CCE1;
     }
 }
+.web_button {
+    color:white;
+    display:block;
+    width: 100px;
+    background-color:$tertiary_bg;
+    &:hover{
+        background-color:$primary;
+    }
+}
+
 
 /*Color and Font-Stuff */
 .secondary{
@@ -260,6 +270,12 @@ h5{
     color:$header_col;
     font-weight:700;
     font-size: 1.1rem;
+}
+table{
+    th, td {
+        padding: 2px $padding_small;
+        text-align: left;
+    }
 }
 
 /*Special Stuff*/
