@@ -1,0 +1,54 @@
+{% extends "members/base.html" %}
+{% block navbar2 %} 
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Mitgliederliste</a>
+</div>
+{% endblock %}
+
+{%block content %}
+<section>
+    <div id="container" style="text-align:center;">
+        <h1>Alle Mitglieder</h1>
+        <div class="trainer_ui">
+            {% if perms.auth.add_user %}
+                <a href="{% url 'register' %}#nav"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
+            {% endif %}
+        </div>
+    </div>
+    <div>
+        <div class="flex_center">
+            <div class="padding_all_big tertiary_bg chair_col-5">
+                <table >
+                <tr> 
+                    <th><h5> Vorname </h5></th>
+                    <th><h5> Nachname </h5></th>
+                    <th><h5> Gruppe </h5></th>
+                </tr>
+                {% for member in object_list %}
+                <tr> 
+                    <td> {{member.first_name}} </td>
+                    <td> {{member.last_name}} </td>
+                    <td> {{member.profile.group.group_id}} </td>
+                    <td> 
+                        {% if perms.auth.remove_user %} 
+                        <a href="{% url 'remove_user' member.id %}">
+                            <i class="far fa-minus-square" style="font-size:17px;"></i>
+                        </a>
+                        {% endif %} 
+                        {% if perms.auth.change_user %} 
+                        <a href="{% url 'update_user' member.id %}#nav">
+                            <i class="fas fa-pen-square" style="font-size:17px;"></i>
+                        </a>
+                        {% endif %} 
+                    </td>
+                </tr>
+                {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

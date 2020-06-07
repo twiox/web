@@ -427,7 +427,7 @@ table{
         list-style-type: circle; 
     }
     padding: 15px;
-    text-align:left;
+    text-align:center;
 }
 
 /*Footer*/
@@ -607,4 +607,13 @@ footer{
             color:red;
         }
     }
+}
+/* Visitenkarte */
+.person_wrapper{
+    display: flex;
+    flex-wrap:wrap;
+    justify-content:center;
+}
+.person_info{
+    text-align:center;
 }

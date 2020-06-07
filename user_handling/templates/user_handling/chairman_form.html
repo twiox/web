@@ -1,16 +1,26 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
-<div class="navbar_blue">
-    <div>
-        <a class="float_left" href="{% url 'index' %}">
-            <i class="fas fa-chevron-left" style="font-size:32px;"></i>
-        </a>
-    </div>
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_list' %}#nav">
+        Vorstände</a>
+    <a class="float_left"> > </a>
+    {% if object.user %}
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{object.user.first_name}}</a>
+    {% else %}
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Neuer Vorstand</a>
+    {% endif %}
 </div>
 {% endblock %}
 {%block content %}
 <section style="text-align:center; padding-top:5%;">
-    <h1>VORSTAND HINZUFÜGEN/ÄNDERN</h1>
+    {% if object.user %}
+    <h1>{{object.user.first_name}} Bearbeiten</h1>
+    {% else %}
+    <h1>Neuer Vorstand</h1>
+    {% endif %}
     {% include "members/form_snippet.html" %}
 </section>
 {% endblock %}

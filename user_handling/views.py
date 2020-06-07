@@ -1,7 +1,7 @@
 from .forms import *
 from .tokens import account_activation_token
 from .permissions import trainer_permissions, chairman_permissions
-from members.models import Group, Chairman
+from members.models import Group, Chairman, Profile
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from django.core.mail import EmailMessage
@@ -83,28 +83,25 @@ def activate(request, uidb64, token):
     else:
         return render(request, "user_handling/activate_fail.html" )   
 
+class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = User
+    permission_required = 'auth.add_user'
+    template_name = "user_handling/member_list.html"
+    
 class UserDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = User
     template_name = "user_handling/user_confirm_delete.html"
-    success_url = "/remove/"
+    success_url = "/users/"
     #who can delete the user?
     permission_required = 'auth.delete_user'
 
-
-@login_required
-@permission_required('auth.delete_user', raise_exception=True)
-def remove_user(request):
-    if(request.method == "POST"): #if the form is filled out
-        form = MemberDeletionForm(request.POST) 
-        if(form.is_valid()):
-            user = form.cleaned_data.get('member') #save the user
-            return HttpResponseRedirect(f"/remove/user/{user.id}/")
-        return render(request, "user_handling/remove_member.html", context={"form":form})
-    else:
-        form = MemberDeletionForm() 
-        return render(request, "user_handling/remove_member.html", context={"form":form})
-        
-        
+class ProfileUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    #template: event_form.html
+    model = Profile
+    fields=["group"]
+    template_name="user_handling/profile_form.html"
+    permission_required = 'members.change_user'
+    
 @login_required
 @permission_required('members.add_trainer', raise_exception=True)
 def register_trainer(request):
@@ -170,23 +167,6 @@ class TrainerUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
     template_name="user_handling/trainer_form.html"
     permission_required = 'members.change_trainer'
 
-@login_required
-@permission_required('members.delete_trainer', raise_exception=True)
-def change_group(request):
-    if(request.method == "POST"): #if the form is filled out
-        form = GroupChangeForm(request.POST) 
-        if(form.is_valid()):
-            user = form.cleaned_data.get('user') #save the user
-            group = form.cleaned_data.get('group')
-            user.profile.group = group
-            user.save()
-            messages.add_message(request, messages.SUCCESS, f"Gruppe für {user.first_name} auf Gruppe {group.group_id} geändert")
-            return redirect("change_group")
-        return render(request, "user_handling/change_group.html", context={"form":form})
-    else:
-        form = GroupChangeForm() 
-        return render(request, "user_handling/change_group.html", context={"form":form})
-        
 class ChairmanCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     #template: event_detail.html
     model = Chairman

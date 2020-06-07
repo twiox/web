@@ -75,7 +75,7 @@ class Trainer(models.Model):
         return f"{self.user.first_name}"
     
     def get_absolute_url(self):
-        return reverse('trainer_update')
+        return reverse('trainer_list')
 
 class Session(models.Model):
 
@@ -114,8 +114,7 @@ class Session(models.Model):
             return tag[self.day]
         else: 
             return "Irgendwann"
-    
-    
+            
     def get_absolute_url(self):
         return reverse('session_detail', kwargs={"pk": self.pk})
 
@@ -171,16 +170,7 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.user.username}\'s Profile"
-
-
-
-
-
-
-
-
-
-
-
-
+        
+    def get_absolute_url(self):
+        return reverse('member_list')
 

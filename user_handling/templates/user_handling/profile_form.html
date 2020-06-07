@@ -4,15 +4,16 @@
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
         Mitglieder </a>
     <a class="float_left"> > </a>
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_list' %}#nav">
-        Trainerliste </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'member_list' %}#nav">
+        Nutzer </a>
     <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Trainer entfernen</a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Gruppe Wechseln</a>
 </div>
 {% endblock %}
-{% block content %}
-<section style="text-align: center;">
-    <h1>TRAINER ENTFERNEN</h1>
+
+{%block content %}
+<section style="text-align:center; padding-top:5%;">
+    <h1>GRUPPE WECHSELN</h1>
     {% include "members/form_snippet.html" %}
 </section>
 {% endblock %}

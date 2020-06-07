@@ -1,16 +1,18 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
-<div class="navbar_blue">
-    <div>
-        <a class="float_left" href="{% url 'index' %}">
-            <i class="fas fa-chevron-left" style="font-size:32px;"></i>
-        </a>
-    </div>
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_list' %}#nav">
+        Trainerliste </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Neuer Trainer</a>
 </div>
 {% endblock %}
 {% block content %}
 <section style="text-align: center;">
-    <h2>NEUEN TRAINER REGISTRIEREN</h2>
+    <h1>NEUER TRAINER</h1>
     {% include "members/form_snippet.html" %}
 </section>
 {% endblock %}

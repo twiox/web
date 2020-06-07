@@ -13,33 +13,11 @@
     {% if user.is_authenticated %}
     <div class="navbar primary_bg">
         <a class="float_right" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt" style="font-size:27px;"></i></a>
-        <!--<a class="float_left" href="{% url 'spot_list' %}">Spots</a>-->
         {% if perms.auth.add_user %}
-        <div class= "dropdown float_left">
-            <button class="dropbtn"><i class="fas fa-user" style="font-size:25px;"></i></button>
-            <div class="dropdown-content">
-                <a href="{% url 'register' %}#nav">Account Hinzufügen</a>
-                <a href="{% url 'remove' %}#nav">Account entfernen</a>
-                <a href="{% url 'change_group'%}#nav">Gruppe wechseln</a>
-                <a href="{% url 'group_create'%}#nav">Gruppe hinzufügen</a>
-                <a href="{% url 'group_list'%}#nav">Alle Gruppen</a>
-            </div>
-        </div>
-        <div class= "dropdown float_left">
-            <button class="dropbtn"><i class="fas fa-user-cog" style="font-size:26px;"></i></button>
-            <div class="dropdown-content">
-                <a href="{% url 'register_trainer' %}#nav">Trainer hinzufügen</a>
-                <a href="{% url 'remove_trainer' %}#nav">Trainer entfernen</a>
-                <a href="{% url 'trainer_update'%}#nav">Trainer bearbeiten</a>
-            </div>
-        </div>
-        <div class= "dropdown float_left">
-            <button class="dropbtn"><i class="fas fa-user-tie" style="font-size:27px;"></i></button>
-            <div class="dropdown-content">
-                <a href="{% url 'chairman_create' %}#nav">Vorstand Hinzufügen</a>
-                <a href="{% url 'chairman_list'%}#nav">Vorstand bearbeiten</a>
-            </div>
-        </div>
+        <a class= "float_left" href="{% url 'member_list'%}#nav"><i class="fas fa-user" style="font-size:26px;"></i></a>
+        <a class= "float_left" href="{% url 'group_list'%}#nav"><i class="fas fa-users" style="font-size:26px;"></i></a>
+        <a class= "float_left" href="{% url 'trainer_list'%}#nav"><i class="fas fa-user-cog" style="font-size:26px;"></i></a>
+        <a class= "float_left" href="{% url 'chairman_list'%}#nav"><i class="fas fa-user-tie" style="font-size:26px;"></i></a>
         {% endif %}
     </div>
     {% endif %}
@@ -56,12 +34,35 @@
     <!-- Here the Container for the Events -->
     {% include "members/snippets/eventkalender.html"%}
     {% endblock %}
+    
     {% block chairmen %}
     {% if chairmen %}
     <section>
         <h1>DEINE ANSPRECHPARTNER</h1>
         <div class="padding_tb_big">
-        {% for chairman in chairmen.all %}
+        {% for object in chairmen.all %}
+            <div class="col-5 float_left padding_all_small" id="container">
+                <div class="padding_all_small person_wrapper">
+                    <div class="chair_col-4 flex_center">
+                        <img class="round_profile_pic_chairman padding_all_small" src="{{object.image.url}}">
+                    </div>
+                    <div class="chair_col-5 float_left padding_all_small person_info">
+                        <h3 class="padding_tb_small"> {{object.user.first_name |upper}} {{object.user.last_name |upper}}</h3>
+                        <div>
+                            <ul class="competences">
+                                {% for comp in object.complist %}
+                                    <li> {{comp}} </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div>
+                            <p> {{object.public_telnr}} </p>
+                            <p> {{object.public_email}} </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--
             <div class="col-5 float_left">
                 <div class="chair_col-4 float_left">
                     <img class="round_profile_pic_chairman" src="{{chairman.image.url}}">
@@ -81,8 +82,9 @@
                     </div>
                 </div>
             </div>
+            -->
+             {% endfor %}
         </div>
     </section>
-    {% endfor %}
     {% endif %}
     {% endblock %}
