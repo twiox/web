@@ -40,8 +40,8 @@
                             <td> {{member.first_name}} </td>
                             <td> {{member.last_name}} </td>
                             <td> 
-                                <a href="{% url 'update_user' member.id %}#nav">
-                                    <p> {{member.profile.group.group_id }} </p>
+                                <a href="{% url 'update_user' member.id %}#nav"> 
+                                    {{member.profile.group.group_id }} 
                                 </a>
                             </td>
                             <td>  

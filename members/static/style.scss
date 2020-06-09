@@ -282,9 +282,13 @@ h5{
     font-size: 1.1rem;
 }
 table{
-    th, td {
+    border-collapse: collapse;
+    th, td{
         padding: 2px $padding_small;
         text-align: left;
+    }
+    tr{
+        height:20px;
     }
 }
 
