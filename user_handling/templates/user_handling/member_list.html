@@ -17,38 +17,54 @@
                 <a href="{% url 'register' %}#nav"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
             {% endif %}
         </div>
+        <div class="padding_tb_big">
+            <input class="searchbar" id="myInput" type="text" placeholder="Suche..">
+        </div>
     </div>
+    
     <div>
         <div class="flex_center">
-            <div class="padding_all_big tertiary_bg chair_col-5">
-                <table >
-                <tr> 
-                    <th><h5> Vorname </h5></th>
-                    <th><h5> Nachname </h5></th>
-                    <th><h5> Gruppe </h5></th>
-                </tr>
-                {% for member in object_list %}
-                <tr> 
-                    <td> {{member.first_name}} </td>
-                    <td> {{member.last_name}} </td>
-                    <td> {{member.profile.group.group_id}} </td>
-                    <td> 
-                        {% if perms.auth.remove_user %} 
-                        <a href="{% url 'remove_user' member.id %}">
-                            <i class="far fa-minus-square" style="font-size:17px;"></i>
-                        </a>
-                        {% endif %} 
-                        {% if perms.auth.change_user %} 
-                        <a href="{% url 'update_user' member.id %}#nav">
-                            <i class="fas fa-pen-square" style="font-size:17px;"></i>
-                        </a>
-                        {% endif %} 
-                    </td>
-                </tr>
-                {% endfor %}
+            <div class="padding_all_big tertiary_bg chair_col-5 side_scroll">
+                <table>
+                    <thead>
+                        <tr> 
+                            <th><h5> Vorname </h5></th>
+                            <th><h5> Nachname </h5></th>
+                            <th><h5> Gruppe </h5></th>
+                            <th><h5> Löschen </h5></th>
+                        </tr>
+                    </thead>
+                    <tbody id="table_body">
+                    {% for member in object_list %}
+                        <tr> 
+                            <td> {{member.first_name}} </td>
+                            <td> {{member.last_name}} </td>
+                            <td> 
+                                <a href="{% url 'update_user' member.id %}#nav">
+                                    <p> {{member.profile.group.group_id }} </p>
+                                </a>
+                            </td>
+                            <td>  
+                                <a href="{% url 'remove_user' member.id %}">
+                                    <i class="far fa-minus-square" style="font-size:17px;"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
                 </table>
             </div>
         </div>
     </div>
 </section>
+<script>
+    $(document).ready(function(){
+      $("#myInput").on("keyup", function() {
+        var value = $(this).val().toLowerCase();
+        $("#table_body tr").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+      });
+    });
+</script>
 {% endblock %}

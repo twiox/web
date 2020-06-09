@@ -135,7 +135,10 @@ $padding_small: 10px;
     display: flex; 
     justify-content: center;
 }
-
+.side_scroll{
+    overflow:auto;
+    overflow-y:hidden;
+}
 /*Buttons*/
 .form_button {
     color:white;
@@ -174,7 +177,14 @@ $padding_small: 10px;
         background-color:$primary;
     }
 }
-
+.searchbar{
+    background-color: $primary_bg;
+    border-radius: 5px;
+    width: 80%;
+    color: white;
+    height: 30px;
+    padding: 0 $padding_small;
+}
 
 /*Color and Font-Stuff */
 .secondary{
@@ -241,7 +251,7 @@ a{
     padding: $padding_small;
 }
 h1{
-    font-size:2rem;
+    font-size:1.8rem;
     font-weight:300;
     color:$header_col;
     padding-bottom: 15px;
@@ -249,7 +259,7 @@ h1{
 }
 h2{
     color:$header_col;
-    font-size:1.75rem;
+    font-size:1.5rem;
     font-weight:300;
     padding-bottom: 10px;
     text-transform: uppercase;
