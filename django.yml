@@ -41,7 +41,8 @@ dependencies:
   - xz=5.2.4=h14c3975_4
   - zlib=1.2.11=h7b6447c_3
   - pip:
+    - django-multiselectfield==0.1.12
     - django-weekday-field==1.1.0
     - pillow==7.1.1
-prefix: /home/merlin/programms/miniconda3/envs/django
+prefix: /home/merlin/miniconda3/envs/django
 
