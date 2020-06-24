@@ -1,17 +1,20 @@
 <div class="form_wrapper padding_all_big">
     <form class="form_wrapper" method="POST" enctype="multipart/form-data">
-        {% if form.errors %}
-            {% for error in field.errors %}
-            <p class="sec_font">{{error}}</p>
-            {% endfor %}
-        {% endif %}
         {% csrf_token %}
         <div class ="inner_form padding_all_big">
+            {% if form.errors %}
+                {% for error in form.non_field_errors %}
+                <p class="padding_tb_small" style="color:red;">{{error}}</p>
+                {% endfor %}
+            {% endif %}
             {% for field in form %}
             <div class="field_wrapper unfocused">
                 <div id="container">
                 {{ field.label_tag }} {{ field }}
                 </div>
+                {% for error in field.errors %}
+                    <p style="color:red;">{{error}}</p>
+                {% endfor %}
             </div>
             {% endfor %}
             <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
@@ -22,6 +25,7 @@
 </div>  
 <script>
 $(document).ready(function(){
+    $(lable)
     $(".field_wrapper").each(function(){
         if($(this).find("input").val() !== ""){
             $(this).addClass("focused");

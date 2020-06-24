@@ -36,7 +36,7 @@ urlpatterns = [
     path('chairman/<int:pk>/remove/', user_views.ChairmanDeleteView.as_view(), name="chairman_delete"),
     path('chairman/<int:pk>/update/', user_views.ChairmanUpdateView.as_view(), name="chairman_update"),
     path('remove_trainer/', user_views.remove_trainer, name="remove_trainer"),
-    path("login/", user_views.LoginView.as_view(template_name="user_handling/login.html"), name="login"),
+    path("login/", auth_views.LoginView.as_view(template_name="user_handling/login.html"), name="login"),
     path("logout/", auth_views.LogoutView.as_view(template_name="user_handling/logout.html"), name="logout"),
     path("activate/<str:uidb64>/<str:token>/", user_views.activate, name="activate"),
     path("reset_pw/", auth_views.PasswordResetView.as_view(template_name="user_handling/password_reset.html"), name="password_reset"),

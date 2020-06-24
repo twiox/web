@@ -13,6 +13,7 @@
     {% if user.is_authenticated %}
     <div class="navbar primary_bg">
         <a class="float_right" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt" style="font-size:27px;"></i></a>
+        <a class="float_left" href="{% url 'profile_detail' user.id %} "><i class="fas fa-sliders-h" style="font-size:27px;"></i></a>
         {% if perms.auth.add_user %}
         <a class= "float_left" href="{% url 'member_list'%}#nav"><i class="fas fa-user" style="font-size:26px;"></i></a>
         <a class= "float_left" href="{% url 'group_list'%}#nav"><i class="fas fa-users" style="font-size:26px;"></i></a>
@@ -62,27 +63,6 @@
                     </div>
                 </div>
             </div>
-            <!--
-            <div class="col-5 float_left">
-                <div class="chair_col-4 float_left">
-                    <img class="round_profile_pic_chairman" src="{{chairman.image.url}}">
-                </div>
-                <div class="chair_col-5 float_left" style="padding:15px;">
-                    <h3> {{chairman.user.first_name |upper}} {{chairman.user.last_name |upper}}</h3>
-                    <div>
-                        <ul class="competences" id="container">
-                            {% for comp in chairman.complist %}
-                                <li> {{comp}} </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    <div>
-                        <p> {{chairman.public_telnr}} </p>
-                        <p> {{chairman.public_email}} </p>
-                    </div>
-                </div>
-            </div>
-            -->
              {% endfor %}
         </div>
     </section>

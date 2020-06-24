@@ -19,11 +19,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,P
 from django.views.generic import DeleteView, UpdateView, CreateView, ListView
 from django.contrib.auth.views import LoginView
 
-class LoginView(LoginView):
-    def form_invalid(self, form):
-        messages.add_message(self.request, messages.ERROR, 'Fehler. Bitte prüfe deine Einloggdaten')
-        return self.render_to_response(self.get_context_data(form=form))
-
 #register user
 @login_required
 @permission_required('auth.add_user', raise_exception=True)

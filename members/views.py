@@ -15,6 +15,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,P
 from .forms import EventUpdateParticipantForm, SessionForm, EventForm
 from django.contrib import messages
 from datetime import datetime
+from django.contrib.auth.models import User
 # Create your views here.
 
 @login_required
@@ -302,3 +303,8 @@ class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
         message.date = datetime.now()
         message.save()
         return super(MessageUpdateView, self).form_valid(form)
+
+"""USER STUFF"""
+class UserDetailView(LoginRequiredMixin, DetailView):
+    model = User
+    template_name = 'members/user_detail.html'
