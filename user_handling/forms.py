@@ -49,14 +49,3 @@ class TrainerChooseForm(forms.Form):
     trainer = forms.ModelChoiceField(label="Wer?",queryset=Trainer.objects.all())
     class Meta:
         fields = ["trainer"]
-        
-class MemberDeletionForm(forms.Form):
-    member = forms.ModelChoiceField(label="Wer?",queryset=User.objects.all())
-    class Meta:
-        fields = ["member"]
-
-class GroupChangeForm(forms.Form):
-    user = forms.ModelChoiceField(label="Wer?",queryset=User.objects.all())
-    group = forms.ModelChoiceField(label="In welche Gruppe verschieben?",queryset=Group.objects.all())
-    class Meta:
-        fields = ["user", "group"]

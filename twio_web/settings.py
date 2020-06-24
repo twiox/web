@@ -138,5 +138,6 @@ LOGIN_URL = 'login'
 
 EMAIL_USE_TLS = True
 EMAIL_HOST ="smtp.gmail.com"
-EMAIL_HOST_USER="merlin.szymanski@gmail.com"
-EMAIL_HOST_PASSWORD="aohftfwdwtlaqsal"
+
+
+AUTHENTICATION_BACKENDS = ["user_handling.backends.EmailBackend"]
