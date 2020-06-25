@@ -1,7 +1,7 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#events">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}">
         Mitglieder </a>
     <a class="float_left"> > </a>
     <a class="float_left strong" style="font-size: 1.1rem; color:white;">Dein Profil</a>
@@ -10,15 +10,51 @@
 {%block content %}
     <section>
         <h1>{{object.first_name}} {{object.last_name}}</h1>
-        <div class="tertiary_bg padding_all_big">
-            <p> Platzhalter </p>
-            <ol>
-                <li>See your information (Mitgliedsnummer, Gruppe, Name, Email, Telefon für Trainer)</li>
-                <li>Change your information (Name? Email, Passwort, Telefon)</li>
-                <li>Formular - Änderung der Daten für den Vorstand </li>
-                <li>Account Löschen</li>
-                <li>Wichtige Formulare? (SEPA?, Kündigungsvorlage?, Satzung?)</li>
-            </ol>
+        <div>
+            <div class="chair_col-5 padding_all_small float_left">
+                <div class="tertiary_bg padding_all_big">
+                    <h3 class="padding_tb_small"> Deine Daten </h3>
+                    <p align="justify"> Hier kannst du deine Daten sehen und teilweise bearbeiten - wie z.B. deine Einloggdaten.
+                    </p>
+                    <table class="padding_tb_small">
+                        <h4 class="padding_tb_small">Stammdaten </h4>
+                        <tr> 
+                            <td>Name:</td><td>{{object.first_name}} {{object.last_name}}</td> 
+                        </tr>
+                        <tr> 
+                            <td>Mitgliedsnummer:</td><td>{{object.profile.member_num}}</td>
+                        </tr>
+                        <tr> 
+                            <td>Gruppe: </td><td>{{object.profile.group.group_id}}</td>
+                        </tr>
+                        <tr> 
+                            <td>Nutzername:</td><td>{{object.username}}</td>
+                        </tr>
+                        <tr> 
+                            <td>Email:</td><td>{{object.email}}</td> <td><a class="more_info_button" href="#">Ändern</a></td>
+                        </tr>
+                        <tr> 
+                            <td>Passwort:</td><td>*************</td> <td><a class="more_info_button" href="#">Ändern</a></td>
+                        </tr>
+                    </table>
+                </div> 
+                <div class="padding_tb_small">
+                    <div class="tertiary_bg padding_all_big">
+                        <h3 class="padding_tb_small"> Dokumente </h3>
+                        <p align="justify"> Dokumente, die du brauchen könntest </p>
+                    </div>
+                </div>
+            </div>
+            <div class="chair_col-5 padding_all_small float_left">
+                <div class="tertiary_bg padding_all_big">
+                    <h3 class="padding_tb_small"> Änderungen mitteilen </h3>
+                    <p align="justify"> Wenn sich Daten von dir ändern, dann fülle das unten stehende Formular aus und
+                    wir ändern deine Daten in unserer Vereinsdatenbank etsprechend ab. Für eine Änderung der Bankverbindung ist 
+                    immer ein neues SEPA Mandat notwendig, dieses bitte an das Formular anhängen.
+                    </p>
+                    {% include "members/form_snippet.html" %}
+                </div>
+             </div>
         </div>
     </section>
 {% endblock %}

@@ -12,7 +12,7 @@ from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Mes
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
-from .forms import EventUpdateParticipantForm, SessionForm, EventForm
+from .forms import EventUpdateParticipantForm, SessionForm, EventForm, UpdateMemberInformationForm
 from django.contrib import messages
 from datetime import datetime
 from django.contrib.auth.models import User
@@ -308,3 +308,8 @@ class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
 class UserDetailView(LoginRequiredMixin, DetailView):
     model = User
     template_name = 'members/user_detail.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super(UserDetailView, self).get_context_data(**kwargs)
+        context['form'] = UpdateMemberInformationForm()
+        return context
