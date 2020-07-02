@@ -6,7 +6,6 @@
     <link type="text/x-scss" rel="stylesheet" media="only screen and (min-width: 1000px)" href="{{ STATIC_URL }}/static/desktop_style.scss">
 {% endcompress %}
     <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}/static/material.css">
-    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
 
 <!doctype html>
 <html lang="en", style="padding-bottom:0px;">
@@ -23,6 +22,7 @@
         <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Google+Sans:400,500,700">
         <link href="https://fonts.googleapis.com/css?family=Catamaran:200,600" rel="stylesheet">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
   
     </head>
     <body>
@@ -51,12 +51,27 @@
             {% block flag %} {% endblock %}
 
             <div class="frame">
-            {% for message in messages %}
-                <p class="message_{{message.tags}}">{{message}} </p>
-            {% endfor %}
-            
+
             {% block content %} {% endblock %}
             </div>
+            
+            <div class="mdc-snackbar mdc-snackbar">
+              <div class="mdc-snackbar__surface">
+                <div class="mdc-snackbar__label" role="status" aria-live="polite">
+                </div>
+              </div>
+            </div>
+            <script>
+            const snackbar = new mdc.snackbar.MDCSnackbar(document.querySelector('.mdc-snackbar'));
+            </script>
+            
+            {% for message in messages %}
+                <script>
+                    snackbar.labelText = "{{message}}";
+                    snackbar.open()
+                </script>
+            {% endfor %}
+            
         </div>
         <footer class="padding_tb_big">
             {% block chairmen %} {% endblock %}
@@ -97,6 +112,5 @@
                 <a class="more_info_button button_padding" href="https://www.twio-x.com/impressum">Impressum</a> ⋅ <a href="https://www.twio-x.com/datenschutzerkl%C3%A4rung" class="more_info_button button_padding">Datenschutz</a>
             </div>
         </footer>
-        <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
     </body>
 </html>

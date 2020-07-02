@@ -12,11 +12,13 @@ from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Mes
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
-from .forms import EventUpdateParticipantForm, SessionForm, EventForm, UpdateMemberInformationForm
+from .forms import EventUpdateParticipantForm, SessionForm, EventForm, UpdateMemberInformationForm,UpdateMemberEmailForm
 from django.contrib import messages
 from datetime import datetime
 from django.contrib.auth.models import User
+from django.core.mail import EmailMessage
 # Create your views here.
+import os
 
 @login_required
 def index(request):
@@ -305,11 +307,72 @@ class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
         return super(MessageUpdateView, self).form_valid(form)
 
 """USER STUFF"""
-class UserDetailView(LoginRequiredMixin, DetailView):
+class UserDetailView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
     model = User
     template_name = 'members/user_detail.html'
+    form_class = UpdateMemberInformationForm
     
-    def get_context_data(self, **kwargs):
-        context = super(UserDetailView, self).get_context_data(**kwargs)
-        context['form'] = UpdateMemberInformationForm()
-        return context
+    def handle_uploaded_file(self,f, name):
+        try:
+            os.mkdir("media/documents")
+        except: 
+            pass
+            
+        with open(f'media/documents/{name}', 'wb+') as destination:
+            for chunk in f.chunks():
+                destination.write(chunk)
+    
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            mail_subject=f"Mitteilung von {request.user.first_name} {request.user.last_name}"
+            message = form.cleaned_data.get("comment")
+            to_email = "merlin.szymanski@gmail.com"
+            email=EmailMessage(mail_subject, message, to=[to_email])
+            if(request.FILES.get('attachment')):
+                document = request.FILES.get('attachment')
+                self.handle_uploaded_file(document, str(document))
+                email.attach_file('media/documents/'+str(document))
+            email.send()
+            messages.add_message(request, messages.SUCCESS, 'Nachricht erfolgreich versendet')
+            return HttpResponseRedirect(f"/members/profile/{request.user.profile.id}/detail/")
+        return render(request, self.template_name, {'form': form})
+    
+
+    def test_func(self):
+        user = self.request.user
+        person = self.get_object()
+        return user == person
+        
+        
+class EmailUpdateView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
+    model = User
+    template_name = 'members/update_email.html'
+    form_class = UpdateMemberEmailForm
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            if(form.cleaned_data.get("email1") == form.cleaned_data.get("email2")):
+                """
+                mail_subject=f"Mitteilung von {request.user.first_name} {request.user.last_name}"
+                message = form.cleaned_data.get("comment")
+                to_email = "merlin.szymanski@gmail.com"
+                email=EmailMessage(mail_subject, message, to=[to_email])
+                if(request.FILES.get('attachment')):
+                    document = request.FILES.get('attachment')
+                    self.handle_uploaded_file(document, str(document))
+                    email.attach_file('media/documents/'+str(document))
+                email.send()
+                """
+                messages.add_message(request, messages.SUCCESS, 'Aktivierungslink verschickt')
+                return HttpResponseRedirect(f"")
+            form.add_error('email1', 'Die Emails stimmen nicht überein')
+            return render(request, self.template_name, {'form': form, "object":request.user})
+        return render(request, self.template_name, {'form': form, "object":request.user})
+
+    def test_func(self):
+        user = self.request.user
+        person = self.get_object()
+        return user == person
+    

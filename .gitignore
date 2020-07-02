@@ -4,10 +4,12 @@
 *.pyc
 *pycache*
 db.sqlite3
-media
+media/documents/*
+media/profile_pics/*
 *settings.py
 api_key.txt
 *static/CACHE/*
+
 
 # Backup files # 
 *.bak 

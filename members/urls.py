@@ -30,5 +30,6 @@ urlpatterns = [
     path("group/<int:pk>/delete/", views.GroupDeleteView.as_view(),name="group_delete"),
     path("group/<int:pk>/detail/", views.GroupDetailView.as_view(),name="group_detail"),
     path("profile/<int:pk>/detail/", views.UserDetailView.as_view(),name="profile_detail"),
+    path("profile/<int:pk>/update_email/", views.EmailUpdateView.as_view(),name="profile_update_email"),
 ]
 

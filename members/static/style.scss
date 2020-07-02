@@ -37,18 +37,14 @@ $padding_small: 10px;
 
 /*MESSAGES */
 .message_success{
-    margin-top:15px;
-    padding:10px;
+    padding:30px;
     text-align:center;
-    border: 3px solid green;
-    color:green;
+    color:$primary;
 }
 .message_error{
-    margin-top:15px;
-    padding:10px;
+    padding:30px;
     text-align:center;
-    border: 2px solid #7b1b42;
-    color:#7b1b42;
+    color:$secondary;
 }
 .message_info{
     margin-top:15px;

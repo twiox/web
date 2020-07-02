@@ -28,14 +28,16 @@ class EventUpdateParticipantForm(forms.ModelForm):
         fields = []
         
 
-class UpdateMemberInformationForm(forms.Form):
-    
-    name = forms.CharField(label='Dein Name*', max_length=100)
-    post_adress = forms.CharField(label='Deine (neue) Adresse', max_length=100, required=False)
-    email = forms.EmailField(label='Deine (neue) Emailadresse', required=False)
-    comments = forms.CharField(label="Kommentar", required = False,  max_length=140)
-    bankaccount = forms.BooleanField(label='Neues Bankkonto', required=False)
+class UpdateMemberInformationForm(forms.ModelForm):
+    comment = forms.CharField(label="Kommentar", widget=forms.Textarea, required=False)
     attachment = forms.FileField(label="Anhänge", required=False)
-        
     class Meta:
-        fields = ["name", "post_adress", "email", "bankaccount", "attachment"]
+        model = User
+        fields = ["comment", "attachment"]
+        
+class UpdateMemberEmailForm(forms.ModelForm):
+    email1 = forms.EmailField()
+    email2 = forms.EmailField()
+    class Meta:
+        model = User
+        fields = ["email1", "email2"]
