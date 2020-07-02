@@ -37,22 +37,63 @@
                             <td>Passwort:</td><td>*************</td> <td><a class="more_info_button" href="#">Ändern</a></td>
                         </tr>
                     </table>
+                    <p class="padding_tb_big" align="justify"> Bitte beachte, dass eine Änderung der Emailadresse <strong>nur</strong> die Einloggdaten für die Website betrifft. Nutze das Formular um uns die Änderung mitzuteilen,
+                    wenn du auch die Nachrichten vom Verein auf die neue Adresse erhalten möchtest.
+                    </p>
                 </div> 
                 <div class="padding_tb_small">
                     <div class="tertiary_bg padding_all_big">
                         <h3 class="padding_tb_small"> Dokumente </h3>
-                        <p align="justify"> Dokumente, die du brauchen könntest </p>
+                        <div class="padding_all_big">
+                            <ul>
+                                <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{ STATIC_URL }}/static/docs/Satzung_TwioX.pdf"><p>Satzung</p><i class="fas fa-file-download"></i></a></li>
+                                <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{ STATIC_URL }}/static/docs/Beitragsordnung_TwioX.pdf"><p>Beitragsordnung</p><i class="fas fa-file-download"></i></a></li>
+                                <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{ STATIC_URL }}/static/docs/SEPA_Mandat_TwioX.pdf"><p>SEPA Mandat</p><i class="fas fa-file-download"></i></a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="chair_col-5 padding_all_small float_left">
                 <div class="tertiary_bg padding_all_big">
                     <h3 class="padding_tb_small"> Änderungen mitteilen </h3>
-                    <p align="justify"> Wenn sich Daten von dir ändern, dann fülle das unten stehende Formular aus und
-                    wir ändern deine Daten in unserer Vereinsdatenbank etsprechend ab. Für eine Änderung der Bankverbindung ist 
-                    immer ein neues SEPA Mandat notwendig, dieses bitte an das Formular anhängen.
+                    <p align="justify"> Wenn sich Daten von dir ändern oder nicht korrekt dargestellt sind, teile es uns über das Feld unten mit und
+                    wir ändern deine Daten in unserer Datenbank. Für eine Änderung der Bankverbindung ist 
+                    <strong>immer ein neues SEPA Mandat</strong> notwendig, dieses kann direkt mit angehängt werden.
                     </p>
-                    {% include "members/form_snippet.html" %}
+                    <form class="form_wrapper" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class ="inner_form padding_all_big flex_center">
+                            <h5>Deine Nachricht an uns</h5>
+                            <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
+                              <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="Label"></textarea>
+                              <span class="mdc-notched-outline">
+                                <span class="mdc-notched-outline__leading"></span>
+                                <span class="mdc-notched-outline__trailing"></span>
+                              </span>
+                            </label>
+                            <div style="display:flex;">
+                                <label class="upload">
+                                    <span style="display:flex;justify-content:center;"><i class="fas fa-file-upload"></i></span>
+                                    <input type="file" id="inputFile" style="display: none" >
+                                </label>
+                                <p class="padding_rl_small" id="fileText" style="display:none;"></p>
+                            </div>
+                            <script>
+                                $(document).on('change','#inputFile' , function(e){
+                                var fileName = e.target.files[0].name
+                                $("#fileText").html(fileName).show();
+                                    });
+                            </script>
+                            <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
+                                <span >OK</span>
+                            </button>
+                        </div>
+                    </form>
+                    <script>
+                        const fields = document.querySelectorAll('.mdc-text-field');
+                        fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+                    </script>
                 </div>
              </div>
         </div>

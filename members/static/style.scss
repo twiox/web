@@ -8,6 +8,7 @@ $secondary_hover:#a0305d;
 $primary_bg: #191919;
 $secondary_bg: #262626;
 $tertiary_bg: #333333;
+$quartiary_bg: #484848;
 
 $font_col: #d1d1d1;
 $header_col: white;
@@ -177,6 +178,28 @@ $padding_small: 10px;
         background-color:$primary;
     }
 }
+.download {
+    background-color:$quartiary_bg;
+    border-radius: 5px;
+    justify-content: space-between;
+    display: flex;
+    &:hover{
+        background-color:$primary;
+    }
+}
+.upload {
+    width: 30px;
+    height: 30px;
+    flex-direction: column;
+    background-color:$quartiary_bg;
+    border-radius: 5px;
+    justify-content: center;
+    display: flex;
+    &:hover{
+        background-color:$primary;
+    }
+}
+
 .searchbar{
     background-color: $primary_bg;
     border-radius: 5px;
@@ -204,6 +227,12 @@ $padding_small: 10px;
 }
 .tertiary_bg{
     background-color: $tertiary_bg;
+}
+.secondary_bg{
+    background-color: $secondary_bg;
+}
+.quartiary_bg{
+    background-color: $quartiary_bg;
 }
 .primary_bg{
     background-color: $primary_bg;
@@ -482,6 +511,7 @@ footer{
 /*For the forms */
 .form_wrapper{
     display:flex;
+    justify-content:center;
     width:100%;
     margin: 0px auto;
 }
@@ -489,6 +519,9 @@ footer{
     background-color: $tertiary_bg;
     display:inline-block;
     width:100%;
+    label span{
+        color: $font_col;
+    }
 }
 
 /*For the Fields*/
