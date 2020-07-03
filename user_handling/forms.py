@@ -22,7 +22,6 @@ class MemberCreationForm(UserCreationForm):
 
 class ProfileCreationForm(forms.ModelForm):
     member_num = forms.CharField(label="Mitgl.Nr.")
-    #make sure, that the group-choices are dynamicly
     group = forms.ModelChoiceField(label="Gruppe",queryset=Group.objects.all())
     
     class Meta:

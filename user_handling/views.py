@@ -17,7 +17,7 @@ from django.contrib.auth.models import User, Permission
 from django.contrib.auth.models import Group as Permission_group
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin, UserPassesTestMixin
 from django.views.generic import DeleteView, UpdateView, CreateView, ListView
-from django.contrib.auth.views import LoginView, PasswordResetView, LogoutView
+from django.contrib.auth.views import LoginView, PasswordResetView, LogoutView, PasswordResetConfirmView
 
 #register user
 @login_required
@@ -122,7 +122,6 @@ def register_trainer(request):
                 messages.add_message(request, messages.SUCCESS, "Trainer angelegt. Gruppe wurde auf 'T' gesetzt")
                 return redirect("register_trainer")
         else:
-            messages.add_message(request, messages.ERROR, "Daten ungültig")
             return render(request, 'user_handling/register_trainer.html', context={'form': form})
     else:
         form = TrainerCreationForm()
@@ -224,3 +223,9 @@ class LogoutView(LogoutView):
         next_page = super(LogoutView, self).get_next_page()
         messages.add_message(self.request, messages.SUCCESS, 'Erfolgreich ausgeloggt')
         return next_page
+        
+class PasswordResetConfirmView(PasswordResetConfirmView):
+    def get_success_url(self):
+        """Return the URL to redirect to after processing a valid form."""
+        messages.add_message(self.request, messages.SUCCESS, 'Passwort erstellt. Du kannst dich nun einloggen')
+        return "/members/"

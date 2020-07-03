@@ -5598,14 +5598,14 @@ a.mdc-list-item {
 }
 .mdc-select:not(.mdc-select--disabled) .mdc-select__native-control,
 .mdc-select:not(.mdc-select--disabled) .mdc-select__selected-text {
-  color: #fff;
+  color: #333333;
 }
 .mdc-select:not(.mdc-select--disabled) .mdc-floating-label {
-  color: #fff;
+  color: #333333;
 }
 .mdc-select:not(.mdc-select--disabled) .mdc-select__native-control,
 .mdc-select:not(.mdc-select--disabled) .mdc-select__selected-text {
-  border-bottom-color: #fff;
+  border-bottom-color: #333333;
 }
 .mdc-select:not(.mdc-select--disabled) + .mdc-select-helper-text {
   color: rgba(0, 0, 0, 0.6);

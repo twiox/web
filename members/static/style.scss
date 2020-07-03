@@ -520,6 +520,19 @@ footer{
     }
 }
 
+.select_overwrite{
+    -moz-appearance: none;
+    appearance: none;
+    color:white;
+    border:none;
+    height: auto;
+    resize: none;
+    outline:none;
+    background-color: $tertiary_bg;
+    padding:15px;
+    box-shadow: none;
+}
+        
 /*For the Fields*/
 .field_wrapper{
     padding:5px 5%;

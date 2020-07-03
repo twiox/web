@@ -8,7 +8,6 @@ from user_handling import views as user_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("members/", include('members.urls')),
-    path("shop/", include('shop.urls')),
     path('users/', user_views.MemberListView.as_view(), name="member_list"),
     path('users/<int:pk>/remove', user_views.UserDeleteView.as_view(), name="remove_user"),
     path('users/<int:pk>/update', user_views.ProfileUpdateView.as_view(), name="update_user"),
@@ -25,7 +24,6 @@ urlpatterns = [
     path("logout/", user_views.LogoutView.as_view(template_name="user_handling/logout.html"), name="logout"),
     path("activate/<str:uidb64>/<str:token>/", user_views.activate, name="activate"),
     path("reset_pw/", user_views.PasswordResetView.as_view(template_name="user_handling/password_reset.html"), name="password_reset"),
-    path("reset_pw/confirm/<str:uidb64>/<str:token>/", auth_views.PasswordResetConfirmView.as_view(template_name="user_handling/password_reset_confirm.html"), name="password_reset_confirm"),
-    path("reset_pw/complete/",auth_views.PasswordResetCompleteView.as_view(template_name="user_handling/password_reset_complete.html"), name="password_reset_complete"),
+    path("reset_pw/confirm/<str:uidb64>/<str:token>/", user_views.PasswordResetConfirmView.as_view(template_name="user_handling/password_reset_confirm.html"), name="password_reset_confirm"),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

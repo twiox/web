@@ -175,6 +175,18 @@ class Chairman(models.Model):
     
     def get_absolute_url(self):
         return reverse('index')
+    
+    def save(self):
+        super().save()
+        img = Image.open(self.image.path)
+        if(img.height > img.width):
+            cut = int((img.height-img.width)/2)
+            img = img.crop((0, 0+cut, img.width, img.height-cut))
+            img.save(self.image.path)
+        elif(img.width > img.height):
+            cut = int((img.width-img.height)/2)
+            img = img.crop((0+cut, 0, img.width-cut, img.height))
+            img.save(self.image.path)
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
