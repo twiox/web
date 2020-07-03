@@ -1,9 +1,18 @@
 {% extends "members/base.html" %}
-{% block content %}
-<section>
-    {% if validlink %}
-    <div style="text-align:center;">
-        <h1>Passwort erstellen</h1>
+{% block navbar2 %} 
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'profile_detail' object.id %}">
+        Dein Profil</a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Passwort ändern</a>
+</div>
+{% endblock %}
+{%block content %}
+<section style="text-align:center;">
+    <h1>Passwort ändern</h1>
         <div class="chair_col-5 tertiary_bg padding_all_big" style="margin: 0 auto;">
             <form class="form_wrapper" method="POST">
                 {% csrf_token %}
@@ -13,6 +22,17 @@
                     {% endfor %}
                 {% endif %}
                 <div class ="inner_form padding_all_big flex_center">
+                    {% if form.old_password.errors %}
+                    {% for error in form.old_password.errors %}
+                        <p style="color:red;">{{error}}</p>
+                    {% endfor %}
+                    {% endif %}
+                     <label class="mdc-text-field mdc-text-field--filled old_password">
+                        <span class="mdc-text-field__ripple"></span>
+                        <input type="password" class="mdc-text-field__input" aria-labelledby="old_password-label" name="old_password" required>
+                        <span class="mdc-floating-label" id="old_password-label">Altes Passwort</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
                     {% if form.new_password1.errors %}
                     {% for error in form.new_password1.errors %}
                         <p style="color:red;">{{error}}</p>
@@ -45,17 +65,5 @@
                 fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
             </script>
         </div>
-    </div>
-    {% else %}
-    <section style="text-align:center;">
-        <h1>Ungültiger Link</h2>
-        <div class="flex_center">
-            <div class="tertiary_bg padding_all_big col-5" style="text-align:center;">
-                <p class="padding_all_big">Vielleicht wurde er bereits genutzt? Bitte beantrage einen neuen Link</p>
-                <a class="form_button" style="margin: 0 auto;" href="{% url 'password_reset' %}">Ok</a>
-            </div>
-        </div>
-    </section>
-    {% endif %}
 </section>
 {% endblock %}

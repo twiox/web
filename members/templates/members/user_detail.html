@@ -16,27 +16,17 @@
                     <h3 class="padding_tb_small"> Deine Daten </h3>
                     <p align="justify"> Hier kannst du deine Daten sehen und teilweise bearbeiten - wie z.B. deine Einloggdaten.
                     </p>
-                    <table class="padding_tb_small">
-                        <h4 class="padding_tb_small">Stammdaten </h4>
-                        <tr> 
-                            <td>Name:</td><td>{{object.first_name}} {{object.last_name}}</td> 
-                        </tr>
-                        <tr> 
-                            <td>Mitgliedsnummer:</td><td>{{object.profile.member_num}}</td>
-                        </tr>
-                        <tr> 
-                            <td>Gruppe: </td><td>{{object.profile.group.group_id}}</td>
-                        </tr>
-                        <tr> 
-                            <td>Nutzername:</td><td>{{object.username}}</td>
-                        </tr>
-                        <tr> 
-                            <td>Email:</td><td>{{object.email}}</td> <td><a class="more_info_button" href="{% url 'profile_update_email' object.id %}">Ändern</a></td>
-                        </tr>
-                        <tr> 
-                            <td>Passwort:</td><td>*************</td> <td><a class="more_info_button" href="#">Ändern</a></td>
-                        </tr>
-                    </table>
+                    <h4 class="padding_tb_small">Stammdaten </h4>
+                    <div class="side_scroll">
+                        <table class="padding_tb_small side_scroll">
+                            <tr> <td>Name:</td><td>{{object.first_name}} {{object.last_name}}</td> </tr>
+                            <tr> <td>Mitgliedsnummer:</td><td>{{object.profile.member_num}}</td> </tr>
+                            <tr> <td>Gruppe: </td><td>{{object.profile.group.group_id}}</td> </tr>
+                            <tr> <td>Nutzername:</td><td>{{object.username}}</td> </tr>
+                            <tr> <td>Email:</td><td>{{object.email}}</td> <td><a class="more_info_button" href="{% url 'profile_update_email' object.id %}">Ändern</a></td> </tr>
+                            <tr> <td>Passwort:</td><td>*************</td> <td><a class="more_info_button" href="{% url 'profile_update_pw' object.id %}">Ändern</a></td> </tr>
+                        </table>
+                    </div>
                     <p class="padding_tb_big" align="justify"> Bitte beachte, dass eine Änderung der Emailadresse <strong>nur</strong> die Einloggdaten für die Website betrifft. Nutze das Formular um uns die Änderung mitzuteilen,
                     wenn du auch die Nachrichten vom Verein auf die neue Adresse erhalten möchtest.
                     </p>

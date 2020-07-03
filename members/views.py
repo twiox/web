@@ -17,6 +17,9 @@ from django.contrib import messages
 from datetime import datetime
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.views import PasswordChangeView
+
 # Create your views here.
 import os
 
@@ -353,21 +356,17 @@ class EmailUpdateView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():
-            if(form.cleaned_data.get("email1") == form.cleaned_data.get("email2")):
-                """
-                mail_subject=f"Mitteilung von {request.user.first_name} {request.user.last_name}"
-                message = form.cleaned_data.get("comment")
-                to_email = "merlin.szymanski@gmail.com"
-                email=EmailMessage(mail_subject, message, to=[to_email])
-                if(request.FILES.get('attachment')):
-                    document = request.FILES.get('attachment')
-                    self.handle_uploaded_file(document, str(document))
-                    email.attach_file('media/documents/'+str(document))
-                email.send()
-                """
-                messages.add_message(request, messages.SUCCESS, 'Aktivierungslink verschickt')
-                return HttpResponseRedirect(f"")
-            form.add_error('email1', 'Die Emails stimmen nicht überein')
+            #check the password
+            if(request.user.check_password(form.cleaned_data.get("password"))):
+                #check, if both mails are the same
+                if(form.cleaned_data.get("email1") == form.cleaned_data.get("email2")):
+                    request.user.email = form.cleaned_data.get("email1")
+                    request.user.save()
+                    messages.add_message(request, messages.SUCCESS, 'Email erfolgreich geändert')
+                    return HttpResponseRedirect("../detail")
+                form.add_error('email1', 'Die Emails stimmen nicht überein')
+                return render(request, self.template_name, {'form': form, "object":request.user})
+            form.add_error('password', 'Das Passwort stimmt nicht')
             return render(request, self.template_name, {'form': form, "object":request.user})
         return render(request, self.template_name, {'form': form, "object":request.user})
 
@@ -375,4 +374,26 @@ class EmailUpdateView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
         user = self.request.user
         person = self.get_object()
         return user == person
+
+class PasswordChangeView(LoginRequiredMixin, PasswordChangeView):
+    template_name = 'members/update_pw.html'
     
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            request.user=form.save()
+            update_session_auth_hash(request,request.user)
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+    
+    
+    def get_context_data(self, **kwargs):
+        context = {}
+        context['object'] = self.request.user
+        context.update(kwargs)
+        return super().get_context_data(**context)
+        
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, 'Passwort erfolgreich geändert')
+        return HttpResponseRedirect("../detail")

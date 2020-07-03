@@ -17,7 +17,7 @@ from django.contrib.auth.models import User, Permission
 from django.contrib.auth.models import Group as Permission_group
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin, UserPassesTestMixin
 from django.views.generic import DeleteView, UpdateView, CreateView, ListView
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, PasswordResetView, LogoutView
 
 #register user
 @login_required
@@ -213,3 +213,14 @@ class ChairmanListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     permission_required = 'members.change_chairman'
     template_name = "user_handling/chairman_list.html"
 
+class PasswordResetView(PasswordResetView):
+    def get_success_url(self):
+        """Return the URL to redirect to after processing a valid form."""
+        messages.add_message(self.request, messages.SUCCESS, 'Email verschickt. Bitte schau in deinen Posteingang')
+        return "" 
+
+class LogoutView(LogoutView):
+    def get_next_page(self):
+        next_page = super(LogoutView, self).get_next_page()
+        messages.add_message(self.request, messages.SUCCESS, 'Erfolgreich ausgeloggt')
+        return next_page

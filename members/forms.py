@@ -36,8 +36,9 @@ class UpdateMemberInformationForm(forms.ModelForm):
         fields = ["comment", "attachment"]
         
 class UpdateMemberEmailForm(forms.ModelForm):
+    password = forms.CharField(max_length=32, widget=forms.PasswordInput)
     email1 = forms.EmailField()
     email2 = forms.EmailField()
     class Meta:
         model = User
-        fields = ["email1", "email2"]
+        fields = ["password", "email1", "email2"]

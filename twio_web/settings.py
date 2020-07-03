@@ -128,6 +128,7 @@ COMPRESS_PRECOMPILERS = (
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
+LOGOUT_REDIRECT_URL = '/login/'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 MEDIA_ROOT = os.path.join(BASE_DIR, "media") #where are the files at the file-system?

@@ -28,6 +28,7 @@
                 <table>
                     <thead>
                         <tr> 
+                            <th><h5><i class="fas fa-user-check"></i></h5></th>
                             <th><h5> Vorname </h5></th>
                             <th><h5> Nachname </h5></th>
                             <th><h5> Gruppe </h5></th>
@@ -37,6 +38,11 @@
                     <tbody id="table_body">
                     {% for member in object_list %}
                         <tr> 
+                            {% if member.is_active %}
+                                <td><i class="fas fa-check"></i></td>
+                            {% else %}
+                                <td>X</td>
+                            {% endif %}
                             <td> {{member.first_name}} </td>
                             <td> {{member.last_name}} </td>
                             <td> 
