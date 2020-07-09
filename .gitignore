@@ -6,6 +6,7 @@
 db.sqlite3
 media/documents/*
 media/profile_pics/*
+media/Events/*
 *settings.py
 api_key.txt
 *static/CACHE/*

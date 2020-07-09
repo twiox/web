@@ -26,23 +26,53 @@
                     {% endif %}
                 </div>
                 <h4>{{object.place}}</h4>
-                <p>{{object.start_date|date:'d.m'}} - {{object.end_date|date:'d.m.Y'}} </p>
+                <div class="padding_tb_small">
+                    <p>{{object.start_date|date:'d.m'}} - {{object.end_date|date:'d.m.Y'}} </p>
+                    <p>Kosten: {{object.costs}} € </p>
+                </div>
                 <div class="padding_all_big">
                     <p align="justify">{{object.description}}<p>
                 </div>
             </div>
             <div>
                 <p style="text-align:center;width:100px;margin:0 auto;">
-                {% if not object.deadline_reached %}
-                    {% if user in object.participants.all %}
-                        <a class="form_button_sec" href="{% url 'event_unparticipate' object.id %}#nav">Abmelden</a>
-                        <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
+                {% if not object.info_only %}
+                    <div class ="flex_center">
+                        <div class="padding_all_big col-5">
+                            <ul>
+                            {% if object.teilnahmebedingungen %}
+                            <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{object.teilnahmebedingungen.url}}"><p>Teilnahmebedingungen</p><i class="fas fa-file-download"></i></a></li>
+                            {% endif %}
+                            {% if object.datenschutz %}
+                            <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{object.datenschutz.url}}"><p>Datenschutzerklärung</p><i class="fas fa-file-download"></i></a></li>
+                            {% endif %}
+                            {% if object.einverstaendnis %}
+                            <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{object.einverstaendnis.url}}"><p>Einverständniserklärung</p><i class="fas fa-file-download"></i></a></li>
+                            {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% if not object.deadline_reached %}
+                    <div class="padding_all_big flex_center">
+                        {% if part %}
+                            <div>
+                                <a class="form_button_sec" href="{% url 'event_unparticipate' object.id %}#nav">Abmelden</a>
+                                <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
+                            </div>
+                        {% else %}
+                            <div>
+                                <a class="form_button" href="{% url 'event_participate' object.id %}#nav">Anmelden</a>
+                                <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
+                            </div>
+                        {% endif %}
+                    </div>
                     {% else %}
-                        <a class="form_button" href="{% url 'event_participate' object.id %}#nav">Anmelden</a>
-                        <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
+                        <p class="time_info">Anmeldung vorbei</p>
                     {% endif %}
                 {% else %}
-                    <p class="time_info">Anmeldung vorbei</p>
+                    <div class="flex_center padding_all_big">
+                        <h5> Anmeldung noch nicht geöffnet </h5>
+                    </div>
                 {% endif %}
                 </p>
             </div>

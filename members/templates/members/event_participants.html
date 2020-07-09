@@ -17,16 +17,22 @@
         <h1> Teilnehmer</h1>
     </div>
     <div class="flex_center">
-        <div class="padding_all_big tertiary_bg chair_col-5">
+        <div class="padding_all_big tertiary_bg chair_col-5 side_scrolL">
             <table >
             <tr> 
                 <th><h5> Vorname </h5></th>
                 <th><h5> Nachname </h5></th>
+                <th><h5> Geburtsdatum </h5></th>
+                <th><h5> Email </h5></th>
+                <th><h5> Notfallnummer </h5></th>
             </tr>
-            {% for member in object.participants.all %}
+            {% for participant in object.participant_set.all %}
             <tr> 
-                <td> {{member.first_name}} </td>
-                <td> {{member.last_name}} </td>
+                <td> {{participant.user.first_name}} </td>
+                <td> {{participant.user.last_name}} </td>
+                <td> {{participant.birthday|date}} </td>
+                <td> {{participant.email}} </td>
+                <td> {{participant.telnr}} </td>
             </tr>
             {% endfor %}
             </table>

@@ -142,7 +142,7 @@ def remove_trainer(request):
             trainer_group.user_set.remove(user)
             trainer_group.save()
             user.save()
-            messages.add_message(request, messages.SUCCESS, f"Trainerstatus für {user.first_name} entfernt. Gruppe wurde auf {group} gesetzt")
+            messages.add_message(request, messages.SUCCESS, f"Trainerstatus für {user.first_name} entfernt. Gruppe wurde auf {group.group_id} gesetzt")
             return redirect("remove_trainer")
         return render(request, "user_handling/remove_trainer.html", context={"form":form})
     else:

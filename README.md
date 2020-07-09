@@ -32,12 +32,20 @@ Now open your browser and navigate to:\
 **localhost:8000/members**\
 you can log in with your superuser credentials
 
-To add members, sessions and events, you need at first to create some Trainingsgroups and Spots (This will be available at a later point from the main page too) . So navigate to \
-**localhost:8000/admin/**\
-There you should add:
-- Group "T" (necessary if you want to add a trainer)
-- One more Trainingsgroup if needed
-- A spot (necessary if you want to create sessions from the main-page)
+At first, make yourself a chairman
+http://127.0.0.1:8000/chairman/#nav
+
+Then Add a Group
+http://127.0.0.1:8000/members/group/#nav
+
+Then Add Members
+http://127.0.0.1:8000/register/#nav
+
+Add Trainers
+http://127.0.0.1:8000/trainer/#nav
+
+Then Add Sessions
+http://127.0.0.1:8000/members/sessions/new/#nav
 
 ### 3. Change Things ###
 To change/create pages make sure to think of the 3 things below:

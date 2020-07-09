@@ -136,6 +136,7 @@ MEDIA_URL ="/media/" #how do we access the media in the browser?
 LOGIN_REDIRECT_URL = "index"
 LOGIN_URL = 'login'
 
+TO_EMAIL = "merlin.szymanski@gmail.com" #Emails from the user-site are send there
 EMAIL_USE_TLS = True
 EMAIL_HOST ="smtp.gmail.com"
 

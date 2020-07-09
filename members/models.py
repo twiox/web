@@ -8,7 +8,6 @@ from PIL import Image
 
 
 # Create your models here.
-
 class Spot(models.Model):
     title = models.CharField("Spotname", max_length=30)
     lat = models.CharField("Latitude", max_length=30, default="51.347127")
@@ -37,7 +36,6 @@ class Group(models.Model):
 
 class Event(models.Model):
     allowed_groups = models.ManyToManyField(Group, verbose_name="Für die Gruppen")
-    participants = models.ManyToManyField(User, blank=True)
     
     title = models.CharField("Event-name", max_length=100)
     place = models.CharField("Veranstaltungsort", max_length=200, blank=True, default="Leipzig")
@@ -46,6 +44,14 @@ class Event(models.Model):
     start_date = models.DateTimeField("Datum Beginn", default=datetime.now())
     end_date = models.DateTimeField("Datum Ende", default=datetime.now())
     hinweis = models.CharField("Hinweis", blank=True, max_length=50)
+    costs = models.IntegerField("Kosten", blank=True, null=True)
+    info_only = models.BooleanField("Nur Ankündigung?",null=True)
+    
+    teilnahmebedingungen = models.FileField("Teilnahmebedingungen", upload_to=f"Events/Docs/",null=True,blank=True)
+    datenschutz = models.FileField("Datenschutzerklärung",upload_to=f"Events/Docs/",null=True,blank=True)
+    einverstaendnis = models.FileField("Einverständnis",upload_to=f"Events/Docs/",null=True,blank=True)
+    
+    participants = models.ManyToManyField(User)
 
     #if we query over events, we want the most recent one firsthand 
     class Meta:
@@ -65,7 +71,17 @@ class Event(models.Model):
     def __str__(self):
         return f"Event: {self.title}"
 
-
+class Participant(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    email = models.CharField("Emailadresse", max_length=150)
+    telnr = models.CharField("Telefon (während der Veranstaltung)", max_length=150)
+    birthday = models.DateTimeField("Geburtstag")
+    event = models.ForeignKey(Event, on_delete=models.CASCADE,blank=True,null=True)
+    
+    def __str__(self):
+        return f"Participant: {self.user.first_name} {self.user.last_name}"
+        
+        
 class Trainer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     trainer_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, default = "Hier die Nummer für die Website")

@@ -8,17 +8,18 @@ from django.views.generic import (
     DeleteView 
     )
 from django.views import View
-from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message
+from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, Participant
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
-from .forms import EventUpdateParticipantForm, SessionForm, EventForm, UpdateMemberInformationForm,UpdateMemberEmailForm
+from .forms import EventUpdateParticipantForm,EventUpdateParticipantForm2, SessionForm, EventForm, UpdateMemberInformationForm,UpdateMemberEmailForm
 from django.contrib import messages
 from datetime import datetime
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.views import PasswordChangeView
+from django.conf import settings
 
 # Create your views here.
 import os
@@ -32,6 +33,7 @@ def index(request):
     chairmen = Chairman.objects.filter(show__contains="member_site")
     training_messags = Message.objects.filter(groups=group).filter(display="sessions")
     event_messags = Message.objects.filter(groups=group).filter(display="events")
+    
     if(hasattr(request.user, "trainer")):
         trainer_sessions = Session.objects.filter(trainer=Trainer.objects.get(user=request.user))
         events = Event.objects.all()
@@ -68,6 +70,19 @@ class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     #template: event_detail.html
     model = Event
     
+    def get_context_data(self, **kwargs):
+        participate = Participant.objects.filter(event=self.object, user=self.request.user)
+        
+        context = {}
+        if self.object:
+            context['object'] = self.object
+            context['part'] = len(participate.all()) == 1
+            context_object_name = self.get_context_object_name(self.object)
+            if context_object_name:
+                context[context_object_name] = self.object
+        context.update(kwargs)
+        return super().get_context_data(**context)
+    
     def test_func(self):
         user_group = self.request.user.profile.group
         event = self.get_object()
@@ -92,22 +107,32 @@ class EventDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     success_url = "/members/#events"
     #who can delete the event?
     permission_required = 'members.delete_event'
+    
+    
 
 class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = 'members/event_participate.html'
     form_class = EventUpdateParticipantForm
     model = Event
-       
+    
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():
+            participant = Participant(
+                user = self.request.user,
+                email = form.cleaned_data.get("email"),
+                telnr = form.cleaned_data.get("telnr"),
+                birthday = form.cleaned_data.get("birthday"),
+                event = self.get_object()
+                )
+            participant.save()
             event = self.get_object()
-            event.participants.add(self.request.user)
+            event.participants.add(request.user)
             event.save()
             messages.add_message(request, messages.SUCCESS, 'Du bist erfolgreich angemeldet')
-            return HttpResponseRedirect(f"/members/events/{event.id}")
-        return render(request, self.template_name, {'form': form})
-        
+            return HttpResponseRedirect(f"/members/events/{self.get_object().id}")
+        return render(request, self.template_name, {'form': form, 'object':self.get_object()})
+    
     def test_func(self):
         user_group = self.request.user.profile.group
         event = self.get_object()
@@ -116,13 +141,15 @@ class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = 'members/event_unparticipate.html'
-    form_class = EventUpdateParticipantForm
+    form_class = EventUpdateParticipantForm2
     model = Event
        
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():
             event = self.get_object()
+            part = Participant.objects.filter(event=event, user=self.request.user)
+            part.delete()
             event.participants.remove(self.request.user)
             event.save()
             messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich abgemeldet')
@@ -330,7 +357,7 @@ class UserDetailView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
         if form.is_valid():
             mail_subject=f"Mitteilung von {request.user.first_name} {request.user.last_name}"
             message = form.cleaned_data.get("comment")
-            to_email = "merlin.szymanski@gmail.com"
+            to_email = settings.TO_EMAIL
             email=EmailMessage(mail_subject, message, to=[to_email])
             if(request.FILES.get('attachment')):
                 document = request.FILES.get('attachment')

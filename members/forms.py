@@ -16,13 +16,22 @@ class EventForm(forms.ModelForm):
     #allowed_groups = forms.ModelChoiceField(label="Für die Gruppen?",queryset=Group.objects.exclude(group_id = "T"))
     class Meta:
         model = Event
-        fields = ["title","start_date","end_date","deadline","hinweis","description","allowed_groups"]
+        fields = ["title","info_only","costs","start_date","end_date","deadline","hinweis","description",
+            "allowed_groups","teilnahmebedingungen", "datenschutz", "einverstaendnis"]
         widgets = {
             'allowed_groups': forms.CheckboxSelectMultiple,
         }
 
-
 class EventUpdateParticipantForm(forms.ModelForm):
+    confirm = forms.BooleanField()
+    telnr = forms.CharField()
+    email = forms.EmailField()
+    birthday = forms.DateField()
+    class Meta:
+        model=Event
+        fields = ["email","telnr","birthday","confirm"]
+ 
+class EventUpdateParticipantForm2(forms.ModelForm):
     class Meta:
         model=Event
         fields = []
@@ -36,7 +45,7 @@ class UpdateMemberInformationForm(forms.ModelForm):
         fields = ["comment", "attachment"]
         
 class UpdateMemberEmailForm(forms.ModelForm):
-    password = forms.CharField(max_length=32, widget=forms.PasswordInput)
+    password = forms.CharField(widget=forms.PasswordInput)
     email1 = forms.EmailField()
     email2 = forms.EmailField()
     class Meta:
