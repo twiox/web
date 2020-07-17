@@ -5,7 +5,13 @@
         Mitglieder </a>
     <a class="float_left"> > </a>
     <a class="float_left strong" style="font-size: 1.1rem; color:white;"> {{object.title}} </a>
+    {% if user.trainer in object.trainer.all %}
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'group_detail' object.id %}#nav">
+        Trainingsgruppe </a>
+    {% endif %}
 </div>
+
 {% endblock %}
 {%block content %}
 <section>
@@ -48,8 +54,8 @@
             </div>
         </div>
     </div>
-    <h1 class="padding_tb_big">ANSPRECHPARTNER</h1>
-    <div class="tertiary_bg padding_all_big" style="clear:both;">
+    <h1 class="padding_tb_big">Deine TrainerInnen</h1>
+    <div class="padding_all_big" style="clear:both;">
         <div>
             {% for trainer in object.trainer.all %}
             <div class="col-5 float_left">

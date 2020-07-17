@@ -36,6 +36,8 @@ def index(request):
     
     if(hasattr(request.user, "trainer")):
         trainer_sessions = Session.objects.filter(trainer=Trainer.objects.get(user=request.user))
+        if(group.group_id != "T"):
+            sessions += Session.objects.filter(group__group_id="T")
         events = Event.objects.all()
         training_messags = Message.objects.all().filter(display="sessions")
         event_messags = Message.objects.all().filter(display="events")
@@ -129,7 +131,7 @@ class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             event = self.get_object()
             event.participants.add(request.user)
             event.save()
-            messages.add_message(request, messages.SUCCESS, 'Du bist erfolgreich angemeldet')
+            messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich angemeldet')
             return HttpResponseRedirect(f"/members/events/{self.get_object().id}")
         return render(request, self.template_name, {'form': form, 'object':self.get_object()})
     
@@ -167,7 +169,7 @@ class EventParticipantsView(LoginRequiredMixin, UserPassesTestMixin, DetailView)
     template_name = 'members/event_participants.html'
     
     def test_func(self):
-        perms = bool(hasattr(self.request.user, "trainer")+ hasattr(self.request.user,"chairman"))
+        perms = bool(hasattr(self.request.user, "trainer")+hasattr(self.request.user,"chairman"))
         return perms
 
 """FOR THE SESSIONS"""
@@ -194,6 +196,7 @@ class SessionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView)
         self.object = form.save()
         if(self.object.day in key):
             self.object.day_key = key[self.object.day]
+        messages.add_message(self.request, messages.SUCCESS, 'Einheit erstellt')
         return super().form_valid(form)
     
 class SessionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
@@ -207,6 +210,7 @@ class SessionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
         self.object = form.save()
         if(self.object.day in key):
             self.object.day_key = key[self.object.day]
+        messages.add_message(self.request, messages.SUCCESS, 'Einheit geändert')
         return super().form_valid(form)
 
 
@@ -214,6 +218,10 @@ class SessionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView)
     model = Session
     success_url = "/members/#training"
     permission_required = 'members.delete_session'
+    
+    def post(self, request, *args, **kwargs):
+        messages.add_message(request, messages.SUCCESS, 'Einheit gelöscht')
+        return self.delete(request, *args, **kwargs)
 
 """FOR THE SPOTS"""
 class SpotListView(LoginRequiredMixin, ListView):
@@ -227,23 +235,43 @@ class SpotCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Spot
     fields=["title","lat","long","description"]
     permission_required = 'members.add_spot'
-
+    
+    def form_valid(self, form):
+        self.object = form.save()
+        messages.add_message(self.request, messages.SUCCESS, 'Spot erstellt')
+        return super().form_valid(form)
+    
 class SpotUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_form.html
     model = Spot
     fields=["title","lat","long","description"]
     permission_required = 'members.change_spot'
+    
+    def form_valid(self, form):
+        self.object = form.save()
+        messages.add_message(self.request, messages.SUCCESS, 'Spot geändert')
+        return super().form_valid(form)
  
 class SpotDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Spot
     success_url = "/members/"
     permission_required = 'members.delete_spot'
+    
+    def post(self, request, *args, **kwargs):
+        messages.add_message(request, messages.SUCCESS, 'Spot gelöscht')
+        return self.delete(request, *args, **kwargs)
 
 """For the Groups"""
 class GroupCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Group
     permission_required = "members.create_group"
     fields = ["group_id"]
+    
+    def form_valid(self, form):
+        self.object = form.save()
+        messages.add_message(self.request, messages.SUCCESS, 'Gruppe erstellt')
+        return super().form_valid(form)
+    
 
 class GroupDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Group
@@ -260,6 +288,7 @@ class GroupDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         if(len(User.objects.filter(profile__group = self.object)) == 0):
             success_url = self.get_success_url()
             self.object.delete()
+            messages.add_message(request, messages.SUCCESS, 'Gruppe gelöscht')
             return HttpResponseRedirect(success_url)
         
         else:
@@ -271,8 +300,24 @@ class GroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     permission_required = 'members.delete_group'
 
 class GroupDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
+    model = Session
+    permission_required = "members.see_group"
+    template_name = "members/group_detail.html"
+    
+    def get_context_data(self, **kwargs):
+        context = {"member_list":User.objects.filter(profile__group = self.object.group)}
+        if self.object:
+            context['object'] = self.object
+            context_object_name = self.get_context_object_name(self.object)
+            if context_object_name:
+                context[context_object_name] = self.object
+        context.update(kwargs)
+        return super().get_context_data(**context)
+    
+class RealGroupDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     model = Group
     permission_required = "members.see_group"
+    template_name = "members/real_group_detail.html"
     
     def get_context_data(self, **kwargs):
         context = {"member_list":User.objects.filter(profile__group = self.object)}
@@ -290,6 +335,11 @@ class GroupUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #who can update the event?
     permission_required = 'members.change_group'
     fields = ["group_id"]
+    
+    def form_valid(self, form):
+        self.object = form.save()
+        messages.add_message(self.request, messages.SUCCESS, 'Name der Gruppe geändert')
+        return super().form_valid(form)
 
 """For The Messages"""
 class MessageEveCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):

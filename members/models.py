@@ -23,10 +23,7 @@ class Spot(models.Model):
 
 class Group(models.Model):
     group_id = models.CharField("Gruppe (z.B 'A')", max_length=10)
-    
-    class Meta:
-        permissions = [('see_group', 'Can see members of the group')]
-    
+
     def __str__(self):
         return f"Gruppe: {self.group_id}"
 
@@ -119,6 +116,9 @@ class Session(models.Model):
     start_time = models.TimeField("Beginn",default="17:00")
     end_time = models.TimeField("Ende",default="19:00")
     hinweis = models.CharField("Hinweis", blank=True, max_length=50)
+    
+    class Meta:
+        permissions = [('see_group', 'Can see members of the group')]
     
     @property
     def format_start_time(self):

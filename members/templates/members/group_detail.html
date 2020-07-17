@@ -4,21 +4,16 @@
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
         Mitglieder </a>
     <a class="float_left"> > </a>
-    {%if perms.members.change_group %}
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'group_list' %}#nav">
-    Gruppenliste </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'session_detail' object.id %}#nav">{{object.title}}</a>
     <a class="float_left"> > </a>
-    {% endif %}
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Gruppe {{object.group_id}} </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Trainingsgruppe</a>
 </div>
 {% endblock %}
-
-
 
 {% block content %}
 <section>
     <div style="text-align:center">
-        <h1> Teilnehmer</h1>
+        <h1> Teilnehmer Gruppe {{object.group.group_id}}</h1>
     </div>
     <div class="flex_center">
         <div class="padding_all_big tertiary_bg chair_col-5">

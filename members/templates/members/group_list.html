@@ -4,7 +4,7 @@
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
         Mitglieder </a>
     <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Gruppenliste </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Alle Gruppen </a>
 </div>
 {% endblock %}
 {%block content %}
@@ -26,14 +26,14 @@
                     </div>
                     <div class="padding_all_med trainer_ui">
                         {% if perms.members.delete_group %}
-                        <a href="{% url 'group_delete' object.id %}"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
+                        <a href="{% url 'group_delete' object.id %}#nav"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                         {% endif %}
                         {% if perms.members.change_group %}
                         <a href="{% url 'group_update' object.id %}#nav"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
                         {% endif %}
                     </div>
                     <div class="second_section padding_all_big" style="height:80px;">
-                        <a href="{% url 'group_detail' object.id %}#nav" style="display: block;">
+                        <a href="{% url 'real_group_detail' object.id %}#nav" style="display: block;">
                             <p class="more_info_button" style="margin: 0px auto;">Teilnehmer </p>
                         </a>
                     </div>

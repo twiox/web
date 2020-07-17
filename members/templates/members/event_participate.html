@@ -13,7 +13,7 @@
 {%block content %}
 {% if not object.deadline_reached %}
 <section style="text-align:center;">
-    <h1>{{object.title|upper}}</h2>
+    <h1>{{object.title|upper}}</h1>
     <div class="flex_center">
         <div class="tertiary_bg padding_all_big col-5" style="text-align:center;">
             <p> Anmeldung </p>
@@ -45,7 +45,7 @@
                 <label class="mdc-text-field mdc-text-field--filled telnr">
                     <span class="mdc-text-field__ripple"></span>
                     <input type="text" class="mdc-text-field__input" aria-labelledby="telnr-label" name="telnr" required>
-                    <span class="mdc-floating-label" id="telnr-label">Notfallnummer</span>
+                    <span class="mdc-floating-label" id="telnr-label">Telefonnummer/Notfallnummer</span>
                     <span class="mdc-line-ripple"></span>
                 </label>
                     

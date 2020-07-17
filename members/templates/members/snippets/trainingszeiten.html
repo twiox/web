@@ -22,11 +22,11 @@
             <div class="padding_all_med" >
                 <div id="container">
                     <h5>{{msg.title}}</h5>
-                    <p class="padding_rl_small">{{msg.message}}</p>
+                    <p>{{msg.message}}</p>
                     <div class="trainer_ui">
                         <p>[{{msg.author.first_name}},{{msg.date |date:'d.m.Y'}}]</p>
                         {% if perms.members.delete_message %}
-                        <a href="{% url 'message_delete' msg.id %}"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
+                        <a href="{% url 'message_delete' msg.id %}#nav"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                         {% endif %}
                         {% if perms.members.change_message %}
                         <a href="{% url 'message_update' msg.id %}#nav"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
@@ -99,15 +99,7 @@
     <!-- The container for the Trainersessions -->
     {% if trainer_sessions %}
     <div>
-        <h3 class="padding_tb_big">DEINE GRUPPEN</h3>
-        <div class="padding_rl_big">
-            <ul style="display:flex; flex-wrap: wrap;">
-            {% for group in trainer_groups.all %}
-                <li style="padding:5px;"> <a class="web_button gruppe{{group.group_id}} training_button padding_all_small" href="{% url 'group_detail' group.id %}">Gruppe {{group.group_id}} </a> </li>
-            {% endfor %}
-            </ul>
-        </div>
-        <h3 class="padding_tb_big">DEINE Einheiten</h3>
+        <h3 class="padding_tb_big">Einheiten, die du gibst</h3>
         <div>
             {% for session in trainer_sessions %}
             <div class="padding_all_small float_left col-4" id="container">
