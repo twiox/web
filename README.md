@@ -1,6 +1,8 @@
 ## Web-App Twio X Member-Area ##
 This project is meant to provide a scaled version of the current web-page at https://twio-x.com/mitglieder.
 ### 1. Set Up ###
+
+#### Option 1: local setup ####
 To run a version of the webapp on your local machine, run:\
 `git clone https://github.com/MerlinSzymanski/twio_web`
 
@@ -24,9 +26,16 @@ go back to the base-directory. To create a sqlite3-database and to initiate the 
 to access the site and the admin-panel, you should create a super-user:\
 `python3 manage.py createsuperuser`
 
-### 2. Run the current version ###
 To run the server:\
 `python3 manage.py runserver`
+
+#### Option 2: Docker ####
+
+Requirements: docker and docker-compose are installed.
+
+Run `docker-compose up` to build and start the python server.
+
+### 2. Use the current version ###
 
 Now open your browser and navigate to:\
 **localhost:8000/members**\

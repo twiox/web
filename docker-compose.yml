@@ -1,0 +1,14 @@
+version: "3.3"
+services:
+
+  twio-python:
+    container_name: twio-python
+    image: twio-python
+    build:
+      context: ./docker-config
+      dockerfile: python.dockerfile
+    ports:
+      - 127.0.0.1:8000:8000
+    volumes:
+      - ./:/opt/twio_web
+
