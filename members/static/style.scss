@@ -132,6 +132,20 @@ $padding_small: 10px;
     display: flex; 
     justify-content: center;
 }
+.flex_even{
+    display: flex; 
+    justify-content: space-evenly;
+}
+.landing_flex{
+    display: flex; 
+    justify-content: space-evenly;
+    flex-direction:column;
+}
+.flex_center_vertical{
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+}
 .side_scroll{
     overflow:auto;
     overflow-y:hidden;
@@ -392,6 +406,7 @@ table{
         width:auto;
     }
 }
+
 .trainer_ui{
     a{
         float:left;
@@ -494,15 +509,35 @@ footer{
         span{color:$primary;}
     }
 }
-.social {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  overflow:visible;
-  padding:1.250rem 0;
-  margin-top:70px;
+.social_test{
+  display: flex;
+  overflow: visible;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
 }
 
+.landing_img{
+    top:0;
+}
+
+.landing_buffer{
+    display:flex;
+    justify-content:center;
+    overflow:visible;
+}
+
+.landing_option{
+    width:220px;
+    height: 40px;
+    opacity: 0.6;
+    h3{
+        font-weight:500;
+    }
+    &:hover{
+        background-color:$primary;
+    }
+}
 
 /*For the forms */
 .form_wrapper{

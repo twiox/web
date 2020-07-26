@@ -4,9 +4,11 @@ from django.conf import settings
 from django.contrib.auth import views as auth_views
 from django.conf.urls.static import static
 from user_handling import views as user_views
+from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.landingPage, name="landing"),
     path("members/", include('members.urls')),
     path('users/', user_views.MemberListView.as_view(), name="member_list"),
     path('users/<int:pk>/remove', user_views.UserDeleteView.as_view(), name="remove_user"),

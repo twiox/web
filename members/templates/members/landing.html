@@ -1,0 +1,125 @@
+{% load compress %}
+{% load static %}
+{% compress css %}
+    <link type="text/x-scss" href="{% static 'style.scss' %}" rel="stylesheet" media="screen">
+    <link type="text/x-scss" rel="stylesheet" media="only screen and (min-width: 600px)" href="{{ STATIC_URL }}/static/tablet_style.scss">
+    <link type="text/x-scss" rel="stylesheet" media="only screen and (min-width: 1000px)" href="{{ STATIC_URL }}/static/desktop_style.scss">
+{% endcompress %}
+    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}/static/material.css">
+
+<!doctype html>
+<html lang="en", style="padding-bottom:0px;">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://kit.fontawesome.com/55165a9737.js" crossorigin="anonymous"></script>
+        
+        <title>Twio X e.V. - Parkour Leipzig</title>
+        <meta name="description" content="Der Internetauftritt vom Parkour Verein Twio X e.V. aus Leipzig">
+        <link rel="icon" href="{{ STATIC_URL }}/static/media/favicon.ico">
+        
+        
+        <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Google+Sans:400,500,700">
+        <link href="https://fonts.googleapis.com/css?family=Catamaran:200,600" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+  
+    </head>
+    <body>
+        <div class="content_wrapper">
+            <!-- header -->
+            <header>
+                <a href="{% url 'index' %}">
+                    <img src="{{ STATIC_URL }}/static/media/twiox_logo.svg">
+                </a>
+            </header>
+            
+            <div id="container">
+                <div style="height: 350px;" class="image_wrapper">
+                    <img class="landing_img" src="{{ STATIC_URL }}/static/media/landing.jpg">
+                </div>
+                <section class="flex_center_vertical" style="position: absolute; top:0; height: 350px; width: 100%">
+                    <div class="landing_flex" style="overflow:visible;">
+                        <div class="landing_buffer">
+                            <a href="members">
+                                <div class="landing_option primary_bg flex_center_vertical">
+                                    <h3>MITGLIEDER</h3>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="landing_buffer">
+                            <a href="#" id="container">
+                                <div class="landing_option primary_bg flex_center_vertical">
+                                    <h3>INTERESSIERTE</h3>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="landing_buffer">
+                            <a href="#" id="container">
+                                <div class="landing_option primary_bg flex_center_vertical">
+                                    <h3>VERANSTALTER</h3>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <div class="mdc-snackbar mdc-snackbar">
+              <div class="mdc-snackbar__surface">
+                <div class="mdc-snackbar__label" role="status" aria-live="polite">
+                </div>
+              </div>
+            </div>
+            <script>
+            const snackbar = new mdc.snackbar.MDCSnackbar(document.querySelector('.mdc-snackbar'));
+            </script>
+            
+            {% for message in messages %}
+                <script>
+                    snackbar.labelText = "{{message}}";
+                    snackbar.open()
+                </script>
+            {% endfor %}
+            
+        </div>
+        <footer class="padding_tb_big">
+                <div class="social_test">
+                    <div class="element">
+                        <a href="https://www.facebook.com/twioxev/" target="_blank">
+                            <i class="fab fa-facebook" style='font-size:27px'></i>
+                            <span>facebook.com/twioxev</span>
+                        </a>
+                    </div>
+                    <div class="element">
+                        <a href="https://www.instagram.com/twio_x/" target="_blank">
+                            <i class="fab fa-instagram" style='font-size:27px'></i>
+                            <span>instagram.com/twio_x</span>
+                        </a>
+                    </div>
+                    <div class="element">
+                        <a href="https://www.youtube.com/channel/UCvvzqAyNrdy79eBQzdCwFUw/videos" target="_blank">
+                            <i class='fab fa-youtube' style='font-size:27px'></i>
+                            <span>youtube.com/twio-x</span>
+                        </a>
+                    </div>
+                    <div class="element">
+                        <a href="tel:+491772119322" target="_blank">
+                            <i class="fas fa-phone-alt" style='font-size:27px'></i>
+                            <span>+49 177 211 93 22</span>
+                        </a>
+                    </div>
+                    <div class="element">
+                        <a href="mailto:parkour@twio-x" target="_blank">
+                            <i class="far fa-envelope" style='font-size:27px'></i>
+                            <span>parkour@twio-x.de</span>
+                        </a>
+                    </div>
+                </div>
+            <hr style="border:0px;height:1px;background-color:#262626;margin-top:30px;">
+            <div class="padding_tb_small" style="text-align:center;">
+                <a class="more_info_button button_padding" href="https://www.twio-x.com/impressum">Impressum</a> ⋅ <a href="https://www.twio-x.com/datenschutzerkl%C3%A4rung" class="more_info_button button_padding">Datenschutz</a>
+            </div>
+        </footer>
+    </body>
+</html>
