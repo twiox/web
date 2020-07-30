@@ -9,6 +9,8 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.landingPage, name="landing"),
+    path('impressum', views.impressumPage, name="impressum"),
+    path('dataprotection', views.dataProtectionPage, name="dataprotection"),
     path("members/", include('members.urls')),
     path('users/', user_views.MemberListView.as_view(), name="member_list"),
     path('users/<int:pk>/remove', user_views.UserDeleteView.as_view(), name="remove_user"),

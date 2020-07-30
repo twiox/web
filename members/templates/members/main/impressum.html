@@ -1,0 +1,162 @@
+{% load compress %}
+{% load static %}
+{% compress css %}
+    <link type="text/x-scss" href="{% static 'style.scss' %}" rel="stylesheet" media="screen">
+    <link type="text/x-scss" rel="stylesheet" media="only screen and (min-width: 600px)" href="{{ STATIC_URL }}/static/tablet_style.scss">
+    <link type="text/x-scss" rel="stylesheet" media="only screen and (min-width: 1000px)" href="{{ STATIC_URL }}/static/desktop_style.scss">
+{% endcompress %}
+    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}/static/material.css">
+
+<!doctype html>
+<html lang="en", style="padding-bottom:0px;">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://kit.fontawesome.com/55165a9737.js" crossorigin="anonymous"></script>
+        
+        <title>Twio X e.V. - Parkour Leipzig</title>
+        <meta name="description" content="Der Internetauftritt vom Parkour Verein Twio X e.V. aus Leipzig">
+        <link rel="icon" href="{{ STATIC_URL }}/static/media/favicon.ico">
+        
+        
+        <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Google+Sans:400,500,700">
+        <link href="https://fonts.googleapis.com/css?family=Catamaran:200,600" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+  
+    </head>
+    <body>
+        <div class="content_wrapper">
+            <!-- header -->
+            <header>
+                <a href="{% url 'index' %}">
+                    <img src="{{ STATIC_URL }}/static/media/twiox_logo.svg">
+                </a>
+            </header>
+            <nav class="sticky" id="nav">
+                <div class="three_grid">
+                    <a href="{% url 'index' %}">MITGLIEDER</a>
+                    <a href="https://www.twio-x.com/interessierte">INTERESSIERTE</a>
+                    <a href="https://www.twio-x.com/veranstalter">VERANSTALTER</a>
+                </div> 
+            </nav>
+            
+            <div class="frame padding_tb_big">
+                <h1>Impressum</h1>
+                <strong>Angaben gem&auml;&szlig; &sect;5 TMG</strong><br>
+                <br>
+                <p>
+                Twio X e.V.<br>
+                Ranst&auml;dter Steinweg 9<br>
+                04109 Leipzig<br>
+                </p>
+                <br>
+                <strong>Bankverbindung:</strong><br>
+                Deutsche Skatbank:<br>
+                IBAN: DE67 8306 5408 0004 9710 60<br>
+                BIC: GENODEF1SLR<br>
+                <br>
+                <h2 class="padding_tb_big">Vertreten nach §26 BGB durch</h2>
+                <strong>Jewgeni Eisenberg</strong><br>
+                <strong>Merlin Szymanski</strong><br>
+                <strong>Oliver Grehl</strong><br>
+                <br>
+                <h2 class="padding_tb_big">Kontakt</h2>
+                Telefon: +49 177 211 93 22<br>
+                E-Mail: parkour[at]twio-x.de<br>
+                <br>
+                <h2 class="padding_tb_big">Registereintrag</h2>
+                <strong>Eintragung im Vereinsregister</strong><br>
+                Registernummer: VR 4359<br>
+                Registergericht: Amtsgericht Leipzig<br>
+                <br>
+                <h2 class="padding_tb_big">Haftungsauschluss</h2>
+                <strong>Haftung f&uuml;r Inhalte</strong><br>
+                <p align="justify">
+                Die Inhalte dieser Seite wurden mit gr&ouml;&szlig;ter Sorgfalt erstellt. F&uuml;r die Richtigkeit, Vollst&auml;ndigkeit und Aktualit&auml;t der Inhalte 
+                k&ouml;nnen wir jedoch keine Gew&auml;hr &uuml;bernehmen. Als Diensteanbieter ist der Anbieter dieser Webseite gem&auml;&szlig; &sect; 7 Abs. 1 TMG 
+                f&uuml;r eigene Inhalte und bereitgestellte Informationen auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich; nach den &sect;&sect; 
+                8 bis 10 TMG jedoch nicht verpflichtet, die &uuml;bermittelten oder gespeicherten fremden Informationen zu &uuml;berwachen. 
+                Eine Entfernung oder Sperrung dieser Inhalte erfolgt umgehend ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung. 
+                    Eine Haftung ist erst ab dem Zeitpunkt der Kenntniserlangung m&ouml;glich.</p><br>
+                <br>
+                <strong>Haftung f&uuml;r Links</strong><br>
+                <p align="justify">
+                Die Webseite enth&auml;lt sog. &#8222;externe Links&ldquo; (Verlinkungen) zu anderen Webseiten, auf deren Inhalt der Anbieter der 
+                Webseite keinen Einfluss hat. Aus diesem Grund kann der Anbieter f&uuml;r diese Inhalte auch keine Gew&auml;hr &uuml;bernehmen. 
+                F&uuml;r die Inhalte und Richtigkeit der bereitgestellten Informationen ist der jeweilige Anbieter der verlinkten Webseite verantwortlich. 
+                Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf m&ouml;gliche Rechtsverst&ouml;&szlig;e &uuml;berpr&uuml;ft. 
+                Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine permanente inhaltliche Kontrolle der 
+                verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. 
+                Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Links umgehend entfernen.</p><br>
+                <br>
+                <strong>Urheberrecht</strong><br>
+                <p align="justify">
+                Die auf dieser Webseite ver&ouml;ffentlichten Inhalte, Werke und bereitgestellten Informationen unterliegen dem 
+                deutschen Urheberrecht. Jede Art der Vervielf&auml;ltigung, Bearbeitung, Verbreitung, Einspeicherung 
+                und jede Art der Verwertung au&szlig;erhalb der Grenzen des Urheberrechts bedarf der vorherigen schriftlichen 
+                Zustimmung des jeweiligen Rechteinhabers. Das unerlaubte Kopieren/Speichern der bereitgestellten
+                Informationen auf diesen Webseiten ist nicht gestattet und strafbar. Lediglich die Herstellung von Kopien
+                und Downloads f&uuml;r den pers&ouml;nlichen, privaten und nicht kommerziellen Gebrauch ist erlaubt. 
+                Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere
+                werden Inhalte Dritter als solche gekennzeichnet. 
+                Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.</p>
+            </div>
+            <div class="mdc-snackbar mdc-snackbar">
+              <div class="mdc-snackbar__surface">
+                <div class="mdc-snackbar__label" role="status" aria-live="polite">
+                </div>
+              </div>
+            </div>
+            <script>
+            const snackbar = new mdc.snackbar.MDCSnackbar(document.querySelector('.mdc-snackbar'));
+            </script>
+            
+            {% for message in messages %}
+                <script>
+                    snackbar.labelText = "{{message}}";
+                    snackbar.open()
+                </script>
+            {% endfor %}
+            
+        </div>
+        <footer class="padding_tb_big">
+                <div class="social_test">
+                    <div class="element">
+                        <a href="https://www.facebook.com/twioxev/" target="_blank">
+                            <i class="fab fa-facebook" style='font-size:27px'></i>
+                            <span>facebook.com/twioxev</span>
+                        </a>
+                    </div>
+                    <div class="element">
+                        <a href="https://www.instagram.com/twio_x/" target="_blank">
+                            <i class="fab fa-instagram" style='font-size:27px'></i>
+                            <span>instagram.com/twio_x</span>
+                        </a>
+                    </div>
+                    <div class="element">
+                        <a href="https://www.youtube.com/channel/UCvvzqAyNrdy79eBQzdCwFUw/videos" target="_blank">
+                            <i class='fab fa-youtube' style='font-size:27px'></i>
+                            <span>youtube.com/twio-x</span>
+                        </a>
+                    </div>
+                    <div class="element">
+                        <a href="tel:+491772119322" target="_blank">
+                            <i class="fas fa-phone-alt" style='font-size:27px'></i>
+                            <span>+49 177 211 93 22</span>
+                        </a>
+                    </div>
+                    <div class="element">
+                        <a href="mailto:parkour@twio-x" target="_blank">
+                            <i class="far fa-envelope" style='font-size:27px'></i>
+                            <span>parkour@twio-x.de</span>
+                        </a>
+                    </div>
+                </div>
+            <hr style="border:0px;height:1px;background-color:#262626;margin-top:30px;">
+            <div class="padding_tb_small" style="text-align:center;">
+                <a class="more_info_button button_padding" href="{% url 'impressum'%}">Impressum</a> ⋅ <a href="{%url 'dataprotection' %}" class="more_info_button button_padding">Datenschutz</a>
+            </div>
+        </footer>
+    </body>
+</html>

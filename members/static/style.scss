@@ -494,6 +494,9 @@ footer{
 }
 .element{
     text-align:center;
+    -webkit-transition: transform 0.15s ease-in-out;
+    -moz-transition:transform 0.15s ease-in-out;
+    -ms-transition:transform 0.15s ease-in-out;
     i{color:$header_col;}
     span{
         color:$header_col;
