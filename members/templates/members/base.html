@@ -36,10 +36,10 @@
             <!-- navigationbar -->
             <nav class="sticky" id="nav">
                 <div class="three_grid">
-                    <a class="here_I_am" href="{% url 'index' %}">MITGLIEDER</a>
-                    <a href="https://www.twio-x.com/interessierte">INTERESSIERTE</a>
-                    <a href="https://www.twio-x.com/veranstalter">VERANSTALTER</a>
-                </div> 
+                    <a id="members" class="here_I_am" href="{% url 'index' %}">MITGLIEDER</a>
+                    <a id ="interested" href="{% url 'interested_index'%}">INTERESSIERTE</a>
+                    <a id ="presenter" href="https://www.twio-x.com/veranstalter">VERANSTALTER</a>
+                </div>
                 {% block whoamI %} {% endblock %}
             </nav>
             <!-- main picture -->

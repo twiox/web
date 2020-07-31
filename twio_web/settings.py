@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'members.apps.MembersConfig',
+    'interested.apps.InterestedConfig',
     'user_handling.apps.UserHandlingConfig',
     'six',
     'multiselectfield',

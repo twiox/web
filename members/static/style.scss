@@ -209,6 +209,14 @@ $padding_small: 10px;
         background-color:$primary;
     }
 }
+.prim_hover{
+    -webkit-transition: background-color 0.15s ease-in-out;
+    -moz-transition:background-color 0.15s ease-in-out;
+    -ms-transition:background-color 0.15s ease-in-out;
+    &:hover{
+        background-color:$primary;
+    }
+}
 
 .searchbar{
     background-color: $primary_bg;

@@ -12,6 +12,7 @@ urlpatterns = [
     path('impressum', views.impressumPage, name="impressum"),
     path('dataprotection', views.dataProtectionPage, name="dataprotection"),
     path("members/", include('members.urls')),
+    path("interested/", include('interested.urls')),
     path('users/', user_views.MemberListView.as_view(), name="member_list"),
     path('users/<int:pk>/remove', user_views.UserDeleteView.as_view(), name="remove_user"),
     path('users/<int:pk>/update', user_views.ProfileUpdateView.as_view(), name="update_user"),

@@ -1,0 +1,78 @@
+{% extends "members/base.html" %}
+    {% block picture %}
+    <div class="image_wrapper">
+        <img src="{{ STATIC_URL }}/static/media/home.jpg" id='home_view'>
+        <script type="text/javascript">
+            window.addEventListener('scroll',function(){
+                document.getElementById("home_view").style.bottom=-window.scrollY*0.25+"px";
+            });
+        </script>
+    </div>
+    {% endblock %}
+    {% block content %}
+    <!-- Say Hello -->
+    <section>
+        <h1> Der Verein </h1>
+        <div>
+            <div class="col-4 padding_all_small float_left">
+                <a href="#">
+                    <div class="tertiary_bg padding_all_big prim_hover">
+                        <p>Unser Angebot</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-4 padding_all_small float_left">
+                <a href="#">
+                    <div class="tertiary_bg padding_all_big prim_hover">
+                        <p>Philosophie</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-4 padding_all_small float_left">
+                <a href="#">
+                    <div class="tertiary_bg padding_all_big prim_hover">
+                        <p>Das Team</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+    {% endblock %}
+    {% block chairmen %}
+    {% if chairmen %}
+    <section>
+        <h1>DEINE ANSPRECHPARTNER</h1>
+        <div class="padding_tb_big">
+        {% for object in chairmen.all %}
+            <div class="col-5 float_left padding_all_small" id="container">
+                <div class="padding_all_small person_wrapper">
+                    <div class="chair_col-4 flex_center">
+                        <img class="round_profile_pic_chairman padding_all_small" src="{{object.image.url}}">
+                    </div>
+                    <div class="chair_col-5 float_left padding_all_small person_info">
+                        <h3 class="padding_tb_small"> {{object.user.first_name |upper}} {{object.user.last_name |upper}}</h3>
+                        <div>
+                            <ul class="competences">
+                                {% for comp in object.complist %}
+                                    <li> {{comp}} </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div>
+                            <p> {{object.public_telnr}} </p>
+                            <p> {{object.public_email}} </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    <script>
+        $(document).ready(function(){
+            $("#members").removeClass("here_I_am");
+            $("#interested").addClass("here_I_am");
+        });
+    </script>
+    {% endblock %}
