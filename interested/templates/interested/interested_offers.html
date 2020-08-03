@@ -1,0 +1,255 @@
+{% extends "members/base.html" %}
+    {% block navbar1 %} 
+    <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+        <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'interested_index' %}#The_Club">
+            Interessierte </a>
+        <a class="float_left"> > </a>
+        <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Angebot </a>
+    </div>
+    {% endblock %}
+    {% block picture %}
+    <div class="image_wrapper grey_cover" id="container">
+        <img src="{{ STATIC_URL }}/static/media/interested.jpg" id='home_view'>
+        <script type="text/javascript">
+            window.addEventListener('scroll',function(){
+                document.getElementById("home_view").style.bottom=-window.scrollY*0.25+"px";
+            });
+        </script>
+        <div class="flex_center_vertical">
+            <div class="flex_center" style="z-index:5; text-align:center;">
+                <h1>Unser Angebot für Mitglieder</h1>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+    {% block content %}
+    <section id="members">
+        <br>
+        <p class="two_cols">Das zentrale Angebot des Vereins richtet sich an unsere Mitglieder. Mehrmals in der Woche werden dabei in kleineren, auf das Alter 
+        und den Erfahrungsstand angepassten Gruppen, die Grundfertigkeiten und Techniken von Parkour und Freerunning erlernt. Besonderer Fokus wird auf Kraft, 
+        Ausdauer und Agilität gesetzt. Ergänzend zum regelmäßigen Techniktraining spielt bei der Verletzungsprävention insbesondere das Fall- und Sturztraining, 
+        die Gelenk- und Kniestabilität sowie ein ausgiebiges Core-Training eine entscheidende Rolle.</p><br>
+        <h2> Parkour</h2>
+        <p class="two_cols">Parkour vermittelt Techniken für das schnelle und kraftsparende Überwinden von jeglichen Hindernissen. Der Traceur verzichtet 
+        hierbei auf ineffiziente Bewegungen und fokussiert sich lediglich auf das gesetzte Ziel und das effektive Vorankommen. Fundamental ist ein ideales Körpergefühl, 
+        eine fehlerfreie Präzision und Kontrolle der Bewegungen. Im Training werden die körperlichen und vor allem mentalen Grenzen ausgereizt und dabei 
+        jede einzelne Technik perfektioniert.</p><br>
+        <h2> Freerunning</h2>
+        <p class="two_cols">Das Freerunning beschäftigt sich mit turnerischen Elementen und möglichst komplexen Bewegungsabläufen. Augenmerkt wird nicht auf 
+        Effizienz, sondern vielmehr auf Ästhetik und eine kunstvolle Ausführung der Bewegung gelegt. Dabei werden in einen Lauf neben den grundlegenden 
+        Parkourtechniken Salti, Drehungen und Schrauben eingebunden. Der Freerunner entwickelt seinen eigenen, unverkennbaren Stil durch eine individuelle 
+        Umsetzung und Kombination der Techniken.</p><br>
+        <h2> Kindertraining</h2>
+        <p class="two_cols">Das Kindertraining verbindet Kindersport mit den Grundlagen des Parkour. Vorrangig wird den Kindern der Ablauf und die richtige 
+        Art und Weise des Trainings vermittelt. Durch spielerische Übungen werden Kraft, Ausdauer, Sprungkraft, Schnellkraft und Koordination geschult. 
+        Besonders in dem sensiblen Alter zwischen 9 und 10 Jahren ist die Verbesserung des Körpergefühls durch kinderspezifische Balance- 
+        und Präzisionsübungen fundamental. Mit dem Fortschreiten des Trainings wird zudem eine erhöhte körperliche Selbsteinschätzung erzielt. 
+        Die Kinder sollen auf das Training mit den Erwachsenen und Jugendlichen im urbanen Raum vorbereitet werden, gerade um das Verletzungsrisiko 
+        zu minimieren. Neben den strukturierten Techniktraining sind jedoch die Freude an der Bewegung und der Spaß am Sport grundlegend. Die Kinder 
+        erfahren die Vorteile eines nicht wettkampforientierten Sportes und das Gefühl, gemeinsam an den körperlichen Herausforderungen zu wachsen. Dabei 
+        wird in der Gruppe lediglich ein Gegner bezwungen; die Grenze des eigenen Körpers.</p><br>
+
+    </section>
+    {% endblock %}
+    {% block picture2 %}
+    <div class="image_wrapper grey_cover" id="container">
+        <img src="{{ STATIC_URL }}/static/media/interested_offer_02.jpg" id='extreme'>
+        <script type="text/javascript">
+            var pos = $("#extreme").position().top;
+            $(document).ready(function(){
+                var height = $(window).scrollTop();
+                var loadingPos = pos/5 - height*0.25
+                
+                $("#extreme").css("bottom",loadingPos+"px")
+                });
+            window.addEventListener('scroll',function(){
+                document.getElementById("extreme").style.bottom=pos/5-window.scrollY*+0.25+"px";
+            });
+        </script>
+        <div class="flex_center_vertical">
+            <div class="flex_center" style="z-index:5;text-align:center;">
+                <h1>Unser Angebot für Nichtmitglieder</h1>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+    {% block content2 %}
+    <div class="frame">
+        <section id="participate">
+            <br>
+            <p>Das Angebot für Nichtmitglieder besteht zum Einen in der Teilnahme an einem kostenlosen Probetraining. Hier kann das Klima im Verein erfühlt und die Sportart in einer zweiwöchigen 
+            Probezeit erprobt werden. Für eine Anmeldung zum Probetraining kann das Formular in der Rubrik "Teilnehmen" genutzt werden.</p>
+            <br>
+            <h2> Lust auf ein Probetraining? </h2>
+            <a href="{% url 'interested_index'%}#form" class="more_info_button" style="padding:0px;">Hier kommst du zu unserem Anmeldeformular fürs Probetraining</a><br>
+            <br>
+            <h2>Workshops</h2>
+            <div class="flex_2even">
+                <div class="chair_col-6">
+                    <div>
+                        <div>
+                            <p>Ein weiteres Angebot sind kostenpflichtige Workshops. Hier kannst du dich als Einzelner für die 
+                            vorgegebenen Termine anmelden. Nutze bei Interesse das Formular. Alle Details zur Anmeldung erhältst du im Anschluss.</p>
+                            <br>
+                            <strong>Im Augenblick bieten wir keine Workshops für Einzelpersonen an</strong><br>
+                            <p class="padding_tb_big">Wir organisieren auch gern Workshops für größere Gruppen. Diese werden ganz individuell gestaltet und darauf angepasst, 
+                            ob sportliche Anfänger lediglich eine einmalige Herausforderung suchen oder ob erfahrene Sportler ihre Grenzen austesten möchten. 
+                            Auf Anfrage erarbeiten wir auch einen Workshop zu einem speziellen Thema, wie bspw. Sturz- und Landetraining, Stabilisation oder Krafttraining. 
+                            In der Regel führen wir einen Workshop für eine Gruppe ab fünf Teilnehmern durch. Nutze hierfür das Formular auf der Veranstalterseite
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="chair_col-6 tertiary_bg">
+                    <div class="padding_all_big">
+                        <div class="padding_all_big">
+                            <h3>Anfrage Workshop</h3>
+                            <br>
+                            <form method="POST">
+                                {% csrf_token %}
+                                {% if form.errors %}
+                                    {% for error in form.non_field_errors %}
+                                    <p class="padding_tb_small" style="color:red;">{{error}}</p>
+                                    {% endfor %}
+                                {% endif %}
+                                <div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.first_name.errors %}
+                                        {% for error in form.first_name.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled first_name">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="first_name-label" name="first_name" required>
+                                            <span class="mdc-floating-label" id="first_name-label">Vorname</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.last_name.errors %}
+                                        {% for error in form.last_name.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled last_name">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="last_name-label" name="last_name" required>
+                                            <span class="mdc-floating-label" id="last_name-label">Nachname</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.birth_date.errors %}
+                                        {% for error in form.birth_date.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled birth_date">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="birth_date-label" name="birth_date" required>
+                                            <span class="mdc-floating-label" id="birth_date-label">Geburtsdatum</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.telephone.errors %}
+                                        {% for error in form.telephone.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled telephone">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="telephone-label" name="telephone" required>
+                                            <span class="mdc-floating-label" id="telephone-label">Telefonnummer</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.email.errors %}
+                                        {% for error in form.email.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled email">
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="email-label" name="email" required>
+                                            <span class="mdc-floating-label" id="email-label">Emailadresse</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.notes.errors %}
+                                        {% for error in form.notes.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled notes">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="notes-label" name="notes">
+                                            <span class="mdc-floating-label" id="notes-label">Anmerkungen</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.city.errors %}
+                                        {% for error in form.city.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled city">
+                                            <i class="mdc-select__dropdown-icon"></i>
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <select id="select-city" class="mdc-text-field__input" style="background-color:#333333;" name="city" required>
+                                                <option value="" selected></option>
+                                                <option value="Leipzig">Leipzig</option>
+                                                <option value="Jena">Jena</option>
+                                            </select>
+                                            <span class="mdc-floating-label" id="city-label">Deine Stadt</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>      
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        <div class="mdc-form-field padding_all_big">
+                                            <div class="mdc-checkbox">
+                                              <input type="checkbox" class="mdc-checkbox__native-control" id="speicherung" name="confirm" required>
+                                              <div class="mdc-checkbox__background">
+                                                <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                                                  <path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+                                                </svg>
+                                                <div class="mdc-checkbox__mixedmark"></div>
+                                              </div>
+                                            </div>
+                                            
+                                            <label for="speicherung" >
+                                                <div>Ich stimme der <a class="more_info_button" style="padding:0px;" href="{% url 'dataprotection' %}">Datenschutzerklärung</a> zu </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="clear:both;">
+                                        <div class="flex_center_vertical">
+                                            <div class="flex_center padding_all_big">
+                                                <button type="submit" class="form_button">Absenden</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script>
+        $(document).ready(function(){
+            $("#members").removeClass("here_I_am");
+            $("#interested").addClass("here_I_am");
+        });
+    </script>
+    <script>
+        const fields = document.querySelectorAll('.mdc-text-field');
+        fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+    </script>
+    {% endblock %}

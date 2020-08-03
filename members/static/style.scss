@@ -150,6 +150,10 @@ $padding_small: 10px;
     overflow:auto;
     overflow-y:hidden;
 }
+.two_cols{
+    column-count: 1;
+    column-gap:0px;
+}
 /*Buttons*/
 .form_button {
     color:white;

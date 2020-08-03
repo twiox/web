@@ -29,7 +29,7 @@
         <div class="content_wrapper">
             <!-- header -->
             <header>
-                <a href="{% url 'index' %}">
+                <a href="{% url 'landing' %}">
                     <img src="{{ STATIC_URL }}/static/media/twiox_logo.svg">
                 </a>
             </header>
@@ -42,6 +42,7 @@
                 </div>
             </nav>
             <!-- main picture -->
+            {% block navbar1 %} {% endblock %}
             {% block picture %} {% endblock %}
             <!-- navigationbar2 -->
             {% block navbar2 %} {% endblock %}

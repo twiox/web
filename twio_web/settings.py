@@ -142,5 +142,4 @@ EMAIL_USE_TLS = True
 EMAIL_HOST ="smtp.gmail.com"
 
 
-
 AUTHENTICATION_BACKENDS = ["user_handling.backends.EmailBackend"]

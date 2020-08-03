@@ -1,0 +1,31 @@
+{% extends "members/base.html" %}
+    {% block navbar1 %} 
+    <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+        <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'interested_index' %}#The_Club">
+            Interessierte </a>
+        <a class="float_left"> > </a>
+        <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Team </a>
+    </div>
+    {% endblock %}
+    
+    {% block picture %}
+    <div class="image_wrapper grey_cover" id="container">
+        <img src="{{ STATIC_URL }}/static/media/interested_team-01.jpg" id='home_view'>
+        <script type="text/javascript">
+            window.addEventListener('scroll',function(){
+                document.getElementById("home_view").style.bottom=-window.scrollY*0.25+"px";
+            });
+        </script>
+    </div>
+    {% endblock %}
+    
+    {% block content %}
+    <section id="members">
+        <br>
+        <h1>Unser Team</h1>
+        <h2>Leipzig</h2>
+        
+        <h2>Jena</h2>
+        
+    </section>
+    {% endblock %}
