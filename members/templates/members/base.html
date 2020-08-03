@@ -22,7 +22,7 @@
         <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Google+Sans:400,500,700">
         <link href="https://fonts.googleapis.com/css?family=Catamaran:200,600" rel="stylesheet">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+        <script src="{{ STATIC_URL }}/static/material.js"></script>
   
     </head>
     <body>
@@ -40,7 +40,6 @@
                     <a id ="interested" href="{% url 'interested_index'%}">INTERESSIERTE</a>
                     <a id ="presenter" href="https://www.twio-x.com/veranstalter">VERANSTALTER</a>
                 </div>
-                {% block whoamI %} {% endblock %}
             </nav>
             <!-- main picture -->
             {% block picture %} {% endblock %}
@@ -51,9 +50,15 @@
             {% block flag %} {% endblock %}
 
             <div class="frame">
-
             {% block content %} {% endblock %}
             </div>
+            <!-- use div class="frame" if u use other content-blocks-->
+            {% block picture2 %} {% endblock %}
+            {% block content2 %} {% endblock %}
+            {% block picture3 %} {% endblock %}
+            {% block content3 %} {% endblock %}
+            {% block picture4 %} {% endblock %}
+            {% block content4 %} {% endblock %}
             
             <div class="mdc-snackbar mdc-snackbar">
               <div class="mdc-snackbar__surface">

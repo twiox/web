@@ -10,6 +10,9 @@
 .chair_col-5 {
     width: 100%;
     }
+.chair_col-6 {
+    width: 49.5%;
+    }
 h1{
     font-size:2.1rem;
 }
@@ -45,4 +48,9 @@ h3{
 }
 .searchbar{
     width:300px;
+}
+.flex_2even{
+    display:flex;
+    justify-content:space-between;
+    
 }

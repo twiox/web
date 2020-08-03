@@ -1,7 +1,7 @@
 {% extends "members/base.html" %}
     {% block picture %}
     <div class="image_wrapper">
-        <img src="{{ STATIC_URL }}/static/media/home.jpg" id='home_view'>
+        <img src="{{ STATIC_URL }}/static/media/interested.jpg" id='home_view'>
         <script type="text/javascript">
             window.addEventListener('scroll',function(){
                 document.getElementById("home_view").style.bottom=-window.scrollY*0.25+"px";
@@ -10,33 +10,247 @@
     </div>
     {% endblock %}
     {% block content %}
-    <!-- Say Hello -->
-    <section>
+    <section id="The_Club">
         <h1> Der Verein </h1>
         <div>
             <div class="col-4 padding_all_small float_left">
                 <a href="#">
-                    <div class="tertiary_bg padding_all_big prim_hover">
+                    <div class="tertiary_bg padding_all_big prim_hover flex_center_vertical" style="height:250px;">
+                        <div class="flex_center">
+                            <div style="width:30%;" >
+                                <img style="width:100%;" src="{{ STATIC_URL }}/static/icons/offers.svg">
+                            </div>
+                        </div>
                         <p>Unser Angebot</p>
                     </div>
                 </a>
             </div>
             <div class="col-4 padding_all_small float_left">
                 <a href="#">
-                    <div class="tertiary_bg padding_all_big prim_hover">
+                    <div class="tertiary_bg padding_all_big prim_hover flex_center_vertical" style="height:250px;">
+                        <div class="flex_center">
+                            <div style="width:30%;" >
+                                <img style="width:100%;" src="{{ STATIC_URL }}/static/icons/philosophie.svg">
+                            </div>
+                        </div>
                         <p>Philosophie</p>
                     </div>
                 </a>
             </div>
             <div class="col-4 padding_all_small float_left">
                 <a href="#">
-                    <div class="tertiary_bg padding_all_big prim_hover">
+                    <div class="tertiary_bg padding_all_big prim_hover flex_center_vertical" style="height:250px;">
+                        <div class="flex_center">
+                            <div style="width:30%;" >
+                                <img style="width:100%;" src="{{ STATIC_URL }}/static/icons/team.svg">
+                            </div>
+                        </div>
                         <p>Das Team</p>
                     </div>
                 </a>
             </div>
         </div>
     </section>
+    {% endblock %}
+    {% block picture2 %}
+    <div class="image_wrapper grey_cover" id="container">
+        <img src="{{ STATIC_URL }}/static/media/interested_01.jpg" id='extreme'>
+        <script type="text/javascript">
+            var pos = $("#extreme").position().top;
+            $(document).ready(function(){
+                var height = $(window).scrollTop();
+                var loadingPos = pos/2 - height*0.25
+                $("#extreme").css("bottom",loadingPos+"px")
+                });
+            window.addEventListener('scroll',function(){
+                document.getElementById("extreme").style.bottom=pos/2-window.scrollY*+0.25+"px";
+            });
+        </script>
+        <div class="flex_center_vertical">
+            <div class="flex_center" style="z-index:5;">
+                <h1>"Das X steht für extrem"</h1>
+            </div>
+            <div class="flex_center" style="z-index:5;">
+                <h3>Vincent Mayer, 2016</h3>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+    {% block content2 %}
+    <div class="frame">
+        <section id="participate">
+        <h1> Teilnahme </h1>
+            <div class="padding_all_big secondary">
+                <h3>Achtung! Aktuell nehmen wir in Leipzig keine neuen Mitglieder auf. Wir hinterlegen Deinen Kontakt aber gerne auf unserer Warteliste.</h3>
+            </div>
+            <br>
+            <div class="flex_2even">
+                <div class="chair_col-6 tertiary_bg">
+                    <div class="padding_all_big">
+                        <div class="padding_all_big">
+                            <h2>Probetraining</h2>
+                            <p>Nachdem Du das unten stehende Formular ausgefüllt hast, erhältst Du von uns zeitnah eine Antwort per E-Mail, 
+                            in welcher Du deine Probetrainings-Termine bekommst. Mit dem Trainer besprichst Du im Anschluss an das Training den weiteren Ablauf. 
+                            Nach vier absolvierten Trainings kannst Du eine Mitgliedschaft beantragen.</p>
+                            <br>
+                            <strong>Wenn Du unter 18 Jahre alt bist, sende uns bitte mit Deiner Anfrage auch die nachfolgende, 
+                            von deinen Eltern ausgefüllte, Einverständniserklärung.</strong><br>
+                            <br>
+                            <ul>
+                                <li style="width:100%;">
+                                    <a class="download prim_hover padding_rl_big" href="{{ STATIC_URL }}/static/docs/Einverstaendniserklaerung_TwioX.pdf">
+                                        <p>Einverständniserklärung</p>
+                                        <div class="flex_center_vertical">
+                                            <i class="fas fa-file-download"></i>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                            <br>
+                            <form class="padding_tb_big" method="POST">
+                                {% csrf_token %}
+                                {% if form.errors %}
+                                    {% for error in form.non_field_errors %}
+                                    <p class="padding_tb_small" style="color:red;">{{error}}</p>
+                                    {% endfor %}
+                                {% endif %}
+                                <div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.first_name.errors %}
+                                        {% for error in form.first_name.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled first_name">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="first_name-label" name="first_name" required>
+                                            <span class="mdc-floating-label" id="first_name-label">Vorname</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.last_name.errors %}
+                                        {% for error in form.last_name.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled last_name">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="last_name-label" name="last_name" required>
+                                            <span class="mdc-floating-label" id="last_name-label">Nachname</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.birth_date.errors %}
+                                        {% for error in form.birth_date.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled birth_date">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="birth_date-label" name="birth_date" required>
+                                            <span class="mdc-floating-label" id="birth_date-label">Geburtsdatum</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.telephone.errors %}
+                                        {% for error in form.telephone.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled telephone">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="telephone-label" name="telephone" required>
+                                            <span class="mdc-floating-label" id="telephone-label">Telefonnummer</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.email.errors %}
+                                        {% for error in form.email.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled email">
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="email-label" name="email" required>
+                                            <span class="mdc-floating-label" id="email-label">Emailadresse</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.notes.errors %}
+                                        {% for error in form.notes.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled notes">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="notes-label" name="notes">
+                                            <span class="mdc-floating-label" id="notes-label">Anmerkungen</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.city.errors %}
+                                        {% for error in form.city.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled city">
+                                            <i class="mdc-select__dropdown-icon"></i>
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <select id="select-city" class="mdc-text-field__input" style="background-color:#333333;" name="city" required>
+                                                <option value="" selected></option>
+                                                <option value="1">Leipzig</option>
+                                                <option value="2">Jena</option>
+                                            </select>
+                                            <span class="mdc-floating-label" id="city-label">Deine Stadt</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>      
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        <div class="mdc-form-field padding_all_big">
+                                            <div class="mdc-checkbox">
+                                              <input type="checkbox" class="mdc-checkbox__native-control" id="speicherung" name="confirm" required>
+                                              <div class="mdc-checkbox__background">
+                                                <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                                                  <path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+                                                </svg>
+                                                <div class="mdc-checkbox__mixedmark"></div>
+                                              </div>
+                                            </div>
+                                            
+                                            <label for="speicherung" >
+                                                <div>Ich stimme der <a class="more_info_button" style="padding:0px;" href="{% url 'dataprotection' %}">Datenschutzerklärung</a> zu </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="clear:both;">
+                                        <div class="flex_center_vertical">
+                                            <div class="flex_center padding_all_big">
+                                                <button type="submit" class="form_button">Absenden</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="chair_col-6 tertiary_bg">
+                    <div class="padding_all_big">
+                        <div class="padding_all_big">
+                            <h2>Mitgliedschaft</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
     {% endblock %}
     {% block chairmen %}
     {% if chairmen %}
@@ -74,5 +288,9 @@
             $("#members").removeClass("here_I_am");
             $("#interested").addClass("here_I_am");
         });
+    </script>
+    <script>
+        const fields = document.querySelectorAll('.mdc-text-field');
+        fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
     </script>
     {% endblock %}

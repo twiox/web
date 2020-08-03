@@ -22,14 +22,14 @@ $padding_small: 10px;
   box-sizing: border-box;
   margin:0px;
   padding:0px;
-  font-size: 15px;
+  font-size: 16px;
   color: $font_col;
   font-family: Catamaran, Noto, sans-serif;
   list-style: none;
   text-decoration: none;
   border: none;
   outline: none;
-  line-height:1.2;
+  line-height:1.5;
 }
 [class*="col-"] {
   width: 100%;
@@ -255,7 +255,9 @@ $padding_small: 10px;
 .primary_bg{
     background-color: $primary_bg;
 }
-
+.grey_cover img{
+    opacity: 0.5;
+}
 /* DOM */
 body {
     background-color: $primary_bg;
@@ -338,7 +340,9 @@ table{
         height:20px;
     }
 }
-
+strong{
+    color: $header_col;
+}
 /*Special Stuff*/
 .three_grid {
     display: grid;
