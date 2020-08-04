@@ -29,15 +29,15 @@
         <div class="content_wrapper">
             <!-- header -->
             <header>
-                <a href="{% url 'index' %}">
+                <a href="{% url 'landing' %}">
                     <img src="{{ STATIC_URL }}/static/media/twiox_logo.svg">
                 </a>
             </header>
             <nav class="sticky" id="nav">
                 <div class="three_grid">
                     <a href="{% url 'index' %}">MITGLIEDER</a>
-                    <a href="https://www.twio-x.com/interessierte">INTERESSIERTE</a>
-                    <a href="https://www.twio-x.com/veranstalter">VERANSTALTER</a>
+                    <a href="{% url 'interested_index' %}">INTERESSIERTE</a>
+                    <a href="{% url 'organizers_index' %}">VERANSTALTER</a>
                 </div> 
             </nav>
             
