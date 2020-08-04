@@ -1,13 +1,11 @@
 {% autoescape off %}
-Hallo {{user.first_name }},
+Hallo {{user.first_name}},
 
 Für dich wurde ein Account im Mitgliederbereich des Twio X e.V. angelegt.
 
 Dein Nutzername für den Account lautet: {{ user.username }}, 
-dieser kann später natürlich geändert werden.
 
-Um deinen Account zu nutzen, musst du nun die folgenden Schritte gehen:
-1. Bitte klicke auf den Link um deinen Account zu aktivieren: 
+Um deinen Account zu aktivieren und zu nutzen, klicke bitte auf den Link: 
 http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
 
 Liebe Grüße

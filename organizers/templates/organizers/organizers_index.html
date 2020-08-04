@@ -1,0 +1,196 @@
+{% extends "members/base.html" %}
+    {% block picture %}
+    <div class="image_wrapper">
+        <img src="{{ STATIC_URL }}/static/media/organizers.jpg" id='home_view'>
+        <script type="text/javascript">
+            window.addEventListener('scroll',function(){
+                document.getElementById("home_view").style.bottom=-window.scrollY*0.25+"px";
+            });
+        </script>
+    </div>
+    {% endblock %}
+    {% block content %}
+    <section id="The_Club" class="padding_tb_big">
+        <h1> Unser Angebot für Veranstalter </h1>
+        <br>
+        <div class="flex_2even">
+                <div class="chair_col-6">
+                    <h3> Showprogramme </h3>
+                    <br>
+                    <p style="padding-right:45px;">
+                    Neben der allgemeinen Vereinstätigkeit sind wir auch Ansprechpartner für die <strong>Ausgestaltung von Showprogrammen</strong> für verschiedenste Veranstaltungen. 
+                    Gerne erarbeiten wir gemeinsam mit Ihnen ein passendes Konzept und präsentieren mit einem erfahrenen Showteam einen kreativen Mix aus Parkour und Freerunning.
+                    <br><br><br>
+                    </p>
+                    <h3>Worshops</h3>
+                    <br>
+                    <p style="padding-right:45px;">
+                    Darüber hinaus bieten wir individuelle <strong>Workshops, allgemeine Fortbildungen und Lehrgänge</strong> für Lehrer und Dozenten an. 
+                    Sie erhalten fundiertes Wissen von Traceuren mit langjähriger Erfahrung und entsprechendes Material zur persönlichen Nachbereitung. Je nach Lehrgansumfang 
+                    behandeln wir grundlegende, fortgeschrittene und professionelle Parkourtechniken. Auf Anfrage widmen wir uns bei unseren Lehrgängen 
+                    besonderen Themen, wie beispielsweise Fall- und Sturztechniken, Verletzungsprävention, Kraft- und Ausdauertraining für Sportler 
+                    sowie Knie- und Fußstabilisation.<br><br>
+                    
+                    Füllen Sie bitte das Formular aus. Wir geben Ihnen im Anschluss in kurzer Zeit eine Rückmeldung. 
+                    Bei Rückfragen erreichen Sie uns jederzeit auch telefonisch.<br><br>
+                    </p>
+                </div>
+                <div class="chair_col-6 tertiary_bg">
+                    <div class="padding_all_big">
+                        <div class="padding_all_big">
+                            <h2>Anfrage</h2>
+                            <form class="padding_tb_big" method="POST">
+                                {% csrf_token %}
+                                {% if form.errors %}
+                                    {% for error in form.non_field_errors %}
+                                    <p class="padding_tb_small" style="color:red;">{{error}}</p>
+                                    {% endfor %}
+                                {% endif %}
+                                <div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.first_name.errors %}
+                                        {% for error in form.first_name.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled first_name">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="first_name-label" name="first_name" required>
+                                            <span class="mdc-floating-label" id="first_name-label">Vorname</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.last_name.errors %}
+                                        {% for error in form.last_name.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled last_name">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="last_name-label" name="last_name" required>
+                                            <span class="mdc-floating-label" id="last_name-label">Nachname</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.telephone.errors %}
+                                        {% for error in form.telephone.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled telephone">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="telephone-label" name="telephone" required>
+                                            <span class="mdc-floating-label" id="telephone-label">Telefonnummer</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        {% if form.email.errors %}
+                                        {% for error in form.email.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled email">
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="email-label" name="email" required>
+                                            <span class="mdc-floating-label" id="email-label">Emailadresse</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="float_left padding_rl_small" style="width:100%;">
+                                        {% if form.notes.errors %}
+                                        {% for error in form.notes.errors %}
+                                            <p style="color:red;">{{error}}</p>
+                                        {% endfor %}
+                                        {% endif %}
+                                        <label class="mdc-text-field mdc-text-field--filled notes">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="notes-label" name="notes">
+                                            <span class="mdc-floating-label" id="notes-label">Anfrage</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div class="chair_col-5 float_left padding_rl_small">
+                                        <div class="mdc-form-field padding_all_big">
+                                            <div class="mdc-checkbox">
+                                              <input type="checkbox" class="mdc-checkbox__native-control" id="speicherung" name="confirm" required>
+                                              <div class="mdc-checkbox__background">
+                                                <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                                                  <path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+                                                </svg>
+                                                <div class="mdc-checkbox__mixedmark"></div>
+                                              </div>
+                                            </div>
+                                            
+                                            <label for="speicherung" >
+                                                <div>Ich stimme der <a class="more_info_button" style="padding:0px;" href="{% url 'dataprotection' %}">Datenschutzerklärung</a> zu </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="clear:both;">
+                                        <div class="flex_center_vertical">
+                                            <div class="flex_center padding_all_big">
+                                                <button type="submit" class="form_button">Absenden</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </form>
+                            <br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    {% endblock %}
+    {% block chairmen %}
+    {% if chairmen %}
+    <section>
+        <h1>Ihre ANSPRECHPARTNER</h1>
+        <div class="padding_tb_big">
+        {% for object in chairmen.all %}
+            <div class="col-5 float_left padding_all_small" id="container">
+                <div class="padding_all_small person_wrapper">
+                    <div class="chair_col-4 flex_center_vertical">
+                        <div class="flex_center">
+                            <img class="round_profile_pic_chairman padding_all_small" src="{{object.image.url}}">
+                        </div>
+                    </div>
+                    <div class="chair_col-5 float_left padding_all_small person_info">
+                        <h3 class="padding_tb_small"> {{object.user.first_name |upper}} {{object.user.last_name |upper}}</h3>
+                        <div>
+                            <ul class="competences">
+                                {% for comp in object.complist %}
+                                    <li> {{comp}} </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div>
+                            <p> {{object.public_telnr}} </p>
+                            <p> {{object.public_email}} </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    <script>
+        $(document).ready(function(){
+            $("#members").removeClass("here_I_am");
+            $("#organizers").addClass("here_I_am");
+        });
+    </script>
+    <script>
+        const fields = document.querySelectorAll('.mdc-text-field');
+        fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+    </script>
+    {% endblock %}

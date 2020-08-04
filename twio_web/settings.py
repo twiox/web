@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'members.apps.MembersConfig',
     'interested.apps.InterestedConfig',
+    'organizers.apps.OrganizersConfig',
     'user_handling.apps.UserHandlingConfig',
     'six',
     'multiselectfield',
