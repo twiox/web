@@ -9,11 +9,20 @@
     {% endblock %}
     
     {% block picture %}
-    <div class="image_wrapper grey_cover" id="container">
+    <div class="image_wrapper2 grey_cover pic1cont" id="container">
         <img src="{{ STATIC_URL }}/static/media/interested_philosophy-01.jpg" id='home_view'>
         <script type="text/javascript">
+            $("document").ready(function(){
+                var ele = document.getElementsByClassName("pic1cont")[0].getBoundingClientRect()
+                var pic = window.pageYOffset + ele.top
+                var win = window.pageYOffset
+                document.getElementById("home_view").style.top =(pic-win)*-0.15+"px";
+            });
             window.addEventListener('scroll',function(){
-                document.getElementById("home_view").style.bottom=-window.scrollY*0.25+"px";
+                var ele = document.getElementsByClassName("pic1cont")[0].getBoundingClientRect()
+                var pic = window.pageYOffset + ele.top
+                var win = window.pageYOffset
+                document.getElementById("home_view").style.top =(pic-win)*-0.15+"px";
             });
         </script>
         <div class="flex_center_vertical">
@@ -54,18 +63,20 @@
     {% endblock %}
     
     {% block picture2 %}
-    <div class="image_wrapper grey_cover" id="container">
+    <div class="image_wrapper2 grey_cover pic2cont" id="container">
         <img src="{{ STATIC_URL }}/static/media/interested_philosophy-02.jpg" id='extreme'>
         <script type="text/javascript">
-            var pos = $("#extreme").position().top;
-            $(document).ready(function(){
-                var height = $(window).scrollTop();
-                var loadingPos = pos/5 - height*0.25
-                
-                $("#extreme").css("bottom",loadingPos+"px")
-                });
+            $("document").ready(function(){
+                var ele = document.getElementsByClassName("pic2cont")[0].getBoundingClientRect()
+                var pic = window.pageYOffset + ele.top
+                var win = window.pageYOffset
+                document.getElementById("extreme").style.top =(pic-win)*-0.15+"px";
+            });
             window.addEventListener('scroll',function(){
-                document.getElementById("extreme").style.bottom=pos/5-window.scrollY*+0.25+"px";
+                var ele = document.getElementsByClassName("pic2cont")[0].getBoundingClientRect()
+                var pic = window.pageYOffset + ele.top
+                var win = window.pageYOffset
+                document.getElementById("extreme").style.top =(pic-win)*-0.15+"px";
             });
         </script>
         <div class="flex_center_vertical">
@@ -100,18 +111,20 @@
     {% endblock %}
     
     {% block picture3 %}
-    <div class="image_wrapper grey_cover" id="container">
+    <div class="image_wrapper2 grey_cover pic3cont" id="container">
         <img src="{{ STATIC_URL }}/static/media/interested_philosophy-03.jpg" id='motivation'>
         <script type="text/javascript">
-            var pos = $("#motivation").position().top;
-            $(document).ready(function(){
-                var height = $(window).scrollTop();
-                var loadingPos = pos/5 - height*0.25
-                
-                $("#motivation").css("bottom",loadingPos+"px")
-                });
+            $("document").ready(function(){
+                var ele = document.getElementsByClassName("pic3cont")[0].getBoundingClientRect()
+                var pic = window.pageYOffset + ele.top
+                var win = window.pageYOffset
+                document.getElementById("motivation").style.top =(pic-win)*-0.15+"px";
+            });
             window.addEventListener('scroll',function(){
-                document.getElementById("motivation").style.bottom=pos/5-window.scrollY*+0.25+"px";
+                var ele = document.getElementsByClassName("pic3cont")[0].getBoundingClientRect()
+                var pic = window.pageYOffset + ele.top
+                var win = window.pageYOffset
+                document.getElementById("motivation").style.top =(pic-win)*-0.15+"px";
             });
         </script>
         <div class="flex_center_vertical">

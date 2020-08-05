@@ -9,11 +9,20 @@
     {% endblock %}
     
     {% block picture %}
-    <div class="image_wrapper grey_cover" id="container">
+    <div class="image_wrapper2 grey_cover pic1cont" id="container">
         <img src="{{ STATIC_URL }}/static/media/interested_team-01.jpg" id='home_view'>
         <script type="text/javascript">
+            $("document").ready(function(){
+                var ele = document.getElementsByClassName("pic1cont")[0].getBoundingClientRect()
+                var pic = window.pageYOffset + ele.top
+                var win = window.pageYOffset
+                document.getElementById("home_view").style.top =(pic-win)*-0.15+"px";
+            });
             window.addEventListener('scroll',function(){
-                document.getElementById("home_view").style.bottom=-window.scrollY*0.25+"px";
+                var ele = document.getElementsByClassName("pic1cont")[0].getBoundingClientRect()
+                var pic = window.pageYOffset + ele.top
+                var win = window.pageYOffset
+                document.getElementById("home_view").style.top =(pic-win)*-0.15+"px";
             });
         </script>
     </div>

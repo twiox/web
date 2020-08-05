@@ -1,10 +1,19 @@
 {% extends "members/base.html" %}
     {% block picture %}
-    <div class="image_wrapper">
-        <img src="{{ STATIC_URL }}/static/media/organizers.jpg" id='home_view'>
+    <div class="image_wrapper2 pic1cont">
+        <img src="{{ STATIC_URL }}/static/media/organizers2.jpg" id='home_view'>
         <script type="text/javascript">
+            $("document").ready(function(){
+                var ele = document.getElementsByClassName("pic1cont")[0].getBoundingClientRect()
+                var pic = window.pageYOffset + ele.top
+                var win = window.pageYOffset
+                document.getElementById("home_view").style.top =(pic-win)*-0.15+"px";
+            });
             window.addEventListener('scroll',function(){
-                document.getElementById("home_view").style.bottom=-window.scrollY*0.25+"px";
+                var ele = document.getElementsByClassName("pic1cont")[0].getBoundingClientRect()
+                var pic = window.pageYOffset + ele.top
+                var win = window.pageYOffset
+                document.getElementById("home_view").style.top =(pic-win)*-0.15+"px";
             });
         </script>
     </div>

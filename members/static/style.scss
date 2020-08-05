@@ -422,6 +422,22 @@ strong{
         width:auto;
     }
 }
+.image_wrapper2{
+    position:relative;
+    align-items:center;
+    justify-content:center;
+    height:350px;
+    display:flex;
+    width: 100%;
+    img{
+        position:absolute;
+        pointer-events:none;
+        object-fit:cover;
+        top: -30;
+        height: 120%;
+        width:auto;
+    }
+}
 
 .trainer_ui{
     a{
