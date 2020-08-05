@@ -56,17 +56,25 @@
     </div>
     <h1 class="padding_tb_big">Deine TrainerInnen</h1>
     <div class="padding_all_big" style="clear:both;">
-        <div>
-            {% for trainer in object.trainer.all %}
-            <div class="col-5 float_left">
-                <div class="chair_col-4 float_left">
-                    <img class="round_profile_pic_chairman padding_all_small" src="{{trainer.image.url}}">
-                </div>
-                <div class="chair_col-5 float_left padding_all_small">
-                    <h3> {{trainer.user.first_name |upper}} {{trainer.user.last_name |upper}}</h3>
-                    <div>
-                        <p> {{trainer.trainer_telnr}} </p>
-                        <p> {{trainer.trainer_email}} </p>
+        <div class="flex_left">
+        {% for trainer in object.trainer.all %}
+            <div class="col-4 padding_all_small">
+                <div style="height:100%;">
+                    <div class="flex_left">
+                        <div class="chair_col-5 flex_center_vertical">
+                            <div class="flex_center">
+                                <img class="padding_all_small round_profile_pic_chairman" src="{{trainer.image.url}}">
+                            </div>
+                        </div>
+                        <div class="chair_col-5 flex_center">
+                            <div class="flex_center_vertical_even padding_all_small">
+                                <h3> {{trainer.user.first_name |upper}} {{trainer.user.last_name |upper}}</h3>
+                                <div>
+                                    <p> {{trainer.trainer_telnr}} </p>
+                                    <p> {{trainer.trainer_email}} </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
