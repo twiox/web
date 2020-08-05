@@ -1,11 +1,14 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.views.generic import (CreateView, UpdateView, DeleteView)
 from django.contrib import messages
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.conf import settings
 from .forms import ProbetrainingForm
 from members.models import Chairman
+from .models import Teamer
 
 def interested_index(request):
     chairmen = Chairman.objects.filter(show__contains="interested_site")
@@ -93,5 +96,51 @@ def interested_offers(request):
 def interested_philosophy(request):
     return render(request, "interested/interested_philosophy.html", {})
     
+
 def interested_team(request):
-    return render(request, "interested/interested_team.html", {})
+    jena_people = Teamer.objects.filter(city__contains="jena")
+    leipzig_people = Teamer.objects.filter(city__contains="leipzig")
+    return render(request, "interested/interested_team.html", {"leipzig_people":leipzig_people, "jena_people":jena_people})
+    
+
+class TeamerLeipzigCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = Teamer
+    fields=["priority","picture","name","position","notes","public_telnr","public_email"]
+    permission_required = 'interested.add_teamer'
+    
+    def form_valid(self, form):
+        teamer = form.save()
+        teamer.city = "leipzig"
+        teamer.save()
+        messages.add_message(self.request, messages.SUCCESS, 'Neues Teammitglied erstellt')
+        return super(TeamerLeipzigCreateView, self).form_valid(form)
+
+class TeamerJenaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = Teamer
+    fields=["priority","picture","name","position","notes","public_telnr","public_email"]
+    permission_required = 'interested.add_teamer'
+    
+    def form_valid(self, form):
+        teamer = form.save()
+        teamer.city = "jena"
+        teamer.save()
+        messages.add_message(self.request, messages.SUCCESS, 'Neues Teammitglied erstellt')
+        return super(TeamerJenaCreateView, self).form_valid(form)
+
+class TeamerUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = Teamer
+    fields=["priority","picture","name","position","notes","public_telnr","public_email"]
+    permission_required = 'interested.change_teamer'
+    
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, 'Teammitglied erfolgreich aktualisiert')
+        return super(TeamerUpdateView, self).form_valid(form)
+
+class TeamerDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Teamer
+    success_url = "/interested/team"
+    permission_required = 'interested.delete_teamer'
+    
+    def post(self, request, *args, **kwargs):
+        messages.add_message(request, messages.SUCCESS, 'Teammitglied gelöscht')
+        return self.delete(request, *args, **kwargs)

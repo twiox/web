@@ -136,6 +136,11 @@ $padding_small: 10px;
     display: flex; 
     justify-content: space-evenly;
 }
+.flex_left{
+    display: flex; 
+    justify-content: left;
+    flex-wrap:wrap;
+}
 .landing_flex{
     display: flex; 
     justify-content: space-evenly;
