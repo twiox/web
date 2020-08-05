@@ -161,29 +161,33 @@
     {% endblock %}
     {% block chairmen %}
     {% if chairmen %}
-    <section>
-        <h1>Ihre ANSPRECHPARTNER</h1>
-        <div class="padding_tb_big">
+    <section style="margin-bottom:150px;">
+        <h1>DEINE ANSPRECHPARTNER</h1>
+        <div class="flex_left">
         {% for object in chairmen.all %}
-            <div class="col-5 float_left padding_all_small" id="container">
-                <div class="padding_all_small person_wrapper">
-                    <div class="chair_col-4 flex_center_vertical">
-                        <div class="flex_center">
-                            <img class="round_profile_pic_chairman padding_all_small" src="{{object.image.url}}">
+            <div class="col-5 padding_all_small">
+                <div style="height:100%;">
+                    <div class="flex_left">
+                        <div class="chair_col-5 flex_center_vertical">
+                            <div class="flex_center">
+                                <img class="padding_all_small round_profile_pic_chairman" src="{{object.image.url}}">
+                            </div>
                         </div>
-                    </div>
-                    <div class="chair_col-5 float_left padding_all_small person_info">
-                        <h3 class="padding_tb_small"> {{object.user.first_name |upper}} {{object.user.last_name |upper}}</h3>
-                        <div>
-                            <ul class="competences">
-                                {% for comp in object.complist %}
-                                    <li> {{comp}} </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        <div>
-                            <p> {{object.public_telnr}} </p>
-                            <p> {{object.public_email}} </p>
+                        <div class="chair_col-5 flex_center">
+                            <div class="flex_center_vertical_even padding_all_small">
+                                <h3>{{object.user.first_name |upper}} {{object.user.last_name |upper}}</h3>
+                                <div class="padding_all_big">
+                                    <ul class="competences padding_rl_big">
+                                        {% for comp in object.complist %}
+                                            <li> {{comp}} </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div>
+                                    <p> {{object.public_telnr}} </p>
+                                    <p> {{object.public_email}} </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
