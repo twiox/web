@@ -388,6 +388,7 @@ class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
 
 """USER STUFF"""
 class UserDetailView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
+    # TODO: get email for every change in "Hinweis"
     model = User
     template_name = 'members/user_detail.html'
     form_class = UpdateMemberInformationForm

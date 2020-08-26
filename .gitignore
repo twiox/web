@@ -11,7 +11,7 @@ media/Events/*
 *settings.py
 api_key.txt
 *static/CACHE/*
-
+.idea/*
 
 # Backup files # 
 *.bak 

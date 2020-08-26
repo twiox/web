@@ -21,6 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'wz$ns1s)!r58z)dn1tub(@-3ifm!l)n_y%mt=*ki(c_cs_e_-0'
+PASSWORD_RESET_TIMEOUT = 31556952 #one year time to activate your account
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

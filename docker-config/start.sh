@@ -8,6 +8,7 @@ if [ ! -e $CONTAINER_ALREADY_STARTED ]; then
     conda env create -f django.yml 
     source activate django
     python3 manage.py makemigrations
+    python3 manage.py makemigrations interested
     python3 manage.py migrate
     echo "from django.contrib.auth.models import User; User.objects.create_superuser('root', 'root@example.com', 'root')" | python manage.py shell
 else
