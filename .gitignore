@@ -1,8 +1,6 @@
 # Django #
 *.log
 *.pot
-*.pyc
-*pycache*
 db.sqlite3
 media/documents/*
 media/profile_pics/*
