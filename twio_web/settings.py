@@ -26,7 +26,7 @@ PASSWORD_RESET_TIMEOUT = 31556952 #one year time to activate your account
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['merlin1.pythonanywhere.com']
 
 
 # Application definition
@@ -83,10 +83,14 @@ WSGI_APPLICATION = 'twio_web.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'merlin1$django_twio_web',
+        'USER': 'merlin1',
+        'PASSWORD': 'LfJj7krph6zSUTkgrKbrRgbBYgKQbyR',
+        'HOST': 'merlin1.mysql.pythonanywhere-services.com',
     }
 }
+CONN_MAX_AGE = 300
 
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -142,6 +146,8 @@ LOGIN_URL = 'login'
 TO_EMAIL = "merlin.szymanski@gmail.com" #Emails from the user-site are send there
 EMAIL_USE_TLS = True
 EMAIL_HOST ="smtp.gmail.com"
+EMAIL_HOST_PASSWORD = "bnqyumxyutwmtdny"
+EMAIL_HOST_USER = "merlin.szymanski"
 
 
 AUTHENTICATION_BACKENDS = ["user_handling.backends.EmailBackend"]
