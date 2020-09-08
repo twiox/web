@@ -1,5 +1,5 @@
 {% extends "members/base.html" %}
-{% block navbar2 %} 
+{% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#training">
         Mitglieder </a>
@@ -26,21 +26,12 @@
             </div>
         </div>
         <div>
-            <div class="col-5" id="map" style="float:left;"> </div>
-            <script>
-                // Initialize and add the map
-                function initMap() {
-                  var spot = {lat: {{object.lat}}, lng: {{object.long}}};
-                  var map = new google.maps.Map(
-                      document.getElementById('map'), {zoom: 17, center: spot});
-                  var marker = new google.maps.Marker({position: spot, map: map});
-                }
-            </script>
-            <script async defer
-                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAkB8V0wOMLikUsZilD_5LEz49Isbqr-0k&callback=initMap">
-            </script>
-            
-            <div class="col-5 float_right">
+            <iframe class="chair_col-5 float_left" frameborder="0" style="border:0; height:400px;"
+                src="https://www.google.com/maps/embed/v1/place?key={{api_key}}
+                &q={{object.lat}},{{object.long}}&zoom=15" allowfullscreen>
+            </iframe>
+
+            <div class="chair_col-5 float_right">
                 <p class="padding_all_big" align="justify">{{object.description}}</p>
                 <p class="flex_center padding_all_big">
                     <a class="form_button" target="_blank" href="https://www.google.de/maps/dir//{{object.lat}},{{object.long}}/@{{object.lat}},{{object.long}},17z"><i class="fas fa-external-link-alt"> Route</i></a>
@@ -48,7 +39,7 @@
             </div>
         </div>
     </div>
+
 </section>
 {% endblock %}
 
-    
