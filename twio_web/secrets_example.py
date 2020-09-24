@@ -8,3 +8,9 @@ DEFAULT_FROM_EMAIL = 'web@your-domain.de'
 
 #google API key
 GOOGLE_API_KEY = "DER_API_KEY"
+
+#mysql credentials
+DB_NAME = ""
+DB_USER = ""
+DB_PW = ""
+DB_HOST = ""
