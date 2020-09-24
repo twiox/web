@@ -8,7 +8,7 @@ services:
       context: ./
       dockerfile: docker-config/python-server.dockerfile
     volumes:
-      - db-volume:/opt/twio-web/Database
+      - db-volume:/opt/twio_web/Database
     ports:
       - 8000:8000
     networks:
