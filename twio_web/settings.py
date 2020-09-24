@@ -15,8 +15,9 @@ PASSWORD_RESET_TIMEOUT = 31556952 #one year time to activate your account
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [secrets.HOST]
-
+ALLOWED_HOSTS = [
+    "*"
+]
 
 # Application definition
 

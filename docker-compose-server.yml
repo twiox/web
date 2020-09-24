@@ -1,0 +1,29 @@
+version: "3.3"
+services:
+
+  twio-python:
+    container_name: twio-${ENV}-python
+    image: twio-python-server:${TAG}
+    build:
+      context: ./
+      dockerfile: docker-config/python-server.dockerfile
+    volumes:
+      - db-volume:/opt/twio-web/db.sqlite3
+    ports:
+      - 8000:8000
+    networks:
+      - outside
+    logging:
+      driver: syslog
+    restart: always
+
+volumes:
+  db-volume:
+    external:
+      name: twio-${ENV}-db
+
+networks:
+  outside:
+    external:
+      name: twio-${ENV}
+
