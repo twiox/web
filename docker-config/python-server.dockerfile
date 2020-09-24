@@ -17,8 +17,6 @@ COPY . /opt/twio_web
 # build
 RUN ls /opt/twio_web && conda env create -f django.yml && \
     source activate django && \
-    python3 manage.py makemigrations && \
-    python3 manage.py makemigrations interested && \
     python3 manage.py migrate
 
 COPY docker-config/start-server.sh /start.sh
