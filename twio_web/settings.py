@@ -72,11 +72,8 @@ WSGI_APPLICATION = 'twio_web.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': secrets.DB_NAME,
-        'USER': secrets.DB_USER,
-        'PASSWORD': secrets.DB_PW,
-        'HOST': secrets.DB_HOST,
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 CONN_MAX_AGE = 300
@@ -132,9 +129,9 @@ MEDIA_URL ="/media/" #how do we access the media in the browser?
 LOGIN_REDIRECT_URL = "index"
 LOGIN_URL = 'login'
 
-TO_EMAIL = "merlin.szymanski@gmail.com" #Emails from the user-site are send there
-EMAIL_USE_TLS = True
-EMAIL_HOST ="smtp.gmail.com"
+TO_EMAIL = secrets.TO_EMAIL #Emails from the user-site are send there
+EMAIL_USE_TLS = secrets.EMAIL_USE_TLS
+EMAIL_HOST = secrets.EMAIL_HOST
 EMAIL_HOST_PASSWORD = secrets.EMAIL_HOST_PASSWORD
 EMAIL_HOST_USER = secrets.EMAIL_HOST_USER
 
