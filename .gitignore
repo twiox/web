@@ -1,7 +1,7 @@
 # Django #
 *.log
 *.pot
-db.sqlite3
+*db.sqlite3
 media/documents/*
 media/profile_pics/*
 media/team_pictures/*
