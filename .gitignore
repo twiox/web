@@ -17,6 +17,7 @@ api_key.txt
 # Python #
 *.py[cod]
 *$py.class
+*__pycache__*
 
 # Distribution / packaging
 .Python build/
@@ -36,7 +37,6 @@ wheels/
 *.egg
 *.manifest
 *.spec
-*migrations*
 
 # Installer logs
 pip-log.txt
