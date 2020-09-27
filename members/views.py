@@ -11,7 +11,7 @@ from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Mes
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
-from .forms import EventUpdateParticipantForm,EventUpdateParticipantForm2, SessionForm, EventForm, UpdateMemberInformationForm,UpdateMemberEmailForm
+from .forms import EventUpdateParticipantForm,EventUpdateParticipantForm2, SessionForm, EventForm, UpdateMemberInformationForm,UpdateMemberEmailForm,SpotForm
 from django.contrib import messages
 from datetime import datetime
 from django.contrib.auth.models import User
@@ -19,6 +19,7 @@ from django.core.mail import EmailMessage
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.views import PasswordChangeView
 from django.conf import settings
+import markdown
 
 # Create your views here.
 import os
@@ -252,22 +253,24 @@ class SpotDetailView(LoginRequiredMixin, DetailView):
 class SpotCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     #template: event_form.html
     model = Spot
-    fields=["title","lat","long","description"]
+    form_class = SpotForm
     permission_required = 'members.add_spot'
 
     def form_valid(self, form):
         self.object = form.save()
-        messages.add_message(self.request, messages.SUCCESS, 'Spot erstellt')
+        self.object.description_rendered = markdown.markdown(self.object.description)
+        messages.add_message(self.request, messages.SUCCESS, 'Spot geändert')
         return super().form_valid(form)
 
 class SpotUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_form.html
     model = Spot
-    fields=["title","lat","long","description"]
+    form_class = SpotForm
     permission_required = 'members.change_spot'
 
     def form_valid(self, form):
         self.object = form.save()
+        self.object.description_rendered = markdown.markdown(self.object.description)
         messages.add_message(self.request, messages.SUCCESS, 'Spot geändert')
         return super().form_valid(form)
 

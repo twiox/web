@@ -25,7 +25,6 @@ $padding_small: 10px;
   font-size: 16px;
   color: $font_col;
   font-family: Catamaran, Noto, sans-serif;
-  list-style: none;
   text-decoration: none;
   border: none;
   outline: none;
@@ -295,6 +294,12 @@ div{
 ul{
     overflow:hidden;
 }
+li{
+    margin-left:15px;
+}
+blockquote{
+    margin-left:15px;
+    }
 header {
   padding: $padding_big;
   text-align: center;
@@ -312,6 +317,12 @@ nav{
 a{
     text-align: center;
     padding: $padding_small;
+}
+.markdown{
+    p{
+        padding-top:15px;
+        padding-bottom:15px;
+    }
 }
 h1{
     font-size:1.8rem;

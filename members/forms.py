@@ -1,7 +1,18 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm 
-from .models import Event, Session, Group
+from .models import Event, Session, Group, Spot
+
+class SpotForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SpotForm, self).__init__(*args, **kwargs)
+        self.fields['description'].strip = False
+    
+    description = forms.CharField(widget=forms.Textarea)
+    
+    class Meta:
+        model = Spot
+        fields = ["title","lat","long","description"]
 
 
 class SessionForm(forms.ModelForm):

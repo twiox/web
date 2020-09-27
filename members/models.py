@@ -13,6 +13,7 @@ class Spot(models.Model):
     lat = models.CharField("Latitude", max_length=30, default="51.347127")
     long = models.CharField("Longitude", max_length=30,default="12.350504")
     description = models.TextField("Beschreibung, Zusatzinformation", default="Lorem Ipsum")
+    description_rendered = models.TextField(blank=True, null=True)
     picture = models.ImageField("Foto vom Spot", default = "spot_placeholder.jpg", upload_to="spot_pics/")
 
     def __str__(self):
