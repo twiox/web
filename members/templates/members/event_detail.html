@@ -30,8 +30,10 @@
                     <p>{{object.start_date|date:'d.m'}} - {{object.end_date|date:'d.m.Y'}} </p>
                     <p>Kosten: {{object.costs}} € </p>
                 </div>
-                <div class="padding_all_big">
-                    <p align="justify">{{object.description}}<p>
+                <div class="padding_all_big flex_center">
+                    <div class="markdown">
+                        <p align="justify">{{object.description_rendered|safe}}<p>
+                    </div>
                 </div>
             </div>
             <div>

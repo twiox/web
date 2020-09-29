@@ -25,6 +25,7 @@ $padding_small: 10px;
   font-size: 16px;
   color: $font_col;
   font-family: Catamaran, Noto, sans-serif;
+  list-style:none;
   text-decoration: none;
   border: none;
   outline: none;
@@ -294,9 +295,7 @@ div{
 ul{
     overflow:hidden;
 }
-li{
-    margin-left:15px;
-}
+
 blockquote{
     margin-left:15px;
     }
@@ -322,6 +321,10 @@ a{
     p{
         padding-top:15px;
         padding-bottom:15px;
+    }
+    li{
+        margin-left:15px;
+        list-style-type:circle;
     }
 }
 h1{
@@ -604,7 +607,6 @@ footer{
 .inner_form{
     background-color: $tertiary_bg;
     display:inline-block;
-    width:100%;
     label span{
         color: $font_col;
     }

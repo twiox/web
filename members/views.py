@@ -96,6 +96,12 @@ class EventCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Event
     form_class = EventForm
     permission_required = 'members.add_event'
+    
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.description_rendered = markdown.markdown(self.object.description)
+        messages.add_message(self.request, messages.SUCCESS, 'Veranstaltung erstellt')
+        return super().form_valid(form)
 
 class EventUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_detail.html
@@ -103,13 +109,25 @@ class EventUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     form_class = EventForm
     #who can update the event?
     permission_required = 'members.change_event'
+    
+    def get_context_data(self, **kwargs):
+        context = {"picked_groups" : [id for id,_ in self.object.allowed_groups.values_list()]}
+        context['object'] = self.request.user
+        context.update(kwargs)
+        return super().get_context_data(**context)
+    
+    
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.description_rendered = markdown.markdown(self.object.description)
+        messages.add_message(self.request, messages.SUCCESS, 'Veranstaltung geändert')
+        return super().form_valid(form)
 
 class EventDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Event
     success_url = "/members/#events"
     #who can delete the event?
     permission_required = 'members.delete_event'
-
 
 
 class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -400,7 +418,13 @@ class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
     model = Message
     fields=["title","message","groups"]
     permission_required = 'members.change_message'
-
+    
+    def get_context_data(self, **kwargs):
+        context = {"group_values" : [id for id,_ in self.object.groups.values_list()]}
+        context['object'] = self.request.user
+        context.update(kwargs)
+        return super().get_context_data(**context)
+    
     def form_valid(self, form):
         message = form.save()
         message.author = self.request.user

@@ -37,8 +37,8 @@
                 src="https://www.google.com/maps/embed/v1/place?key={{api_key}}
                 &q={{object.spot.lat}},{{object.spot.long}}&zoom=15" allowfullscreen>
             </iframe>
-            <div class="chair_col-5 float_right">
-                <p class="padding_all_big" align="justify">{{object.spot.description}}</p>
+            <div class="chair_col-5 float_right markdown">
+                <p class="padding_rl_big">{{object.spot.description_rendered|safe}}</p>
                 <p class="flex_center padding_all_big">
                     <a class="form_button" target="_blank" href="https://www.google.de/maps/dir//{{object.spot.lat}},{{object.spot.long}}/@{{object.spot.lat}},{{object.spot.long}},17z"><i class="fas fa-external-link-alt"> Route</i></a>
                 </p>

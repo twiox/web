@@ -27,7 +27,7 @@ class EventForm(forms.ModelForm):
     #allowed_groups = forms.ModelChoiceField(label="Für die Gruppen?",queryset=Group.objects.exclude(group_id = "T"))
     class Meta:
         model = Event
-        fields = ["title","info_only","costs","start_date","end_date","deadline","hinweis","description",
+        fields = ["title","place","info_only","costs","start_date","end_date","deadline","hinweis","description",
             "allowed_groups","teilnahmebedingungen", "datenschutz", "einverstaendnis"]
         widgets = {
             'allowed_groups': forms.CheckboxSelectMultiple,
