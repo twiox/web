@@ -27,7 +27,7 @@ def register(request):
         form = MemberCreationForm(request.POST) 
         form2 = ProfileCreationForm(request.POST)
         
-        if(form.is_valid() and form2.is_valid()): #and the form is valid (= submitted and passwords match etc.)
+        if(form.is_valid() and form2.is_valid()): #and the form is valid
             real_user = form.save(commit=False) #save the user to fire the signal
             real_user.username=form.cleaned_data.get("first_name").lower()+form2.cleaned_data.get('member_num')
             password = User.objects.make_random_password()
@@ -35,8 +35,8 @@ def register(request):
             real_user.is_active=False
             real_user.save()
             real_user.refresh_from_db() #get the user again
-            real_user.profile.group = form2.cleaned_data.get('group') #add the user's group
-            real_user.profile.member_num = form2.cleaned_data.get('member_num') #add the user's number
+            for key, value in form2.cleaned_data.items():
+                setattr(real_user.profile, key, value)
             real_user.save() #save the entries
             current_site = get_current_site(request)
             password_reset_token = PasswordResetTokenGenerator()

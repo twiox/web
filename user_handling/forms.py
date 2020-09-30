@@ -26,7 +26,8 @@ class ProfileCreationForm(forms.ModelForm):
     
     class Meta:
         model = Profile
-        fields = ["member_num", "group"]
+        fields = ["birthday","address","telephone","sex","status","member_num","group","membership_start","mandatsref","zahlungsart",
+        "beitrag","notes_trainer","notes_chairman"]
         
 class TrainerCreationForm(forms.ModelForm):
     user = forms.ModelChoiceField(label="Wer?",queryset=User.objects.exclude(trainer__user__username__contains=""))

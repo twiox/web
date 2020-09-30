@@ -14,93 +14,196 @@
 
 <section style="text-align: center;">
     <h1>Neuer Account</h1>
-    <div class="chair_col-5 tertiary_bg padding_all_big" style="margin: 0 auto;">
-        <form class="form_wrapper" method="POST" enctype="multipart/form-data">
+    <form class="form_wrapper" method="POST" enctype="multipart/form-data">
+        <div class ="inner_form padding_all_small">
             {% csrf_token %}
-            
             {% if form.errors %}
                 {% for error in form.non_field_errors %}
                 <p class="padding_tb_small" style="color:red;">{{error}}</p>
                 {% endfor %}
             {% endif %}
-            <div class ="inner_form padding_all_big flex_center">
-                {% if form2.member_num.errors %}
-                {% for error in form2.member_num.errors %}
-                    <p style="color:red;">{{error}}</p>
-                {% endfor %}
-                {% endif %}
-                <label class="mdc-text-field mdc-text-field--filled member_num">
-                    <span class="mdc-text-field__ripple"></span>
-                    <input type="text" class="mdc-text-field__input" aria-labelledby="member_num-label" name="member_num" required>
-                    <span class="mdc-floating-label" id="member_num-label">Mitgliedsnummer</span>
-                    <span class="mdc-line-ripple"></span>
-                </label>
+            <h5 class="padding_all_big">Mitgliedsdaten</h5>
+            <div class="flex_center">
+                <div class="col-5 padding_all_small">
 
-                {% if form2.group.errors %}
-                {% for error in form2.group.errors %}
-                    <p style="color:red;">{{error}}</p>
-                {% endfor %}
-                {% endif %}
-                <label class="mdc-text-field mdc-text-field--filled group">
-                    <i class="mdc-select__dropdown-icon"></i>
-                    <span class="mdc-text-field__ripple"></span>
-                    <select id="select-group" class="mdc-text-field__input" style="background-color:#333333;" name="group" required>
-                        <option value="" selected></option>
-                            {% for id, name in form2.group.field.choices %}
-                            {% if name != "---------" %}
-                            <option value="{{id}}">{{name}}</option>
-                            {% endif %}
-                            {% endfor %}
-                    </select>
-                    <span class="mdc-floating-label" id="group-label">Gruppe</span>
-                    <span class="mdc-line-ripple"></span>
-                </label>
+                    <label class="mdc-text-field mdc-text-field--filled first_name">
+                        <span class="mdc-text-field__ripple"></span>
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="first_name-label" name="first_name" required value=
+                        {% if form.instance.first_name %} "{{form.instance.first_name}}" {% else %} "{{form.data.first_name}}" {% endif %}>
+                        <span class="mdc-floating-label" id="first_name-label">Vorname</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                    
+                    <label class="mdc-text-field mdc-text-field--filled last_name">
+                        <span class="mdc-text-field__ripple"></span>
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="last_name-label" name="last_name" required value=
+                        {% if form.instance.last_name %} "{{form.instance.last_name}}" {% else %} "{{form.data.last_name}}" {% endif %}>
+                        <span class="mdc-floating-label" id="last_name-label">Nachname</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                    
+                    <label class="mdc-text-field mdc-text-field--filled address">
+                        <span class="mdc-text-field__ripple"></span>
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="address-label" name="address" required value=
+                        {% if form2.instance.address %} "{{form2.instance.address}}" {% else %} "{{form2.data.address}}" {% endif %}>
+                        <span class="mdc-floating-label" id="address-label">Adresse</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+
+                    <label class="mdc-text-field mdc-text-field--filled birthday">
+                        <span class="mdc-text-field__ripple"></span>
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="birthday-label" name="birthday" required value=
+                        {% if form2.instance.birthday %} {{form2.instance.birthday|date:"d.m.Y"}} {% else %} {{form2.data.birthday|date:"d.m.Y"}} {% endif %}>
+                        <span class="mdc-floating-label" id="birthday-label">Geburtdatum</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                </div>
                 
-                {% if form.first_name.errors %}
-                {% for error in form.first_name.errors %}
-                    <p style="color:red;">{{error}}</p>
-                {% endfor %}
-                {% endif %}
-                <label class="mdc-text-field mdc-text-field--filled first_name">
-                    <span class="mdc-text-field__ripple"></span>
-                    <input type="text" class="mdc-text-field__input" aria-labelledby="first_name-label" name="first_name" required>
-                    <span class="mdc-floating-label" id="first_name-label">Vorname</span>
-                    <span class="mdc-line-ripple"></span>
-                </label>
-                
-                {% if form.last_name.errors %}
-                {% for error in form.last_name.errors %}
-                    <p style="color:red;">{{error}}</p>
-                {% endfor %}
-                {% endif %}
-                <label class="mdc-text-field mdc-text-field--filled last_name">
-                    <span class="mdc-text-field__ripple"></span>
-                    <input type="text" class="mdc-text-field__input" aria-labelledby="last_name-label" name="last_name" required>
-                    <span class="mdc-floating-label" id="last_name-label">Nachname</span>
-                    <span class="mdc-line-ripple"></span>
-                </label>
-                
-                {% if form.last_name.errors %}
-                {% for error in form.last_name.errors %}
-                    <p style="color:red;">{{error}}</p>
-                {% endfor %}
-                {% endif %}
-                <label class="mdc-text-field mdc-text-field--filled email">
-                    <span class="mdc-text-field__ripple"></span>
-                    <input type="text" class="mdc-text-field__input" aria-labelledby="email-label" name="email" required>
-                    <span class="mdc-floating-label" id="email-label">Email Adresse</span>
-                    <span class="mdc-line-ripple"></span>
-                </label>
-                
-                <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
-                    <span >OK</span>
-                </button>
+                <div class="col-5 padding_all_small">
+                    <label class="mdc-text-field mdc-text-field--filled telephone">
+                        <span class="mdc-text-field__ripple"></span>
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="telephone-label" name="telephone" required value=
+                        {% if form2.instance.telephone %} "{{form2.instance.telephone}}" {% else %} "{{form2.data.telephone}}" {% endif %}>
+                        <span class="mdc-floating-label" id="telephone-label">Telefonnummer</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                    
+                    <label class="mdc-text-field mdc-text-field--filled email">
+                        <span class="mdc-text-field__ripple"></span>
+                        <input type="email" class="mdc-text-field__input" aria-labelledby="email-label" name="email" required value=
+                        {% if form2.instance.email %} "{{form2.instance.email}}" {% else %} "{{form2.data.email}}" {% endif %}>
+                        <span class="mdc-floating-label" id="email-label">Email Adresse</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                    
+                    <label class="mdc-text-field mdc-text-field--filled sex">
+                        <span class="mdc-text-field__ripple"></span>
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="sex-label" name="sex" required value=
+                        {% if form2.instance.sex %} "{{form2.instance.sex}}" {% else %} "{{form2.data.sex}}" {% endif %}>
+                        <span class="mdc-floating-label" id="sex-label">Geschlecht</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                </div>
             </div>
-        </form>
-        <script>
-            const fields = document.querySelectorAll('.mdc-text-field');
-            fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
-        </script>
+            
+            <h5 class="padding_all_big">Vereinsdaten</h5>
+            <div class="flex_center">
+                <div class="col-5 padding_all_small">
+                    <h6>Verwaltung</h6>
+                    
+                    <label class="mdc-text-field mdc-text-field--filled membership_start">
+                        <span class="mdc-text-field__ripple"></span>
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="membership_start-label" name="membership_start" required value=
+                        {% if form2.instance.membership_start %} {{form2.instance.membership_start|date:"d.m.Y"}} {% else %} {{form2.data.membership_start|date:"d.m.Y"}} {% endif %}>
+                        <span class="mdc-floating-label" id="membership_start-label">Start der Mitgliedschaft</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                    
+                    <label class="mdc-text-field mdc-text-field--filled status">
+                        <i class="mdc-select__dropdown-icon"></i>
+                        <span class="mdc-text-field__ripple"></span>
+                        <select id="select-status" class="mdc-text-field__input" style="background-color:#333333;" name="status" required value=
+                        {% if form2.instance.status %} "{{form2.instance.status}}" {% else %} "{{form2.data.status}}" {% endif %}>
+                            <option value="" selected></option>
+                                {% for id, name in form2.status.field.choices %}
+                                {% if name != "---------" %}
+                                <option value="{{id}}">{{name}}</option>
+                                {% endif %}
+                                {% endfor %}
+                        </select>
+                        <span class="mdc-floating-label" id="status-label">Status</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                    
+                    <label class="mdc-text-field mdc-text-field--filled member_num">
+                        <span class="mdc-text-field__ripple"></span>
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="member_num-label" name="member_num" required value=
+                        {% if form2.instance.member_num %} {{form2.instance.member_num}} {% else %} {{form2.data.member_num}} {% endif %}>
+                        <span class="mdc-floating-label" id="member_num-label">Mitgliedsnummer</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                    
+                    <label class="mdc-text-field mdc-text-field--filled group">
+                        <i class="mdc-select__dropdown-icon"></i>
+                        <span class="mdc-text-field__ripple"></span>
+                        <select id="select-group" class="mdc-text-field__input" style="background-color:#333333;" name="group" required value=
+                        {% if form2.instance.group %} {{form2.instance.group}} {% else %} {{form2.data.group}} {% endif %}>
+                            <option value="" selected></option>
+                                {% for id, name in form2.group.field.choices %}
+                                {% if name != "---------" %}
+                                <option value="{{id}}">{{name}}</option>
+                                {% endif %}
+                                {% endfor %}
+                        </select>
+                        <span class="mdc-floating-label" id="group-label">Gruppe</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                    
+                </div>
+                <div class="col-5 padding_all_small">
+                    <h6>Mitgliedsbeitrag</h6>
+                    
+                    <label class="mdc-text-field mdc-text-field--filled zahlungsart">
+                        <i class="mdc-select__dropdown-icon"></i>
+                        <span class="mdc-text-field__ripple"></span>
+                        <select id="select-zahlungsart" class="mdc-text-field__input" style="background-color:#333333;" name="zahlungsart" required value=
+                        {% if form2.instance.zahlungsart %} {{form2.instance.zahlungsart}} {% else %} {{form2.data.zahlungsart}} {% endif %}>
+                            <option value="" selected></option>
+                                {% for id, name in form2.zahlungsart.field.choices %}
+                                {% if name != "---------" %}
+                                <option value="{{id}}">{{name}}</option>
+                                {% endif %}
+                                {% endfor %}
+                        </select>
+                        <span class="mdc-floating-label" id="zahlungsart-label">Zahlungsart</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                    
+                    <label class="mdc-text-field mdc-text-field--filled beitrag">
+                        <span class="mdc-text-field__ripple"></span>
+                        <input type="digit" class="mdc-text-field__input" aria-labelledby="beitrag-label" name="beitrag" required value=
+                        {% if form2.instance.beitrag %} {{form2.instance.beitrag}} {% else %} {{form2.data.beitrag}} {% endif %}>
+                        <span class="mdc-floating-label" id="beitrag-label">Mitgliedsbeitrag</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                    
+                    <label class="mdc-text-field mdc-text-field--filled mandatsref">
+                        <span class="mdc-text-field__ripple"></span>
+                        <input type="digit" class="mdc-text-field__input" aria-labelledby="mandatsref-label" name="mandatsref" value=
+                        {% if form2.instance.mandatsref %} "{{form2.instance.mandatsref}}" {% else %} "{{form2.data.mandatsref}}" {% endif %}>
+                        <span class="mdc-floating-label" id="mandatsref-label">Mandatsreferenz</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                </div>
+            </div>
+            <h5 class="padding_all_big">Notizen</h5>
+            <h6>Trainernotizen</h6>
+            <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
+              <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="notes_trainer" id="id_comment" 
+              name="notes_trainer" >{% if form.instance.notes_trainer %} {{form.instance.notes_trainer}} {% else %} {{form.data.notes_trainer}} {% endif %}</textarea>
+              <span class="mdc-notched-outline">
+                <span class="mdc-notched-outline__leading"></span>
+                <span class="mdc-notched-outline__trailing"></span>
+              </span>
+            </label>
+            <h6>Vorstandsnotizen</h6>
+            <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
+              <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="notes_chairman" id="id_comment" 
+              name="notes_chairman" >{% if form.instance.notes_chairman %} {{form.instance.notes_chairman}} {% else %} {{form.data.notes_chairman}} {% endif %}</textarea>
+              <span class="mdc-notched-outline">
+                <span class="mdc-notched-outline__leading"></span>
+                <span class="mdc-notched-outline__trailing"></span>
+              </span>
+            </label>
+            <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
+                <span >OK</span>
+            </button>
+        </div>
+    </form>
+    <script>
+        const fields = document.querySelectorAll('.mdc-text-field');
+        fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+    </script>
     </div>
 </section>
 

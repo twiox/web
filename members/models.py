@@ -75,6 +75,8 @@ class Participant(models.Model):
     email = models.CharField("Emailadresse", max_length=150)
     telnr = models.CharField("Telefon (während der Veranstaltung)", max_length=150)
     birthday = models.DateTimeField("Geburtstag")
+    gezahlt = models.BooleanField("Beitrag gezahlt", default=False)
+    part = models.BooleanField("Teilgenommen", default=False)
     event = models.ForeignKey(Event, on_delete=models.CASCADE,blank=True,null=True)
     
     def __str__(self):
@@ -207,9 +209,32 @@ class Chairman(models.Model):
             img.save(self.image.path)
 
 class Profile(models.Model):
+    choices = (('ordentlich', 'Ordentliches Mitglied'),
+              ('fördernd', 'Förderndes Mitglied'),
+              ('pausiert', 'Pausiertes Mitglied'))
+    choices2 = (('sepa', 'SEPA'),
+              ('da', 'Dauerauftrag'),
+              ('transfer', 'Überweisung'))
+    
+    #peronal data
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    birthday = models.DateTimeField("Geburtstag",null=True, blank=True)
+    address = models.CharField("Adresse", max_length=300, null=True, blank=True)
+    telephone = models.CharField("Telephone", max_length=20, null=True, blank=True)
+    sex = models.CharField("Geschlecht", default="w", max_length=1)
+    
+    # club data
+    status = models.CharField(max_length=40, choices=choices, default="Ordentliches Mitglied")
     member_num = models.CharField("Mitgliedsnummer", blank=True, max_length=30)
     group = models.ForeignKey(Group, blank=True, null=True, on_delete=models.SET_NULL)
+    membership_start = models.DateTimeField("Beginn der Mitgliedschaft",null=True, blank=True)
+    membership_end = models.DateTimeField("Kündigung zum", null=True, blank=True) 
+    ermaessigt = models.BooleanField("Ermäßigt?", default=False)
+    mandatsref = models.CharField("Mandatsreferenz", max_length=40, null=True, blank=True)
+    zahlungsart = models.CharField("Zahlungsart",choices=choices2, max_length=30, default="SEPA")
+    beitrag = models.IntegerField("Beitragshöhe", default = 20)
+    notes_trainer = models.TextField("Notizen für den/die Trainer*in",null=True, blank=True)
+    notes_chairman = models.TextField("Notizen für den Vorstand",null=True, blank=True)
 
     def __str__(self):
         return f"{self.user.username}\'s Profile"
