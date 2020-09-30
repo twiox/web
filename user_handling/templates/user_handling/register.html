@@ -7,13 +7,21 @@
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'member_list' %}#nav">
         Mitgliederliste</a>
     <a class="float_left"> > </a>
+    {%if form.instance.username %}
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{form.instance.first_name}} {{form.instance.last_name}}</a>
+    {% else %}
     <a class="float_left strong" style="font-size: 1.1rem; color:white;">Neuer Account</a>
+    {% endif %}
 </div>
 {% endblock %}
 {% block content %}
 
 <section style="text-align: center;">
+    {% if form.instance.username %}
+    <h1>{{form.instance.first_name}} {{form.instance.last_name}}</h1>
+    {% else %}
     <h1>Neuer Account</h1>
+    {% endif %}
     <form class="form_wrapper" method="POST" enctype="multipart/form-data">
         <div class ="inner_form padding_all_small">
             {% csrf_token %}
@@ -44,7 +52,7 @@
                     
                     <label class="mdc-text-field mdc-text-field--filled address">
                         <span class="mdc-text-field__ripple"></span>
-                        <input type="text" class="mdc-text-field__input" aria-labelledby="address-label" name="address" required value=
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="address-label" name="address" value=
                         {% if form2.instance.address %} "{{form2.instance.address}}" {% else %} "{{form2.data.address}}" {% endif %}>
                         <span class="mdc-floating-label" id="address-label">Adresse</span>
                         <span class="mdc-line-ripple"></span>
@@ -52,7 +60,7 @@
 
                     <label class="mdc-text-field mdc-text-field--filled birthday">
                         <span class="mdc-text-field__ripple"></span>
-                        <input type="text" class="mdc-text-field__input" aria-labelledby="birthday-label" name="birthday" required value=
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="birthday-label" name="birthday" value=
                         {% if form2.instance.birthday %} {{form2.instance.birthday|date:"d.m.Y"}} {% else %} {{form2.data.birthday|date:"d.m.Y"}} {% endif %}>
                         <span class="mdc-floating-label" id="birthday-label">Geburtdatum</span>
                         <span class="mdc-line-ripple"></span>
@@ -62,7 +70,7 @@
                 <div class="col-5 padding_all_small">
                     <label class="mdc-text-field mdc-text-field--filled telephone">
                         <span class="mdc-text-field__ripple"></span>
-                        <input type="text" class="mdc-text-field__input" aria-labelledby="telephone-label" name="telephone" required value=
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="telephone-label" name="telephone" value=
                         {% if form2.instance.telephone %} "{{form2.instance.telephone}}" {% else %} "{{form2.data.telephone}}" {% endif %}>
                         <span class="mdc-floating-label" id="telephone-label">Telefonnummer</span>
                         <span class="mdc-line-ripple"></span>
@@ -70,21 +78,39 @@
                     
                     <label class="mdc-text-field mdc-text-field--filled email">
                         <span class="mdc-text-field__ripple"></span>
-                        <input type="email" class="mdc-text-field__input" aria-labelledby="email-label" name="email" required value=
-                        {% if form2.instance.email %} "{{form2.instance.email}}" {% else %} "{{form2.data.email}}" {% endif %}>
+                        <input type="email" class="mdc-text-field__input" aria-labelledby="email-label" name="email" value=
+                        {% if form.instance.email %} "{{form.instance.email}}" {% else %} "{{form.data.email}}" {% endif %}>
                         <span class="mdc-floating-label" id="email-label">Email Adresse</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
                     
                     <label class="mdc-text-field mdc-text-field--filled sex">
                         <span class="mdc-text-field__ripple"></span>
-                        <input type="text" class="mdc-text-field__input" aria-labelledby="sex-label" name="sex" required value=
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="sex-label" name="sex" value=
                         {% if form2.instance.sex %} "{{form2.instance.sex}}" {% else %} "{{form2.data.sex}}" {% endif %}>
                         <span class="mdc-floating-label" id="sex-label">Geschlecht</span>
                         <span class="mdc-line-ripple"></span>
-                    </label>
+                    </label>   
                 </div>
             </div>
+            <br>
+            <h6> Bei Minderjährigen </h6>
+                    
+                    <label class="mdc-text-field mdc-text-field--filled parent">
+                        <span class="mdc-text-field__ripple"></span>
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="parent-label" name="parent" value=
+                        {% if form2.instance.parent %} "{{form2.instance.parent}}" {% else %} "{{form2.data.parent}}" {% endif %}>
+                        <span class="mdc-floating-label" id="parent-label">Ansprechpartner</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                    
+                    <label class="mdc-text-field mdc-text-field--filled parent_telnr">
+                        <span class="mdc-text-field__ripple"></span>
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="parent_telnr-label" name="parent_telnr" value=
+                        {% if form2.instance.parent_telnr %} "{{form2.instance.parent_telnr}}" {% else %} "{{form2.data.parent_telnr}}" {% endif %}>
+                        <span class="mdc-floating-label" id="parent_telnr-label">Notfallnummer</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
             
             <h5 class="padding_all_big">Vereinsdaten</h5>
             <div class="flex_center">
@@ -93,18 +119,26 @@
                     
                     <label class="mdc-text-field mdc-text-field--filled membership_start">
                         <span class="mdc-text-field__ripple"></span>
-                        <input type="text" class="mdc-text-field__input" aria-labelledby="membership_start-label" name="membership_start" required value=
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="membership_start-label" name="membership_start" value=
                         {% if form2.instance.membership_start %} {{form2.instance.membership_start|date:"d.m.Y"}} {% else %} {{form2.data.membership_start|date:"d.m.Y"}} {% endif %}>
                         <span class="mdc-floating-label" id="membership_start-label">Start der Mitgliedschaft</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
-                    
+                    {% if form.instance.username %}
+                    <label class="mdc-text-field mdc-text-field--filled membership_end">
+                        <span class="mdc-text-field__ripple"></span>
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="membership_end-label" name="membership_end" value=
+                        {% if form2.instance.membership_end %} {{form2.instance.membership_end|date:"d.m.Y"}} {% else %} {{form2.data.membership_end|date:"d.m.Y"}} {% endif %}>
+                        <span class="mdc-floating-label" id="membership_end-label">Kündigungsdatum</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                    {% endif %}
                     <label class="mdc-text-field mdc-text-field--filled status">
                         <i class="mdc-select__dropdown-icon"></i>
                         <span class="mdc-text-field__ripple"></span>
-                        <select id="select-status" class="mdc-text-field__input" style="background-color:#333333;" name="status" required value=
-                        {% if form2.instance.status %} "{{form2.instance.status}}" {% else %} "{{form2.data.status}}" {% endif %}>
-                            <option value="" selected></option>
+                        <select id="select-status" class="mdc-text-field__input" style="background-color:#333333;" name="status">
+                            <option value={% if form2.instance.status %} "{{form2.instance.status}}" {% else %} "{{form2.data.status}}"{% endif %}>
+                            {% if form2.instance.status %} {{form2.instance.status}} {% else %} {{form2.data.status}} {% endif %}</option>
                                 {% for id, name in form2.status.field.choices %}
                                 {% if name != "---------" %}
                                 <option value="{{id}}">{{name}}</option>
@@ -126,9 +160,9 @@
                     <label class="mdc-text-field mdc-text-field--filled group">
                         <i class="mdc-select__dropdown-icon"></i>
                         <span class="mdc-text-field__ripple"></span>
-                        <select id="select-group" class="mdc-text-field__input" style="background-color:#333333;" name="group" required value=
-                        {% if form2.instance.group %} {{form2.instance.group}} {% else %} {{form2.data.group}} {% endif %}>
-                            <option value="" selected></option>
+                        <select id="select-group" class="mdc-text-field__input" style="background-color:#333333;" name="group" required>
+                            <option value={% if form2.instance.group %} "{{form2.instance.group.id}}" {% else %} "{{form2.data.group.id}}" {% endif %}>
+                            {% if form2.instance.group %} {{form2.instance.group}} {% else %} {{form2.data.group}} {% endif %}</option>
                                 {% for id, name in form2.group.field.choices %}
                                 {% if name != "---------" %}
                                 <option value="{{id}}">{{name}}</option>
@@ -146,9 +180,9 @@
                     <label class="mdc-text-field mdc-text-field--filled zahlungsart">
                         <i class="mdc-select__dropdown-icon"></i>
                         <span class="mdc-text-field__ripple"></span>
-                        <select id="select-zahlungsart" class="mdc-text-field__input" style="background-color:#333333;" name="zahlungsart" required value=
-                        {% if form2.instance.zahlungsart %} {{form2.instance.zahlungsart}} {% else %} {{form2.data.zahlungsart}} {% endif %}>
-                            <option value="" selected></option>
+                        <select id="select-zahlungsart" class="mdc-text-field__input" style="background-color:#333333;" name="zahlungsart" required>
+                            <option value={% if form2.instance.zahlungsart %} "{{form2.instance.zahlungsart}}" {% else %} "{{form2.data.zahlungsart}}" {% endif %}>
+                            {% if form2.instance.zahlungsart %} {{form2.instance.zahlungsart}} {% else %} {{form2.data.zahlungsart}} {% endif %}</option>
                                 {% for id, name in form2.zahlungsart.field.choices %}
                                 {% if name != "---------" %}
                                 <option value="{{id}}">{{name}}</option>

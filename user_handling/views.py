@@ -5,6 +5,7 @@ from members.models import Group, Chairman, Profile
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from django.core.mail import EmailMessage
+from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -23,7 +24,7 @@ from django.contrib.auth.views import LoginView, PasswordResetView, LogoutView, 
 @login_required
 @permission_required('auth.add_user', raise_exception=True)
 def register(request):
-    if(request.method == "POST"): #if the form is filled out
+    if request.method == "POST": #if the form is filled out
         form = MemberCreationForm(request.POST) 
         form2 = ProfileCreationForm(request.POST)
         
@@ -83,6 +84,9 @@ class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     permission_required = 'auth.add_user'
     template_name = "user_handling/member_list.html"
     
+    def get_queryset(self):
+        return User.objects.order_by('profile__membership_start')
+    
 class UserDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = User
     template_name = "user_handling/user_confirm_delete.html"
@@ -90,13 +94,34 @@ class UserDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     #who can delete the user?
     permission_required = 'auth.delete_user'
 
-class ProfileUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    #template: event_form.html
-    model = Profile
-    fields=["group"]
-    template_name="user_handling/profile_form.html"
-    permission_required = 'members.change_user'
+@login_required
+@permission_required('auth.add_user', raise_exception=True)
+def member_update(request, pk):
+    real_user = get_object_or_404(User,pk=pk)
     
+    if request.method == "POST": #if the form is filled out
+    
+        form = MemberListUserUpdateForm(request.POST) 
+        form2 = MemberListProfileUpdateForm(request.POST)
+        
+        if(form.is_valid() and form2.is_valid()): #and the form is valid
+            
+            for key, value in form.cleaned_data.items():
+                setattr(real_user, key, value)
+                
+            for key, value in form2.cleaned_data.items():
+                setattr(real_user.profile, key, value)
+                
+            real_user.save() #save the entries
+            messages.add_message(request, messages.SUCCESS, 'Account erfolgreich bearbeitet')
+            return redirect("member_list")
+    else:
+        form = MemberListUserUpdateForm(instance=real_user)
+        form2 = MemberListProfileUpdateForm(instance=real_user.profile)
+    return render(request, 'user_handling/register.html', context={"form":form, "form2":form2})
+
+
+
 @login_required
 @permission_required('members.add_trainer', raise_exception=True)
 def register_trainer(request):

@@ -16,7 +16,7 @@ urlpatterns = [
     path('organizers/', include('organizers.urls')),
     path('users/', user_views.MemberListView.as_view(), name="member_list"),
     path('users/<int:pk>/remove', user_views.UserDeleteView.as_view(), name="remove_user"),
-    path('users/<int:pk>/update', user_views.ProfileUpdateView.as_view(), name="update_user"),
+    path('users/<int:pk>/update', user_views.member_update, name="update_user"),
     path('register/', user_views.register, name="register"),
     path('register_trainer/', user_views.register_trainer, name="register_trainer"),
     path('trainer/',user_views.TrainerListView.as_view(), name="trainer_list"),

@@ -368,6 +368,16 @@ table{
         height:20px;
     }
 }
+#Kündigung{
+    background-color:black;
+}
+#Förderndes{
+    background-color:$primary;
+}
+#Pausiertes{
+    background-color:grey;
+}
+
 strong{
     color: $header_col;
 }

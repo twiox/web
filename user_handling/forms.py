@@ -4,6 +4,18 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User
 from members.models import Profile, Group, Trainer, Chairman
 
+class MemberListUserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["first_name","last_name","email"]
+
+class MemberListProfileUpdateForm(forms.ModelForm):
+    group = forms.ModelChoiceField(label="Gruppe",queryset=Group.objects.all())
+    class Meta:
+        model = Profile
+        fields = ["birthday","address","telephone","sex","status","member_num","group","membership_start","mandatsref","zahlungsart",
+        "beitrag","notes_trainer","notes_chairman","parent", "parent_telnr"]
+
 class MemberCreationForm(UserCreationForm):
     first_name = forms.CharField(label="Vorname")
     last_name = forms.CharField(label="Nachname")
@@ -27,7 +39,7 @@ class ProfileCreationForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ["birthday","address","telephone","sex","status","member_num","group","membership_start","mandatsref","zahlungsart",
-        "beitrag","notes_trainer","notes_chairman"]
+        "beitrag","notes_trainer","notes_chairman","parent", "parent_telnr"]
         
 class TrainerCreationForm(forms.ModelForm):
     user = forms.ModelChoiceField(label="Wer?",queryset=User.objects.exclude(trainer__user__username__contains=""))

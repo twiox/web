@@ -209,12 +209,14 @@ class Chairman(models.Model):
             img.save(self.image.path)
 
 class Profile(models.Model):
-    choices = (('ordentlich', 'Ordentliches Mitglied'),
-              ('fördernd', 'Förderndes Mitglied'),
-              ('pausiert', 'Pausiertes Mitglied'))
-    choices2 = (('sepa', 'SEPA'),
-              ('da', 'Dauerauftrag'),
-              ('transfer', 'Überweisung'))
+    choices = (('Ordentliches Mitglied', 'Ordentliches Mitglied'),
+              ('Förderndes Mitglied', 'Förderndes Mitglied'),
+              ('Pausiertes Mitglied', 'Pausiertes Mitglied'),
+              ('Kündigung', 'Kündigung')
+              )
+    choices2 = (('SEPA', 'SEPA'),
+              ('Dauerauftrag', 'Dauerauftrag'),
+              ('Überweisung', 'Überweisung'))
     
     #peronal data
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -222,6 +224,10 @@ class Profile(models.Model):
     address = models.CharField("Adresse", max_length=300, null=True, blank=True)
     telephone = models.CharField("Telephone", max_length=20, null=True, blank=True)
     sex = models.CharField("Geschlecht", default="w", max_length=1)
+    
+    #for u18
+    parent = models.CharField("Ansprechpartner*in", max_length=100, null=True, blank=True)
+    parent_telnr = models.CharField("Notfallnummer", max_length=100, null=True, blank=True)
     
     # club data
     status = models.CharField(max_length=40, choices=choices, default="Ordentliches Mitglied")
@@ -241,4 +247,4 @@ class Profile(models.Model):
         
     def get_absolute_url(self):
         return reverse('member_list')
-
+        
