@@ -9,45 +9,40 @@
 {% endblock %}
 {%block content %}
     <section>
-        <h1>{{object.first_name}} {{object.last_name}}</h1>
-        <div>
-            <div class="chair_col-5 padding_all_small float_left">
-                <div class="tertiary_bg padding_all_big">
+        <h1>Dein Profil</h1>
+        <div class="flex_center" style="flex-wrap:wrap;justify-content:space-between;">
+            <div class="chair_col-49 padding_all_small tertiary_bg">
+                <div class="padding_all_big">
                     <h3 class="padding_tb_small"> Deine Daten </h3>
-                    <p align="justify"> Hier kannst du deine Daten sehen und teilweise bearbeiten - wie z.B. deine Einloggdaten.
-                    </p>
-                    <h4 class="padding_tb_small">Stammdaten </h4>
+                    <p align="justify"> Hier kannst du deine Daten sehen und bearbeiten</p>
+                    <h4 class="padding_tb_small"></h4>
                     <div class="side_scroll">
                         <table class="padding_tb_small side_scroll">
+                            <tr> <td><h4>Persönliche Daten</h4></td>
+                                <td></td><td><a class="more_info_button" href="{% url 'profile_update_address' object.id %}">Ändern</a></td></tr>
                             <tr> <td>Name:</td><td>{{object.first_name}} {{object.last_name}}</td> </tr>
-                            <tr> <td>Mitgliedsnummer:</td><td>{{object.profile.member_num}}</td> </tr>
-                            <tr> <td>Gruppe: </td><td>{{object.profile.group.group_id}}</td> </tr>
                             <tr> <td>Nutzername:</td><td>{{object.username}}</td> </tr>
+                            <tr> <td>Adresse:</td><td>{{object.profile.address}}</td> </tr>
+                            <tr> <td>Geburtsdatum:</td><td>{{object.profile.birthday|date:"d.m.Y"}}</td> </tr>
+                            <tr> <td>Geschlecht:</td><td>{{object.profile.sex}}</td> </tr>
+                            <tr> <td>Telefon:</td><td>{{object.profile.telephone}}</td> </tr>
+                            <tr> <td>Ansprechpartner (U18):</td><td>{% if object.profile.parent %} {{object.profile.parent}} {%else%} - {% endif %}</td></tr>
+                            <tr> <td>Notfallnummer (U18):</td><td>{% if object.profile.parent_telnr %} {{object.profile.parent_telnr}} {%else%} -  {% endif %}</td> </tr>
                             <tr> <td>Email:</td><td>{{object.email}}</td> <td><a class="more_info_button" href="{% url 'profile_update_email' object.id %}">Ändern</a></td> </tr>
                             <tr> <td>Passwort:</td><td>*************</td> <td><a class="more_info_button" href="{% url 'profile_update_pw' object.id %}">Ändern</a></td> </tr>
+                            <tr> <td><h4 class="padding_tb_small">Vereinsdaten</h4></td> </tr>
+                            <tr> <td>Mitgliedsstatus:</td><td>{{object.profile.status}}</td> </tr>
+                            <tr> <td>Mitglied seit:</td><td>{{object.profile.membership_start|date:"m/Y"}}</td> </tr>
+                            <tr> <td>Mitgliedsnummer:</td><td>{{object.profile.member_num}}</td> </tr>
+                            <tr> <td>Trainingsgruppe: </td><td>{{object.profile.group}}</td> </tr>
                         </table>
                     </div>
-                    <p class="padding_tb_big" align="justify"> Bitte beachte, dass eine Änderung der Emailadresse <strong>nur</strong> die Einloggdaten für die Website betrifft. Nutze das Formular um uns die Änderung mitzuteilen,
-                    wenn du auch die Nachrichten vom Verein auf die neue Adresse erhalten möchtest.
-                    </p>
                 </div> 
-                <div class="padding_tb_small">
-                    <div class="tertiary_bg padding_all_big">
-                        <h3 class="padding_tb_small"> Dokumente </h3>
-                        <div class="padding_all_big">
-                            <ul>
-                                <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{ STATIC_URL }}/static/docs/Satzung_TwioX.pdf"><p>Satzung</p><i class="fas fa-file-download"></i></a></li>
-                                <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{ STATIC_URL }}/static/docs/Beitragsordnung_TwioX.pdf"><p>Beitragsordnung</p><i class="fas fa-file-download"></i></a></li>
-                                <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{ STATIC_URL }}/static/docs/SEPA_Mandat_TwioX.pdf"><p>SEPA Mandat</p><i class="fas fa-file-download"></i></a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
             </div>
-            <div class="chair_col-5 padding_all_small float_left">
-                <div class="tertiary_bg padding_all_big">
+            <div class="chair_col-49 padding_all_small tertiary_bg">
+                <div class="padding_all_big">
                     <h3 class="padding_tb_small"> Änderungen mitteilen </h3>
-                    <p align="justify"> Wenn sich Daten von dir ändern oder nicht korrekt dargestellt sind, teile es uns über das Feld unten mit und
+                    <p align="justify"> Wenn sich statische Daten von dir ändern (Name, Geschlecht) oder nicht korrekt dargestellt sind, teile es uns über das Feld unten mit und
                     wir ändern deine Daten in unserer Datenbank. Für eine Änderung der Bankverbindung ist 
                     <strong>immer ein neues SEPA Mandat</strong> notwendig, dieses kann direkt mit angehängt werden.
                     </p>
@@ -85,7 +80,19 @@
                         fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
                     </script>
                 </div>
-             </div>
+            </div>
+        </div>
+        <h3 class="padding_tb_small"> Dokumente </h3>
+        <div class="padding_all_small tertiary_bg chair_col-49">
+            <div class="padding_all_big">
+                <div class="padding_all_big">
+                    <ul>
+                        <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{ STATIC_URL }}/static/docs/Satzung_TwioX.pdf"><p>Satzung</p><i class="fas fa-file-download"></i></a></li>
+                        <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{ STATIC_URL }}/static/docs/Beitragsordnung_TwioX.pdf"><p>Beitragsordnung</p><i class="fas fa-file-download"></i></a></li>
+                        <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{ STATIC_URL }}/static/docs/SEPA_Mandat_TwioX.pdf"><p>SEPA Mandat</p><i class="fas fa-file-download"></i></a></li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 {% endblock %}

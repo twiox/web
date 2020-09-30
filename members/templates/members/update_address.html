@@ -1,0 +1,58 @@
+{% extends "members/base.html" %}
+{% block navbar2 %} 
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'profile_detail' object.id %}">
+        Dein Profil</a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Aktualisieren</a>
+</div>
+{% endblock %}
+{%block content %}
+<section style="text-align:center;">
+    <h1>Daten Aktualisieren</h1>
+    <form class="form_wrapper" method="POST">
+        <div class ="inner_form padding_all_small">
+        {% csrf_token %}
+            <label class="mdc-text-field mdc-text-field--filled address">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="address-label" name="address" required value=
+                {% if form.instance.address %} "{{form.instance.address}}" {% else %} "{{form.data.address}}" {% endif %}>
+                <span class="mdc-floating-label" id="address-label">Deine Adresse</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+            <label class="mdc-text-field mdc-text-field--filled telephone">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="address-label" name="telephone" required value=
+                {% if form.instance.telephone %} "{{form.instance.telephone}}" {% else %} "{{form.data.telephone}}" {% endif %}>
+                <span class="mdc-floating-label" id="telephone-label">Deine Telefonnumer</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+            <label class="mdc-text-field mdc-text-field--filled parent">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="address-label" name="parent" value=
+                {% if form.instance.parent %} "{{form.instance.parent}}" {% else %} "{{form.data.parent}}" {% endif %}>
+                <span class="mdc-floating-label" id="parent-label">Ansprechpartner (U18)</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+            <label class="mdc-text-field mdc-text-field--filled parent_telnr">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="parent_telnr-label" name="parent_telnr" value=
+                {% if form.instance.parent_telnr %} "{{form.instance.parent_telnr}}" {% else %} "{{form.data.parent_telnr}}" {% endif %}>
+                <span class="mdc-floating-label" id="parent_telnr-label">Notfallnummer (U18)</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+            <br>
+            <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
+                <span >OK</span>
+            </button>
+        </div>
+    </form>
+    <script>
+        const fields = document.querySelectorAll('.mdc-text-field');
+        fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+    </script>
+</section>
+{% endblock %}

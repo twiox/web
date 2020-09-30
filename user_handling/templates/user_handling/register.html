@@ -22,7 +22,7 @@
     {% else %}
     <h1>Neuer Account</h1>
     {% endif %}
-    <form class="form_wrapper" method="POST" enctype="multipart/form-data">
+    <form class="form_wrapper tertiary_bg" method="POST" enctype="multipart/form-data">
         <div class ="inner_form padding_all_small">
             {% csrf_token %}
             {% if form.errors %}

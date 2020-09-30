@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.views.generic import (
     ListView,
@@ -521,3 +522,17 @@ class PasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS, 'Passwort erfolgreich geändert')
         return HttpResponseRedirect("../detail")
+
+class AddressChangeView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Profile
+    template_name = 'members/update_address.html'
+    fields = ["address"]
+    
+    def get_success_url(self):
+        return reverse('profile_detail', kwargs={'pk':self.object.user.pk})
+    
+    
+    def test_func(self):
+        user = self.request.user
+        profile = self.get_object()
+        return user.profile == profile
