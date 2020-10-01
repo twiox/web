@@ -8,7 +8,7 @@ from django.views.generic import (
     UpdateView,
     DeleteView
     )
-from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, Participant
+from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
@@ -73,19 +73,6 @@ class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     #template: event_detail.html
     model = Event
 
-    def get_context_data(self, **kwargs):
-        participate = Participant.objects.filter(event=self.object, user=self.request.user)
-
-        context = {}
-        if self.object:
-            context['object'] = self.object
-            context['part'] = len(participate.all()) == 1
-            context_object_name = self.get_context_object_name(self.object)
-            if context_object_name:
-                context[context_object_name] = self.object
-        context.update(kwargs)
-        return super().get_context_data(**context)
-
     def test_func(self):
         user_group = self.request.user.profile.group
         event = self.get_object()
@@ -139,14 +126,6 @@ class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():
-            participant = Participant(
-                user = self.request.user,
-                email = form.cleaned_data.get("email"),
-                telnr = form.cleaned_data.get("telnr"),
-                birthday = form.cleaned_data.get("birthday"),
-                event = self.get_object()
-                )
-            participant.save()
             event = self.get_object()
             event.participants.add(request.user)
             event.save()
@@ -169,8 +148,6 @@ class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
         form = self.form_class(request.POST)
         if form.is_valid():
             event = self.get_object()
-            part = Participant.objects.filter(event=event, user=self.request.user)
-            part.delete()
             event.participants.remove(self.request.user)
             event.save()
             messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich abgemeldet')

@@ -69,18 +69,6 @@ class Event(models.Model):
     
     def __str__(self):
         return f"Event: {self.title}"
-
-class Participant(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    email = models.CharField("Emailadresse", max_length=150)
-    telnr = models.CharField("Telefon (während der Veranstaltung)", max_length=150)
-    birthday = models.DateTimeField("Geburtstag")
-    gezahlt = models.BooleanField("Beitrag gezahlt", default=False)
-    part = models.BooleanField("Teilgenommen", default=False)
-    event = models.ForeignKey(Event, on_delete=models.CASCADE,blank=True,null=True)
-    
-    def __str__(self):
-        return f"Participant: {self.user.first_name} {self.user.last_name}"
         
         
 class Trainer(models.Model):

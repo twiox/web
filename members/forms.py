@@ -35,12 +35,9 @@ class EventForm(forms.ModelForm):
 
 class EventUpdateParticipantForm(forms.ModelForm):
     confirm = forms.BooleanField()
-    telnr = forms.CharField()
-    email = forms.EmailField()
-    birthday = forms.DateField()
     class Meta:
         model=Event
-        fields = ["email","telnr","birthday","confirm"]
+        fields = ["confirm"]
  
 class EventUpdateParticipantForm2(forms.ModelForm):
     class Meta:

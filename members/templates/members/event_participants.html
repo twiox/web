@@ -17,22 +17,28 @@
         <h1> Teilnehmer</h1>
     </div>
     <div class="flex_center">
-        <div class="padding_all_big tertiary_bg chair_col-5 side_scrolL">
+        <div class="padding_all_big tertiary_bg side_scrolL">
             <table >
-            <tr> 
+            <tr>
+                <th><h5> Nr </h5></th>
                 <th><h5> Vorname </h5></th>
                 <th><h5> Nachname </h5></th>
                 <th><h5> Geburtsdatum </h5></th>
                 <th><h5> Email </h5></th>
+                <th><h5> Telefon </h5></th>
+                <th><h5> Ansprechpartner </h5></th>
                 <th><h5> Notfallnummer </h5></th>
             </tr>
-            {% for participant in object.participant_set.all %}
+            {% for participant in object.participants.all %}
             <tr> 
-                <td> {{participant.user.first_name}} </td>
-                <td> {{participant.user.last_name}} </td>
-                <td> {{participant.birthday|date}} </td>
-                <td> {{participant.email}} </td>
-                <td> {{participant.telnr}} </td>
+                <td nowrap="nowrap"> {{forloop.counter}} </td>
+                <td nowrap="nowrap"> {{participant.first_name}} </td>
+                <td nowrap="nowrap"> {{participant.last_name}} </td>
+                <td nowrap="nowrap"> {{participant.profile.birthday|date:"d.m.Y"}} </td>
+                <td nowrap="nowrap"> {{participant.email}} </td>
+                <td nowrap="nowrap"> {% if participant.profile.telephone %} {{participant.profile.telephone}} {% else %} - {% endif %}</td>
+                <td nowrap="nowrap"> {% if participant.profile.parent %} {{participant.profile.parent}} {% else %} - {% endif %} </td>
+                <td nowrap="nowrap"> {% if participant.profile.parent_telnr %} {{participant.profile.parent_telnr}} {% else %} - {% endif %}</td>
             </tr>
             {% endfor %}
             </table>

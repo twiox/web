@@ -13,10 +13,9 @@
 {%block content %}
 {% if not object.deadline_reached %}
 <section style="text-align:center;">
-    <h1>{{object.title|upper}}</h1>
+    <h1>Anmeldung {{object.title|upper}}</h1>
     <div class="flex_center">
         <div class="tertiary_bg padding_all_big col-5" style="text-align:center;">
-            <p> Anmeldung </p>
             <form class="padding_all_big" method="POST">
                 {% csrf_token %}
                 {% if form.errors %}
@@ -24,43 +23,6 @@
                     <p class="padding_tb_small" style="color:red;">{{error}}</p>
                     {% endfor %}
                 {% endif %}
-                
-                {% if form.email.errors %}
-                {% for error in form.email.errors %}
-                    <p style="color:red;">{{error}}</p>
-                {% endfor %}
-                {% endif %}
-                <label class="mdc-text-field mdc-text-field--filled email">
-                    <span class="mdc-text-field__ripple"></span>
-                    <input type="text" class="mdc-text-field__input" aria-labelledby="email-label" name="email" required>
-                    <span class="mdc-floating-label" id="email-label">Emailadresse</span>
-                    <span class="mdc-line-ripple"></span>
-                </label>
-                
-                {% if form.telnr.errors %}
-                {% for error in form.telnr.errors %}
-                    <p style="color:red;">{{error}}</p>
-                {% endfor %}
-                {% endif %}
-                <label class="mdc-text-field mdc-text-field--filled telnr">
-                    <span class="mdc-text-field__ripple"></span>
-                    <input type="text" class="mdc-text-field__input" aria-labelledby="telnr-label" name="telnr" required>
-                    <span class="mdc-floating-label" id="telnr-label">Telefonnummer/Notfallnummer</span>
-                    <span class="mdc-line-ripple"></span>
-                </label>
-                    
-                    
-                {% if form.birthday.errors %}
-                {% for error in form.birthday.errors %}
-                    <p style="color:red;">{{error}}</p>
-                {% endfor %}
-                {% endif %}
-                <label class="mdc-text-field mdc-text-field--filled birthday">
-                    <span class="mdc-text-field__ripple"></span>
-                    <input type="text" class="mdc-text-field__input" aria-labelledby="birthday-label" name="birthday" required>
-                    <span class="mdc-floating-label" id="birthday-label">Geburtsdatum</span>
-                    <span class="mdc-line-ripple"></span>
-                </label>
                 
                 <div class="mdc-form-field padding_all_big">
                     <div class="mdc-checkbox">
@@ -75,11 +37,12 @@
                     <label for="speicherung" >
                         <div align="left">Ich habe die<a class="more_info_button" href={%if object.datenschutz%}"{{object.datenschutz.url}}"{% else %}"https://www.twio-x.com/datenschutzerkl%C3%A4rung"{%endif%}>Datenschutzerklärung</a>und die<a class="more_info_button" 
                         href={%if object.teilnahmebedingungen%}"{{object.teilnahmebedingungen.url}}"{% else %}"#"{%endif%}>Teilnahmebedingungen</a>gelesen und akzeptiere sie. 
-                        Ich willige ein, dass die von mir hinterlegten Daten für die Dauer der Veranstaltung verarbeitet und gespeichert werden dürfen. <strong> Beachte, dass wir von Minderjährigen das
+                        Ich willige ein, dass die von mir hinterlegten Daten für die Drurchführung der Veranstaltung an die notwendigen Stellen übermittelt werden. <strong> Beachte, dass wir von Minderjährigen das
                         Einverständnis der Eltern benötigen!</strong></div>
                     </label>
                 </div>
-                
+                <h6> Die An- und Abmeldefrist endet am {{object.deadline|date:"d.m.Y"}} </h6>
+                <br>
                 <button type="submit" class="form_button" style="margin: 0 auto;">Jawoll</button>
                 <script>
                 const fields = document.querySelectorAll('.mdc-text-field');

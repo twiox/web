@@ -56,7 +56,7 @@
                     </div>
                     {% if not object.deadline_reached %}
                     <div class="padding_all_big flex_center">
-                        {% if part %}
+                        {% if request.user in object.participants.all %}
                             <div>
                                 <a class="form_button_sec" href="{% url 'event_unparticipate' object.id %}#nav">Abmelden</a>
                                 <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
