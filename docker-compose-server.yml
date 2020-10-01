@@ -11,6 +11,8 @@ services:
       - 8000:8000
     links:
       - db:db
+    volumes:
+      - file-volume:/opt/twio_web/media
     networks:
       - outside
     logging:
@@ -38,6 +40,9 @@ volumes:
   db-volume:
     external:
       name: twio-${ENV}-db
+  file-volume:
+    external:
+      name: twio-${ENV}-file
 
 networks:
   outside:

@@ -59,15 +59,15 @@ fi
 git pull
 
 # check if volumes and network exist, otherwise create
-#FILE_VOLUME_IS_NEW=false
-#if [ $( docker volume ls | grep twio-$ENV-file | wc -l) == "0" ]; then
-#  FILE_VOLUMES_IS_NEW=true
-#  echo ""
-#  echo "File volume does not exist. Creating it now."
-#  docker volume create --name=twio-$ENV-file > /dev/null
-#  echo "Created docker volume twio-$ENV-file"
-#  echo ""
-#fi;
+FILE_VOLUME_IS_NEW=false
+if [ $( docker volume ls | grep twio-$ENV-file | wc -l) == "0" ]; then
+ FILE_VOLUMES_IS_NEW=true
+ echo ""
+ echo "File volume does not exist. Creating it now."
+ docker volume create --name=twio-$ENV-file > /dev/null
+ echo "Created docker volume twio-$ENV-file"
+ echo ""
+fi;
 
 DB_VOLUME_IS_NEW=false
 if [ $( docker volume ls | grep twio-$ENV-db | wc -l) == "0" ]; then
