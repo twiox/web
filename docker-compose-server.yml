@@ -7,10 +7,27 @@ services:
     build:
       context: ./
       dockerfile: docker-config/python-server.dockerfile
-    volumes:
-      - db-volume:/opt/twio_web/Database
     ports:
       - 8000:8000
+    links:
+      - db:db
+    networks:
+      - outside
+    logging:
+      driver: syslog
+    restart: always
+
+  db:
+    image: mysql
+    container_name: twio-${ENV}-db
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: doit
+      MYSQL_DATABASE: twio
+      MYSQL_USER: twio
+      MYSQL_PASSWORD: twio
+    volumes:
+      - db-volume:/var/lib/mysql
     networks:
       - outside
     logging:
@@ -26,4 +43,3 @@ networks:
   outside:
     external:
       name: twio-${ENV}
-

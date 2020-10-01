@@ -9,6 +9,16 @@ services:
       dockerfile: python.dockerfile
     ports:
       - 127.0.0.1:8000:8000
+    links:
+      - db:db
     volumes:
       - ./:/opt/twio_web
 
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: doit
+      MYSQL_DATABASE: twio
+      MYSQL_USER: twio
+      MYSQL_PASSWORD: twio
