@@ -127,6 +127,7 @@ COMPRESS_PRECOMPILERS = (
 LOGOUT_REDIRECT_URL = '/login/'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
 MEDIA_ROOT = os.path.join(BASE_DIR, "media") #where are the files at the file-system?
 MEDIA_URL ="/media/" #how do we access the media in the browser?
 #for the login

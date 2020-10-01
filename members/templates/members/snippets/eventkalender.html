@@ -36,10 +36,10 @@
     {% endif %}
     
     {% if events %}
-    <section>
+    <section style="display:flex; flex-wrap:wrap; justify-content:left;">
         {% for event in events %}
             {% if not event.is_past_due %}
-                <div class="padding_all_small float_left col-4" id="container">
+                <div class="padding_all_small col-4" id="container">
                     <div>
                         {% if event.hinweis %}
                                 <div id="info_position">

@@ -43,14 +43,14 @@
                     <label class="mdc-text-field mdc-text-field--filled title">
                         <span class="mdc-text-field__ripple"></span>
                         <input type="text" class="mdc-text-field__input" aria-labelledby="title-label" name="title" required value=
-                            {% if form.instance.title %} {{form.instance.title}} {% else %} {{form.data.title}} {% endif %}>
+                            {% if form.instance.title %} "{{form.instance.title}}" {% else %} "{{form.data.title}}" {% endif %}>
                         <span class="mdc-floating-label" id="title-label">Titel</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
                     <label class="mdc-text-field mdc-text-field--filled place">
                         <span class="mdc-text-field__ripple"></span>
                         <input type="text" class="mdc-text-field__input" aria-labelledby="place-label" name="place" required value=
-                            {% if form.instance.place %} {{form.instance.place}} {% else %} {{form.data.place}} {% endif %}>
+                            {% if form.instance.place %} "{{form.instance.place}}" {% else %} "{{form.data.place}}" {% endif %}>
                         <span class="mdc-floating-label" id="place-label">Veranstaltungsort</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
@@ -102,7 +102,7 @@
                     <label class="mdc-text-field mdc-text-field--filled hinweis">
                         <span class="mdc-text-field__ripple"></span>
                         <input type="text" class="mdc-text-field__input" aria-labelledby="hinweis-label" name="hinweis" value=
-                            {% if form.instance.hinweis %} {{form.instance.hinweis}} {% else %} {{form.data.hinweis}} {% endif %}>
+                            {% if form.instance.hinweis %} "{{form.instance.hinweis}}" {% else %} {{form.data.hinweis}} {% endif %}>
                         <span class="mdc-floating-label" id="hinweis-label">Warnhinweis</span>
                         <span class="mdc-line-ripple"></span>
                     </label>

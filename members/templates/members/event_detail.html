@@ -37,7 +37,6 @@
                 </div>
             </div>
         </div>
-        <p style="text-align:center;width:100px;margin:0 auto;">
         <br>
         {% if not object.info_only %}
             <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
@@ -55,29 +54,36 @@
                     </ul>
                 </div>
                 {% if not object.deadline_reached %}
-                <div class="padding_all_big chair_col-20 flex_center">
-                    <div class="flex_center_vertical">
-                        {% if request.user in object.participants.all %}
-                            <div>
-                                <a class="form_button_sec" href="{% url 'event_unparticipate' object.id %}#nav">Abmelden</a>
-                                <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
-                            </div>
-                        {% else %}
-                            <div>
-                                <a class="form_button" href="{% url 'event_participate' object.id %}#nav">Anmelden</a>
-                                <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
-                            </div>
-                        {% endif %}
+                <div class="padding_all_big chair_col-20">
+                    <div class="flex_center">
+                        <div class="flex_center_vertical">
+                            {% if request.user in object.participants.all %}
+                                <div>
+                                    <a class="form_button_sec" href="{% url 'event_unparticipate' object.id %}#nav">Abmelden</a>
+                                    <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
+                                </div>
+                            {% else %}
+                                <div>
+                                    <a class="form_button" href="{% url 'event_participate' object.id %}#nav">Anmelden</a>
+                                    <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-            {% else %}
-                <p class="time_info">Anmeldung vorbei</p>
-            {% endif %}
+                {% else %}
+                <div class="padding_all_big chair_col-20">
+                    <div class="flex_center">
+                        <div class="flex_center_vertical">
+                            <p>Anmeldung vorbei</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
         {% else %}
             <div class="flex_center padding_all_big">
                 <h5> Anmeldung noch nicht geöffnet </h5>
             </div>
         {% endif %}
-        </p>
     </section>
 {% endblock %}
