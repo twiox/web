@@ -66,7 +66,7 @@ def activate(request, uidb64, token):
         user = User.objects.get(pk=uid)
     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
-    if user is not None and account_activation_token.check_token(user, token):
+    if user is not None and account_activation_token.check_token(user, token) and user.is_active==False:
         user.is_active = True
         user.save()
         
@@ -77,7 +77,30 @@ def activate(request, uidb64, token):
         # return redirect('home')
         return render(request, "user_handling/activate.html", context={"user":user, "uid":uid2, "token":token2})
     else:
-        return render(request, "user_handling/activate_fail.html" )   
+        return render(request, "user_handling/activate_fail.html", context={"uidb64":uidb64, "token":token}  )   
+
+def resend_activate(request, uidb64, token):
+    uid = force_text(urlsafe_base64_decode(uidb64))
+    try:
+        real_user = User.objects.get(pk=uid)
+        to_email = real_user.email
+    
+        password_reset_token = PasswordResetTokenGenerator()
+        mail_subject="Aktiviere deinen Account für den Twio Mitgliederbereich"
+        message= render_to_string("user_handling/acc_active_email.html",{
+            "user":real_user,
+            "domain":get_current_site(request).domain,
+            "uid": urlsafe_base64_encode(force_bytes(real_user.pk)),
+            "token":account_activation_token.make_token(real_user),
+            }       
+        )
+        
+        email=EmailMessage(mail_subject, message, to=[to_email])
+        email.send()
+        messages.add_message(request, messages.SUCCESS, 'Neuer Aktivierungslink verschickt')
+    except:
+        messages.add_message(request, messages.SUCCESS, 'FEHLER: Der Benutzer existiert nicht. Bitte wende dich an den Vorstand')
+    return redirect("activate", uidb64=uidb64, token=token)
 
 class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = User

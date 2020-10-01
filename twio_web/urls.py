@@ -29,6 +29,7 @@ urlpatterns = [
     path("login/", auth_views.LoginView.as_view(template_name="user_handling/login.html"), name="login"),
     path("logout/", user_views.LogoutView.as_view(template_name="user_handling/logout.html"), name="logout"),
     path("activate/<str:uidb64>/<str:token>/", user_views.activate, name="activate"),
+    path("activate/<str:uidb64>/<str:token>/resend", user_views.resend_activate, name="resend_activate"),
     path("reset_pw/", user_views.PasswordResetView.as_view(template_name="user_handling/password_reset.html"), name="password_reset"),
     path("reset_pw/confirm/<str:uidb64>/<str:token>/", user_views.PasswordResetConfirmView.as_view(template_name="user_handling/password_reset_confirm.html"), name="password_reset_confirm"),
 ]

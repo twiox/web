@@ -12,14 +12,16 @@
             {% endif %}
             <label class="mdc-text-field mdc-text-field--filled username">
                 <span class="mdc-text-field__ripple"></span>
-                <input type="text" class="mdc-text-field__input" aria-labelledby="username-label" name="username" required>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="username-label" name="username" required value=
+                {% if form.data.username %} {{form.data.username}} {% endif %}>
                 <span class="mdc-floating-label" id="username-label">Nutzername/Email</span>
                 <span class="mdc-line-ripple"></span>
             </label>
             </br>
             <label class="mdc-text-field mdc-text-field--filled password">
                 <span class="mdc-text-field__ripple"></span>
-                <input type="password" class="mdc-text-field__input" aria-labelledby="password-label" name="password" required>
+                <input type="password" class="mdc-text-field__input" aria-labelledby="password-label" name="password" required value=
+                {% if form.data.password %} {{form.data.password}} {% endif %}>
                 <span class="mdc-floating-label" id="password-label">Passwort</span>
                 <span class="mdc-line-ripple"></span>
             </label>

@@ -1,10 +1,19 @@
 {% extends "members/base.html" %}
 {% block content %}
-<section style="text-align:center;">
-    <h1>Link Ungültig</h1>
+<section style="text-align:center; padding_all_big">
+    <h1 class="padding_all_big">Link Ungültig</h1>
     <div class="flex_center">
-        <div class="tertiary_bg padding_all_big col-5" style="text-align:center;">
-            <p> Der Account wurde vermutlich bereits aktiviert </p>
+        <div class="flex_center_vertical">
+            <div>
+                <h5>Das kann mehrere Gründe haben</h5>
+                <br>
+                <ol>
+                    <li>1. Dein Account wurde bereits aktiviert</li>
+                    <li>2. Der Link ist abgelaufen</li>
+                    <li>3. Dein Account existiert nicht mehr</li>
+                </ol>
+            </div>
+            <a href="{% url 'resend_activate' uidb64=uidb64 token=token %}" class="more_info_button">Aktivierungslink erneut senden</a>
         </div>
     </div>
 </section>
