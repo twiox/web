@@ -526,7 +526,7 @@ class PasswordChangeView(LoginRequiredMixin, PasswordChangeView):
 class AddressChangeView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Profile
     template_name = 'members/update_address.html'
-    fields = ["address"]
+    fields = ["address", "telephone", "parent", "parent_telnr"]
     
     def get_success_url(self):
         return reverse('profile_detail', kwargs={'pk':self.object.user.pk})

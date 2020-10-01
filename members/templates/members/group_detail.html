@@ -16,16 +16,30 @@
         <h1> Teilnehmer Gruppe {{object.group.group_id}}</h1>
     </div>
     <div class="flex_center">
-        <div class="padding_all_big tertiary_bg chair_col-5">
+        <div class="padding_all_big tertiary_bg side_scroll">
             <table >
             <tr> 
+                <th><h5> status </h5></th>
+                <th><h5> Nummer </h5></th>
                 <th><h5> Vorname </h5></th>
                 <th><h5> Nachname </h5></th>
+                <th><h5> Emailadresse </h5></th>
+                <th><h5> Telefonnummer </h5></th>
+                <th><h5> Erziehungsberechtigter </h5></th>
+                <th><h5> Notfallnummer </h5></th>
+                <th><h5> Anmerkungen </h5></th>
             </tr>
             {% for member in member_list %}
-            <tr> 
+            <tr class="{{member.profile.status}}"> 
+                <td nowrap="nowrap"> {{member.profile.status}} </td>
+                <td>  {{ forloop.counter }}  </td>
                 <td> {{member.first_name}} </td>
                 <td> {{member.last_name}} </td>
+                <td> {{member.email}} </td>
+                <td> {% if member.profile.telephone %} {{member.profile.telephone}} {% else %} - {% endif %}</td>
+                <td> {% if member.profile.parent %} {{member.profile.parent}} {% else %} - {% endif %}</td>
+                <td> {% if member.profile.parent_telnr %} {{member.profile.parent_telnr}} {% else %} - {% endif %}</td>
+                <td nowrap="nowrap"> {% if member.profile.notes_trainer %} {{member.profile.notes_trainer}} {% else %} - {% endif %}</td>
             </tr>
             {% endfor %}
             </table>
