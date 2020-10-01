@@ -5,10 +5,10 @@
 <head>
     {% compress css %}
         <link type="text/x-scss" href="{% static 'style.scss' %}" rel="stylesheet" media="screen">
-        <link type="text/x-scss" rel="stylesheet" media="only screen and (min-width: 600px)" href="{{ STATIC_URL }}/static/tablet_style.scss">
-        <link type="text/x-scss" rel="stylesheet" media="only screen and (min-width: 1000px)" href="{{ STATIC_URL }}/static/desktop_style.scss">
+        <link type="text/x-scss" rel="stylesheet" media="only screen and (min-width: 600px)" href="{% static 'tablet_style.scss' %}">
+        <link type="text/x-scss" rel="stylesheet" media="only screen and (min-width: 1000px)" href="{% static 'desktop_style.scss' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'material.css' %}">
     {% endcompress %}
-        <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}/static/material.css">
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://kit.fontawesome.com/55165a9737.js" crossorigin="anonymous"></script>
