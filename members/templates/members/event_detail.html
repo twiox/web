@@ -14,48 +14,49 @@
 {% endblock %}
 {%block content %}
     <section>
-        <h1>{{object.title|upper}}</h1>
-        <div class="tertiary_bg padding_all_big">
-            <div id="container">
-                <div class="trainer_ui">
-                    {% if perms.members.change_event %}
-                    <a href="{% url 'event_update' object.id  %}#nav"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
-                    {% endif %}
-                    {% if perms.members.delete_event %}
-                    <a href="{% url 'event_delete' object.id  %}"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
-                    {% endif %}
-                </div>
+        <h1>{{object.title}}</h1>
+        <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
+            <div class="trainer_ui">
+                {% if perms.members.change_event %}
+                <a href="{% url 'event_update' object.id  %}#nav"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+                {% endif %}
+                {% if perms.members.delete_event %}
+                <a href="{% url 'event_delete' object.id  %}"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
+                {% endif %}
+            </div>
+            <div class="tertiary_bg chair_col-20 padding_all_big">
                 <h4>{{object.place}}</h4>
                 <div class="padding_tb_small">
-                    <p>{{object.start_date|date:'d.m'}} - {{object.end_date|date:'d.m.Y'}} </p>
+                    <p>{{object.start_date|date:'d.m'}} - {{object.end_date|date:'d.m.Y'}}</p>
                     <p>Kosten: {{object.costs}} € </p>
                 </div>
-                <div class="padding_all_big flex_center">
-                    <div class="markdown">
-                        <p align="justify">{{object.description_rendered|safe}}<p>
-                    </div>
+            </div>
+            <div class="chair_col-80 tertiary_bg padding_all_big">
+                <div class="markdown">
+                    {{object.description_rendered|safe}}
                 </div>
             </div>
-            <div>
-                <p style="text-align:center;width:100px;margin:0 auto;">
-                {% if not object.info_only %}
-                    <div class ="flex_center">
-                        <div class="padding_all_big col-5">
-                            <ul>
-                            {% if object.teilnahmebedingungen %}
-                            <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{object.teilnahmebedingungen.url}}"><p>Teilnahmebedingungen</p><i class="fas fa-file-download"></i></a></li>
-                            {% endif %}
-                            {% if object.datenschutz %}
-                            <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{object.datenschutz.url}}"><p>Datenschutzerklärung</p><i class="fas fa-file-download"></i></a></li>
-                            {% endif %}
-                            {% if object.einverstaendnis %}
-                            <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{object.einverstaendnis.url}}"><p>Einverständniserklärung</p><i class="fas fa-file-download"></i></a></li>
-                            {% endif %}
-                            </ul>
-                        </div>
-                    </div>
-                    {% if not object.deadline_reached %}
-                    <div class="padding_all_big flex_center">
+        </div>
+        <p style="text-align:center;width:100px;margin:0 auto;">
+        <br>
+        {% if not object.info_only %}
+            <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
+                <div class="padding_all_big chair_col-5">
+                    <ul>
+                    {% if object.teilnahmebedingungen %}
+                    <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{object.teilnahmebedingungen.url}}"><p>Teilnahmebedingungen</p><i class="fas fa-file-download"></i></a></li>
+                    {% endif %}
+                    {% if object.datenschutz %}
+                    <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{object.datenschutz.url}}"><p>Datenschutzerklärung</p><i class="fas fa-file-download"></i></a></li>
+                    {% endif %}
+                    {% if object.einverstaendnis %}
+                    <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{object.einverstaendnis.url}}"><p>Einverständniserklärung</p><i class="fas fa-file-download"></i></a></li>
+                    {% endif %}
+                    </ul>
+                </div>
+                {% if not object.deadline_reached %}
+                <div class="padding_all_big chair_col-20 flex_center">
+                    <div class="flex_center_vertical">
                         {% if request.user in object.participants.all %}
                             <div>
                                 <a class="form_button_sec" href="{% url 'event_unparticipate' object.id %}#nav">Abmelden</a>
@@ -68,16 +69,15 @@
                             </div>
                         {% endif %}
                     </div>
-                    {% else %}
-                        <p class="time_info">Anmeldung vorbei</p>
-                    {% endif %}
-                {% else %}
-                    <div class="flex_center padding_all_big">
-                        <h5> Anmeldung noch nicht geöffnet </h5>
-                    </div>
-                {% endif %}
-                </p>
+                </div>
+            {% else %}
+                <p class="time_info">Anmeldung vorbei</p>
+            {% endif %}
+        {% else %}
+            <div class="flex_center padding_all_big">
+                <h5> Anmeldung noch nicht geöffnet </h5>
             </div>
-        </div>
+        {% endif %}
+        </p>
     </section>
 {% endblock %}
