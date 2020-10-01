@@ -29,6 +29,7 @@
                     <thead>
                         <tr>
                             <th nowrap="nowrap"><h5> Bearbeiten </h5></th>
+                            <th nowrap="nowrap"><h5> Nr </h5></th>
                             <th nowrap="nowrap"><h5><i class="fas fa-user-check"></i></h5></th>
                             <th nowrap="nowrap"><h5> Status </h5></th>
                             <th nowrap="nowrap"><h5> Vorname </h5></th>
@@ -56,6 +57,7 @@
                     {% for member in object_list %}
                         <tr id={{member.profile.status}}> 
                             <td nowrap="nowrap"><a href="{% url 'update_user' member.id %}#nav">Edit</a></td>
+                            <td nowrap="nowrap"> {{forloop.counter}}</td>
                             {% if member.is_active %}
                                 <td><i class="fas fa-check"></i></td>
                             {% else %}
