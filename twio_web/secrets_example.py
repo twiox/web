@@ -1,3 +1,5 @@
+DEBUG = True
+
 #email login credentials
 TO_EMAIL = "web@your-domain.de" #Emails from the user-site are send there
 EMAIL_USE_TLS = True
