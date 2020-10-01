@@ -7,12 +7,29 @@ services:
     build:
       context: ./
       dockerfile: docker-config/python-server.dockerfile
-    ports:
-      - 8000:8000
     links:
       - db:db
     volumes:
       - file-volume:/opt/twio_web/media
+      - cache-volume:/opt/static
+    networks:
+      - outside
+    logging:
+      driver: syslog
+    restart: always
+
+  twio-nginx:
+    image: twio-nginx-server
+    build:
+      context: ./
+      dockerfile: docker-config/nginx-server.dockerfile
+    depends_on:
+      - twio-python
+    volumes:
+      - file-volume:/opt/media
+      - cache-volume:/opt/static
+    ports:
+      - 8000:80
     networks:
       - outside
     logging:
@@ -43,6 +60,9 @@ volumes:
   file-volume:
     external:
       name: twio-${ENV}-file
+  cache-volume:
+    external:
+      name: twio-${ENV}-cache
 
 networks:
   outside:

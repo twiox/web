@@ -15,5 +15,9 @@ RUN apt update && \
 # copy code
 COPY . /opt/twio_web
 
+RUN conda env create -f django.yml && \
+    source activate django && \
+    python manage.py compress --force
+
 COPY docker-config/start-server.sh /start.sh
 CMD "/start.sh"

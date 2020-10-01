@@ -59,6 +59,16 @@ fi
 git pull
 
 # check if volumes and network exist, otherwise create
+CACHE_VOLUME_IS_NEW=false
+if [ $( docker volume ls | grep twio-$ENV-cache | wc -l) == "0" ]; then
+ CACHE_VOLUMES_IS_NEW=true
+ echo ""
+ echo "Cache volume does not exist. Creating it now."
+ docker volume create --name=twio-$ENV-cache > /dev/null
+ echo "Created docker volume twio-$ENV-cache"
+ echo ""
+fi;
+
 FILE_VOLUME_IS_NEW=false
 if [ $( docker volume ls | grep twio-$ENV-file | wc -l) == "0" ]; then
  FILE_VOLUMES_IS_NEW=true
