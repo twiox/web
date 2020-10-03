@@ -46,7 +46,7 @@
             <label class="mdc-text-field mdc-text-field--filled title">
                 <span class="mdc-text-field__ripple"></span>
                 <input type="text" class="mdc-text-field__input" aria-labelledby="title-label" name="title" required value=
-                    {% if form.instance.title %} {{form.instance.title}} {% else %} {{form.data.title}} {% endif %}>
+                    {% if form.instance.title %} "{{form.instance.title}}" {% else %} "{{form.data.title}}" {% endif %}>
                 <span class="mdc-floating-label" id="title-label">Titel</span>
                 <span class="mdc-line-ripple"></span>
             </label>
@@ -54,7 +54,7 @@
             <label class="mdc-text-field mdc-text-field--filled lat">
                 <span class="mdc-text-field__ripple"></span>
                 <input type="text" class="mdc-text-field__input" aria-labelledby="lat-label" name="lat" required value=
-                    {% if form.instance.lat %} {{form.instance.lat}} {% else %} {{form.data.lat}} {% endif %}>
+                    {% if form.instance.lat %} "{{form.instance.lat}}" {% else %} "{{form.data.lat}}" {% endif %}>
                 <span class="mdc-floating-label" id="lat-label">Latitude</span>
                 <span class="mdc-line-ripple"></span>
             </label>
@@ -62,7 +62,7 @@
             <label class="mdc-text-field mdc-text-field--filled long">
                 <span class="mdc-text-field__ripple"></span>
                 <input type="text" class="mdc-text-field__input" aria-labelledby="long-label" name="long" required value=
-                    {% if form.instance.long %} {{form.instance.long}} {% else %} {{form.data.long}} {% endif %}>
+                    {% if form.instance.long %} "{{form.instance.long}}" {% else %} "{{form.data.long}}" {% endif %}>
                 <span class="mdc-floating-label" id="long-label">Longitude</span>
                 <span class="mdc-line-ripple"></span>
             </label>

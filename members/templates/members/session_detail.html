@@ -16,9 +16,13 @@
 {%block content %}
 <section>
     <h1>{{object.title|upper}}</h1>
-
-    <div class="padding_all_big tertiary_bg">
-        <div class="padding_tb_small" id="container">
+    <div style="display:flex; flex-wrap:wrap; justify-content:space-between;">
+        <div class="padding_all_big tertiary_bg chair_col-20">
+            <h3>{{object.spot.title}}</h3>
+            <h4> Gruppe {{object.group.group_id}} {{object.weekday}}</h4>
+            <p>{{object.start_time}} bis {{object.end_time}} Uhr</p>
+        </div>
+        <div class="padding_all_big tertiary_bg chair_col-80" id="container">
             <div class="trainer_ui">
                 {% if perms.members.change_session %}
                 <a href="{% url 'session_update' object.id  %}#nav"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
@@ -27,24 +31,29 @@
                 <a href="{% url 'session_delete' object.id  %}"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
                 {% endif %}
             </div>
-            <h3> Gruppe {{object.group.group_id}}</h3>
-            <p> {{object.weekday}}: {{object.start_time}} bis {{object.end_time}} Uhr</p>
-        </div>
-        <div class="padding_tb_big">
-            <h3>{{object.spot.title}}</h3>
-
-            <iframe class="chair_col-5 float_left" frameborder="0" style="border:0; height:400px;"
-                src="https://www.google.com/maps/embed/v1/place?key={{api_key}}
-                &q={{object.spot.lat}},{{object.spot.long}}&zoom=15" allowfullscreen>
-            </iframe>
-            <div class="chair_col-5 float_right markdown">
-                <p class="padding_rl_big">{{object.spot.description_rendered|safe}}</p>
-                <p class="flex_center padding_all_big">
-                    <a class="form_button" target="_blank" href="https://www.google.de/maps/dir//{{object.spot.lat}},{{object.spot.long}}/@{{object.spot.lat}},{{object.spot.long}},17z"><i class="fas fa-external-link-alt"> Route</i></a>
-                </p>
+            <div class="markdown">
+            {{object.spot.description_rendered|safe}}
             </div>
         </div>
     </div>
+    <br>
+    <div style="display:flex; flex-wrap:wrap; justify-content:space-between">
+        <div class="chair_col-80">
+            <iframe frameborder="0" style="border:0; height:400px; width:100%"
+                src="https://www.google.com/maps/embed/v1/place?key={{api_key}}
+                &q={{object.spot.lat}},{{object.spot.long}}&zoom=15" allowfullscreen>
+            </iframe>
+        </div>
+        <div class="chair_col-20">
+            <p class="padding_rl_big"></p>
+            <p class="flex_center padding_all_big">
+                <a class="form_button" target="_blank" href="https://www.google.de/maps/dir//{{object.spot.lat}},{{object.spot.long}}/@{{object.spot.lat}},{{object.spot.long}},17z"><i class="fas fa-external-link-alt"> Route</i></a>
+            </p>
+        </div>
+    </div>
+
+
+
     <h1 class="padding_tb_big">Deine TrainerInnen</h1>
     <div class="padding_all_big" style="clear:both;">
         <div class="flex_left">
