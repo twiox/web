@@ -113,7 +113,7 @@ class EventUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
 class EventDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Event
-    success_url = "/members/#events"
+    success_url = "/mitglieder/#events"
     #who can delete the event?
     permission_required = 'members.delete_event'
 
@@ -130,7 +130,7 @@ class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             event.participants.add(request.user)
             event.save()
             messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich angemeldet')
-            return HttpResponseRedirect(f"/members/events/{self.get_object().id}")
+            return HttpResponseRedirect(f"/mitglieder/veranstaltungen/{self.get_object().id}")
         return render(request, self.template_name, {'form': form, 'object':self.get_object()})
 
     def test_func(self):
@@ -151,7 +151,7 @@ class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
             event.participants.remove(self.request.user)
             event.save()
             messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich abgemeldet')
-            return HttpResponseRedirect(f"/members/events/{event.id}")
+            return HttpResponseRedirect(f"/mitglieder/veranstaltungen/{event.id}")
         return render(request, self.template_name, {'form': form})
 
     def test_func(self):
@@ -222,7 +222,7 @@ class SessionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
 
 class SessionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Session
-    success_url = "/members/#training"
+    success_url = "/mitglieder/#training"
     permission_required = 'members.delete_session'
 
     def post(self, request, *args, **kwargs):
@@ -272,7 +272,7 @@ class SpotUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
 class SpotDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Spot
-    success_url = "/members/"
+    success_url = "/mitglieder/"
     permission_required = 'members.delete_spot'
 
     def post(self, request, *args, **kwargs):
@@ -294,7 +294,7 @@ class GroupCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 class GroupDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Group
     permission_required = "members.delete_group"
-    success_url = '/members/group/'
+    success_url = '/mitglieder/gruppe/'
 
     def delete(self, request, *args, **kwargs):
         """
@@ -311,7 +311,7 @@ class GroupDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
         else:
             messages.add_message(request, messages.ERROR, 'Fehler. Die Gruppe ist nicht leer')
-            return HttpResponseRedirect(f"/members/group/{self.object.id}/delete/")
+            return HttpResponseRedirect(f"/mitglieder/gruppe/{self.object.id}/löschen/")
 
 class GroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Group
@@ -388,7 +388,7 @@ class MessageSessCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
 
 class MessageDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Message
-    success_url = "/members/"
+    success_url = "/mitglieder/"
     permission_required = 'members.delete_message'
 
 class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
@@ -440,7 +440,7 @@ class UserDetailView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
                 email.attach_file('media/documents/'+str(document))
             email.send()
             messages.add_message(request, messages.SUCCESS, 'Nachricht erfolgreich versendet')
-            return HttpResponseRedirect(f"/members/profile/{request.user.profile.id}/detail/")
+            return HttpResponseRedirect(f"/mitglieder/profil/{request.user.id}/detail/")
         return render(request, self.template_name, {'form': form})
 
 
@@ -488,8 +488,7 @@ class PasswordChangeView(LoginRequiredMixin, PasswordChangeView):
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
-
-
+            
     def get_context_data(self, **kwargs):
         context = {}
         context['object'] = self.request.user

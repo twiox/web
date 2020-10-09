@@ -41,7 +41,8 @@
                     {% endif %}
                     <label class="mdc-text-field mdc-text-field--filled email">
                         <span class="mdc-text-field__ripple"></span>
-                        <input type="text" class="mdc-text-field__input" aria-labelledby="email-label" name="email1" required>
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="email-label" name="email1" required value=
+                        {% if form.instance.email1 %} "{{form.instance.email1}}" {% else %} "{{form.data.email1}}" {% endif %}>
                         <span class="mdc-floating-label" id="email-label">Neue Emailadresse</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
@@ -52,7 +53,8 @@
                     {% endif %}
                     <label class="mdc-text-field mdc-text-field--filled email">
                         <span class="mdc-text-field__ripple"></span>
-                        <input type="text" class="mdc-text-field__input" aria-labelledby="email-label" name="email2" required>
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="email-label" name="email2" required value=
+                        {% if form.instance.email2 %} "{{form.instance.email2}}" {% else %} "{{form.data.email2}}" {% endif %}>
                         <span class="mdc-floating-label" id="email-label">Bestätigen</span>
                         <span class="mdc-line-ripple"></span>
                     </label>

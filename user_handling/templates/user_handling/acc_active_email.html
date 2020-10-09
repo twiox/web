@@ -8,6 +8,9 @@ Dein Nutzername für den Account lautet: {{ user.username }},
 Um deinen Account zu aktivieren und zu nutzen, klicke bitte auf den Link: 
 http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
 
+Achtung, der Link ist nur 2 Wochen gültig, bitte aktiviere 
+vorher deinen Account
+
 Liebe Grüße
 Dein Twio X e.V.
 {% endautoescape %}

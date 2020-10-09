@@ -169,7 +169,7 @@ $padding_small: 10px;
     color:white;
     display:block;
     border-radius:5px;
-    width: 100px;
+    width: 100%;
     background-color:$primary;
     padding: $padding_small;
     &:hover{
@@ -276,8 +276,8 @@ $padding_small: 10px;
 body {
     background-color: $primary_bg;
     .frame {
-        margin-right:10%;
-        margin-left:10%;
+        margin-right:7%;
+        margin-left:7%;
         padding-bottom:5%;
         padding-top:2%;
         min-height: 400px;
