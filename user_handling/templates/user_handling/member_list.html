@@ -28,9 +28,10 @@
                 <table>
                     <thead>
                         <tr>
-                            <th nowrap="nowrap"><h5> Bearbeiten </h5></th>
                             <th nowrap="nowrap"><h5> Nr </h5></th>
                             <th nowrap="nowrap"><h5><i class="fas fa-user-check"></i></h5></th>
+                            <th nowrap="nowrap"><h5>-</h5></th>
+                            <th nowrap="nowrap"><h5>-</h5></th>
                             <th nowrap="nowrap"><h5> Status </h5></th>
                             <th nowrap="nowrap"><h5> Vorname </h5></th>
                             <th nowrap="nowrap"><h5> Nachname </h5></th>
@@ -50,19 +51,28 @@
                             <th nowrap="nowrap"><h5> Beitrag </h5></th>
                             <th nowrap="nowrap"><h5> Notizen Trainer </h5></th>
                             <th nowrap="nowrap"><h5> Notizen Vorstand </h5></th>
-                            <th nowrap="nowrap"><h5> Löschen </h5></th>
+                            
                         </tr>
                     </thead>
                     <tbody id="table_body">
                     {% for member in object_list %}
-                        <tr id={{member.profile.status}}> 
-                            <td nowrap="nowrap"><a href="{% url 'update_user' member.id %}#nav">Edit</a></td>
+                        <tr id={{member.profile.status}} class="{% cycle 'odd' 'even' %}"> 
                             <td nowrap="nowrap"> {{forloop.counter}}</td>
                             {% if member.is_active %}
                                 <td><i class="fas fa-check"></i></td>
                             {% else %}
                                 <td>X</td>
                             {% endif %}
+                            <td nowrap="nowrap">
+                                <a href="{% url 'update_user' member.id %}#nav">
+                                    <i class="fas fa-pen-square" style="font-size:17px;"></i>
+                                </a>
+                            </td>
+                            <td nowrap="nowrap">
+                                <a href="{% url 'remove_user' member.id %}#nav">
+                                    <i class="far fa-minus-square" style="font-size:17px;"></i>
+                                </a>
+                            </td>
                             <td nowrap="nowrap"> {%if member.profile.status %} {{member.profile.status}} {% endif %}</td>
                             <td nowrap="nowrap"> {%if member.first_name %} {{member.first_name}} {% endif %}</td>
                             <td nowrap="nowrap"> {%if member.last_name %} {{member.last_name}} {% endif %}</td>
@@ -79,14 +89,10 @@
                             <td nowrap="nowrap"> {%if member.profile.membership_end %} {{member.profile.membership_end}} {% endif %}</td>
                             <td nowrap="nowrap"> {%if member.profile.mandatsref %} {{member.profile.mandatsref}} {% endif %}</td>
                             <td nowrap="nowrap"> {%if member.profile.zahlungsart %} {{member.profile.zahlungsart}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.profile.beitrag %} {{member.profile.beitrag}} {% endif %}</td>
+                            <td nowrap="nowrap"> {%if member.profile.beitrag %} {{member.profile.beitrag}},00 €{% endif %}</td>
                             <td nowrap="nowrap"> {%if member.profile.notes_trainer %} {{member.profile.notes_trainer}} {% endif %}</td>
                             <td nowrap="nowrap"> {%if member.profile.notes_chairman %} {{member.profile.notes_chairman}} {% endif %}</td>
-                            <td>  
-                                <a href="{% url 'remove_user' member.id %}#nav">
-                                    <i class="far fa-minus-square" style="font-size:17px;"></i>
-                                </a>
-                            </td>
+                            
                         </tr>
                     {% endfor %}
                     </tbody>

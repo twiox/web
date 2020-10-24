@@ -407,10 +407,18 @@ strong{
     padding-left: 10%;
     a {
         margin: auto 0px;
-        font-weight:300;
+        }
+    i{
+        padding-top:3px;
     }
     i:hover{
         color: $header_col;
+    }
+    p{
+        font-weight: 500;
+        &:hover{
+            color: $header_col;
+        }
     }
 }
 .dropdown{
@@ -509,7 +517,9 @@ strong{
     background-color: #7b1b42; 
     padding:3px;
 }
-
+.odd{ 
+    background-color:#262626;
+}
 /* Google Maps enbedded */
 #map {
         height: 400px;  /* The height is 400 pixels */

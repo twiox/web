@@ -319,7 +319,7 @@ class GroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
 class GroupDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     model = Session
-    permission_required = "members.see_group"
+    permission_required = "members.view_group"
     template_name = "members/group_detail.html"
 
     def get_context_data(self, **kwargs):
@@ -334,7 +334,7 @@ class GroupDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
 
 class RealGroupDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     model = Group
-    permission_required = "members.see_group"
+    permission_required = "members.view_group"
     template_name = "members/real_group_detail.html"
 
     def get_context_data(self, **kwargs):

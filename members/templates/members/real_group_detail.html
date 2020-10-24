@@ -13,19 +13,33 @@
 {% block content %}
 <section>
     <div style="text-align:center">
-        <h1> Trainingsgruppe {{object.group_id}}</h1>
+        <h1> Teilnehmer Gruppe {{object.group.group_id}}</h1>
     </div>
     <div class="flex_center">
-        <div class="padding_all_big tertiary_bg chair_col-5">
+        <div class="padding_all_big tertiary_bg side_scroll">
             <table >
             <tr> 
+                <th><h5> Nr </h5></th>
+                <th><h5> status </h5></th>
                 <th><h5> Vorname </h5></th>
                 <th><h5> Nachname </h5></th>
+                <th><h5> Emailadresse </h5></th>
+                <th><h5> Telefonnummer </h5></th>
+                <th><h5> Erziehungsberechtigter </h5></th>
+                <th><h5> Notfallnummer </h5></th>
+                <th><h5> Anmerkungen </h5></th>
             </tr>
             {% for member in member_list %}
-            <tr> 
-                <td> {{member.first_name}} </td>
-                <td> {{member.last_name}} </td>
+            <tr id="{{member.profile.status}}" class="{% cycle 'odd' 'even' %}"> 
+                <td nowrap="nowrap">  {{ forloop.counter }}  </td>
+                <td nowrap="nowrap"> {{member.profile.status}} </td>
+                <td nowrap="nowrap"> {{member.first_name}} </td>
+                <td nowrap="nowrap"> {{member.last_name}} </td>
+                <td nowrap="nowrap"> {{member.email}} </td>
+                <td nowrap="nowrap"> {% if member.profile.telephone %} {{member.profile.telephone}} {% else %} - {% endif %}</td>
+                <td nowrap="nowrap"> {% if member.profile.parent %} {{member.profile.parent}} {% else %} - {% endif %}</td>
+                <td nowrap="nowrap"> {% if member.profile.parent_telnr %} {{member.profile.parent_telnr}} {% else %} - {% endif %}</td>
+                <td nowrap="nowrap"> {% if member.profile.notes_trainer %} {{member.profile.notes_trainer}} {% else %} - {% endif %}</td>
             </tr>
             {% endfor %}
             </table>

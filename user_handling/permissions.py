@@ -8,6 +8,6 @@ def trainer_permissions():
      
 def chairman_permissions():
     all_perms = trainer_permissions()
-    for model in ["user","chairman","trainer","teamer"]:
+    for model in ["user","chairman","trainer","teamer","group"]:
         all_perms.extend(Permission.objects.filter(codename__contains=model))
     return all_perms

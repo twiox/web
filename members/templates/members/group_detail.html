@@ -30,7 +30,7 @@
                 <th><h5> Anmerkungen </h5></th>
             </tr>
             {% for member in member_list %}
-            <tr class="{{member.profile.status}}"> 
+            <tr id="{{member.profile.status}}" class="{% cycle 'odd' 'even' %}"> 
                 <td nowrap="nowrap">  {{ forloop.counter }}  </td>
                 <td nowrap="nowrap"> {{member.profile.status}} </td>
                 <td nowrap="nowrap"> {{member.first_name}} </td>
