@@ -13,7 +13,7 @@
         <h1>Alle Vorstände</h1>
             <div class="trainer_ui">
                 {% if perms.members.add_chairman %}
-                    <a class="blue_font" href="{% url 'chairman_create' %}#nav"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
+                    <a class="blue_font" href="{% url 'chairman_create' %}#nav" title="Vorstand hinzufügen"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
                 {% endif %}
             </div>
         </div>
@@ -23,12 +23,12 @@
                 <div class="tertiary_bg padding_all_small person_wrapper">
                     <div class="padding_all_med trainer_ui">
                         {% if perms.members.delete_chairman %}
-                        <a href="{% url 'chairman_delete' object.id%}">
+                        <a href="{% url 'chairman_delete' object.id%}" title="Löschen">
                             <i class="far fa-minus-square" style="font-size:15px;"></i>
                         </a>
                         {% endif %}
                         {% if perms.members.change_chairman %}
-                        <a href="{% url 'chairman_update' object.id%}#nav">
+                        <a href="{% url 'chairman_update' object.id%}#nav" title="Bearbeiten">
                             <i class="fas fa-pen-square" style="font-size:15px;"></i>
                         </a>
                         {% endif %}

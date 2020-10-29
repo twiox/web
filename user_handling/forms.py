@@ -13,7 +13,7 @@ class MemberListProfileUpdateForm(forms.ModelForm):
     group = forms.ModelChoiceField(label="Gruppe",queryset=Group.objects.all())
     class Meta:
         model = Profile
-        fields = ["birthday","address","telephone","sex","status","member_num","group","membership_start","mandatsref","zahlungsart",
+        fields = ["birthday","address","telephone","sex","status","member_num","group","membership_start","membership_end","mandatsref","zahlungsart",
         "beitrag","notes_trainer","notes_chairman","parent", "parent_telnr"]
 
 class MemberCreationForm(UserCreationForm):

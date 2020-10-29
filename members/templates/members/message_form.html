@@ -41,7 +41,7 @@
             <label class="mdc-text-field mdc-text-field--filled title">
                 <span class="mdc-text-field__ripple"></span>
                 <input type="text" class="mdc-text-field__input" aria-labelledby="title-label" name="title" required value=
-                    {% if form.instance.title %} {{form.instance.title}} {% else %} {{form.data.title}} {% endif %}>
+                    {% if form.instance.title %} "{{form.instance.title}}" {% else %} "{{form.data.title}}" {% endif %}>
                 <span class="mdc-floating-label" id="title-label">Titel</span>
                 <span class="mdc-line-ripple"></span>
             </label>
@@ -86,7 +86,5 @@
         const fields = document.querySelectorAll('.mdc-text-field');
         fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
     </script>
-    
-    
 </section>
 {% endblock %}

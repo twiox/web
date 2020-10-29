@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import (CreateView, UpdateView, DeleteView)
@@ -47,7 +48,7 @@ def interested_index(request):
             )
             EmailMessage(f"Twio X e.V. - Deine Anfrage auf Probetraining", message2, to=[int_email]).send()
             messages.add_message(request, messages.SUCCESS, 'Anmeldung verschickt')
-            return HttpResponseRedirect("")
+            return HttpResponseRedirect(reverse("interested_index"))
         else:
             return render(request, "interested/interested_index.html", {"form": form, "chairmen": chairmen})
     form = ProbetrainingForm()
@@ -87,7 +88,7 @@ def interested_offers(request):
                 }
             )
             EmailMessage(f"Twio X e.V. - Deine Workshopanfrage", message2, to=[int_email]).send()
-            return HttpResponseRedirect("")
+            return HttpResponseRedirect(reverse("offers"))
 
         else:
             return render(request, "interested/interested_offers.html", {"form": form})
@@ -144,9 +145,11 @@ class TeamerUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
 class TeamerDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Teamer
-    success_url = "/interested/team"
     permission_required = 'interested.delete_teamer'
 
     def post(self, request, *args, **kwargs):
         messages.add_message(request, messages.SUCCESS, 'Teammitglied gelöscht')
         return self.delete(request, *args, **kwargs)
+        
+    def get_success_url(self):
+        return reverse("team")+"#nav" 

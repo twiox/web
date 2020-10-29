@@ -113,10 +113,12 @@ class EventUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
 class EventDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Event
-    success_url = "/mitglieder/#events"
+    #success_url = "/mitglieder/#events"
     #who can delete the event?
     permission_required = 'members.delete_event'
-
+    
+    def get_success_url(self, **kwargs):
+        return reverse("index")+"#events"
 
 class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = 'members/event_participate.html'
@@ -130,7 +132,7 @@ class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             event.participants.add(request.user)
             event.save()
             messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich angemeldet')
-            return HttpResponseRedirect(f"/mitglieder/veranstaltungen/{self.get_object().id}")
+            return HttpResponseRedirect(reverse("event_detail", kwargs={"pk":event.id}))
         return render(request, self.template_name, {'form': form, 'object':self.get_object()})
 
     def test_func(self):
@@ -151,7 +153,7 @@ class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
             event.participants.remove(self.request.user)
             event.save()
             messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich abgemeldet')
-            return HttpResponseRedirect(f"/mitglieder/veranstaltungen/{event.id}")
+            return HttpResponseRedirect(reverse("event_detail", kwargs={"pk":event.id}))
         return render(request, self.template_name, {'form': form})
 
     def test_func(self):
@@ -222,12 +224,14 @@ class SessionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
 
 class SessionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Session
-    success_url = "/mitglieder/#training"
     permission_required = 'members.delete_session'
 
     def post(self, request, *args, **kwargs):
         messages.add_message(request, messages.SUCCESS, 'Einheit gelöscht')
         return self.delete(request, *args, **kwargs)
+    
+    def get_success_url(self, **kwargs):
+        return reverse("index")+"#training"
 
 """FOR THE SPOTS"""
 class SpotListView(LoginRequiredMixin, ListView):
@@ -272,12 +276,14 @@ class SpotUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
 class SpotDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Spot
-    success_url = "/mitglieder/"
     permission_required = 'members.delete_spot'
 
     def post(self, request, *args, **kwargs):
         messages.add_message(request, messages.SUCCESS, 'Spot gelöscht')
         return self.delete(request, *args, **kwargs)
+    
+    def get_success_url(self, **kwargs):
+        return reverse("spot_list")
 
 """For the Groups"""
 class GroupCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
@@ -294,7 +300,6 @@ class GroupCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 class GroupDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Group
     permission_required = "members.delete_group"
-    success_url = '/mitglieder/gruppe/'
 
     def delete(self, request, *args, **kwargs):
         """
@@ -311,7 +316,10 @@ class GroupDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
         else:
             messages.add_message(request, messages.ERROR, 'Fehler. Die Gruppe ist nicht leer')
-            return HttpResponseRedirect(f"/mitglieder/gruppe/{self.object.id}/löschen/")
+            return HttpResponseRedirect(reverse("group_delete",kwargs={"pk":self.object.id}))
+    
+    def get_success_url(self, **kwargs):
+        return reverse("group_list")
 
 class GroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Group
@@ -388,8 +396,10 @@ class MessageSessCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
 
 class MessageDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Message
-    success_url = "/mitglieder/"
     permission_required = 'members.delete_message'
+    
+    def get_success_url(self, **kwargs):
+        return reverse("index")
 
 class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_form.html
@@ -419,11 +429,11 @@ class UserDetailView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
 
     def handle_uploaded_file(self,f, name):
         try:
-            os.mkdir("media/documents")
+            os.mkdir("media/user_uploads")
         except:
             pass
 
-        with open(f'media/documents/{name}', 'wb+') as destination:
+        with open(f'media/user_uploads/{name}', 'wb+') as destination:
             for chunk in f.chunks():
                 destination.write(chunk)
 
@@ -433,14 +443,14 @@ class UserDetailView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
             mail_subject=f"Mitteilung von {request.user.first_name} {request.user.last_name}"
             message = form.cleaned_data.get("comment")
             to_email = settings.TO_EMAIL
-            email=EmailMessage(mail_subject, message, to=[to_email])
+            email=EmailMessage(mail_subject, message, to=[to_email], cc=[request.user.email])
             if(request.FILES.get('attachment')):
                 document = request.FILES.get('attachment')
                 self.handle_uploaded_file(document, str(document))
                 email.attach_file('media/documents/'+str(document))
             email.send()
             messages.add_message(request, messages.SUCCESS, 'Nachricht erfolgreich versendet')
-            return HttpResponseRedirect(f"/mitglieder/profil/{request.user.id}/detail/")
+            return HttpResponseRedirect(reverse("profile_detail", kwargs={"pk": request.user.id}))
         return render(request, self.template_name, {'form': form})
 
 
@@ -465,7 +475,7 @@ class EmailUpdateView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
                     request.user.email = form.cleaned_data.get("email1")
                     request.user.save()
                     messages.add_message(request, messages.SUCCESS, 'Email erfolgreich geändert')
-                    return HttpResponseRedirect("../detail")
+                    return HttpResponseRedirect(reverse("profile_detail", kwargs={"pk": request.user.id}))
                 form.add_error('email1', 'Die Emails stimmen nicht überein')
                 return render(request, self.template_name, {'form': form, "object":request.user})
             form.add_error('password', 'Das Passwort stimmt nicht')
@@ -497,7 +507,7 @@ class PasswordChangeView(LoginRequiredMixin, PasswordChangeView):
 
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS, 'Passwort erfolgreich geändert')
-        return HttpResponseRedirect("../detail")
+        return HttpResponseRedirect(reverse("profile_detail", kwargs={"pk": request.user.id}))
 
 class AddressChangeView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Profile

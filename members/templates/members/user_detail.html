@@ -68,6 +68,11 @@
                                 $(document).on('change','#inputFile' , function(e){
                                 var fileName = e.target.files[0].name
                                 $("#fileText").html(fileName).show();
+                                var fileSize = e.target.files[0].size
+                                if(fileSize > 5000000){
+                                    $("#fileText").html("Die Datei ist zu groß (> 5mb)").show();
+                                    $("#inputFile").value = ""
+                                    }
                                     });
                             </script>
                             <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">

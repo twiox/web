@@ -42,10 +42,10 @@
             {% for person in leipzig_people.all %}
                 <div class="col-3 padding_all_small" id="container">
                     <div class="trainer_ui">
-                        {% if perms.members.delete_teamer %}
+                        {% if perms.interested.delete_teamer %}
                         <a href="{% url 'teamer_delete' person.id %}"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                         {% endif %}
-                        {% if perms.members.change_teamer %}
+                        {% if perms.interested.change_teamer %}
                         <a href="{% url 'teamer_update' person.id %}"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
                         {% endif %}
                     </div>

@@ -114,9 +114,11 @@ class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 class UserDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = User
     template_name = "user_handling/user_confirm_delete.html"
-    success_url = "/nutzer/"
     #who can delete the user?
     permission_required = 'auth.delete_user'
+    
+    def get_success_url(self, **kwargs):
+        return reverse("member_list")
 
 @login_required
 @permission_required('auth.add_user', raise_exception=True)
@@ -235,7 +237,6 @@ class ChairmanCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView
         
 class ChairmanDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Chairman
-    success_url = "/mitglieder/"
     template_name = "user_handling/chairman_confirm_delete.html"
     permission_required = 'members.delete_chairman'
     
@@ -248,6 +249,9 @@ class ChairmanDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView
         chairman_group.save()
         self.object.delete()
         return HttpResponseRedirect(success_url)
+    
+    def get_success_url(self, **kwargs):
+        return reverse("chairman_list")
 
 class ChairmanUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_form.html
@@ -277,4 +281,4 @@ class PasswordResetConfirmView(PasswordResetConfirmView):
     def get_success_url(self):
         """Return the URL to redirect to after processing a valid form."""
         messages.add_message(self.request, messages.SUCCESS, 'Passwort erstellt. Du kannst dich nun einloggen')
-        return "/mitglieder/"
+        return reverse("index")

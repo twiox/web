@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse #to get absolut_urls
-from datetime import datetime
+from datetime import datetime, timedelta
 from multiselectfield import MultiSelectField
 from PIL import Image
 
@@ -62,7 +62,7 @@ class Event(models.Model):
     
     @property
     def is_past_due(self):
-        return datetime.now().replace(tzinfo=None) > self.start_date.replace(tzinfo=None)
+        return datetime.now().replace(tzinfo=None) > self.end_date.replace(tzinfo=None) + timedelta(days=3)
     @property
     def deadline_reached(self):
         return datetime.now().replace(tzinfo=None) > self.deadline.replace(tzinfo=None)
@@ -78,7 +78,7 @@ class Trainer(models.Model):
     image = models.ImageField("Profilbild", upload_to="profile_pics/")
     
     def __str__(self):
-        return f"{self.user.first_name}"
+        return f"Trainer: {self.user.first_name} {self.user.last_name}"
     
     def get_absolute_url(self):
         return reverse('trainer_list')
@@ -89,11 +89,13 @@ class Trainer(models.Model):
         if(img.height > img.width):
             cut = int((img.height-img.width)/2)
             img = img.crop((0, 0+cut, img.width, img.height-cut))
-            img.save(self.image.path)
+            img2 = img.resize((720,720))
+            img2.save(self.image.path)
         elif(img.width > img.height):
             cut = int((img.width-img.height)/2)
             img = img.crop((0+cut, 0, img.width-cut, img.height))
-            img.save(self.image.path)
+            img2 = img.resize((720,720))
+            img2.save(self.image.path)
 
 class Session(models.Model):
 
@@ -140,7 +142,7 @@ class Session(models.Model):
         return reverse('session_detail', kwargs={"pk": self.pk})
 
     def __str__(self):
-        return f"{self.title}_{self.group.group_id_self.day}"
+        return f"Session: {self.title}_{self.group.group_id_self.day}"
         
     class Meta:
         ordering = ["day_key"]
@@ -158,7 +160,7 @@ class Message(models.Model):
     groups = models.ManyToManyField(Group,verbose_name="Für die Gruppen")
     
     def __str__(self):
-        return f"Message {self.title}"
+        return f"Message: {self.title}"
     
     def get_absolute_url(self):
         return reverse('index')
@@ -176,7 +178,7 @@ class Chairman(models.Model):
     show = MultiSelectField(choices=choices, blank=True)
     
     def __str__(self):
-        return f"Vorstand: {self.user.username}"
+        return f"Vorstand: {self.user.first_name} {self.user.last_name}"
     @property
     def complist(self):
         return self.competences.split(",")
@@ -190,11 +192,13 @@ class Chairman(models.Model):
         if(img.height > img.width):
             cut = int((img.height-img.width)/2)
             img = img.crop((0, 0+cut, img.width, img.height-cut))
-            img.save(self.image.path)
+            img2 = img.resize((720,720))
+            img2.save(self.image.path)
         elif(img.width > img.height):
             cut = int((img.width-img.height)/2)
             img = img.crop((0+cut, 0, img.width-cut, img.height))
-            img.save(self.image.path)
+            img2 = img.resize((720,720))
+            img2.save(self.image.path)
 
 class Profile(models.Model):
     choices = (('Ordentliches Mitglied', 'Ordentliches Mitglied'),

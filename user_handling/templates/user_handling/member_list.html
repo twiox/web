@@ -14,7 +14,7 @@
         <h1>Alle Mitglieder</h1>
         <div class="trainer_ui">
             {% if perms.auth.add_user %}
-                <a href="{% url 'register' %}#nav"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
+                <a href="{% url 'register' %}#nav" title="Benutzer hinzufügen"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
             {% endif %}
         </div>
         <div class="padding_tb_big">
@@ -64,12 +64,12 @@
                                 <td>X</td>
                             {% endif %}
                             <td nowrap="nowrap">
-                                <a href="{% url 'update_user' member.id %}#nav">
+                                <a href="{% url 'update_user' member.id %}#nav" title="Bearbeiten">
                                     <i class="fas fa-pen-square" style="font-size:17px;"></i>
                                 </a>
                             </td>
                             <td nowrap="nowrap">
-                                <a href="{% url 'remove_user' member.id %}#nav">
+                                <a href="{% url 'remove_user' member.id %}#nav" title="Löschen">
                                     <i class="far fa-minus-square" style="font-size:17px;"></i>
                                 </a>
                             </td>
@@ -86,7 +86,7 @@
                             <td nowrap="nowrap"> {%if member.profile.telephone %} {{member.profile.telephone}} {% endif %}</td>
                             <td nowrap="nowrap"> {%if member.profile.parent_telnr %} {{member.profile.parent_telnr}} {% endif %}</td>
                             <td nowrap="nowrap"> {%if member.profile.membership_start %} {{member.profile.membership_start|date:"m/Y"}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.profile.membership_end %} {{member.profile.membership_end}} {% endif %}</td>
+                            <td nowrap="nowrap"> {%if member.profile.membership_end %} Kündigung: {{member.profile.membership_end|date:"d.m.Y"}} {% endif %}</td>
                             <td nowrap="nowrap"> {%if member.profile.mandatsref %} {{member.profile.mandatsref}} {% endif %}</td>
                             <td nowrap="nowrap"> {%if member.profile.zahlungsart %} {{member.profile.zahlungsart}} {% endif %}</td>
                             <td nowrap="nowrap"> {%if member.profile.beitrag %} {{member.profile.beitrag}},00 €{% endif %}</td>

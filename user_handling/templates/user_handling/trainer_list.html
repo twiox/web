@@ -14,29 +14,33 @@
     <h1>Alle Trainer</h1>
         <div class="trainer_ui">
             {% if perms.members.add_trainer %}
-                <a href="{% url 'register_trainer' %}#nav"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
+                <a href="{% url 'register_trainer' %}#nav" title="Trainer hinzufügen"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
             {% endif %}
             {% if perms.members.remove_trainer %}
-                <a href="{% url 'remove_trainer' %}#nav"><i class="far fa-minus-square" style="font-size:27px;"></i></a>
+                <a href="{% url 'remove_trainer' %}#nav" title="Trainer entfernen"><i class="far fa-minus-square" style="font-size:27px;"></i></a>
             {% endif %}
         </div>
     </div>
-    <div>
+    <div style="display:flex; flex-wrap:wrap;">
         {% for object in object_list %}
-        <div class="col-5 float_left padding_all_small" id="container">
-            <div class="tertiary_bg padding_all_small person_wrapper">
+        <div class="col-5 padding_all_small" id="container">
+            <div class="padding_all_small tertiary_bg person_wrapper">
                 <div class="padding_all_med trainer_ui">
                     {% if perms.members.change_trainer %}
-                    <a href="{% url 'trainer_update_form' object.id%}#nav">
+                    <a href="{% url 'trainer_update_form' object.id%}#nav" title="bearbeiten">
                         <i class="fas fa-pen-square" style="font-size:15px;"></i>
                     </a>
                     {% endif %}
                 </div>
                 <div class="chair_col-4 flex_center">
-                    <img class="round_profile_pic_chairman padding_all_small" src="{{object.image.url}}">
+                    <div class="flex_center_vertical">
+                        <div>
+                            <img class="round_profile_pic_chairman padding_all_small" src="{{object.image.url}}">
+                        </div>
+                    </div>
                 </div>
-                <div class="chair_col-5 float_left padding_all_small person_info">
-                    <h3 class="padding_tb_small"> {{object.user.first_name}} {{object.user.last_name}}</h3>
+                <div class="chair_col-5 padding_all_small person_info">
+                    <h3 class="padding_tb_small">{{object.user.first_name}} {{object.user.last_name}}</h3>
                     <div>
                         <p> {{object.trainer_telnr}} </p>
                         <p> {{object.trainer_email}} </p>

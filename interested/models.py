@@ -28,11 +28,13 @@ class Teamer(models.Model):
         if(img.height > img.width):
             cut = int((img.height-img.width)/2)
             img = img.crop((0, 0+cut, img.width, img.height-cut))
-            img.save(self.picture.path)
+            img2 = img.resize((720,720))
+            img2.save(self.picture.path)
         elif(img.width > img.height):
             cut = int((img.width-img.height)/2)
             img = img.crop((0+cut, 0, img.width-cut, img.height))
-            img.save(self.picture.path)
+            img2 = img.resize((720,720))
+            img2.save(self.picture.path)
         
     class Meta:
         ordering = ["priority"]

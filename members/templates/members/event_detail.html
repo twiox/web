@@ -18,10 +18,10 @@
         <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
             <div class="trainer_ui">
                 {% if perms.members.change_event %}
-                <a href="{% url 'event_update' object.id  %}#nav"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+                <a href="{% url 'event_update' object.id  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
                 {% endif %}
                 {% if perms.members.delete_event %}
-                <a href="{% url 'event_delete' object.id  %}"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
+                <a href="{% url 'event_delete' object.id  %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
                 {% endif %}
             </div>
             <div class="tertiary_bg chair_col-20 padding_all_big">
