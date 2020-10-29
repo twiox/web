@@ -447,7 +447,7 @@ class UserDetailView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
             if(request.FILES.get('attachment')):
                 document = request.FILES.get('attachment')
                 self.handle_uploaded_file(document, str(document))
-                email.attach_file('media/documents/'+str(document))
+                email.attach_file('media/user_uploads/'+str(document))
             email.send()
             messages.add_message(request, messages.SUCCESS, 'Nachricht erfolgreich versendet')
             return HttpResponseRedirect(reverse("profile_detail", kwargs={"pk": request.user.id}))
