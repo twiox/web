@@ -1,0 +1,40 @@
+{% extends "members/base.html" %}
+{% block navbar2 %} 
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#training">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Alle Beiträge </a>
+</div>
+{% endblock %}
+{%block content %}
+<section id="training">
+        <div id="container">
+        <h1>Alle Beiträge</h1>
+            <div class="trainer_ui">
+                {% if perms.members.add_news %}
+                    <a class="blue_font" href="{% url 'news_create' %}#nav"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
+                {% endif %}
+            </div>
+        </div>
+        <div style="display:flex; flex-wrap:wrap;">
+            {% for news in object_list %}
+            <div class="padding_all_small float_left col-4" id="container">
+                <div style="display:flex;" class="tertiary_bg">
+                    <div class="padding_all_big polygon primary">
+                            <p class="strong"><p>
+                    </div>
+                    <div class="second_section padding_all_big">
+                        <h3> {{news.title}}</h3>
+                    </div>
+                </div>
+                <div class="third_session tertiary_bg padding_all_med">
+                    <a class="more_info_button" href="{% url 'news_detail' news.id %}#nav">weitere Informationen</a>
+                </div>
+            </div>
+            {% empty %}
+                <h3> Es sind noch keine Beiträge vorhanden</h3>
+            {% endfor %}
+        </div>
+    </section>
+{% endblock %}

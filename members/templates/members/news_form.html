@@ -1,0 +1,83 @@
+{% extends "members/base.html" %}
+{% block navbar2 %}
+{% if object.title %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#training">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'news_list' %}#nav">
+        Alle Beiträge </a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'news_detail' object.id%}#nav">
+        {{object.title}}</a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Bearbeiten </a>
+</div>
+{% else %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#training">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'spot_list' %}#nav">
+        Alle Beiträge </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Neu </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{%block content %}
+<section>
+    <div style="text-align:center;">
+    {% if object.title %}
+    <h1>{{object.title}}</h1>
+    {% else %}
+    <h1>Neuer Beitrag</h1>
+    {% endif %}
+    </div>
+    <form class="form_wrapper" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class ="inner_form padding_all_big flex_center">
+            {% if form.errors %}
+                {% for error in form.non_field_errors %}
+                <p class="padding_tb_small" style="color:red;">{{error}}</p>
+                {% endfor %}
+            {% endif %}
+            <label class="mdc-text-field mdc-text-field--filled title">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="title-label" name="title" required value=
+                    {% if form.instance.title %} "{{form.instance.title}}" {% else %} "{{form.data.title}}" {% endif %}>
+                <span class="mdc-floating-label" id="title-label">Titel</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+            </br>
+            <h5>Dein Beitrag</h5>
+            <p>Gib einen kurzen Teaser an</p>
+            <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
+              <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="capture" id="id_comment"
+              name="capture">{% if form.instance.capture %}{{form.instance.capture}}{% else %}{{form.data.capture}}{% endif %}</textarea>
+              <span class="mdc-notched-outline">
+                <span class="mdc-notched-outline__leading"></span>
+                <span class="mdc-notched-outline__trailing"></span>
+              </span>
+            </label>
+            <p>Bitte in Markdown oder HTML Syntax verfassen</p>
+            <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
+              <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="content" id="id_comment"
+              name="content">{% if form.instance.content %}{{form.instance.content}}{% else %}{{form.data.content}}{% endif %}</textarea>
+              <span class="mdc-notched-outline">
+                <span class="mdc-notched-outline__leading"></span>
+                <span class="mdc-notched-outline__trailing"></span>
+              </span>
+            </label>
+            <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
+                <span >OK</span>
+            </button>
+        </div>
+    </form>
+    <script>
+        const fields = document.querySelectorAll('.mdc-text-field');
+        fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+    </script>
+</section>
+{% endblock %}

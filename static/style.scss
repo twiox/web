@@ -223,6 +223,12 @@ $padding_small: 10px;
         background-color:$primary;
     }
 }
+.fade{
+    -webkit-transition: background-color 0.15s ease-in-out;
+    -moz-transition:background-color 0.15s ease-in-out;
+    -ms-transition:background-color 0.15s ease-in-out;
+}
+
 .prim_hover{
     -webkit-transition: background-color 0.15s ease-in-out;
     -moz-transition:background-color 0.15s ease-in-out;
@@ -318,6 +324,7 @@ a{
     padding: $padding_small;
 }
 .markdown{
+    overflow:visible;
     p{
         padding-top:15px;
         padding-bottom:15px;
@@ -503,6 +510,9 @@ strong{
     height:100%;
     clip-path:polygon(0 0,100% 0%,100% 78%,0% 100%);
     width:60px;
+}
+.polygon2{
+    clip-path:polygon(23% 0%, 100% 0%, 100% 100%, 0% 100%);
 }
 .second_section{
     width:75%;

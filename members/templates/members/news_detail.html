@@ -1,0 +1,35 @@
+{% extends "members/base.html" %}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#news">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <!--
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'news_list' %}#nav">
+        Alle Beiträge </a> 
+    <a class="float_left"> > </a> -->
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> {{object.title}} </a>
+</div>
+{% endblock %}
+{%block content %}
+<section>
+    <h1>{{object.title}}</h1>
+    <div>
+        <div id="container" style="overflow: visible;">
+            <div class="trainer_ui">
+                {% if perms.members.change_spot %}
+                <a href="{% url 'news_update' object.id  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+                {% endif %}
+                {% if perms.members.delete_spot %}
+                <a href="{% url 'news_delete' object.id  %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="markdown">
+            {{object.content_rendered|safe}}
+        </div>
+    </div>
+
+</section>
+{% endblock %}
+

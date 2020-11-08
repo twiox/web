@@ -8,7 +8,7 @@ from django.views.generic import (
     UpdateView,
     DeleteView
     )
-from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message
+from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, News
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
@@ -34,6 +34,9 @@ def index(request):
     chairmen = Chairman.objects.filter(show__contains="member_site")
     training_messags = Message.objects.filter(groups=group).filter(display="sessions")
     event_messags = Message.objects.filter(groups=group).filter(display="events")
+    posts = News.objects.all().order_by('-id')
+    if len(posts) > 3:
+        posts = posts[:3]
 
     if(hasattr(request.user, "trainer")):
         trainer_sessions = Session.objects.filter(trainer=Trainer.objects.get(user=request.user))
@@ -64,6 +67,7 @@ def index(request):
          "event_messags":event_messags,
          "chairman":hasattr(request.user, "chairman"),
          "groups":Group.objects.all(),
+         "posts":posts,
          }
             )
 
@@ -284,6 +288,48 @@ class SpotDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     
     def get_success_url(self, **kwargs):
         return reverse("spot_list")
+
+"""For the news"""
+class NewsListView(LoginRequiredMixin, ListView):
+    model = News
+
+class NewsDetailView(LoginRequiredMixin, DetailView):
+    model = News
+
+class NewsCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    #template: event_form.html
+    model = News
+    permission_required = 'members.add_news'
+    fields = ["title","capture","content"]
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.content_rendered = markdown.markdown(self.object.content)
+        messages.add_message(self.request, messages.SUCCESS, 'Beitrag erstellt')
+        return super().form_valid(form)
+
+class NewsUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    #template: event_form.html
+    model = News
+    permission_required = 'members.change_news'
+    fields = ["title","capture", "content"]
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.content_rendered = markdown.markdown(self.object.content)
+        messages.add_message(self.request, messages.SUCCESS, 'Beitrag geändert')
+        return super().form_valid(form)
+
+class NewsDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = News
+    permission_required = 'members.delete_news'
+
+    def post(self, request, *args, **kwargs):
+        messages.add_message(request, messages.SUCCESS, 'Beitrag gelöscht')
+        return self.delete(request, *args, **kwargs)
+    
+    def get_success_url(self, **kwargs):
+        return reverse("news_list")
 
 """For the Groups"""
 class GroupCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
@@ -522,3 +568,6 @@ class AddressChangeView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         user = self.request.user
         profile = self.get_object()
         return user.profile == profile
+
+def lockdown_table(request):
+    return render(request, 'members/lockdown.html', context={})
