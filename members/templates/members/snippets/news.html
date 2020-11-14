@@ -7,7 +7,7 @@
         <div class="padding_all_small tertiary_bg" style="height:100%;" id="container">
             <div style="display:flex; flex-direction:column; height:100%;">
                 <h4>{{post.title}}</h4>
-                <p class="padding_all_small">{{post.capture}}</p>
+                <div class="padding_all_small"><p style="padding-bottom:15px;">{{post.capture}}</p></div>
                 <div style="position: absolute; right:0px; bottom:-3px; width:50%;" class="secondary_bg polygon2">
                     <a href="{% url 'news_detail' post.id %}" style="padding:0px; text-align:right;">
                          <p class="more_info_button">Weiterlesen</p>

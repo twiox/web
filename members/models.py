@@ -26,7 +26,7 @@ class Spot(models.Model):
     long = models.CharField("Longitude", max_length=30,default="12.350504")
     description = models.TextField("Beschreibung, Zusatzinformation", default="Lorem Ipsum")
     description_rendered = models.TextField(blank=True, null=True)
-    picture = models.ImageField("Foto vom Spot", default = "spot_placeholder.jpg", upload_to="spot_pics/")
+    picture = models.ImageField("Foto vom Spot", blank=True, null=True, upload_to="spot_pics/")
 
     def __str__(self):
         return f"Spot: {self.title}"
