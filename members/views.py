@@ -520,9 +520,9 @@ class EmailUpdateView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
                 if(form.cleaned_data.get("email1") == form.cleaned_data.get("email2")):
                     request.user.email = form.cleaned_data.get("email1")
                     request.user.save()
-                    messages.add_message(request, messages.SUCCESS, 'Email erfolgreich geändert')
+                    messages.add_message(request, messages.SUCCESS, 'E-Mail erfolgreich geändert')
                     return HttpResponseRedirect(reverse("profile_detail", kwargs={"pk": request.user.id}))
-                form.add_error('email1', 'Die Emails stimmen nicht überein')
+                form.add_error('email1', 'Die E-Mails stimmen nicht überein')
                 return render(request, self.template_name, {'form': form, "object":request.user})
             form.add_error('password', 'Das Passwort stimmt nicht')
             return render(request, self.template_name, {'form': form, "object":request.user})

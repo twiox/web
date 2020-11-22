@@ -15,10 +15,10 @@
         <a class="float_right" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt" style="font-size:20px;"><p>Logout</p></i></a>
         <a class="float_left" href="{% url 'profile_detail' user.id %} "><i class="fas fa-user-circle" style="font-size:20px;"><p>Profil</p></i></a>
         {% if perms.auth.add_user %}
-        <a class= "float_left" href="{% url 'member_list'%}#nav"><i class="fas fa-user" style="font-size:20px;"><p>Mitglieder</p></i></a>
-        <a class= "float_left" href="{% url 'group_list'%}#nav"><i class="fas fa-users" style="font-size:20px;"><p>Gruppen</p></i></a>
-        <a class= "float_left" href="{% url 'trainer_list'%}#nav"><i class="fas fa-user-cog" style="font-size:20px;"><p>Trainer</p></i></a>
-        <a class= "float_left" href="{% url 'chairman_list'%}#nav"><i class="fas fa-user-tie" style="font-size:20px;"><p>Vorstände</p></i></a>
+        <a class= "float_left" href="{% url 'member_list' %}#nav"><i class="fas fa-user" style="font-size:20px;"><p>Mitglieder</p></i></a>
+        <a class= "float_left" href="{% url 'group_list' %}#nav"><i class="fas fa-users" style="font-size:20px;"><p>Gruppen</p></i></a>
+        <a class= "float_left" href="{% url 'trainer_list' %}#nav"><i class="fas fa-user-cog" style="font-size:20px;"><p>Trainer</p></i></a>
+        <a class= "float_left" href="{% url 'chairman_list' %}#nav"><i class="fas fa-user-tie" style="font-size:20px;"><p>Vorstände</p></i></a>
         {% endif %}
     </div>
     {% endif %}

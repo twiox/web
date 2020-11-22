@@ -39,7 +39,7 @@
                             <th nowrap="nowrap"><h5> Gruppe </h5></th>
                             <th nowrap="nowrap"><h5> Geschlecht </h5></th>
                             <th nowrap="nowrap"><h5> Geb.-Datum </h5></th>
-                            <th nowrap="nowrap"><h5> Emailadresse </h5></th>
+                            <th nowrap="nowrap"><h5> E-Mail-Adresse </h5></th>
                             <th nowrap="nowrap"><h5> Ansprechpartner </h5></th>
                             <th nowrap="nowrap"><h5> Adresse </h5></th>
                             <th nowrap="nowrap"><h5> Telefonnummer </h5></th>
@@ -56,12 +56,12 @@
                     </thead>
                     <tbody id="table_body">
                     {% for member in object_list %}
-                        <tr id={{member.profile.status}} class="{% cycle 'odd' 'even' %}"> 
-                            <td nowrap="nowrap"> {{forloop.counter}}</td>
+                        <tr id={{member.profile.status}} class="{% cycle 'odd' 'even' %} table_row">
+                            <td nowrap="nowrap" class="counter"> {{forloop.counter}}</td>
                             {% if member.is_active %}
                                 <td><i class="fas fa-check"></i></td>
                             {% else %}
-                                <td>X</td>
+                                <td> X </td>
                             {% endif %}
                             <td nowrap="nowrap">
                                 <a href="{% url 'update_user' member.id %}#nav" title="Bearbeiten">
@@ -103,12 +103,20 @@
 </section>
 <script>
     $(document).ready(function(){
-      $("#myInput").on("keyup", function() {
-        var value = $(this).val().toLowerCase();
-        $("#table_body tr").filter(function() {
-          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        $("#myInput").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#table_body tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+            });
+            $(".counter:visible").each(function(index, value){
+                $(this).html(index+1)});
+            $(".table_row:visible").each(function(index, value){
+                $(this).removeClass('odd');
+                if(index%2===1){
+                    $(this).addClass('odd');
+                };
+            });
         });
-      });
     });
 </script>
 {% endblock %}
