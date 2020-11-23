@@ -14,21 +14,20 @@
             <div class="chair_col-49 padding_all_small tertiary_bg">
                 <div class="padding_all_big">
                     <h3 class="padding_tb_small"> Deine Daten </h3>
-                    <p align="justify"> Hier kannst du deine Daten sehen und bearbeiten</p>
-                    <h4 class="padding_tb_small"></h4>
                     <div class="side_scroll">
                         <table class="padding_tb_small side_scroll">
                             <tr> <td><h4>Persönliche Daten</h4></td>
-                                <td></td><td><a class="more_info_button" href="{% url 'profile_update_address' object.profile.id %}">Ändern</a></td></tr>
+                            <td></td><td><a class="more_info_button" href="{% url 'profile_update_address' object.profile.id %}">Ändern</a></td></tr>
                             <tr> <td>Name:</td><td>{{object.first_name}} {{object.last_name}}</td> </tr>
-                            <tr> <td>Nutzername:</td><td>{{object.username}}</td> </tr>
                             <tr> <td>Adresse:</td><td>{{object.profile.address}}</td> </tr>
                             <tr> <td>Geburtsdatum:</td><td>{{object.profile.birthday|date:"d.m.Y"}}</td> </tr>
                             <tr> <td>Geschlecht:</td><td>{{object.profile.sex}}</td> </tr>
                             <tr> <td>Telefon:</td><td>{{object.profile.telephone}}</td> </tr>
                             <tr> <td>Ansprechpartner (U18):</td><td>{% if object.profile.parent %} {{object.profile.parent}} {%else%} - {% endif %}</td></tr>
                             <tr> <td>Notfallnummer (U18):</td><td>{% if object.profile.parent_telnr %} {{object.profile.parent_telnr}} {%else%} -  {% endif %}</td> </tr>
-                            <tr> <td>Email:</td><td>{{object.email}}</td> <td><a class="more_info_button" href="{% url 'profile_update_email' object.id %}">Ändern</a></td> </tr>
+                            <tr> <td><h4 class="padding_tb_small">Websitedaten</h4></td> </tr>
+                            <tr> <td>Nutzername:</td><td>{{object.username}}</td> <td><a class="more_info_button" href="{% url 'profile_update_username' object.id %}">Ändern</a></td> </tr>
+                            <tr> <td>E-Mail:</td><td>{{object.email}}</td> <td><a class="more_info_button" href="{% url 'profile_update_email' object.id %}">Ändern</a></td> </tr>
                             <tr> <td>Passwort:</td><td>*************</td> <td><a class="more_info_button" href="{% url 'profile_update_pw' object.id %}">Ändern</a></td> </tr>
                             <tr> <td><h4 class="padding_tb_small">Vereinsdaten</h4></td> </tr>
                             <tr> <td>Mitgliedsstatus:</td><td>{{object.profile.status}}</td> </tr>

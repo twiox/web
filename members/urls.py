@@ -31,6 +31,7 @@ urlpatterns = [
     path("gruppe/<int:pk>/liste/", views.RealGroupDetailView.as_view(),name="real_group_detail"),
     path("profil/<int:pk>/detail/", views.UserDetailView.as_view(),name="profile_detail"),
     path("profil/<int:pk>/ändere_email/", views.EmailUpdateView.as_view(),name="profile_update_email"),
+    path("profil/<int:pk>/ändere_nutzername/", views.UsernameUpdateView.as_view(),name="profile_update_username"),
     path("profil/<int:pk>/ändere_daten/", views.AddressChangeView.as_view(),name="profile_update_address"),
     path("profil/<int:pk>/ändere_passwort/", views.PasswordChangeView.as_view(),name="profile_update_pw"),
     path("beiträge/", views.NewsListView.as_view(),name="news_list"),

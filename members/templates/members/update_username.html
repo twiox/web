@@ -1,0 +1,45 @@
+{% extends "members/base.html" %}
+{% block navbar2 %} 
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'profile_detail' object.id %}">
+        Dein Profil</a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Nutzername ändern</a>
+</div>
+{% endblock %}
+{%block content %}
+<section style="text-align:center;">
+    <h1>Nutzername ändern</h1>
+    <form class="form_wrapper" method="POST">
+        <div class ="inner_form chair_col-5 padding_all_small">
+        {% csrf_token %}
+        {% if form.errors %}
+            {% for error in form.non_field_errors %}
+            <p class="padding_tb_small" style="color:red;">{{error}}</p>
+            {% endfor %}
+        {% endif %}
+        {% if form.username.errors %}
+        {% for error in form.username.errors %}
+            <p style="color:red;">{{error}}</p>
+        {% endfor %}
+        {% endif %}
+        <label class="mdc-text-field mdc-text-field--filled username">
+            <span class="mdc-text-field__ripple"></span>
+            <input type="username" class="mdc-text-field__input" aria-labelledby="username-label" name="username" value="{{form.instance.username}}" required>
+            <span class="mdc-floating-label" id="username-label">Nutzername</span>
+            <span class="mdc-line-ripple"></span>
+        </label>
+        <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
+            <span >OK</span>
+        </button>
+        </div>
+    </form>
+    <script>
+        const fields = document.querySelectorAll('.mdc-text-field');
+        fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+    </script>
+</section>
+{% endblock %}

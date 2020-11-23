@@ -555,6 +555,16 @@ class PasswordChangeView(LoginRequiredMixin, PasswordChangeView):
         messages.add_message(self.request, messages.SUCCESS, 'Passwort erfolgreich geändert')
         return HttpResponseRedirect(reverse("profile_detail", kwargs={"pk": request.user.id}))
 
+class UsernameUpdateView(LoginRequiredMixin, UpdateView):
+    model = User
+    template_name = 'members/update_username.html'
+    fields = ["username"]
+    
+    def get_success_url(self):
+        messages.add_message(self.request, messages.SUCCESS, 'Nutzername erfolgreich geändert')
+        return reverse('profile_detail', kwargs={'pk':self.object.pk})
+        
+
 class AddressChangeView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Profile
     template_name = 'members/update_address.html'
@@ -562,12 +572,8 @@ class AddressChangeView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     
     def get_success_url(self):
         return reverse('profile_detail', kwargs={'pk':self.object.user.pk})
-    
-    
+
     def test_func(self):
         user = self.request.user
         profile = self.get_object()
         return user.profile == profile
-
-def lockdown_table(request):
-    return render(request, 'members/lockdown.html', context={})
