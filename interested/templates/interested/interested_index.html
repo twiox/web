@@ -126,7 +126,7 @@
                                 </li>
                             </ul>
                             <br>
-                            <form class="padding_tb_big" method="POST">
+                            <form class="padding_tb_big" id="prob_form" method="POST">
                                 {% csrf_token %}
                                 {% if form.errors %}
                                     {% for error in form.non_field_errors %}
@@ -250,13 +250,22 @@
                                     <div style="clear:both;">
                                         <div class="flex_center_vertical">
                                             <div class="flex_center padding_all_big">
-                                                <button type="submit" class="form_button">Absenden</button>
+                                                <button type="submit" class="form_button" id="prob_button">Absenden</button>
                                             </div>
                                         </div>
                                     </div>
-                                    
                                 </div>
                             </form>
+                            <script>
+                                $(document).ready(function(){
+                                    $("#prob_button").click(function(){
+                                        $(this).html('<i class="fas fa-spinner fa-pulse"></i>');
+                                        setTimeout(function(){ 
+                                            $("#prob_button").html("Absenden");
+                                            }, 3000);
+                                        });
+                                });
+                            </script>
                         </div>
                     </div>
                 </div>
@@ -279,7 +288,7 @@
                                 </li>
                                 <li style="width:100%;" class="padding_tb_small">
                                     <a class="download prim_hover padding_all_big" href="{{ STATIC_URL }}/static/docs/Aufnahmeantrag_Kids_TwioX.pdf">
-                                        <p class="padding_rl_small">Aufnahmeantrag Kinder</p>
+                                        <p class="padding_rl_small">Aufnahmeantrag Minderjährige</p>
                                         <div class="flex_center_vertical">
                                             <i class="fas fa-file-download padding_rl_small"></i>
                                         </div>

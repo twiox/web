@@ -141,13 +141,23 @@
                                 <div style="clear:both;">
                                     <div class="flex_center_vertical">
                                         <div class="flex_center padding_all_big">
-                                            <button type="submit" class="form_button">Absenden</button>
+                                            <button type="submit" class="form_button" id="orga_button">Absenden</button>
                                         </div>
                                     </div>
                                 </div>
                                 
                             </div>
                         </form>
+                        <script>
+                            $(document).ready(function(){
+                                $("#orga_button").click(function(){
+                                    $(this).html('<i class="fas fa-spinner fa-pulse"></i>');
+                                    setTimeout(function(){ 
+                                        $("#orga_button").html("Absenden");
+                                    }, 3000);
+                                });
+                            });
+                        </script>
                         <br>
                     </div>
                 </div>
