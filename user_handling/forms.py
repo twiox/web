@@ -40,24 +40,3 @@ class ProfileCreationForm(forms.ModelForm):
         model = Profile
         fields = ["birthday","address","telephone","sex","status","member_num","group","membership_start","mandatsref","zahlungsart",
         "beitrag","notes_trainer","notes_chairman","parent", "parent_telnr"]
-        
-class TrainerCreationForm(forms.ModelForm):
-    user = forms.ModelChoiceField(label="Wer?",queryset=User.objects.exclude(trainer__user__username__contains=""))
-    trainer_telnr = forms.CharField(label = "Öffentliche TelNr.")
-    trainer_email = forms.CharField(label = "Öffentliche Email")
-    image = forms.ImageField(label="Profilbild")
-    
-    class Meta:
-        model = Trainer
-        fields = ["user", "trainer_telnr","trainer_email","image"]
-
-class TrainerDeletionForm(forms.Form):
-    trainer = forms.ModelChoiceField(label="Wer?",queryset=Trainer.objects.all())
-    group = forms.ModelChoiceField(label="In welche Gruppe verschieben?",queryset=Group.objects.all())
-    class Meta:
-        fields = ["trainer", "group"]
-
-class TrainerChooseForm(forms.Form):
-    trainer = forms.ModelChoiceField(label="Wer?",queryset=Trainer.objects.all())
-    class Meta:
-        fields = ["trainer"]

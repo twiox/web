@@ -1,0 +1,222 @@
+{% extends "members/base.html" %}
+{% block navbar2 %} 
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_list' %}#nav">
+        Trainerliste </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Trainer</a>
+</div>
+{% endblock %}
+{%block content %}
+<section style="text-align: center;">
+    {% if form.instance.image %}
+    <h1>{{form.instance.user.first_name}} {{form.instance.user.last_name}}</h1>
+    {% else %}
+    <h1>Neuer Trainer</h1>
+    {% endif %}
+    <div class="chair_col-5 tertiary_bg padding_all_big" style="margin: 0 auto;">
+        <form class="form_wrapper" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% if form.errors %}
+                {% for error in form.non_field_errors %}
+                <p class="padding_tb_small" style="color:red;">{{error}}</p>
+                {% endfor %}
+            {% endif %}
+            <div class ="inner_form padding_all_big flex_center">
+                {% if not form.instance.image %}
+                    {% if form.user.errors %}
+                    {% for error in form.user.errors %}
+                        <p style="color:red;">{{error}}</p>
+                    {% endfor %}
+                    {% endif %}
+                    <label class="mdc-text-field mdc-text-field--filled user">
+                        <i class="mdc-select__dropdown-icon"></i>
+                        <span class="mdc-text-field__ripple"></span>
+                        <select id="select-user" class="mdc-text-field__input" style="background-color:#333333;" name="user" required>
+                            <option value="" selected></option>
+                                {% for id, name in form.user.field.choices %}
+                                {% if name != "---------" %}
+                                <option value="{{ id }}">{{ name }}</option>
+                                {% endif %}
+                                {% endfor %}
+                        </select>
+                        <span class="mdc-floating-label" id="user-label">Wähle ein Mitglied</span>
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                {% endif %}
+                {% if form.trainer_telnr.errors %}
+                {% for error in form.trainer_telnr.errors %}
+                    <p style="color:red;">{{error}}</p>
+                {% endfor %}
+                {% endif %}
+                <label class="mdc-text-field mdc-text-field--filled trainer_telnr">
+                    <span class="mdc-text-field__ripple"></span>
+                    <input type="text" class="mdc-text-field__input" aria-labelledby="trainer_telnr-label" name="trainer_telnr" required value=
+                    {% if form.instance.trainer_telnr %} "{{form.instance.trainer_telnr}}" {% else %} "{{form.data.trainer_telnr}}" {% endif %}>
+                    <span class="mdc-floating-label" id="trainer_telnr-label">Öffentliche Telefonnummer</span>
+                    <span class="mdc-line-ripple"></span>
+                </label>
+                {% if form.trainer_email.errors %}
+                {% for error in form.trainer_email.errors %}
+                    <p style="color:red;">{{error}}</p>
+                {% endfor %}
+                {% endif %}
+                <label class="mdc-text-field mdc-text-field--filled trainer_email">
+                    <span class="mdc-text-field__ripple"></span>
+                    <input type="text" class="mdc-text-field__input" aria-labelledby="trainer_email-label" name="trainer_email" required value=
+                    {% if form.instance.trainer_email %} "{{form.instance.trainer_email}}" {% else %} "{{form.data.trainer_email}}" {% endif %}>
+                    <span class="mdc-floating-label" id="trainer_email-label">Öffentliche E-Mail-Adresse</span>
+                    <span class="mdc-line-ripple"></span>
+                </label>
+                {% if form.salary.errors %}
+                {% for error in form.salary.errors %}
+                    <p style="color:red;">{{error}}</p>
+                {% endfor %}
+                {% endif %}
+                <label class="mdc-text-field mdc-text-field--filled salary">
+                    <span class="mdc-text-field__ripple"></span>
+                    <input type="text" class="mdc-text-field__input" aria-labelledby="salary-label" name="salary" value=
+                    {% if form.instance.salary %} "{{form.instance.salary}}" {% else %} "{{form.data.salary}}" {% endif %}>
+                    <span class="mdc-floating-label" id="salary-label">Gehalt</span>
+                    <span class="mdc-line-ripple"></span>
+                </label>
+                {% if form.license_level.errors %}
+                {% for error in form.license_level.errors %}
+                    <p style="color:red;">{{error}}</p>
+                {% endfor %}
+                {% endif %}
+                <label class="mdc-text-field mdc-text-field--filled license_level">
+                    <span class="mdc-text-field__ripple"></span>
+                    <input type="text" class="mdc-text-field__input" aria-labelledby="license_level-label" name="license_level" value=
+                    {% if form.instance.license_level %} "{{form.instance.license_level}}" {% else %} "{{form.data.license_level}}" {% endif %}>
+                    <span class="mdc-floating-label" id="license_level-label">Lizenzstufe</span>
+                    <span class="mdc-line-ripple"></span>
+                </label>
+                {% if form.license_number.errors %}
+                {% for error in form.license_number.errors %}
+                    <p style="color:red;">{{error}}</p>
+                {% endfor %}
+                {% endif %}
+                <label class="mdc-text-field mdc-text-field--filled license_number">
+                    <span class="mdc-text-field__ripple"></span>
+                    <input type="text" class="mdc-text-field__input" aria-labelledby="license_number-label" name="license_number" value=
+                    {% if form.instance.license_number %} "{{form.instance.license_number}}" {% else %} "{{form.data.license_number}}" {% endif %}>
+                    <span class="mdc-floating-label" id="license_number-label">Lizenznummer</span>
+                    <span class="mdc-line-ripple"></span>
+                </label>
+                {% if form.license_valid.errors %}
+                {% for error in form.license_valid.errors %}
+                    <p style="color:red;">{{error}}</p>
+                {% endfor %}
+                {% endif %}
+                <label class="mdc-text-field mdc-text-field--filled license_valid">
+                    <span class="mdc-text-field__ripple"></span>
+                    <input type="text" class="mdc-text-field__input" aria-labelledby="license_valid-label" name="license_valid" value=
+                    {% if form.instance.license_valid %} {{form.instance.license_valid|date:"d.m.Y"}} {% else %} "{{form.data.license_valid}}" {% endif %}>
+                    <span class="mdc-floating-label" id="license_valid-label">Gültig bis</span>
+                    <span class="mdc-line-ripple"></span>
+                </label>
+                {% if form.image.errors %}
+                {% for error in form.image.errors %}
+                    <p style="color:red;">{{error}}</p>
+                {% endfor %}
+                {% endif %}
+                <div style="display:flex;">
+                    <label class="upload">
+                        <span style="display:flex;justify-content:center;"><i class="fas fa-file-upload"></i></span>
+                        <input type="file" id="inputFile" style="display: none" name="image" {% if not form.instance.image %}  required {% endif %}>
+                    </label>
+                    <p class="padding_rl_small" id="fileText">Profilbild hochladen*</p>
+                </div>
+                {% if form.instance.image %}
+                    <p style="text-align: left;">Aktuell:<a class="more_info_button" href="{{ form.instance.image.url}}">Profilbild</a></p>
+                {% endif %}
+                <script>
+                    $(document).on('change','#inputFile' , function(e){
+                    var fileName = e.target.files[0].name
+                    $("#fileText").html(fileName).show();
+                        });
+                </script>
+                
+                {% if form.contract.errors %}
+                {% for error in form.contract.errors %}
+                    <p style="color:red;">{{error}}</p>
+                {% endfor %}
+                {% endif %}
+                <div style="display:flex;">
+                    <label class="upload">
+                        <span style="display:flex;justify-content:center;"><i class="fas fa-file-upload"></i></span>
+                        <input type="file" id="inputFileContract" style="display: none" name="contract">
+                    </label>
+                    <p class="padding_rl_small" id="fileTextContract">Vertrag hochladen</p>
+                </div>
+                {% if form.instance.contract %}
+                    <p style="text-align: left;">Aktuell:<a class="more_info_button" href="{{ form.instance.contract.url}}">Vertrag</a></p>
+                {% endif %}
+                <script>
+                    $(document).on('change','#inputFileContract' , function(e){
+                    var fileName = e.target.files[0].name
+                    $("#fileTextContract").html(fileName).show();
+                        });
+                </script>
+                
+                {% if form.license.errors %}
+                {% for error in form.license.errors %}
+                    <p style="color:red;">{{error}}</p>
+                {% endfor %}
+                {% endif %}
+                <div style="display:flex;">
+                    <label class="upload">
+                        <span style="display:flex;justify-content:center;"><i class="fas fa-file-upload"></i></span>
+                        <input type="file" id="inputFileLicense" style="display: none" name="license">
+                    </label>
+                    <p class="padding_rl_small" id="fileTextLicense">Lizenz hochladen</p>
+                </div>
+                {% if form.instance.license %}
+                    <p style="text-align: left;">Aktuell:<a class="more_info_button" href=" {{ form.instance.license.url}}">Lizenz</a> </p>
+                {% endif %}
+                <script>
+                    $(document).on('change','#inputFileLicense' , function(e){
+                    var fileName = e.target.files[0].name
+                    $("#fileTextLicense").html(fileName).show();
+                        });
+                </script>
+                
+                {% if form.codex.errors %}
+                {% for error in form.codex.errors %}
+                    <p style="color:red;">{{error}}</p>
+                {% endfor %}
+                {% endif %}
+                <div style="display:flex;">
+                    <label class="upload">
+                        <span style="display:flex;justify-content:center;"><i class="fas fa-file-upload"></i></span>
+                        <input type="file" id="inputFileCodex" style="display: none" name="codex">
+                    </label>
+                    <p class="padding_rl_small" id="fileTextCodex">Ehrenkodex hochladen</p>
+                </div>
+                {% if form.instance.codex %}
+                    <p style="text-align: left;">Aktuell:<a class="more_info_button" href="{{ form.instance.codex.url }}">Ehrenkodex</a></p>
+                {% endif %}
+                <script>
+                    $(document).on('change','#inputFileCodex' , function(e){
+                    var fileName = e.target.files[0].name
+                    $("#fileTextCodex").html(fileName).show();
+                        });
+                </script>
+                
+                <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
+                    <span >OK</span>
+                </button>
+            </div>
+        </form>
+        <script>
+            const fields = document.querySelectorAll('.mdc-text-field');
+            fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+        </script>
+    </div>
+</section>
+
+{% endblock %}

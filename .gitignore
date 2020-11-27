@@ -5,6 +5,7 @@
 media/documents/*
 media/profile_pics/*
 media/team_pictures/*
+media/trainer_stuff/
 media/Events/*
 twio_web/secrets.py
 api_key.txt

@@ -88,6 +88,13 @@ class Trainer(models.Model):
     trainer_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, default = "Hier die Nummer für die Website")
     trainer_email = models.CharField("Öffentliche Email", max_length=150, default = "Hier die Email für die Website")
     image = models.ImageField("Profilbild", upload_to="profile_pics/")
+    salary = models.CharField("Bezahlung", blank=True, null=True, max_length=5)
+    license_level = models.CharField("Lizenzstufe", max_length=100, blank=True, null=True)
+    license_number = models.CharField("Lizenznummer", max_length=100, blank=True, null=True)
+    license_valid = models.DateTimeField('Gültigkeit', blank=True, null=True)
+    license = models.FileField("Lizenz", upload_to="trainer_stuff", blank=True, null=True)
+    contract = models.FileField("Vertrag", upload_to="trainer_stuff", blank=True, null=True)
+    codex = models.FileField("Ehrencodex", upload_to="trainer_stuff", blank=True, null=True)
     
     def __str__(self):
         return f"Trainer: {self.user.first_name} {self.user.last_name}"

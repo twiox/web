@@ -44,6 +44,11 @@
                     <div>
                         <p> {{object.trainer_telnr}} </p>
                         <p> {{object.trainer_email}} </p>
+                        {% if object.license%}
+                        <p> {{object.license_level}} </p>
+                        <p> {{object.license}} </p>
+                        <p> {{object.license_valid}} </p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
