@@ -1,14 +1,67 @@
 {% extends 'members/base.html' %}
 {% block content %}
-<h1>Das Trainerdokument</h1>
-<div>
-    <h3>Dein Trainerprofil</h3>
-        <p>Deine Daten</p>
-        <p>Deine Weiterbildungen</p>
-    <h3>Training</h3>
-        <p>Deine Einheiten</p>
-        <p>Deine Gruppen</p>
-        <p>Abrechnungstabelle</p>
-    <h3>Nützliche Links</p>
+<h1>Trainerdokument</h1>
+<div style="display:flex; justify-content: left; flex-wrap:wrap;">
+        <a href="{% url 'trainer_index' %}" class="padding_all_small here_I_am">Deine Daten</a>
+        <a href="{% url 'abrechnung' %}" class="padding_all_small">Abrechnungstabelle</a>
+        <a href="{% url 'trainer_list' %}" class="padding_all_small">Trainerübersicht</a>
 </div>
+<br>
+<h3> Deine Daten </h3>
+<div class="padding_all_small">
+    <div class="tertiary_bg padding_all_big">
+        <p>{{request.user.first_name}} {{request.user.last_name}}</p>
+        <p>Rest comes soon</p>
+    </div>
+</div>
+<h3> Deine Einheiten </h3>
+<div>
+    <div>
+        {% for session in trainer_sessions %}
+        <div class="padding_all_small float_left col-4" id="container">
+            <div>
+                {% if session.hinweis %}
+                    <div id="info_position">
+                        <p class="session_alert"> {{session.hinweis}} </p>
+                    </div>
+                {% endif %}
+                <div style="display:flex;" class="tertiary_bg">
+                    <div class="padding_all_big polygon primary">
+                        <p class="strong">{{session.day}}</p>
+                    </div>
+                    <div class="second_section padding_all_big">
+                        <h4> {{session.group}}</h4>
+                        <p> {{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
+                        <h4> {{session.spot.title}}</h4>
+                    </div>
+                </div>
+                <div class="third_session tertiary_bg padding_all_med">
+                    <a class="more_info_button" href="{% url 'session_detail' session.id %}#nav">weitere Informationen</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+            <p> Leider gibt es im Moment keine Einheiten für dich </p>
+        {% endfor %}
+    </div>
+</div>
+<h3>Deine Gruppen</h3>
+    <div style="display:flex; flex-wrap:wrap; justify-content: left;">
+    {% for group in trainer_groups %}
+        <div class="padding_all_small col-4">
+            <div>
+                <div style="display:flex;" class="tertiary_bg">
+                    <div class="second_section padding_all_big">
+                        <h4>Gruppe {{group.group_id}}</h4>
+                    </div>
+                </div>
+                <div class="third_session tertiary_bg padding_all_med">
+                    <a class="more_info_button" href="{% url 'real_group_detail' group.id %}#nav">Gruppeninfo</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p> Leider gibt es im Moment keine Einheiten für dich </p>
+    {% endfor %}
+    </div>
 {% endblock %}

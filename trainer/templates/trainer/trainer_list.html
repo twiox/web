@@ -1,17 +1,15 @@
 {% extends "members/base.html" %}
-{% block navbar2 %} 
-<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
-        Mitglieder </a>
-    <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Trainerliste</a>
-</div>
-{% endblock %}
-
 {%block content %}
+<h1>Trainerdokument</h1>
+<div style="display:flex; justify-content: left; flex-wrap:wrap;">
+        <a href="{% url 'trainer_index' %}" class="padding_all_small">Deine Daten</a>
+        <a href="{% url 'abrechnung' %}" class="padding_all_small">Abrechnungstabelle</a>
+        <a href="{% url 'trainer_list' %}" class="padding_all_small here_I_am">Trainerübersicht</a>
+</div>
+<br>
+<h3> Trainerübersicht </h3>
 <section>
     <div id="container">
-    <h1>Alle Trainer</h1>
         <div class="trainer_ui">
             {% if perms.members.add_trainer %}
                 <a href="{% url 'register_trainer' %}#nav" title="Trainer hinzufügen"><i class="far fa-plus-square" style="font-size:27px;"></i></a>

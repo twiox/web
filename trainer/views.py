@@ -1,6 +1,6 @@
 from .forms import *
 from django.shortcuts import render, redirect
-from members.models import Trainer
+from members.models import Trainer, Profile, Event, Message, Session, Group
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import DeleteView, UpdateView, CreateView, ListView
@@ -10,7 +10,16 @@ from django.contrib.auth.models import Group as Permission_group
 
 
 def trainer_index(request):
-    return render(request,"trainer/trainer_index.html",context={})
+    """ I just assume for the moment, that the user is a trainer """
+    trainer_sessions = Session.objects.filter(trainer=Trainer.objects.get(user=request.user))
+    trainer_groups = Group.objects.filter(session__trainer=Trainer.objects.get(user=request.user)).distinct()
+    
+    return render(
+        request,"trainer/trainer_index.html",
+        {"trainer_sessions":trainer_sessions,
+         "trainer_groups":trainer_groups,
+         }
+            )
  
 
 def abrechnungstable(request):

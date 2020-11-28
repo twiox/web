@@ -39,13 +39,11 @@ def index(request):
         posts = posts[:3]
 
     if(hasattr(request.user, "trainer")):
-        trainer_sessions = Session.objects.filter(trainer=Trainer.objects.get(user=request.user))
         if(group.group_id != "T"):
             sessions += Session.objects.filter(group__group_id="T")
         events = Event.objects.all()
         training_messags = Message.objects.all().filter(display="sessions")
         event_messags = Message.objects.all().filter(display="events")
-        trainer_groups = Group.objects.filter(session__trainer=Trainer.objects.get(user=request.user)).distinct()
     else:
         trainer_sessions = None
         trainer_groups = None
@@ -61,8 +59,6 @@ def index(request):
          "chairmen":chairmen,
          "sessions":sessions,
          "events":events,
-         "trainer_sessions":trainer_sessions,
-         "trainer_groups":trainer_groups,
          "training_messags":training_messags,
          "event_messags":event_messags,
          "chairman":hasattr(request.user, "chairman"),
@@ -370,21 +366,7 @@ class GroupDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 class GroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Group
     permission_required = 'members.delete_group'
-
-class GroupDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
-    model = Session
-    permission_required = "members.view_group"
-    template_name = "members/group_detail.html"
-
-    def get_context_data(self, **kwargs):
-        context = {"member_list":User.objects.filter(profile__group = self.object.group)}
-        if self.object:
-            context['object'] = self.object
-            context_object_name = self.get_context_object_name(self.object)
-            if context_object_name:
-                context[context_object_name] = self.object
-        context.update(kwargs)
-        return super().get_context_data(**context)
+    
 
 class RealGroupDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     model = Group
