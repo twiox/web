@@ -8,6 +8,173 @@
 </div>
 <br>
 <h3> Abrechnungstabelle </h3>
-<p>Die muss irgendwie dynamisch werden...</p>
+<div style="display:flex; justify-content:left; flex-wrap:wrap;" class="padding_tb_small">
+    <div class="padding_all_small" ><a class="padding_all_small tertiary_bg" style="cursor: pointer" id='reset'>Reset</a></div>
+    <div class="padding_all_small" ><a class="padding_all_small tertiary_bg" style="cursor: pointer" id="add_week">+1 Woche</a></div>
+</div>
+
+<div class="side_scroll" id="js_send_table">
+    <table id="js_trainerdata">
+        <tr><td>Name:</td><td>{{request.user.first_name}} {{request.user.last_name}}</td></tr>
+        {% if request.user.trainer.license_number %}
+        <tr><td>Lizenznummer: </td><td>{{request.user.trainer.license_number}}</td></tr>
+        <tr><td>Gültigkeit: </td><td>{{request.user.trainer.license_valid|date:"d.m.Y"}}</td></tr>
+        {% endif %}
+    </table>
+    <br>
+    <table id="abrechenform">
+        <thead>
+            <tr>
+                <th><strong>Datum</strong></th>
+                <th><strong>Wochentag</strong></th>
+                <th><strong>Gruppe</strong></th>
+                <th><strong>Von</strong></th>
+                <th><strong>Bis</strong></th>
+                <th><strong>Dauer</strong></th>
+                <th><strong>Anmerkung</strong></th>
+                <th><strong>Aktion</strong></th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+            {% for entry in entries %}
+            <tr id="js_row_{{entry.pk}}">
+                <td contenteditable='true'><input type="date" class="js_datefield"></td>
+                <td contenteditable='true'>{{entry.session.day}}</td>
+                <td contenteditable='true'>{{entry.session.group.group_id}}</td>
+                <td contenteditable='true'>{{entry.session.start_time}}</td>
+                <td contenteditable='true'>{{entry.session.end_time}}</td>
+                <td contenteditable='true' onkeyup="javascript:updateCalc();" class="js-count_hours">2</td>
+                <td contenteditable='true'>{% if entry.notes %}{{entry.notes}}{% endif %}</td>
+                <td><a class="js_delete_row" id="js_entry_{{entry.pk}}"></a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <div style="text-align:left;">
+        <h4> Abrechnung: </h4>
+        <table id="js_summary">
+        <tr><td>Stunden gesamt:</td><td id="hours"></td></tr>
+        <tr><td>TAE/Stunde: </td><td id="tae">{{request.user.trainer.salary}} €</td></tr>
+        <tr><td><strong>Gesamt:</strong></td><td><strong id="total"></strong></td></tr>
+        </table>
+    </div>
+
+    <br>
+    <a id="prob_button" class="form_button" style="cursor: pointer;" onclick=sendTable()>Absenden</a>
+</div>
+
+<script type="text/javascript">
+function getTableString(key,value){
+    return '<tr id="js_row_'+key+'">'+
+    '<td contenteditable="true"><input type="date" class="js_datefield"></td>' + 
+    '<td contenteditable="true"> ' + value.day + '</td>' +
+    '<td contenteditable="true"> ' + value.group + '</td>' +
+    '<td contenteditable="true"> ' + value.start_time + '</td>' + 
+    '<td contenteditable="true"> ' + value.end_time + '</td>' + 
+    '<td contenteditable="true" class="js-count_hours" onkeyup="javascript:updateCalc();"> ' +2+ '</td>' + 
+    '<td contenteditable="true"> </td>'+
+    '<td><a class="js_delete_row" id="js_entry_'+key+'"> </a></td></tr>'
+    }
+
+$("#add_week").click(function (){
+    $.ajax({
+        url: "{% url 'add_week' %}",
+        dataType: 'json',
+        success: function (data){
+            $.each(data, function(key, value){
+                $("#tbody").append(getTableString(key, value))
+            });
+            addButton();
+            updateCalc();
+        }
+    });
+});
+//delete all entries and start with initial sessions
+$("#reset").click(function (){
+    $.ajax({
+        url: "{% url 'reset_table' %}",
+        dataType: 'json',
+        success: function (data){
+            $("#tbody").html("")
+            $.each(data, function(key, value){
+               $("#tbody").append(getTableString(key, value))
+            });
+            addButton();
+            updateCalc();
+        }
+    });
+});
+
+$("#abrechenform").on("click",".js_delete_row", function (){
+    $.ajax({
+        url: "{% url 'delete_row' %}",
+        dataType: 'json',
+        data: { 'id': $(this).attr('id')
+        },
+        success: function (data){
+            $.each(data, function(key, value){
+                $('#'+value).remove();
+                updateCalc();
+            });
+            
+        }
+    });
+});
+
+//style the delete buttons
+function addButton(){
+    $.each($(".js_delete_row"), function(){
+            $(this).css({ "cursor":"pointer"});
+            $(this).html(
+                '<i class="far fa-minus-square" style="font-size:15px;"></i>'
+            )
+    });
+};
+
+$(document).ready(function(){
+    addButton();
+    updateCalc();
+});
+
+//calculate the total amount of hours and money
+function updateCalc(){
+    var total = 0.0;
+    $(".js-count_hours").each(function(){
+        value = parseFloat($(this).text().replace(",", "."));
+        total += value;
+    });
+    $("#hours").html(total)
+    $("#total").html((total*parseFloat($("#tae").text())).toFixed(2) + ' €')
+}
+$("#abrechenform").on("change",".js_count_hours", function (){
+    updateCalc();
+});
+
+function sendTable(){
+    $(".js_datefield").each(function(){
+        var date = new Date($(this).val());
+        $(this).parent().html(date.getDate()+"."+(date.getMonth()+1)+"."+date.getFullYear());
+    });
+    $.ajax({
+        url: "{% url 'send_table' %}",
+        dataType: 'json',
+        data: { 
+            'html': $("#js_send_table").html()
+        },
+        success: function (data){
+            location.reload();
+            }
+    });
+};
+$(document).ready(function(){
+    $("#prob_button").click(function(){
+        $(this).html('<i class="fas fa-spinner fa-pulse"></i>');
+        setTimeout(function(){ 
+            $("#prob_button").html("Absenden");
+            }, 3000);
+        });
+});
+</script>
 
 {% endblock %}

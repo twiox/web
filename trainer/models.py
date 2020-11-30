@@ -1,4 +1,5 @@
 from django.db import models
+from members.models import Trainer, Group, Session
 from multiselectfield import MultiSelectField
 from PIL import Image
 from django.urls import reverse
@@ -13,3 +14,12 @@ class Education(models.Model):
     def get_absolute_url(self):
         return reverse('trainer')
 
+class Trainer_table(models.Model):
+    title = models.CharField(max_length=140)
+    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE)
+    
+class Table_entry(models.Model):
+    table = models.ForeignKey(Trainer_table, blank=True, null=True, on_delete=models.SET_NULL)
+    date = models.DateTimeField(blank=True, null=True)
+    session = models.ForeignKey(Session,blank=True, null=True, on_delete=models.SET_NULL)
+    notes = models.TextField(blank=True, null=True)

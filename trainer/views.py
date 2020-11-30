@@ -1,4 +1,6 @@
+from bs4 import BeautifulSoup
 from .forms import *
+from .models import Trainer_table, Table_entry
 from django.shortcuts import render, redirect
 from members.models import Trainer, Profile, Event, Message, Session, Group
 from django.contrib import messages
@@ -7,6 +9,10 @@ from django.views.generic import DeleteView, UpdateView, CreateView, ListView
 from django.urls import reverse
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.models import Group as Permission_group
+from django.http import JsonResponse
+from datetime import datetime
+from django.core.mail import EmailMessage
+from django.conf import settings
 
 
 def trainer_index(request):
@@ -23,7 +29,90 @@ def trainer_index(request):
  
 
 def abrechnungstable(request):
-    return render(request, "trainer/abrechnung_form.html", context={})
+    table, _ = Trainer_table.objects.get_or_create(trainer=request.user.trainer)
+    sessions = Session.objects.filter(trainer=request.user.trainer)
+    if(request.GET.get('reset', '')=="true"):
+        Table_entry.objects.filter(table=table).all().delete()
+        for sess in sessions.all():
+            try:
+                temp, created = Table_entry.objects.get_or_create(table=table, session=sess)
+            except Table_entry.MultipleObjectsReturned:
+                pass
+
+    entries = Table_entry.objects.filter(table=table).all()
+    return render(request, "trainer/abrechnung_form.html", context={"table":table, "entries":entries})
+
+### JQUERY AJAX STUFF ###
+
+def reset_table(request):
+    table = Trainer_table.objects.get(trainer=request.user.trainer)
+    sessions = Session.objects.filter(trainer=request.user.trainer)
+    Table_entry.objects.filter(table=table).all().delete()
+    for sess in sessions.all():
+        try:
+            temp, created = Table_entry.objects.get_or_create(table=table, session=sess)
+        except Table_entry.MultipleObjectsReturned:
+            pass
+    entries = Table_entry.objects.filter(table=table).all()
+    data = {}
+    for obj in entries:
+        data[obj.pk] = {
+            "day":obj.session.day,
+            "start_time":obj.session.start_time.strftime("%H:%M"),
+            "end_time":obj.session.end_time.strftime("%H:%M"),
+            "group":obj.session.group.group_id,
+        }
+    return JsonResponse(data)
+    
+    
+def add_week(request):
+    table = Trainer_table.objects.get(trainer=request.user.trainer)
+    sessions = Session.objects.filter(trainer=request.user.trainer)
+
+    entries = []
+    data = {}
+    for sess in sessions.all():
+        temp = Table_entry.objects.create(table=table, session=sess)
+        entries.append(temp)
+
+    for obj in entries:
+        data[obj.pk] = {
+            "day":obj.session.day,
+            "start_time":obj.session.start_time.strftime("%H:%M"),
+            "end_time":obj.session.end_time.strftime("%H:%M"),
+            "group":obj.session.group.group_id,
+        }
+    return JsonResponse(data)
+
+def delete_row(request):
+    _,_,pk = request.GET.get('id', None).split("_")
+    Table_entry.objects.filter(id=pk).delete()
+    row_id = f"js_row_{pk}"
+    data = {'row':row_id}
+    return JsonResponse(data)
+
+def send_table(request):
+    html = request.GET.get('html', None)
+    soup = BeautifulSoup(html)
+    trainer = soup.find(id="js_trainerdata")
+    entries = soup.find(id="abrechenform")
+    summary = soup.find(id="js_summary")
+    data = {
+        "trainer":trainer.text.strip().replace("\n",","),
+        "entries":entries.text.strip().replace("\n\n\n\n",";").replace("\n",",").replace(";","\n"),
+        "summary":summary.text.strip().replace("\n",",")
+    }
+    
+    mail_subject="Trainerabrechnungstabelle"
+    message= "\n\n".join(data.values())
+    to_email = settings.TO_EMAIL
+    email=EmailMessage(mail_subject, message, to=[to_email])
+    email.send()
+    messages.add_message(request, messages.SUCCESS, 'Abrechnungstabelle verschickt')
+    
+    return JsonResponse(data)
+
+#### More views ####
 
 class TrainerListView(LoginRequiredMixin, ListView):
     model = Trainer

@@ -376,6 +376,20 @@ table{
         height:20px;
     }
 }
+#abrechenform{
+    border-collapse: collapse;
+    th, td{
+        border: 1px solid $primary;
+        text-align: left;
+    }
+    tr{ 
+        border: 1px solid $primary;
+        height:10px;
+    }
+    input{
+        background-color: $secondary_bg;
+    }
+}
 #Kündigung{
     background-color:black;
 }

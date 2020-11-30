@@ -9,9 +9,61 @@
 <br>
 <h3> Deine Daten </h3>
 <div class="padding_all_small">
-    <div class="tertiary_bg padding_all_big">
-        <p>{{request.user.first_name}} {{request.user.last_name}}</p>
-        <p>Rest comes soon</p>
+    <div class="" style="display:flex; justify-content:left; flex-wrap:wrap;">
+        <div class="col-20 padding_all_big tertiary_bg">
+            <img src="{{request.user.trainer.image.url}}" class="team_picture" style="border-radius:50%;">
+        </div>
+        <div class="col-80 padding_all_small tertiary_bg">
+            <h3>{{request.user.first_name}} {{request.user.last_name}}</h3>
+            <br>
+            <table>
+                <tr><td><strong>Telefon:</strong></td> <td>{{request.user.trainer.trainer_telnr}}</td></tr>
+                <tr><td><strong>Email:</strong></td> <td>{{request.user.trainer.trainer_email}}</td></tr>
+                {% if request.user.trainer.license_number %}
+                <td><strong>Lizenznr.:</strong></td> <td>{{request.user.trainer.license_number}}</td></tr>
+                {% endif %}
+                {% if request.user.trainer.license_valid %}
+                <td><strong>Gültigkeit:</strong></td> <td>{{request.user.trainer.license_valid|date:"d.m.Y"}}</td></tr>
+                {% endif %}
+                {% if request.user.trainer.salary %}
+                <td><strong>TAE:</strong></td> <td>{{request.user.trainer.salary}} €/h</td></tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+    <div> 
+        <ul style="display:flex; justify-content:left; flex-wrap:wrap;">
+            {%if request.user.trainer.contract %}
+            <li class="padding_tb_small col-4">
+                <a class="download tertiary_bg prim_hover padding_all_small" href="{{request.user.trainer.contract.url}}">
+                    <p class="padding_rl_small">Dein aktueller Vertrag</p>
+                    <div class="flex_center_vertical">
+                        <i class="fas fa-file-download padding_rl_small"></i>
+                    </div>
+                </a>
+            </li>
+            {% endif %}
+            {%if request.user.trainer.license %}
+            <li class="padding_tb_small col-4">
+                <a class="download tertiary_bg prim_hover padding_all_small" href="{{request.user.trainer.licence.url}}">
+                    <p class="padding_rl_small">Deine Lizenz</p>
+                    <div class="flex_center_vertical">
+                        <i class="fas fa-file-download padding_rl_small"></i>
+                    </div>
+                </a>
+            </li>
+            {% endif %}
+            {%if request.user.trainer.codex %}
+            <li class="padding_tb_small col-4">
+                <a class="download tertiary_bg prim_hover padding_all_small" href="{{request.user.trainer.codex.url}}">
+                    <p class="padding_rl_small">Dein Ehrenkodex</p>
+                    <div class="flex_center_vertical">
+                        <i class="fas fa-file-download padding_rl_small"></i>
+                    </div>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
     </div>
 </div>
 <h3> Deine Einheiten </h3>
