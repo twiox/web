@@ -15,7 +15,7 @@
 
 <div class="side_scroll" id="js_send_table">
     <table id="js_trainerdata">
-        <tr><td>Name:</td><td>{{request.user.first_name}} {{request.user.last_name}}</td></tr>
+        <tr><td>Name: </td><td>{{request.user.first_name}} {{request.user.last_name}}</td></tr>
         {% if request.user.trainer.license_number %}
         <tr><td>Lizenznummer: </td><td>{{request.user.trainer.license_number}}</td></tr>
         <tr><td>Gültigkeit: </td><td>{{request.user.trainer.license_valid|date:"d.m.Y"}}</td></tr>
@@ -24,7 +24,7 @@
     <br>
     <table id="abrechenform">
         <thead>
-            <tr>
+            <tr id="bs4_header">
                 <th><strong>Datum</strong></th>
                 <th><strong>Wochentag</strong></th>
                 <th><strong>Gruppe</strong></th>
@@ -37,7 +37,7 @@
         </thead>
         <tbody id="tbody">
             {% for entry in entries %}
-            <tr id="js_row_{{entry.pk}}">
+            <tr id="js_row_{{entry.pk}}" class="bs4_body">
                 <td contenteditable='true'><input type="date" class="js_datefield"></td>
                 <td contenteditable='true'>{{entry.session.day}}</td>
                 <td contenteditable='true'>{{entry.session.group.group_id}}</td>
@@ -54,9 +54,9 @@
     <div style="text-align:left;">
         <h4> Abrechnung: </h4>
         <table id="js_summary">
-        <tr><td>Stunden gesamt:</td><td id="hours"></td></tr>
+        <tr><td>Stunden gesamt: </td><td id="hours"></td></tr>
         <tr><td>TAE/Stunde: </td><td id="tae">{{request.user.trainer.salary}} €</td></tr>
-        <tr><td><strong>Gesamt:</strong></td><td><strong id="total"></strong></td></tr>
+        <tr><td><strong>Gesamt: </strong></td><td><strong id="total"></strong></td></tr>
         </table>
     </div>
 
@@ -66,15 +66,15 @@
 
 <script type="text/javascript">
 function getTableString(key,value){
-    return '<tr id="js_row_'+key+'">'+
-    '<td contenteditable="true"><input type="date" class="js_datefield"></td>' + 
-    '<td contenteditable="true"> ' + value.day + '</td>' +
-    '<td contenteditable="true"> ' + value.group + '</td>' +
-    '<td contenteditable="true"> ' + value.start_time + '</td>' + 
-    '<td contenteditable="true"> ' + value.end_time + '</td>' + 
-    '<td contenteditable="true" class="js-count_hours" onkeyup="javascript:updateCalc();"> ' +2+ '</td>' + 
-    '<td contenteditable="true"> </td>'+
-    '<td><a class="js_delete_row" id="js_entry_'+key+'"> </a></td></tr>'
+    return '<tr id="js_row_'+key+'"class="bs4_body">\n'+
+    '<td contenteditable="true"><input type="date" class="js_datefield"> </td>\n' + 
+    '<td contenteditable="true"> '+ value.day +' </td>\n' +
+    '<td contenteditable="true"> '+ value.group +' </td>\n' +
+    '<td contenteditable="true"> '+ value.start_time +' </td>\n' + 
+    '<td contenteditable="true"> '+ value.end_time +' </td>\n' + 
+    '<td contenteditable="true" class="js-count_hours" onkeyup="javascript:updateCalc();"> '+ 2 +' </td>\n' + 
+    '<td contenteditable="true"> </td>\n'+
+    '<td><a class="js_delete_row" id="js_entry_'+key+'"> </a></td></tr>\n'
     }
 
 $("#add_week").click(function (){

@@ -14,7 +14,7 @@ from datetime import datetime
 from django.core.mail import EmailMessage
 from django.conf import settings
 
-
+@login_required
 def trainer_index(request):
     """ I just assume for the moment, that the user is a trainer """
     trainer_sessions = Session.objects.filter(trainer=Trainer.objects.get(user=request.user))
@@ -27,7 +27,7 @@ def trainer_index(request):
          }
             )
  
-
+@login_required
 def abrechnungstable(request):
     table, _ = Trainer_table.objects.get_or_create(trainer=request.user.trainer)
     sessions = Session.objects.filter(trainer=request.user.trainer)
@@ -93,20 +93,29 @@ def delete_row(request):
 
 def send_table(request):
     html = request.GET.get('html', None)
-    soup = BeautifulSoup(html)
+    soup = BeautifulSoup(html, features="html.parser")
     trainer = soup.find(id="js_trainerdata")
-    entries = soup.find(id="abrechenform")
+    header = soup.find(id="bs4_header")
+    entries = soup.find_all("tr", {"class":"bs4_body"})
     summary = soup.find(id="js_summary")
     data = {
-        "trainer":trainer.text.strip().replace("\n",","),
-        "entries":entries.text.strip().replace("\n\n\n\n",";").replace("\n",",").replace(";","\n"),
-        "summary":summary.text.strip().replace("\n",",")
+        "Datum":f"{datetime.today().strftime('%d.%m.%Y')}",
+        "Trainer":trainer.text.strip(),
+        "Einheiten": "\n".join([
+            header.text.strip().replace("\n","\t").replace("Aktion",""),
+            "\n".join([
+                x.text.strip().replace("\n","\t") for x in entries]),
+            ]),
+        "Abrechnung":summary.text.strip().replace("\n","\t")
     }
     
-    mail_subject="Trainerabrechnungstabelle"
-    message= "\n\n".join(data.values())
+    mail_subject=f"{datetime.today().strftime('%d.%m.%Y')}_Abrechnung_{request.user.first_name}_{request.user.last_name}"
+    message= f"Trainerabrechnung von {request.user.first_name} {request.user.last_name}"
     to_email = settings.TO_EMAIL
-    email=EmailMessage(mail_subject, message, to=[to_email])
+    with open(f"media/trainer_tables/{datetime.today().strftime('%d.%m.%Y')}_Abrechnung_{request.user.first_name}.txt", "w") as outfile:
+        print("\n--------\n".join(data.values()), file=outfile)
+    email=EmailMessage(mail_subject, message, to=[to_email], cc=[request.user.trainer.trainer_email])
+    email.attach_file(f"media/trainer_tables/{datetime.today().strftime('%d.%m.%Y')}_Abrechnung_{request.user.first_name}.txt")
     email.send()
     messages.add_message(request, messages.SUCCESS, 'Abrechnungstabelle verschickt')
     
