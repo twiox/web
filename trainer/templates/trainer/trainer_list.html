@@ -19,35 +19,32 @@
             {% endif %}
         </div>
     </div>
+    
     <div style="display:flex; flex-wrap:wrap;">
         {% for object in object_list %}
         <div class="col-5 padding_all_small" id="container">
-            <div class="padding_all_small tertiary_bg person_wrapper">
+            <div class="flex_center_vertical tertiary_bg padding_all_small">
+                <h3>{{object.user.first_name}} {{object.user.last_name}}</h3>
+                <div style="display:flex;flex-wrap:wrap; justify-content:left;">
+                    <div class="chair_col-5 padding_all_small person_info">
+                        <h4>Kontaktdaten</h4>
+                        <p> {{object.trainer_telnr}} </p>
+                        <p> {{object.trainer_email}} </p>
+                    </div>
+                    <div class="chair_col-5 padding_all_small person_info">
+                        <h4>Trainerinfo</h4>
+                         {% if object.license_number%}
+                        <p> {{object.license_number}} </p>
+                        <p> {{object.license_valid}} </p>
+                        {% endif %}
+                    </div>
+                </div>
                 <div class="padding_all_med trainer_ui">
                     {% if perms.members.change_trainer %}
                     <a href="{% url 'trainer_update_form' object.id%}#nav" title="bearbeiten">
                         <i class="fas fa-pen-square" style="font-size:15px;"></i>
                     </a>
                     {% endif %}
-                </div>
-                <div class="chair_col-4 flex_center">
-                    <div class="flex_center_vertical">
-                        <div>
-                            <img class="round_profile_pic_chairman padding_all_small" src="{{object.image.url}}">
-                        </div>
-                    </div>
-                </div>
-                <div class="chair_col-5 padding_all_small person_info">
-                    <h3 class="padding_tb_small">{{object.user.first_name}} {{object.user.last_name}}</h3>
-                    <div>
-                        <p> {{object.trainer_telnr}} </p>
-                        <p> {{object.trainer_email}} </p>
-                        {% if object.license%}
-                        <p> {{object.license_level}} </p>
-                        <p> {{object.license}} </p>
-                        <p> {{object.license_valid}} </p>
-                        {% endif %}
-                    </div>
                 </div>
             </div>
         </div>

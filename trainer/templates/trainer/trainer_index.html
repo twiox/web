@@ -25,9 +25,6 @@
                 {% if request.user.trainer.license_valid %}
                 <td><strong>Gültigkeit:</strong></td> <td>{{request.user.trainer.license_valid|date:"d.m.Y"}}</td></tr>
                 {% endif %}
-                {% if request.user.trainer.salary %}
-                <td><strong>TAE:</strong></td> <td>{{request.user.trainer.salary}} €/h</td></tr>
-                {% endif %}
             </table>
         </div>
     </div>
