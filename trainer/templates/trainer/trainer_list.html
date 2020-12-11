@@ -2,8 +2,10 @@
 {%block content %}
 <h1>Trainerdokument</h1>
 <div style="display:flex; justify-content: left; flex-wrap:wrap;">
+        {% if request.user.trainer %}
         <a href="{% url 'trainer_index' %}" class="padding_all_small">Deine Daten</a>
         <a href="{% url 'abrechnung' %}" class="padding_all_small">Abrechnungstabelle</a>
+        {% endif %}
         <a href="{% url 'trainer_list' %}" class="padding_all_small here_I_am">Trainerübersicht</a>
 </div>
 <br>

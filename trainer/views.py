@@ -13,8 +13,13 @@ from django.http import JsonResponse
 from datetime import datetime
 from django.core.mail import EmailMessage
 from django.conf import settings
+from django.contrib.auth.decorators import user_passes_test
 
-@login_required
+def trainer_check(user):
+    return hasattr(user, "trainer")
+
+
+@user_passes_test(trainer_check)
 def trainer_index(request):
     """ I just assume for the moment, that the user is a trainer """
     trainer_sessions = Session.objects.filter(trainer=Trainer.objects.get(user=request.user))
@@ -27,7 +32,7 @@ def trainer_index(request):
          }
             )
  
-@login_required
+@user_passes_test(trainer_check)
 def abrechnungstable(request):
     table, _ = Trainer_table.objects.get_or_create(trainer=request.user.trainer)
     sessions = Session.objects.filter(trainer=request.user.trainer)
@@ -149,7 +154,7 @@ def register_trainer(request):
                 trainer_group.save()
                 user.save()
                 new_trainer.save()
-                messages.add_message(request, messages.SUCCESS, "Trainer angelegt. Gruppe wurde auf 'T' gesetzt")
+                messages.add_message(request, messages.SUCCESS, "Trainer angelegt. Gruppe wurde auf T gesetzt")
                 return redirect("register_trainer")
         else:
             return render(request, 'trainer/trainer_form.html', context={'form': form})

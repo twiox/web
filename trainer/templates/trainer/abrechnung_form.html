@@ -68,7 +68,7 @@
 function getTableString(key,value){
     return '<tr id="js_row_'+key+'"class="bs4_body">\n'+
     '<td contenteditable="true"><input type="date" class="js_datefield"> </td>\n' + 
-    '<td contenteditable="true"> '+ value.day +' </td>\n' +
+    '<td contenteditable="true"><input name="day'+counter+'">'+ value.day +' </td>\n' +
     '<td contenteditable="true"> '+ value.group +' </td>\n' +
     '<td contenteditable="true"> '+ value.start_time +' </td>\n' + 
     '<td contenteditable="true"> '+ value.end_time +' </td>\n' + 
@@ -84,6 +84,7 @@ $("#add_week").click(function (){
         success: function (data){
             $.each(data, function(key, value){
                 $("#tbody").append(getTableString(key, value))
+                counter++
             });
             addButton();
             updateCalc();
