@@ -11,9 +11,10 @@
 <div style="display:flex; justify-content:left; flex-wrap:wrap;" class="padding_tb_small">
     <div class="padding_all_small" ><a class="padding_all_small tertiary_bg" style="cursor: pointer" id='reset'>Reset</a></div>
     <div class="padding_all_small" ><a class="padding_all_small tertiary_bg" style="cursor: pointer" id="add_week">+1 Woche</a></div>
+    <div class="padding_all_small" ><a class="padding_all_small tertiary_bg" style="cursor: pointer" id="add_row">+1 Eintrag</a></div>
 </div>
 
-<div class="side_scroll" id="js_send_table">
+<div id="js_send_table">
     <table id="js_trainerdata">
         <tr><td>Name: </td><td>{{request.user.first_name}} {{request.user.last_name}}</td></tr>
         {% if request.user.trainer.license_number %}
@@ -22,60 +23,103 @@
         {% endif %}
     </table>
     <br>
-    <table id="abrechenform">
-        <thead>
-            <tr id="bs4_header">
-                <th><strong>Datum</strong></th>
-                <th><strong>Wochentag</strong></th>
-                <th><strong>Gruppe</strong></th>
-                <th><strong>Von</strong></th>
-                <th><strong>Bis</strong></th>
-                <th><strong>Dauer</strong></th>
-                <th><strong>Anmerkung</strong></th>
-                <th><strong>Aktion</strong></th>
-            </tr>
-        </thead>
-        <tbody id="tbody">
-            {% for entry in entries %}
-            <tr id="js_row_{{entry.pk}}" class="bs4_body">
-                <td contenteditable='true'><input type="date" class="js_datefield"></td>
-                <td contenteditable='true'>{{entry.session.day}}</td>
-                <td contenteditable='true'>{{entry.session.group.group_id}}</td>
-                <td contenteditable='true'>{{entry.session.start_time}}</td>
-                <td contenteditable='true'>{{entry.session.end_time}}</td>
-                <td contenteditable='true' onkeyup="javascript:updateCalc();" class="js-count_hours">2</td>
-                <td contenteditable='true'>{% if entry.notes %}{{entry.notes}}{% endif %}</td>
-                <td><a class="js_delete_row" id="js_entry_{{entry.pk}}"></a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <br>
-    <div style="text-align:left;">
-        <h4> Abrechnung: </h4>
-        <table id="js_summary">
-        <tr><td>Stunden gesamt: </td><td id="hours"></td></tr>
-        <tr><td>TAE/Stunde: </td><td id="tae">{{request.user.trainer.salary}} €</td></tr>
-        <tr><td><strong>Gesamt: </strong></td><td><strong id="total"></strong></td></tr>
-        </table>
-    </div>
+    <form method="POST">
+        {% csrf_token %}
+        <div  class="side_scroll"> 
+            <table id="abrechenform">
+                <thead>
+                    <tr id="bs4_header">
+                        <th><strong>Datum</strong></th>
+                        <th><strong>Wochentag</strong></th>
+                        <th><strong>Gruppe</strong></th>
+                        <th><strong>Von</strong></th>
+                        <th><strong>Bis</strong></th>
+                        <th><strong>Dauer</strong></th>
+                        <th><strong>Anmerkung</strong></th>
+                        <th><strong>Aktion</strong></th>
+                    </tr>
+                </thead>
+                <tbody id="tbody">
+                    {% for entry in entries %}
+                    <tr id="js_row_{{entry.pk}}" class="bs4_body">
+                        <input hidden name="id" value="{{entry.pk}}">
+                        <td><input name="date" type="date" value="{{entry.date|date:'Y-m-d'}}"></td>
+                        <td><input name="day" value="{{entry.day}}"></td>
+                        <td><input name="group" value="{{entry.group}}"></td>
+                        <td><input name="start" type="time" value="{{entry.start}}"></td>
+                        <td><input name="end" type="time" value="{{entry.end}}"></td>
+                        <td><input name="dur" onkeyup="javascript:updateCalc();" class="js-count_hours" value=2></td>
+                        <td><input name="notes" type="text" value="{{entry.notes}}"></td>
+                        <td><a class="js_delete_row" id="js_entry_{{entry.pk}}"></a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <br>
+        <div style="text-align:left;">
+            <h4> Abrechnung: </h4>
+            <table id="js_summary">
+            <tr><td>Stunden gesamt: </td><td id="hours"></td></tr>
+            <tr><td>TAE/Stunde: </td><td id="tae">{{request.user.trainer.salary}} €</td></tr>
+            <tr><td><strong>Gesamt: </strong></td><td><strong id="total"></strong></td></tr>
+            </table>
+        </div>
 
-    <br>
-    <a id="prob_button" class="form_button" style="cursor: pointer;" onclick=sendTable()>Absenden</a>
+        <br>
+        <div style="display:flex; flex-direction:left">
+            <div class="padding_all_small">
+                <input type="button" id="prob_button" class="form_button" style="cursor: pointer;" name="send" onclick=sendData() value="Absenden">
+            </div>
+            <div class="padding_all_small">
+                <input type="button" class="form_button_simple" id="save" style="cursor: pointer;" name="save" onclick=saveData() value="Speichern">
+            </div>
+        </div>
+    </form>
 </div>
+<br>
+{% if tables %}
+<section class="padding_tb_small">
+    <h3> Archiv </h3>
+    {% for table in tables %}
+        {% if table.final_file and table.final_file.url %}
+            <a class="more_info_button" href="{{table.final_file.url}}">{{table.title}}</a><br>
+        {% endif %}
+    {% endfor %}
+</section>
+{% endif %}
 
 <script type="text/javascript">
-function getTableString(key,value){
+function getTableString(key,value,counter){
     return '<tr id="js_row_'+key+'"class="bs4_body">\n'+
-    '<td contenteditable="true"><input type="date" class="js_datefield"> </td>\n' + 
-    '<td contenteditable="true"><input name="day'+counter+'">'+ value.day +' </td>\n' +
-    '<td contenteditable="true"> '+ value.group +' </td>\n' +
-    '<td contenteditable="true"> '+ value.start_time +' </td>\n' + 
-    '<td contenteditable="true"> '+ value.end_time +' </td>\n' + 
-    '<td contenteditable="true" class="js-count_hours" onkeyup="javascript:updateCalc();"> '+ 2 +' </td>\n' + 
-    '<td contenteditable="true"> </td>\n'+
+    '<input hidden name="id" value="'+key+'">\n'+
+    '<td><input name="date" type="date"></td>\n' + 
+    '<td><input name="day" value="'+ value.day +'"></td>\n' +
+    '<td><input name="group" value="'+ value.group +'"></td>\n' +
+    '<td><input name="start" type="time" value="'+ value.start_time +'"></td>\n' + 
+    '<td><input name="end" type="time" value="'+ value.end_time +'"></td>\n' + 
+    '<td><input name="dur" value="2" onkeyup="javascript:updateCalc();" class="js-count_hours"></td>\n' + 
+    '<td><input name="notes" value="'+value.notes+'"></td>\n'+
     '<td><a class="js_delete_row" id="js_entry_'+key+'"> </a></td></tr>\n'
     }
+
+function saveData(){
+    $.post(
+        "{% url 'save_entries' %}",
+        $("form").serialize(),
+        function(data){
+            alert("Deine Daten sind gespeichert");
+    });
+}
+
+function sendData(){
+    $.post(
+        "{% url 'send_table' %}",
+        $("form").serialize(),
+        function(data){
+            location.reload(true);
+    });
+}
 
 $("#add_week").click(function (){
     $.ajax({
@@ -84,13 +128,28 @@ $("#add_week").click(function (){
         success: function (data){
             $.each(data, function(key, value){
                 $("#tbody").append(getTableString(key, value))
-                counter++
             });
+            location.reload();
             addButton();
             updateCalc();
         }
     });
 });
+$("#add_row").click(function (){
+    $.ajax({
+        url: "{% url 'add_row' %}",
+        dataType: 'json',
+        success: function (data){
+            $.each(data, function(key, value){
+                $("#tbody").append(getTableString(key, value))
+            });
+            location.reload();
+            addButton();
+            updateCalc();
+        }
+    });
+});
+
 //delete all entries and start with initial sessions
 $("#reset").click(function (){
     $.ajax({
@@ -101,6 +160,7 @@ $("#reset").click(function (){
             $.each(data, function(key, value){
                $("#tbody").append(getTableString(key, value))
             });
+            location.reload();
             addButton();
             updateCalc();
         }
@@ -142,32 +202,17 @@ $(document).ready(function(){
 function updateCalc(){
     var total = 0.0;
     $(".js-count_hours").each(function(){
-        value = parseFloat($(this).text().replace(",", "."));
+        value = parseFloat($(this).val().replace(",", "."));
         total += value;
     });
     $("#hours").html(total)
     $("#total").html((total*parseFloat($("#tae").text())).toFixed(2) + ' €')
 }
+
 $("#abrechenform").on("change",".js_count_hours", function (){
     updateCalc();
 });
 
-function sendTable(){
-    $(".js_datefield").each(function(){
-        var date = new Date($(this).val());
-        $(this).parent().html(date.getDate()+"."+(date.getMonth()+1)+"."+date.getFullYear());
-    });
-    $.ajax({
-        url: "{% url 'send_table' %}",
-        dataType: 'json',
-        data: { 
-            'html': $("#js_send_table").html()
-        },
-        success: function (data){
-            location.reload();
-            }
-    });
-};
 $(document).ready(function(){
     $("#prob_button").click(function(){
         $(this).html('<i class="fas fa-spinner fa-pulse"></i>');

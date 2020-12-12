@@ -115,7 +115,16 @@ class Trainer(models.Model):
             img = img.crop((0+cut, 0, img.width-cut, img.height))
             img2 = img.resize((720,720))
             img2.save(self.image.path)
-
+    
+    def trainer_info(self):
+        info = [f"Trainer:\t{self.user.first_name} {self.user.last_name}"]
+        if self.license_number:
+            info.append(f"Lizenznummer:\t{self.license_number}")
+        if self.license_valid:
+            info.append(f"Gültigkeit:\t{self.license_valid.strftime('%d.%m.%Y')}")
+    
+        return "\n".join(info)
+    
 class Session(models.Model):
 
     group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name = u"Gruppe",blank=True, null=True,)

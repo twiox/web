@@ -188,6 +188,21 @@ $padding_small: 10px;
         background-color:$secondary_hover;
     }
 }
+.form_button_simple{
+    color:white;
+    background-color:inherit;
+    padding: $padding_small;
+    display:block;
+    border: 2px solid $primary;
+    border-radius:5px;
+    width: 100px;
+    height:44px;;
+    &:hover{
+        background-color:$primary_hover;
+    }
+    
+}
+
 .more_info_button{
     color:$primary;
     &:hover{
