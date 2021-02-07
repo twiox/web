@@ -14,5 +14,4 @@ else
     echo "-- Not first container startup --"
 fi
 
-pip install gunicorn
 gunicorn twio_web.wsgi:application --bind 0.0.0.0:8000
