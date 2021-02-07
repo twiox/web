@@ -1,0 +1,45 @@
+{% extends 'members/base.html' %}
+{% block navbar2 %} 
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'abrechnung' %}#nav">
+        Abrechnungstabelle </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Details </a>
+</div>
+{% endblock %}
+{% block content %}
+<h1>Trainerdokument</h1>
+<br>
+<h3> {{object.title}} </h3>
+    <div class="side_scroll padding_all_small">
+        <table id="abrechenform">
+            <thead>
+                <tr id="bs4_header">
+                    <th style="display:None;">PK</th>
+                    <th><strong>Datum</strong></th>
+                    <th><strong>Wochentag</strong></th>
+                    <th><strong>Gruppe</strong></th>
+                    <th><strong>Von</strong></th>
+                    <th><strong>Bis</strong></th>
+                    <th><strong>Dauer</strong></th>
+                    <th><strong>Anmerkung</strong></th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+                {% for entry in object.table_entry_set.all %}
+                <tr id="js_row_{{entry.pk}}" class="bs4_body">
+                    <td style="display:None;"><input hidden name="id" value="{{entry.pk}}"></td>
+                    <td><input name="date" type="date" value="{{entry.date|date:'Y-m-d'}}" required></td>
+                    <td><input name="day" value="{{entry.day}}" required></td>
+                    <td><input name="group" value="{{entry.group}}" required></td>
+                    <td><input name="start" type="time" value="{{entry.start}}" required></td>
+                    <td><input name="end" type="time" value="{{entry.end}}" required></td>
+                    <td><input name="dur" onkeyup="javascript:updateCalc();" class="js-count_hours" value=2 required></td>
+                    <td><input name="notes" type="text" value="{{entry.notes}}"></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

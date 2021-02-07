@@ -23,12 +23,13 @@
         {% endif %}
     </table>
     <br>
-    <form method="POST">
+    <form method="POST" id="trainer_form">
         {% csrf_token %}
         <div  class="side_scroll"> 
             <table id="abrechenform">
                 <thead>
                     <tr id="bs4_header">
+                        <th style="display:None;">PK</th>
                         <th><strong>Datum</strong></th>
                         <th><strong>Wochentag</strong></th>
                         <th><strong>Gruppe</strong></th>
@@ -42,13 +43,13 @@
                 <tbody id="tbody">
                     {% for entry in entries %}
                     <tr id="js_row_{{entry.pk}}" class="bs4_body">
-                        <input hidden name="id" value="{{entry.pk}}">
-                        <td><input name="date" type="date" value="{{entry.date|date:'Y-m-d'}}"></td>
-                        <td><input name="day" value="{{entry.day}}"></td>
-                        <td><input name="group" value="{{entry.group}}"></td>
-                        <td><input name="start" type="time" value="{{entry.start}}"></td>
-                        <td><input name="end" type="time" value="{{entry.end}}"></td>
-                        <td><input name="dur" onkeyup="javascript:updateCalc();" class="js-count_hours" value=2></td>
+                        <td style="display:None;"><input hidden name="id" value="{{entry.pk}}"></td>
+                        <td><input class="date" name="date" type="date" value="{{entry.date|date:'Y-m-d'}}" required></td>
+                        <td><input name="day" value="{{entry.day}}" required></td>
+                        <td><input name="group" value="{{entry.group}}" required></td>
+                        <td><input name="start" type="time" value="{{entry.start}}" required></td>
+                        <td><input name="end" type="time" value="{{entry.end}}" required></td>
+                        <td><input name="dur" onkeyup="javascript:updateCalc();" class="js-count_hours" value=2 required></td>
                         <td><input name="notes" type="text" value="{{entry.notes}}"></td>
                         <td><a class="js_delete_row" id="js_entry_{{entry.pk}}"></a></td>
                     </tr>
@@ -58,14 +59,13 @@
         </div>
         <br>
         <div style="text-align:left;">
-            <h4> Abrechnung: </h4>
+            <h4>Zusammenfassung:</h4>
             <table id="js_summary">
             <tr><td>Stunden gesamt: </td><td id="hours"></td></tr>
             <tr><td>TAE/Stunde: </td><td id="tae">{{request.user.trainer.salary}} €</td></tr>
             <tr><td><strong>Gesamt: </strong></td><td><strong id="total"></strong></td></tr>
             </table>
         </div>
-
         <br>
         <div style="display:flex; flex-direction:left">
             <div class="padding_all_small">
@@ -82,9 +82,7 @@
 <section class="padding_tb_small">
     <h3> Archiv </h3>
     {% for table in tables %}
-        {% if table.final_file and table.final_file.url %}
-            <a class="more_info_button" href="{{table.final_file.url}}">{{table.title}}</a><br>
-        {% endif %}
+        <a class="more_info_button" href="{% url 'abrechnung_detail' table.id %}">{{table.title}}</a><br>
     {% endfor %}
 </section>
 {% endif %}
@@ -92,32 +90,58 @@
 <script type="text/javascript">
 function getTableString(key,value,counter){
     return '<tr id="js_row_'+key+'"class="bs4_body">\n'+
-    '<input hidden name="id" value="'+key+'">\n'+
-    '<td><input name="date" type="date"></td>\n' + 
-    '<td><input name="day" value="'+ value.day +'"></td>\n' +
-    '<td><input name="group" value="'+ value.group +'"></td>\n' +
-    '<td><input name="start" type="time" value="'+ value.start_time +'"></td>\n' + 
-    '<td><input name="end" type="time" value="'+ value.end_time +'"></td>\n' + 
-    '<td><input name="dur" value="2" onkeyup="javascript:updateCalc();" class="js-count_hours"></td>\n' + 
+    '<td style="display:None;"><input hidden name="id" value="'+key+'"></td>\n'+
+    '<td><input class="date" name="date" type="date" required onkeyup="javascript:updateDay();"></td>\n' + 
+    '<td><input name="day" value="'+ value.day +'" required></td>\n' +
+    '<td><input name="group" value="'+ value.group +'" required></td>\n' +
+    '<td><input name="start" type="time" value="'+ value.start_time +'" required></td>\n' + 
+    '<td><input name="end" type="time" value="'+ value.end_time +'" required></td>\n' + 
+    '<td><input name="dur" value="2" onkeyup="javascript:updateCalc();" class="js-count_hours" required></td>\n' + 
     '<td><input name="notes" value="'+value.notes+'"></td>\n'+
     '<td><a class="js_delete_row" id="js_entry_'+key+'"> </a></td></tr>\n'
     }
 
+function validate(){
+    $("input:required").each(function(){
+        if(this.value === ""){
+            $(this).css("backgroundColor","#7b1b42")
+        }
+    });
+    setTimeout(function(){
+        $("input:required").each(function(){
+            if(this.value === ""){
+                $(this).css("backgroundColor","inherit");
+            }
+        })
+    }, 1000);
+}
+
 function saveData(){
+    validate()
     $.post(
         "{% url 'save_entries' %}",
         $("form").serialize(),
         function(data){
-            alert("Deine Daten sind gespeichert");
+            if(data["data"]===true){
+                snackbar.labelText = "Daten wurden gespeichert";
+                snackbar.open()
+            }
     });
 }
 
 function sendData(){
+    validate()
     $.post(
         "{% url 'send_table' %}",
         $("form").serialize(),
         function(data){
-            location.reload(true);
+            if(data["data"]==true){
+                location.reload(true);
+            } else {
+                if(data["email"]==true){
+                    alert("Deine Email ist nicht korrekt")
+                }
+            }
     });
 }
 
@@ -129,12 +153,12 @@ $("#add_week").click(function (){
             $.each(data, function(key, value){
                 $("#tbody").append(getTableString(key, value))
             });
-            location.reload();
             addButton();
             updateCalc();
         }
     });
 });
+
 $("#add_row").click(function (){
     $.ajax({
         url: "{% url 'add_row' %}",
@@ -143,7 +167,6 @@ $("#add_row").click(function (){
             $.each(data, function(key, value){
                 $("#tbody").append(getTableString(key, value))
             });
-            location.reload();
             addButton();
             updateCalc();
         }
@@ -160,7 +183,6 @@ $("#reset").click(function (){
             $.each(data, function(key, value){
                $("#tbody").append(getTableString(key, value))
             });
-            location.reload();
             addButton();
             updateCalc();
         }
@@ -209,18 +231,19 @@ function updateCalc(){
     $("#total").html((total*parseFloat($("#tae").text())).toFixed(2) + ' €')
 }
 
-$("#abrechenform").on("change",".js_count_hours", function (){
-    updateCalc();
+$("#abrechenform").on("change",".date", function() {
+    var date = new Date( $(this).val());
+    var days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+    this.parentElement.nextElementSibling.firstChild.value = days[date.getDay()];
 });
 
-$(document).ready(function(){
-    $("#prob_button").click(function(){
+$("#prob_button").click(function(){
         $(this).html('<i class="fas fa-spinner fa-pulse"></i>');
         setTimeout(function(){ 
             $("#prob_button").html("Absenden");
             }, 3000);
-        });
 });
+
 </script>
 
 {% endblock %}

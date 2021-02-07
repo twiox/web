@@ -6,8 +6,8 @@ from django.core.files.base import ContentFile
 from django.shortcuts import render, redirect
 from members.models import Trainer, Profile, Event, Message, Session, Group
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.views.generic import DeleteView, UpdateView, CreateView, ListView
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
+from django.views.generic import DeleteView, UpdateView, CreateView, ListView, DetailView
 from django.urls import reverse
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.models import Group as Permission_group
@@ -18,10 +18,10 @@ from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
 import json
 import codecs
+import django
 
 def trainer_check(user):
     return hasattr(user, "trainer")
-
 
 @user_passes_test(trainer_check)
 def trainer_index(request):
@@ -71,7 +71,9 @@ def reset_table(request):
     return JsonResponse(data)
     
 def save_entries(request):
+    table = Trainer_table.objects.get(trainer=request.user.trainer, active=True)
     data = request.POST
+        
     for entry in zip(*[tuple(x[1]) for x in data.lists()][1:]):
         tab = Table_entry.objects.get(pk=entry[0])
         tab.date = entry[1]
@@ -81,7 +83,10 @@ def save_entries(request):
         tab.end = entry[5]
         tab.dur = entry[6]
         tab.notes = entry[7]
-        tab.save()
+        try:
+            tab.save()
+        except django.core.exceptions.ValidationError:
+            return JsonResponse({"data":False})
     return JsonResponse({"data":True})
 
 def add_week(request):
@@ -140,14 +145,19 @@ def send_email(table, hours):
     mail_subject=f"{datetime.today().strftime('%d.%m.%Y')}_Abrechnung_{user.first_name}_{user.last_name}"
     message= f"Trainerabrechnung von {user.first_name} {user.last_name}"
     to_email = settings.TO_EMAIL
-    email=EmailMessage(mail_subject, message, to=[to_email], cc=[table.trainer.trainer_email])
-    email.attach_file(table.final_file.path)
-    email.send()
-    return True
+    try:
+        email=EmailMessage(mail_subject, message, to=[to_email], cc=[table.trainer.trainer_email])
+        email.attach_file(table.final_file.path)
+        email.send()
+        table.final_file.delete()
+        return True
+    except ValueError:
+        return False
 
 def send_table(request):
     data = request.POST
     hours = 0
+    
     for entry in zip(*[tuple(x[1]) for x in data.lists()][1:]):
         tab = Table_entry.objects.get(pk=entry[0])
         tab.date = entry[1]
@@ -158,19 +168,31 @@ def send_table(request):
         tab.dur = entry[6]
         hours += float(entry[6].replace(",","."))
         tab.notes = entry[7]
-        tab.save()
+        try:
+            tab.save()
+        except django.core.exceptions.ValidationError:
+            return JsonResponse({"data":False, "email":False})
     
     table = Trainer_table.objects.get(trainer=request.user.trainer, active=True)
-    table.active = False
     table.title = f"Abrechnung_{datetime.today().strftime('%d.%m.%Y')}_{request.user.first_name}_{request.user.last_name}"
     table.final_file.save(f"{datetime.today().strftime('%Y-%m-%d')}_Abrechnung_{request.user.first_name}_{request.user.last_name}.txt", ContentFile("Trainerabrechnung"))
     table.save()
     if send_email(table, hours):
         messages.add_message(request, messages.SUCCESS, 'Abrechnungstabelle verschickt')
-    
-    return JsonResponse({"data":True})
+        table.active = False
+        table.save()
+        return JsonResponse({"data":True})
+    else:
+        return JsonResponse({"data":False, "email":True})
 
 #### More views ####
+
+class AbrechnungstableDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    model = Trainer_table
+    
+    def test_func(self):
+        table = self.get_object()
+        return hasattr(self.request.user,"chairman") or table.trainer == request.user.trainer
 
 class TrainerListView(LoginRequiredMixin, ListView):
     model = Trainer

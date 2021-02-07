@@ -1,0 +1,12 @@
+{% extends 'members/base.html' %}
+{% block content %}
+<h1>Trainerdokument</h1>
+<div style="display:flex; justify-content: left; flex-wrap:wrap;">
+        <a href="{% url 'trainer_index' %}" class="padding_all_small here_I_am">Deine Daten</a>
+        <a href="{% url 'abrechnung' %}" class="padding_all_small">Abrechnungstabelle</a>
+        <a href="{% url 'trainer_list' %}" class="padding_all_small">Trainerübersicht</a>
+</div>
+<br>
+<h3> Deine Abrechnung </h3>
+
+{% endblock %}

@@ -31,7 +31,7 @@
     <div> 
         <ul style="display:flex; justify-content:left; flex-wrap:wrap;">
             {%if request.user.trainer.contract %}
-            <li class="padding_tb_small col-4">
+            <li class="padding_all_small col-4">
                 <a class="download tertiary_bg prim_hover padding_all_small" href="{{request.user.trainer.contract.url}}">
                     <p class="padding_rl_small">Dein aktueller Vertrag</p>
                     <div class="flex_center_vertical">
@@ -41,7 +41,7 @@
             </li>
             {% endif %}
             {%if request.user.trainer.license %}
-            <li class="padding_tb_small col-4">
+            <li class="padding_all_small col-4">
                 <a class="download tertiary_bg prim_hover padding_all_small" href="{{request.user.trainer.licence.url}}">
                     <p class="padding_rl_small">Deine Lizenz</p>
                     <div class="flex_center_vertical">
@@ -51,7 +51,7 @@
             </li>
             {% endif %}
             {%if request.user.trainer.codex %}
-            <li class="padding_tb_small col-4">
+            <li class="padding_all_small col-4">
                 <a class="download tertiary_bg prim_hover padding_all_small" href="{{request.user.trainer.codex.url}}">
                     <p class="padding_rl_small">Dein Ehrenkodex</p>
                     <div class="flex_center_vertical">
