@@ -1,4 +1,3 @@
-from bs4 import BeautifulSoup
 from .forms import *
 from .models import Trainer_table, Table_entry
 from django.core.files import File
@@ -192,7 +191,7 @@ class AbrechnungstableDetailView(LoginRequiredMixin, UserPassesTestMixin, Detail
     
     def test_func(self):
         table = self.get_object()
-        return hasattr(self.request.user,"chairman") or table.trainer == request.user.trainer
+        return hasattr(self.request.user,"chairman") or table.trainer == self.request.user.trainer
 
 class TrainerListView(LoginRequiredMixin, ListView):
     model = Trainer
