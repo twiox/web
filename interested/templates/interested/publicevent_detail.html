@@ -1,0 +1,99 @@
+{% extends "members/base.html" %}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'interested_index' %}#Events">
+        Interessierte </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> {{object.title}} </a>
+    {% if perms.interested.change_publicevent %}
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_participant_list' object.slug %}">
+        Anmeldungen </a>
+    {% endif %}
+</div>
+{% endblock %}
+{% block header_picture %}
+<div class="image_wrapper2 grey_cover2 pic1cont" id="container">
+    <img src="{{object.header_picture.url}}" id="home_view">
+    <script type="text/javascript">
+        $("document").ready(function(){
+            var ele = document.getElementsByClassName("pic1cont")[0].getBoundingClientRect()
+            var pic = window.pageYOffset + ele.top
+            var win = window.pageYOffset
+            document.getElementById("home_view").style.top =(pic-win)*-0.15+"px";
+        });
+        window.addEventListener('scroll',function(){
+            var ele = document.getElementsByClassName("pic1cont")[0].getBoundingClientRect()
+            var pic = window.pageYOffset + ele.top
+            var win = window.pageYOffset
+            document.getElementById("home_view").style.top =(pic-win)*-0.15+"px";
+        });
+    </script>
+    {% if not object.info_only %}
+        {% if not object.deadline_reached %}
+        <div class="flex_center_vertical">
+            <a href="{% url 'event_participant_create' object.slug %}#nav" class="flex_center" style="z-index:5; text-align:center;">
+                <span class="form_button_simple_big">Anmelden</span>
+            </a>
+        </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
+{% block content %}
+    <section>
+        <h1>{{object.title}}</h1>
+        <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
+            <div class="trainer_ui">
+                {% if perms.interested.change_event %}
+                <a href="{% url 'public_event_change' object.pk  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+                {% endif %}
+                {% if perms.interested.delete_pulicevent %}
+                <a href="{% url 'public_event_delete' object.pk %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
+                {% endif %}
+            </div>
+            <div class="tertiary_bg chair_col-20 padding_all_big">
+                <h3>{{object.place}}</h3>
+                <div class="padding_tb_small">
+                    <p style="font-size:21px;">{{object.start_date|date:'d.m.Y, H:i'}} - {{object.end_date|date:'d.m.Y, H:i'}}</h4>
+                    <h4>Kosten: {{object.base_costs}} € </h4>
+                </div>
+            </div>
+            <div class="chair_col-80 tertiary_bg padding_all_big">
+                <div class="markdown">
+                    {{object.description_rendered|safe}}
+                </div>
+            </div>
+        </div>
+        <br>
+        {% if not object.info_only %}
+            <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
+                {% if not object.deadline_reached %}
+                <div class="padding_all_big chair_col-5"> </div>
+                <div class="padding_all_big chair_col-20">
+                    <div class="flex_center">
+                        <div class="flex_center_vertical">
+                            <div>
+                                <a class="form_button" href="{% url 'event_participant_create' object.slug %}#nav">Anmelden</a>
+                                <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="padding_all_big chair_col-20">
+                    <div class="flex_center">
+                        <div class="flex_center_vertical">
+                            <p>Anmeldung vorbei</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="flex_center padding_all_big">
+                <h5> Anmeldung noch nicht geöffnet </h5>
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}

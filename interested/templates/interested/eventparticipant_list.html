@@ -1,0 +1,99 @@
+{% extends "members/base.html" %}
+{% block navbar2 %} 
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'interested_index' %}#Events">
+        Interessierte </a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'public_event' event.slug %}"> {{event.title}} </a>
+    <a class="float_left"> > </a> 
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Anmeldungen </a>
+</div>
+{% endblock %}
+
+{%block content %}
+<section>
+    <div id="container" style="text-align:center;">
+        <h1>Alle Anmeldungen</h1>
+        <!--
+        <div class="trainer_ui">
+            {% if perms.auth.add_user %}
+                <a href="{% url 'register' %}#nav" title="Benutzer hinzufügen"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
+            {% endif %}
+        </div>
+        -->
+    </div>
+    
+    <div>
+        <div class="flex_center">
+            <div class="padding_all_big tertiary_bg side_scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th nowrap="nowrap"><h5> Nr </h5></th>
+                            <th nowrap="nowrap"><h5> - </h5></th>
+                            <th nowrap="nowrap"><h5> - </h5></th>
+                            <th nowrap="nowrap"><h5> Vorname </h5></th>
+                            <th nowrap="nowrap"><h5> Nachname </h5></th>
+                            <th nowrap="nowrap"><h5> Geb.-Datum </h5></th>
+                            <th nowrap="nowrap"><h5> E-Mail-Adresse </h5></th>
+                            <th nowrap="nowrap"><h5> Telefonnummer </h5></th>
+                            <th nowrap="nowrap"><h5> Kontaktwunsch </h5></th>
+                            <th nowrap="nowrap"><h5> Merch </h5></th>
+                            <th nowrap="nowrap"><h5> Merch-Größe </h5></th>
+                            <th nowrap="nowrap"><h5> Rechnung </h5></th>
+                            <th nowrap="nowrap"><h5> Bezahlt </h5></th>
+                            <th nowrap="nowrap"><h5> Notizen </h5></th>
+                        </tr>
+                    </thead>
+                    <tbody id="table_body">
+                    {% for participant in object_list %}
+                        <tr class="{% cycle 'odd' 'even' %} table_row">
+                            <td nowrap="nowrap" class="counter"> {{forloop.counter}}</td>
+                            <td nowrap="nowrap">
+                                <a href="{% url 'eventparticipant_change' participant.id %}" title="Bearbeiten">
+                                    <i class="fas fa-pen-square" style="font-size:17px;"></i>
+                                </a>
+                            </td>
+                            <td nowrap="nowrap">
+                                <a href="{% url 'eventparticipant_remove' participant.id %}" title="Löschen">
+                                    <i class="far fa-minus-square" style="font-size:17px;"></i>
+                                </a>
+                            </td>
+                            <td nowrap="nowrap"> {{participant.first_name}}</td>
+                            <td nowrap="nowrap"> {{participant.last_name}}</td>
+                            <td nowrap="nowrap"> {{participant.birthday|date:'d.m.Y'}}</td>
+                            <td nowrap="nowrap"> {{participant.email}}</td>
+                            <td nowrap="nowrap"> {{participant.phone}}</td>
+                            <td nowrap="nowrap"> {{participant.contact}}</td>
+                            <td nowrap="nowrap"> {% if participant.merch_wanted %} Ja {% else %} Nein {%endif %}</td>
+                            <td nowrap="nowrap"> {% if participant.merch_size %} {{participant.merch_size}} {%else%} - {%endif%}</td>
+                            <td nowrap="nowrap"> {{participant.invoice}} €</td>
+                            <td nowrap="nowrap"> {%if participant.payed %} Jawoll {%else%} Nope {%endif%}</td>
+                            <td nowrap="nowrap"> {%if participant.notes %} {{participant.notes}} {%else%} - {%endif%}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    $(document).ready(function(){
+        $("#myInput").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#table_body tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+            });
+            $(".counter:visible").each(function(index, value){
+                $(this).html(index+1)});
+            $(".table_row:visible").each(function(index, value){
+                $(this).removeClass('odd');
+                if(index%2===1){
+                    $(this).addClass('odd');
+                };
+            });
+        });
+    });
+</script>
+{% endblock %}

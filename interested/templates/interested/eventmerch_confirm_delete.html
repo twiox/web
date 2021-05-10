@@ -1,0 +1,15 @@
+{% extends "members/base.html" %}
+{%block content %}
+<section style="text-align:center;">
+    <h1>{{object.title}}</h1>
+    <div class="flex_center">
+        <div class="tertiary_bg padding_all_big col-5" style="text-align:center;">
+            <p> Willst du den Merch wirklich löschen?</p>
+            <form class="padding_all_big" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="form_button_sec" style="margin: 0 auto;">Jawoll</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

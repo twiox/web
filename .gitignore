@@ -8,6 +8,7 @@ media/team_pictures/*
 media/trainer_stuff/
 media/trainer_tables/*.txt
 media/Events/*
+media/PublicEvents/*
 twio_web/secrets.py
 api_key.txt
 *static/CACHE/*

@@ -180,7 +180,7 @@ class Message(models.Model):
         ("sessions","Sessions"),
         ("events","Events")
     )
-    title = models.CharField("Titel",max_length=30)
+    title = models.CharField("Titel",max_length=200)
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     message = models.TextField("Hinweis",default = "Deine Nachricht hier")
     date = models.DateTimeField(default=datetime(2020, 11, 14, 1, 54, 52, 799289))

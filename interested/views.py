@@ -2,19 +2,20 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.views.generic import (CreateView, UpdateView, DeleteView)
+from django.contrib.auth.decorators import permission_required
+from django.views.generic import (CreateView, UpdateView, DeleteView, DetailView, ListView)
 from django.contrib import messages
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.conf import settings
-from .forms import ProbetrainingForm
+from .forms import ProbetrainingForm, PublicEventForm
 from members.models import Chairman
-from .models import Teamer
-
+from .models import Teamer, PublicEvent, EventParticipant, EventMerch
 
 def interested_index(request):
     chairmen = Chairman.objects.filter(show__contains="interested_site")
-
+    public_events = [x for x in PublicEvent.objects.all() if not x.is_past_due]
+    
     if (request.method == "POST"):
         form = ProbetrainingForm(request.POST)  # if no files
         if form.is_valid():
@@ -50,9 +51,9 @@ def interested_index(request):
             messages.add_message(request, messages.SUCCESS, 'Anmeldung verschickt')
             return HttpResponseRedirect(reverse("interested_index"))
         else:
-            return render(request, "interested/interested_index.html", {"form": form, "chairmen": chairmen})
+            return render(request, "interested/interested_index.html", {"form": form, "chairmen": chairmen, 'public_events':public_events})
     form = ProbetrainingForm()
-    return render(request, "interested/interested_index.html", {"form": form, "chairmen": chairmen})
+    return render(request, "interested/interested_index.html", {"form": form, "chairmen": chairmen,'public_events':public_events})
 
 
 def interested_offers(request):
@@ -153,3 +154,151 @@ class TeamerDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         
     def get_success_url(self):
         return reverse("team")+"#nav" 
+
+
+class PublicEventCreateView(PermissionRequiredMixin, CreateView):
+    model = PublicEvent
+    permission_required = "interested_add_publicevent"
+    fields = "__all__"
+
+class PublicEventView(DetailView):
+    model = PublicEvent
+    slug_url_kwarg = 'event_slug'
+    slug_field = 'slug' # DetailView's default value: optional
+
+@permission_required("interested_change_eventparticipant")
+def event_participant_list_view(request, event_slug):
+    event = PublicEvent.objects.get(slug=event_slug)
+    object_list = EventParticipant.objects.filter(event=event)
+    return render(request, "interested/eventparticipant_list.html", {"object_list":object_list, "event": event})
+
+
+def event_participant_create_view(request, event_slug):
+    event = PublicEvent.objects.get(slug=event_slug)
+    merch = EventMerch.objects.get(event=event.pk)
+    sizes = [x for x in merch.sizes.split("\t")]
+    if (request.method == "POST"):
+        form = PublicEventForm(request.POST)
+        if form.is_valid():
+            # get Form data
+            participant = EventParticipant(
+                event=event,
+                first_name=form.cleaned_data.get('first_name'),
+                last_name = form.cleaned_data.get('last_name'),
+                birthday = form.cleaned_data.get('birthday'),
+                email = form.cleaned_data.get('email'),
+                phone = form.cleaned_data.get('phone'),
+                contact  = form.cleaned_data.get('contact'),
+                invoice = form.cleaned_data.get('costs'),
+                merch_wanted = form.cleaned_data.get('merch_wanted'),
+                merch_size = form.cleaned_data.get('merch_size'),
+                notes=""
+            )
+            participant.save()
+            mail_subject = f"Twio X e.V. | {event.title}: Anmeldebestätigung"
+            mail_subject2 = f"Anmeldung: {event.title}: {participant.first_name} {participant.last_name}"
+            message = render_to_string("interested/public_event_confirmation_email.html", {
+                "first_name": participant.first_name,
+                "last_name": participant.last_name,
+                "birthdate": participant.birthday,
+                "email": participant.email,
+                "telnr": participant.phone,
+                "title": event.title,
+                "start_date": event.start_date,
+                "end_date": event.end_date,
+                "contact": participant.contact,
+                "merch": True if participant.merch_wanted else False,
+                "merch_title": merch.title,
+                "merch_size": participant.merch_size,
+                "costs": participant.invoice,
+                }
+            )
+            email = EmailMessage(mail_subject2, message, to=[settings.TO_EMAIL])
+            email2 = EmailMessage(mail_subject, message, to=[participant.email])
+            email.send()
+            email2.send()
+            
+            messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich angemeldet')
+            return HttpResponseRedirect(reverse("public_event", kwargs={'event_slug':event_slug}))
+        else:
+            return render(request,"interested/eventparticipant_form.html", {"form":form, "event": event, "merch":merch, "sizes":sizes})
+    form = PublicEventForm()
+    return render(request,"interested/eventparticipant_form.html", {"form":form, "event": event, "merch":merch, "sizes":sizes})
+
+
+class EventParticipantDeleteView(PermissionRequiredMixin, DeleteView):
+    model=EventParticipant
+    permission_required="interested_remove_eventparticipant"
+    
+    def get_success_url(self, **kwargs):
+        slug = self.get_object().event.slug
+        messages.add_message(self.request, messages.SUCCESS, 'Teilnehmer*in erfolgreich gelöscht')
+        return reverse("event_participant_list", kwargs={'event_slug':slug})
+
+class EventParticipantUpdateView(PermissionRequiredMixin, UpdateView):
+    model=EventParticipant
+    permission_required="interested_change_eventparticipant"
+    template_name = "interested/eventparticipant_form_update.html"
+    fields = ["first_name", "last_name", "birthday", "email", "phone", "contact", "invoice", "payed", "merch_wanted", "merch_size", "notes"]
+    
+    def get_success_url(self, **kwargs):
+        slug = self.get_object().event.slug
+        messages.add_message(self.request, messages.SUCCESS, 'Teilnehmer*in erfolgreich geändert')
+        return reverse("event_participant_list", kwargs={'event_slug':slug})
+
+
+class PublicEventDeleteView(PermissionRequiredMixin, DeleteView):
+    model = PublicEvent
+    permission_required = "interested_publicevent_delete"
+    
+    def get_success_url(self, **kwargs):
+        slug = self.get_object().slug
+        messages.add_message(self.request, messages.SUCCESS, 'Veranstaltung erfolgreich gelöscht')
+        return reverse("interested_index")
+    
+
+class PublicEventUpdateView(PermissionRequiredMixin, UpdateView):
+    model = PublicEvent
+    permission_required="interested_change_eventparticipant"
+    fields = "__all__"
+    
+    def get_success_url(self, **kwargs):
+        slug = self.get_object().slug
+        messages.add_message(self.request, messages.SUCCESS, 'Veranstaltung erfolgreich geändert')
+        return reverse("public_event", kwargs={'event_slug':slug})
+    
+
+class EventMerchCreateView(PermissionRequiredMixin, CreateView):
+    model = EventMerch
+    permission_required = "interested_change_eventmerch"
+    fields = "__all__"
+    
+    def form_valid(self, form):
+        self.event_pk = form.cleaned_data.get('event').pk
+        return HttpResponseRedirect(self.get_success_url())
+    
+    def get_success_url(self, **kwargs):
+        messages.add_message(self.request, messages.SUCCESS, 'Merch erfolgreich hinzugefügt')
+        return reverse("public_event_change", kwargs={'pk':self.event_pk})
+
+class EventMerchUpdateView(PermissionRequiredMixin, UpdateView):
+    model = EventMerch
+    permission_required = "interested_change_eventmerch"
+    fields = "__all__"
+
+    def get_success_url(self, **kwargs):
+        event_pk = self.get_object().event.pk
+        messages.add_message(self.request, messages.SUCCESS, 'Merch erfolgreich geändert')
+        return reverse("public_event_change", kwargs={'pk':event_pk})
+
+class EventMerchDeleteView(PermissionRequiredMixin, DeleteView):
+    model = EventMerch
+    permission_required = "interested_change_eventmerch"
+    
+    def get_success_url(self, **kwargs):
+        event_pk = self.get_object().event.pk
+        messages.add_message(self.request, messages.SUCCESS, 'Merch erfolgreich gelöscht')
+        return reverse("public_event_change", kwargs={'pk':event_pk})
+    
+
+

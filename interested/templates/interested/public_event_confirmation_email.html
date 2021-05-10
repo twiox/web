@@ -1,0 +1,43 @@
+{% autoescape off %}
+Hallo {{first_name}} {{last_name}}
+
+vielen Dank für deine Anmeldung auf unserer Website
+
+Veranstaltung: {{title}}
+Beginn: {{start_date}}
+Ende: {{end_date}}
+
+Wir haben von Dir die folgenden Daten übermittelt bekommen:
+Name: {{first_name}} {{last_name}}
+Geburtsdatum: {{birthdate}}
+E-Mail: {{email}}
+Telefon: {{telnr}}
+Kontakt via: {{contact}}
+
+{% if merch %}
+Zusatzbestellung: {{merch_title}}
+Größe: {{merch_size}}
+{% endif %}
+
+Gesamtkosten: {{costs}} €
+
+Sollten Informationen nicht korrekt sein, dann gib uns
+gerne Bescheid. Ansonsten werden wir uns demnächst mit 
+weiteren Informationen melden.
+
+Viele Grüße
+
+Dein Twio X e.V.
+
+_____________________________________________________________
+Twio X e.V. | Ranstädter Steinweg 9 | 04109 Leipzig
+
+Vorstand gem. § 26 BGB:
+Jewgeni Eisenberg | Merlin Szymanski | Oliver Grehl
+Vereinsregisternummer: VR 4359
+Steuernummer: 231/141/11554
+Telefon: +49 177 211 93 22 | E.Mail: parkour@twio-x.de | Internet: www.twio-x.de
+
+SAVE PAPER - THINK BEFORE YOU PRINT
+
+{% endautoescape %}

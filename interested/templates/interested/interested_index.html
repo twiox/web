@@ -17,11 +17,41 @@
     </div>
     {% endblock %}
     {% block content %}
+    {% if public_events or perms.interested.add_publicevent %}
+    <section id="Events">
+        <h1>Veranstaltungen</h1>
+        {% if perms.interested.add_publicevent %}
+            <a href="{%url 'public_event_add' %}" target="_blank" class="more_info_button"> Hinzufügen </a>
+        {% endif %}
+        <div class="flex_left">
+        {% for event in public_events %}
+        <div class="padding_all_small chair_col-4">
+            <div class="tertiary_bg" style="height:100%;" id="container">
+                <div style="display:flex; flex-direction:column; height:100%;">
+                    <div class="primary padding_all_small">
+                        <h4>{{event.title}}</h4>
+                    </div>
+                    <div class="padding_rl_big">
+                        <h5>{{event.start_date |date:'d.m.Y'}}</h5>
+                    </div>
+                    <div class="padding_all_big"><p style="padding-bottom:15px;">{{event.capture}}</p></div>
+                    <div style="position: absolute; right:0px; bottom:-3px; width:50%;" class="secondary_bg polygon2">
+                        <a href="{% url 'public_event' event.slug %}#nav" style="padding:0px; text-align:right;">
+                             <p class="more_info_button">Weiterlesen</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        </div>
+    </section>
+    {% endif %}
     <section id="The_Club">
         <h1> Der Verein </h1>
         <h3>Parkour in Leipzig und Jena</h3><br>
         <p class="two_cols">
-        Wir, der <strong>Twio X e.V.</strong>, sind ein <strong>Parkorverein</strong> mit dem Sitz in Leipzig. Für alle interessierten Sportler bieten wir Parkour als Breitensport an. 
+        Wir, der <strong>Twio X e.V.</strong>, sind ein <strong>Parkourverein</strong> mit dem Sitz in Leipzig. Für alle interessierten Sportler bieten wir Parkour als Breitensport an. 
         Während der Großteil des Trainings in Leipzig stattfindet, haben wir <strong>ab dem 01.09.2020 eine Trainingsgruppe in Jena</strong>. 
         Anfragen für ein Probetraining in Jena oder Leipzig können über das Fomular unten oder direkt über die Ansprechpartner auf der <a href="{%url 'team' %}#jena" style="padding:0px;" class="more_info_button">Teamseite</a> gestellt werden.
         Mehr Informationen zu unserem Verein findest du auf der Seite zu<a href="{%url 'offers' %}" style="padding:0px;" class="more_info_button"> unserem Angebot</a>
