@@ -160,6 +160,7 @@ class PublicEventCreateView(PermissionRequiredMixin, CreateView):
     model = PublicEvent
     permission_required = "interested_add_publicevent"
     fields = "__all__"
+    template_name = "interested/publicevent_form.html"
 
 class PublicEventView(DetailView):
     model = PublicEvent
@@ -175,8 +176,12 @@ def event_participant_list_view(request, event_slug):
 
 def event_participant_create_view(request, event_slug):
     event = PublicEvent.objects.get(slug=event_slug)
-    merch = EventMerch.objects.get(event=event.pk)
-    sizes = [x for x in merch.sizes.split("\t")]
+    merch = EventMerch.objects.filter(event=event.pk)
+    if merch:
+        merch = merch[0]
+        sizes = [x for x in merch.sizes.split("\t")]
+    else:
+        sizes = []
     if (request.method == "POST"):
         form = PublicEventForm(request.POST)
         if form.is_valid():
@@ -274,12 +279,12 @@ class EventMerchCreateView(PermissionRequiredMixin, CreateView):
     fields = "__all__"
     
     def form_valid(self, form):
-        self.event_pk = form.cleaned_data.get('event').pk
-        return HttpResponseRedirect(self.get_success_url())
+        self.object = form.save()
+        return super().form_valid(form)
     
     def get_success_url(self, **kwargs):
         messages.add_message(self.request, messages.SUCCESS, 'Merch erfolgreich hinzugefügt')
-        return reverse("public_event_change", kwargs={'pk':self.event_pk})
+        return reverse("public_event_change", kwargs={'pk':self.object.event.pk})
 
 class EventMerchUpdateView(PermissionRequiredMixin, UpdateView):
     model = EventMerch

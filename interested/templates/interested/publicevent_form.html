@@ -1,4 +1,5 @@
 {% extends "members/base.html" %}
+
 {% block navbar2 %} 
 {% if object.title %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
@@ -19,7 +20,6 @@
 </div>
 {% endif %}
 {% endblock %}
-
 {% block content %}
 <section>
     <div style="text-align:center;">
@@ -126,15 +126,14 @@
                 <span class="mdc-notched-outline__trailing"></span>
               </span>
             </label>
-            
-            <h5>Dokumente</h5>
-            
+            <br>
+            <h5>Header</h5>
             <div style="display:flex; margin-bottom:5px;">
                 <label class="upload">
                     <span style="display:flex;justify-content:center;"><i class="fas fa-file-upload"></i></span>
-                    <input type="file" id="header" style="display: none" name="header_picture" >
+                    <input type="file" id="header" style="display: none" name="header_picture" required>
                 </label>
-                <p class="padding_rl_small" id="header">{%if form.instance.header_picture %} {{form.instance.header_picture}} {% else %} Header Bild hochladen {% endif %}</p>
+                <p class="padding_rl_small" id="header">{%if form.instance.header_picture %} {{form.instance.header_picture}} {% else %} Header Bild hochladen* {% endif %}</p>
             </div>
             {% if form.instance.header_picture %}
             <a class="more_info_button" href="{{form.instance.header_picture.url}}" target="_blank"> Ansehen </a>
@@ -145,7 +144,8 @@
                 $("#header").html(fileName).show();
                     });
             </script>
-            
+            <br>
+            <h5>Dokumente</h5>
             <div style="display:flex; margin-bottom:5px;">
                 <label class="upload">
                     <span style="display:flex;justify-content:center;"><i class="fas fa-file-upload"></i></span>
@@ -188,21 +188,22 @@
                     });
             </script>
             <br>
-            <h5>Merch</h5>
             <div>
-            {% if object.eventmerch_set.all|first %}
-            <h6> Merch ändern </h6>
-                {% with object.eventmerch_set.all|first as merch %}
-                <a href="{% url 'eventmerch_update' merch.pk %}" target="_blank" class="more_info_button"> Merch bearbeiten </a><br>
-                <a href="{% url 'eventmerch_delete' merch.pk %}" target="_blank" class="more_info_button"> Merch löschen </a>
-                {% endwith %}
-            {% else %}
-            <h6> Merch hinzufügen </h6>
-                <a href="{% url 'eventmerch_create' %}" target="_blank" class="more_info_button"> Merch hinzufügen </a>
+            {% if object.title %} <!-- on create or on edit? -->
+                <h5>Merch</h5>
+                {% if object.eventmerch_set.all|first %}
+                    <h6> Merch ändern </h6>
+                        {% with object.eventmerch_set.all|first as merch %}
+                        <a href="{% url 'eventmerch_update' merch.pk %}" target="_blank" class="more_info_button"> Merch bearbeiten </a><br>
+                        <a href="{% url 'eventmerch_delete' merch.pk %}" target="_blank" class="more_info_button"> Merch löschen </a>
+                        {% endwith %}
+                {% else %}
+                    <h6> Merch hinzufügen </h6>
+                    <a href="{% url 'eventmerch_create' %}" target="_blank" class="more_info_button"> Merch hinzufügen </a>
+                {% endif %}
             {% endif %}
-            </div>
-            
-            
+        
+        
             <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
                 <span >OK</span>
             </button>
