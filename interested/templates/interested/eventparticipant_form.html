@@ -11,7 +11,7 @@
 {% endblock %}
 {% block content %}
     <h1>Anmeldung</h1>
-        <form class="padding_tb_big" id="prob_form" method="POST">
+        <form class="padding_tb_big" id="event_form" method="POST">
             <h3> Persönliche Daten </h3>
             {% csrf_token %}
             <div class="tertiary_bg padding_all_big">
@@ -127,7 +127,7 @@
                         <br>
                         Bitte beachtet, dass die Kosten für die ausgewählte Kleidung auf die Kosten der Veranstaltung summiert werden.
                         <br><br>
-                        Kosten: <strong>{{merch.price}} €</strong>
+                        Kosten: <strong>{{merch.price|floatformat:2}} €</strong>
                         </div>
                         <div class="mdc-form-field padding_rl_big">
                             <div class="mdc-checkbox">
@@ -140,7 +140,7 @@
                               </div>
                             </div>
                             <label for="merch_yes" >
-                                <div>Ein {{merch.title}} dazubestellen</div>
+                                <div>{{merch.title}} dazubestellen</div>
                             </label>
                         </div>
                         <div class="padding_rl_big" id="merch_sizes" hidden>
@@ -166,6 +166,7 @@
                     </div>
                 </div>
             {% endif %}
+            <input id="real_costs" type="text" hidden name="costs">
             <br>
             <h3>Absenden</h3>
             <div style="clear:both;">
@@ -192,14 +193,24 @@
                     </div>
                     <div class="flex_center_vertical">
                         <div class="flex_center padding_all_big">
-                            <button type="submit" class="form_button" id="prob_button">Anmelden</button>
+                            <button style="cursor:pointer;" type="submit" class="form_button" id="event_button">Anmelden</button>
                         </div>
                     </div>
+                    <script>
+                        $(document).ready(function(){
+                            $("#event_button").click(function(){
+                                $(this).html('<i class="fas fa-spinner fa-pulse"></i>');
+                                $(this).attr("disabled","")
+                                setTimeout(function(){ 
+                                    $("#event_button").html("Anmelden");
+                                    $("#event_button").attr("disabled",false)
+                                }, 3000);
+                                });
+                            });
+                    </script>
                 </div>
             </div>
-            <input id="real_costs" hidden name="costs">
         </form>
-        
         <h3> Dokumente </h3>
         <div class="padding_all_big chair_col-5">
             <ul>
@@ -219,25 +230,25 @@
     $(document).ready(function(){
         $("#members").removeClass("here_I_am");
         $("#interested").addClass("here_I_am");
-        $("#kosten").html({{event.base_costs}})
-        $("#real_costs").attr("value", parseInt({{event.base_costs}}))
+        $("#kosten").html("{{event.base_costs}}")
+        $("#real_costs").attr("value", (parseFloat("{{event.base_costs}}".replace(',', '.'))).toFixed(2))
         if(document.getElementById('merch_yes').checked){
             $("#merch_sizes").attr("hidden", false)
             $("#select-merch_size").attr("required", "")
-            $("#kosten").html(parseInt({{event.base_costs}})+parseInt({{merch.price}}))
-            $("#real_costs").attr("value", parseInt({{event.base_costs}})+parseInt({{merch.price}}))
+            $("#kosten").html((parseFloat("{{event.base_costs}}".replace(',', '.'))+parseFloat("{{merch.price}}".replace(',', '.'))).toFixed(2).replace(".",","))
+            $("#real_costs").attr("value", (parseFloat("{{event.base_costs}}".replace(',', '.'))+parseFloat("{{merch.price}}".replace(',', '.'))).toFixed(2))
         }
         $("#merch_yes").change(function(){
             $("#merch_sizes").toggle(3);
             if(document.getElementById('merch_yes').checked){
                 $("#select-merch_size").attr("required", '')
-                $("#kosten").html(parseInt({{event.base_costs}})+parseInt({{merch.price}}))
-                $("#real_costs").attr("value", parseInt({{event.base_costs}})+parseInt({{merch.price}}))
+                $("#kosten").html((parseFloat("{{event.base_costs}}".replace(',', '.'))+parseFloat("{{merch.price}}".replace(',', '.'))).toFixed(2).replace(".",","))
+                $("#real_costs").attr("value", (parseFloat("{{event.base_costs}}".replace(',', '.'))+parseFloat("{{merch.price}}".replace(',', '.'))).toFixed(2))
             }
             else{
                 $("#select-merch_size").removeAttr("required")
-                $("#kosten").html({{event.base_costs}})
-                $("#real_costs").attr("value", parseInt({{event.base_costs}}))
+                $("#kosten").html("{{event.base_costs|floatformat:2}}")
+                $("#real_costs").attr("value", (parseFloat("{{event.base_costs}}".replace(',', '.'))).toFixed(2))
             }
         });
     });

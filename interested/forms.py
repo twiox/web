@@ -22,7 +22,7 @@ class PublicEventForm(forms.Form):
     email = forms.EmailField()
     phone = forms.CharField()
     contact = forms.CharField(required=False)
-    costs = forms.IntegerField(required=False)
+    costs = forms.CharField(required=False)
     #merch-data
     merch_wanted = forms.BooleanField(required=False)
     merch_size = forms.CharField(required=False)

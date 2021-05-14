@@ -34,8 +34,8 @@
                     {% endif %}
                     <label class="mdc-text-field mdc-text-field--filled price">
                         <span class="mdc-text-field__ripple"></span>
-                        <input type="number" class="mdc-text-field__input" aria-labelledby="price-label" name="price" required value=
-                            {% if form.instance.price %} {{form.instance.price}} {% else %} {{form.data.price}} {% endif %}>
+                        <input type="number" step="0.1" class="mdc-text-field__input" aria-labelledby="price-label" name="price" required value=
+                            {% if form.instance.price %} "{{form.instance.price}}" {% else %} "{{form.data.price}}" {% endif %}>
                         <span class="mdc-floating-label" id="price-label">Kosten</span>
                         <span class="mdc-line-ripple"></span>
                     </label>

@@ -13,8 +13,8 @@
 </div>
 {% else %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#events">
-        Mitglieder </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'interested_index' %}#events">
+        Interesserte </a>
     <a class="float_left"> > </a>
     <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Neu </a>
 </div>
@@ -56,7 +56,7 @@
                     </label>
                     <label class="mdc-text-field mdc-text-field--filled base_costs">
                         <span class="mdc-text-field__ripple"></span>
-                        <input type="text" class="mdc-text-field__input" aria-labelledby="base_costs-label" name="base_costs" required value=
+                        <input type="number" step="0.1" class="mdc-text-field__input" aria-labelledby="base_costs-label" name="base_costs" required value=
                             {% if form.instance.base_costs %} {{form.instance.base_costs}} {% else %} {{form.data.base_costs}} {% endif %}>
                         <span class="mdc-floating-label" id="base_costs-label">Kosten</span>
                         <span class="mdc-line-ripple"></span>
@@ -131,7 +131,8 @@
             <div style="display:flex; margin-bottom:5px;">
                 <label class="upload">
                     <span style="display:flex;justify-content:center;"><i class="fas fa-file-upload"></i></span>
-                    <input type="file" id="header" style="display: none" name="header_picture" required>
+                    <input type="file" id="header" style="display: none" name="header_picture" 
+                    {%if form.instance.header_picture %} "" {% else %} required {% endif %}>
                 </label>
                 <p class="padding_rl_small" id="header">{%if form.instance.header_picture %} {{form.instance.header_picture}} {% else %} Header Bild hochladen* {% endif %}</p>
             </div>

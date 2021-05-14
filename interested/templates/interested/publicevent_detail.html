@@ -56,7 +56,7 @@
                 <h3>{{object.place}}</h3>
                 <div class="padding_tb_small">
                     <p style="font-size:21px;">{{object.start_date|date:'d.m.Y, H:i'}} - {{object.end_date|date:'d.m.Y, H:i'}}</h4>
-                    <h4>Kosten: {{object.base_costs}} € </h4>
+                    <h4>Kosten: {{object.base_costs|floatformat:2}} € </h4>
                 </div>
             </div>
             <div class="chair_col-80 tertiary_bg padding_all_big">

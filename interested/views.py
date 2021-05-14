@@ -194,7 +194,7 @@ def event_participant_create_view(request, event_slug):
                 email = form.cleaned_data.get('email'),
                 phone = form.cleaned_data.get('phone'),
                 contact  = form.cleaned_data.get('contact'),
-                invoice = form.cleaned_data.get('costs'),
+                invoice = float(form.cleaned_data.get('costs')),
                 merch_wanted = form.cleaned_data.get('merch_wanted'),
                 merch_size = form.cleaned_data.get('merch_size'),
                 notes=""
@@ -213,7 +213,7 @@ def event_participant_create_view(request, event_slug):
                 "end_date": event.end_date,
                 "contact": participant.contact,
                 "merch": True if participant.merch_wanted else False,
-                "merch_title": merch.title,
+                "merch_title": merch.title if merch else None,
                 "merch_size": participant.merch_size,
                 "costs": participant.invoice,
                 }
