@@ -114,7 +114,7 @@
                 <h3>Veranstaltungs-merch</h3>
                 <div class="tertiary_bg padding_all_big flex_left">
                     <div class="chair_col-5 padding_all_small flex_center">
-                        <img style="max-width:60%" src="{{merch.image.url}}">
+                        <img style="max-width:60%;max-height:100%;" src="{{merch.image.url}}">
                     </div>
                     <div class="chair_col-5 padding_all_small" style="display:flex; flex-direction: column;">
                         <div class="flex_center padding_tb_small">
@@ -199,6 +199,7 @@
                     <script>
                         $(document).ready(function(){
                             $("#event_button").click(function(){
+                                $(event_form).submit()
                                 $(this).html('<i class="fas fa-spinner fa-pulse"></i>');
                                 $(this).attr("disabled","")
                                 setTimeout(function(){ 
