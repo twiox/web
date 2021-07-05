@@ -1,5 +1,5 @@
 {% extends "members/base.html" %}
-{% block navbar2 %} 
+{% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#events">
         Mitglieder </a>
@@ -23,7 +23,7 @@
                     <p class="padding_tb_small" style="color:red;">{{error}}</p>
                     {% endfor %}
                 {% endif %}
-                
+
                 <div class="mdc-form-field padding_all_big">
                     <div class="mdc-checkbox">
                       <input type="checkbox" class="mdc-checkbox__native-control" id="speicherung" name="confirm" required>
@@ -35,8 +35,8 @@
                       </div>
                     </div>
                     <label for="speicherung" >
-                        <div align="left">Ich habe die<a class="more_info_button" href={%if object.datenschutz%}"{{object.datenschutz.url}}"{% else %}"https://www.twio-x.com/datenschutzerkl%C3%A4rung"{%endif%}>Datenschutzerklärung</a>und die<a class="more_info_button" 
-                        href={%if object.teilnahmebedingungen%}"{{object.teilnahmebedingungen.url}}"{% else %}"#"{%endif%}>Teilnahmebedingungen</a>gelesen und akzeptiere sie. 
+                        <div align="left">Ich habe die<a class="more_info_button" href={%if object.datenschutz%}"{{object.datenschutz.url}}"{% else %}"https://twio-x.de/datenschutzerkl%C3%A4rung"{%endif%}>Datenschutzerklärung</a>und die<a class="more_info_button"
+                        href={%if object.teilnahmebedingungen%}"{{object.teilnahmebedingungen.url}}"{% else %}"#"{%endif%}>Teilnahmebedingungen</a>gelesen und akzeptiere sie.
                         Ich willige ein, dass die von mir hinterlegten Daten für die Drurchführung der Veranstaltung an die notwendigen Stellen übermittelt werden. <strong> Beachte, dass wir von Minderjährigen das
                         Einverständnis der Eltern benötigen!</strong></div>
                     </label>
