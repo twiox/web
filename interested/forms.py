@@ -9,7 +9,7 @@ class ProbetrainingForm(forms.Form):
     telephone = forms.CharField()
     notes = forms.CharField(required=False)
     confirm = forms.BooleanField()
-    
+
     class Meta:
         fields = ["first_name", "last_name", "birth_date", "email", "telephone", "notes", "confirm"]
 
@@ -23,11 +23,11 @@ class PublicEventForm(forms.Form):
     phone = forms.CharField()
     contact = forms.CharField(required=False)
     costs = forms.CharField(required=False)
+    confirm = forms.BooleanField()
     #merch-data
     merch_wanted = forms.BooleanField(required=False)
     merch_size = forms.CharField(required=False)
-    
-    
+
     class Meta:
-        fields = ["first_name", "last_name", "birthday", "email", "phone", "contact", "merch_wanted", "merch_size", "costs"]
-        
+        fields = ["first_name", "last_name", "birthday", "email", "phone", "contact", "merch_wanted", "merch_size", "costs", "confirm"]
+
