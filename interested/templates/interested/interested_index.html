@@ -28,16 +28,17 @@
         <div class="padding_all_small chair_col-4">
             <div class="tertiary_bg" style="height:100%;" id="container">
                 <div style="display:flex; flex-direction:column; height:100%;">
-                    <div class="primary padding_all_small">
-                        <h4>{{event.title}}</h4>
+                    <div class="primary padding_all_small absolute_link">
+                      <h4>{{event.title}}</h4>
+                      <a href="{% url 'public_event' event.slug %}#nav"></a>
                     </div>
-                    <div class="padding_rl_big">
+                    <div class="padding_trl_big">
                         <h5>{{event.start_date |date:'d.m.Y'}}</h5>
                     </div>
                     <div class="padding_all_big"><p style="padding-bottom:15px;">{{event.capture}}</p></div>
                     <div style="position: absolute; right:0px; bottom:-3px; width:50%;" class="secondary_bg polygon2">
                         <a href="{% url 'public_event' event.slug %}#nav" style="padding:0px; text-align:right;">
-                             <p class="more_info_button">Weiterlesen</p>
+                             <p class="more_info_button" style="margin-top: 6px">Weiterlesen</p>
                         </a>
                     </div>
                 </div>
@@ -51,8 +52,8 @@
         <h1> Der Verein </h1>
         <h3>Parkour in Leipzig und Jena</h3><br>
         <p class="two_cols">
-        Wir, der <strong>Twio X e.V.</strong>, sind ein <strong>Parkourverein</strong> mit dem Sitz in Leipzig. Für alle interessierten Sportler bieten wir Parkour als Breitensport an. 
-        Während der Großteil des Trainings in Leipzig stattfindet, haben wir <strong>ab dem 01.09.2020 eine Trainingsgruppe in Jena</strong>. 
+        Wir, der <strong>Twio X e.V.</strong>, sind ein <strong>Parkourverein</strong> mit dem Sitz in Leipzig. Für alle interessierten Sportler bieten wir Parkour als Breitensport an.
+        Während der Großteil des Trainings in Leipzig stattfindet, haben wir <strong>ab dem 01.09.2020 eine Trainingsgruppe in Jena</strong>.
         Anfragen für ein Probetraining in Jena oder Leipzig können über das Fomular unten oder direkt über die Ansprechpartner auf der <a href="{%url 'team' %}#jena" style="padding:0px;" class="more_info_button">Teamseite</a> gestellt werden.
         Mehr Informationen zu unserem Verein findest du auf der Seite zu<a href="{%url 'offers' %}" style="padding:0px;" class="more_info_button"> unserem Angebot</a>
         </p>
@@ -136,11 +137,11 @@
                     <div class="padding_all_med">
                         <div>
                             <h2 id="form">Probetraining</h2>
-                            <p>Nachdem Du das unten stehende Formular ausgefüllt hast, erhältst Du von uns zeitnah eine Antwort per E-Mail, 
-                            in welcher Du deine Probetrainings-Termine bekommst. Mit dem Trainer besprichst Du im Anschluss an das Training den weiteren Ablauf. 
+                            <p>Nachdem Du das unten stehende Formular ausgefüllt hast, erhältst Du von uns zeitnah eine Antwort per E-Mail,
+                            in welcher Du deine Probetrainings-Termine bekommst. Mit dem Trainer besprichst Du im Anschluss an das Training den weiteren Ablauf.
                             Nach vier absolvierten Trainings kannst Du eine Mitgliedschaft beantragen.</p>
                             <br>
-                            <strong>Wenn Du unter 18 Jahre alt bist, sende uns bitte mit Deiner Anfrage auch die nachfolgende, 
+                            <strong>Wenn Du unter 18 Jahre alt bist, sende uns bitte mit Deiner Anfrage auch die nachfolgende,
                             von deinen Eltern ausgefüllte, Einverständniserklärung.</strong><br>
                             <br>
                             <ul>
@@ -148,8 +149,8 @@
                                     <a class="download prim_hover padding_all_big" href="{{ STATIC_URL }}/static/docs/Einverstaendniserklaerung_TwioX.pdf">
                                         <p class="padding_rl_small">Einverständniserklärung</p>
                                         <div class="flex_center_vertical">
-                                            <i class="fas fa-file-download 
-                                            
+                                            <i class="fas fa-file-download
+
                                             padding_rl_small"></i>
                                         </div>
                                     </a>
@@ -258,7 +259,7 @@
                                             <span class="mdc-floating-label" id="city-label">Deine Stadt</span>
                                             <span class="mdc-line-ripple"></span>
                                         </label>
-                                    </div>      
+                                    </div>
                                     <div class="chair_col-5 float_left padding_rl_small">
                                         <div class="mdc-form-field padding_all_big">
                                             <div class="mdc-checkbox">
@@ -270,13 +271,13 @@
                                                 <div class="mdc-checkbox__mixedmark"></div>
                                               </div>
                                             </div>
-                                            
+
                                             <label for="speicherung" >
                                                 <div>Ich stimme der <a class="more_info_button" style="padding:0px;" href="{% url 'dataprotection' %}">Datenschutzerklärung</a> zu </div>
                                             </label>
                                         </div>
                                     </div>
-                                    
+
                                     <div style="clear:both;">
                                         <div class="flex_center_vertical">
                                             <div class="flex_center padding_all_big">
@@ -290,7 +291,7 @@
                                 $(document).ready(function(){
                                     $("#prob_button").click(function(){
                                         $(this).html('<i class="fas fa-spinner fa-pulse"></i>');
-                                        setTimeout(function(){ 
+                                        setTimeout(function(){
                                             $("#prob_button").html("Absenden");
                                             }, 3000);
                                         });
@@ -303,7 +304,7 @@
                     <div class="padding_all_big">
                         <div class="padding_all_big">
                             <h2>Mitgliedschaft</h2>
-                            <p>Schön dich wiederzusehen! Du hast dich nach erfolgreichem Probetraining dazu entschieden, unserem Verein beizutreten? 
+                            <p>Schön dich wiederzusehen! Du hast dich nach erfolgreichem Probetraining dazu entschieden, unserem Verein beizutreten?
                             Wir freuen uns, dass du dich für Parkour und unseren Verein begeistern kannst. Bitte lies dir auch unsere Satzung und Beitragsordnung durch.
                             </p>
                             <br>

@@ -31,9 +31,9 @@
     </script>
     {% if not object.info_only %}
         {% if not object.deadline_reached %}
-        <div class="flex_center_vertical">
+        <div class="flex_center_vertical" style="align-self:end">
             <a href="{% url 'event_participant_create' object.slug %}#nav" class="flex_center" style="z-index:5; text-align:center;">
-                <span class="form_button_simple_big">Anmelden</span>
+                <span class="form_button_simple_big" style="width:400px; padding:14px; font-size:24px;">Zur Anmeldung</span>
             </a>
         </div>
         {% endif %}
@@ -70,13 +70,11 @@
             <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
                 {% if not object.deadline_reached %}
                 <div class="padding_all_big chair_col-5"> </div>
-                <div class="padding_all_big chair_col-20">
+                <div class="padding_all_big chair_col-4">
                     <div class="flex_center">
-                        <div class="flex_center_vertical">
-                            <div>
-                                <a class="form_button" href="{% url 'event_participant_create' object.slug %}#nav">Zur Anmeldung</a>
-                                <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
-                            </div>
+                        <div class="flex_center_vertical" style="width:100%">
+                            <a class="form_button" href="{% url 'event_participant_create' object.slug %}#nav" style="width:100%;font-size:24px">Zur Anmeldung</a>
+                            <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
                         </div>
                     </div>
                 </div>

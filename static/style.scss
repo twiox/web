@@ -108,6 +108,11 @@ $padding_small: 10px;
     padding-right: $padding_big;
     padding-left: $padding_big;
 }
+.padding_trl_big{
+    padding-top: $padding_big;
+    padding-right: $padding_big;
+    padding-left: $padding_big;
+}
 .padding_all_small{
     padding: $padding_small;
 }
@@ -129,20 +134,20 @@ $padding_small: 10px;
   z-index:10;
 }
 .flex_center{
-    display: flex; 
+    display: flex;
     justify-content: center;
 }
 .flex_even{
-    display: flex; 
+    display: flex;
     justify-content: space-evenly;
 }
 .flex_left{
-    display: flex; 
+    display: flex;
     justify-content: left;
     flex-wrap:wrap;
 }
 .landing_flex{
-    display: flex; 
+    display: flex;
     justify-content: space-evenly;
     flex-direction:column;
 }
@@ -200,7 +205,7 @@ $padding_small: 10px;
     &:hover{
         background-color:$primary_hover;
     }
-    
+
 }
 
 .form_button_simple_big{
@@ -213,7 +218,7 @@ $padding_small: 10px;
     &:hover{
         background-color:$primary_hover;
     }
-    
+
 }
 
 .more_info_button{
@@ -410,7 +415,7 @@ table{
         border: 1px solid $primary;
         text-align: left;
     }
-    tr{ 
+    tr{
         border: 1px solid $primary;
         height:10px;
     }
@@ -566,11 +571,11 @@ strong{
     text-align:center;
 }
 .session_alert{
-    text-align: center; 
-    background-color: #7b1b42; 
+    text-align: center;
+    background-color: #7b1b42;
     padding:3px;
 }
-.odd{ 
+.odd{
     background-color:#262626;
 }
 /* Google Maps enbedded */
@@ -608,7 +613,7 @@ strong{
     max-width: 250px;
     max-height:250px;
     object-fit:scale;
-    
+
 }
 .team_picture{
     width: 100%;
@@ -618,7 +623,7 @@ strong{
 .competences{
     overflow:visible;
     li{
-        list-style-type: circle; 
+        list-style-type: circle;
     }
 }
 
@@ -626,7 +631,7 @@ strong{
 footer{
     padding-right:10%;
     padding-left:10%;
-    display:block; 
+    display:block;
     background-color:$primary_bg;
     clear:both;
 }
@@ -643,7 +648,7 @@ footer{
         padding:5px;
         display:none;
     }
-    
+
     &:hover{
         transform:scale(1.2);
         i{color:$primary;}
@@ -707,12 +712,12 @@ footer{
     padding:15px;
     box-shadow: none;
 }
-        
+
 /*For the Fields*/
 .field_wrapper{
     padding:5px 5%;
     text-align:left;
-    width:100%; 
+    width:100%;
     div{
         margin:3px;
         padding-top:30px;
@@ -775,12 +780,12 @@ footer{
     }
     li{
         position:relative;
-        label{ 
+        label{
             input{
                 position:absolute;
                 margin:auto;
-                top: 0; 
-                bottom: 0; 
+                top: 0;
+                bottom: 0;
                 left:0;
                 width:auto;
             }
@@ -847,4 +852,16 @@ footer{
 }
 .person_info{
     text-align:center;
+}
+
+
+.absolute_link {
+  position: relative;
+}
+.absolute_link > a {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
