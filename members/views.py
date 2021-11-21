@@ -40,7 +40,7 @@ def index(request):
 
     if(hasattr(request.user, "trainer")):
         if(group.group_id != "T"):
-            sessions += Session.objects.filter(group__group_id="T")
+            sessions = Session.objects.filter(group__group_id__in=["T",group])
         events = Event.objects.all()
         training_messags = Message.objects.all().filter(display="sessions")
         event_messags = Message.objects.all().filter(display="events")
