@@ -10,17 +10,15 @@
 </div>
 <br>
 <h3> Trainerübersicht </h3>
-<section>
-    <div id="container">
-        <div class="trainer_ui">
+<section id='container'>
+        <div class="trainer_ui flex_wrap">
             {% if perms.members.add_trainer %}
                 <a href="{% url 'register_trainer' %}#nav" title="Trainer hinzufügen"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
             {% endif %}
-            {% if perms.members.remove_trainer %}
+            {% if perms.members.delete_trainer %}
                 <a href="{% url 'remove_trainer' %}#nav" title="Trainer entfernen"><i class="far fa-minus-square" style="font-size:27px;"></i></a>
             {% endif %}
         </div>
-    </div>
     
     <div style="display:flex; flex-wrap:wrap;">
         {% for object in object_list %}
