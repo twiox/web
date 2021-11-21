@@ -3,6 +3,7 @@ from django import forms
 from members.models import Trainer, Group
 from django.contrib.auth.models import User
 
+
 class TrainerCreationForm(forms.ModelForm):
     user = forms.ModelChoiceField(label="Wer?",queryset=User.objects.exclude(trainer__user__username__contains=""))
 

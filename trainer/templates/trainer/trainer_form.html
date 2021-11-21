@@ -71,6 +71,7 @@
                     <span class="mdc-floating-label" id="trainer_email-label">Öffentliche E-Mail-Adresse</span>
                     <span class="mdc-line-ripple"></span>
                 </label>
+                {% if request.user.trainer != form.instance or request.user.chairman %}
                 {% if form.salary.errors %}
                 {% for error in form.salary.errors %}
                     <p style="color:red;">{{error}}</p>
@@ -83,6 +84,7 @@
                     <span class="mdc-floating-label" id="salary-label">Gehalt</span>
                     <span class="mdc-line-ripple"></span>
                 </label>
+                {% endif %}
                 {% if form.license_level.errors %}
                 {% for error in form.license_level.errors %}
                     <p style="color:red;">{{error}}</p>

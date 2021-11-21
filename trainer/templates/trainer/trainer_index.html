@@ -25,6 +25,7 @@
                 {% if request.user.trainer.license_valid %}
                 <td><strong>Gültigkeit:</strong></td> <td>{{request.user.trainer.license_valid|date:"d.m.Y"}}</td></tr>
                 {% endif %}
+                <tr><td><a class="more_info_button" style="padding-left:0px;" href={% url 'trainer_self_update_form' %}>bearbeiten</a></td></tr>
             </table>
         </div>
     </div>
