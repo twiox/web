@@ -21,6 +21,11 @@ from django.views.generic import DeleteView, UpdateView, CreateView, ListView
 from django.contrib.auth.views import LoginView, PasswordResetView, LogoutView, PasswordResetConfirmView
 from django.urls import reverse
 
+
+def index(request):
+     return render(request, 'user_handling/index.html')
+
+
 #register user
 @login_required
 @permission_required('auth.add_user', raise_exception=True)
