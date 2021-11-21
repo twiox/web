@@ -5,6 +5,7 @@ from django.core.files.base import ContentFile
 from django.shortcuts import render, redirect
 from members.models import Trainer, Profile, Event, Message, Session, Group
 from django.contrib import messages
+from user_handling.permissions import trainer_permissions 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.views.generic import DeleteView, UpdateView, CreateView, ListView, DetailView
 from django.urls import reverse
