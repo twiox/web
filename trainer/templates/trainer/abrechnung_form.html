@@ -228,7 +228,11 @@ function updateCalc(){
         total += value;
     });
     $("#hours").html(total)
-    $("#total").html((total*parseFloat($("#tae").text())).toFixed(2) + ' €')
+    if($('#tae').text() != 'None €'){
+        $("#total").html((total*parseFloat($("#tae").text())).toFixed(2) + ' €')
+    } else {
+        $('#total').html('0,00 €');
+    }
 }
 
 $("#abrechenform").on("change",".date", function() {

@@ -178,9 +178,12 @@ class ChairmanDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView
         self.object = self.get_object()
         user=self.object.user
         success_url = self.get_success_url()
-        chairman_group = Permission_group.objects.get(name='Vorstand')
-        chairman_group.user_set.remove(user)
-        chairman_group.save()
+        try:
+            chairman_group = Permission_group.objects.get(name='Vorstand')
+            chairman_group.user_set.remove(user)
+            chairman_group.save()
+        except: #if we created chairman via the webiste...
+            pass 
         self.object.delete()
         return HttpResponseRedirect(success_url)
     

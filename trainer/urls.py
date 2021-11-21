@@ -15,6 +15,7 @@ urlpatterns = [
     path('alle',views.TrainerListView.as_view(), name="trainer_list"),
     path('entferne/', views.remove_trainer, name="remove_trainer"),
     path('ändere/<int:pk>', views.TrainerUpdateView.as_view(),name="trainer_update_form"),
+    path('update/', views.TrainerSelfUpdateView.as_view(),name="trainer_self_update_form"),
     path('neu/', views.register_trainer, name="register_trainer"),
 ]
 

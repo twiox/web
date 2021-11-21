@@ -131,7 +131,10 @@ def delete_row(request):
 
 def send_email(table, hours):
     user = table.trainer.user
-    sum = hours * float(user.trainer.salary.replace(",","."))
+    try:
+        sal = hours * float(user.trainer.salary.replace(",","."))
+    except AttributeError:
+        sal = 0.0
     
     with codecs.open(table.final_file.path, "w", encoding='windows-1252') as outfile:
         print(datetime.today().strftime('%d.%m.%Y'), file=outfile)
@@ -141,7 +144,7 @@ def send_email(table, hours):
         print("Datum\tWochentag\tGruppe\tVon\tBis\tDauer\tAnmerkung",file=outfile)
         print("\n".join([str(entry) for entry in Table_entry.objects.filter(table=table).all()]), file=outfile)
         print("--------", file=outfile)
-        print(f"Stunden: {hours}\tTAE/Stunde: {user.trainer.salary} €\tGesamt: {sum} €",file=outfile)
+        print(f"Stunden: {hours}\tTAE/Stunde: {user.trainer.salary} €\tGesamt: {sal:.2f} €",file=outfile)
     mail_subject=f"{datetime.today().strftime('%d.%m.%Y')}_Abrechnung_{user.first_name}_{user.last_name}"
     message= f"Trainerabrechnung von {user.first_name} {user.last_name}"
     to_email = settings.TO_EMAIL
@@ -269,3 +272,28 @@ class TrainerUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
         ]
     template_name="trainer/trainer_form.html"
     permission_required = 'members.change_trainer'
+
+
+
+class TrainerSelfUpdateView(UpdateView, LoginRequiredMixin,UserPassesTestMixin):
+    model = Trainer
+    fields = [
+        "trainer_telnr",
+        "trainer_email",
+        "license_number",
+        "license_valid",
+        "license_level",
+        "contract",
+        "license",
+        "codex",
+        "image"
+    ]        
+    template_name = "trainer/trainer_form.html"
+    
+    def get_object(self):
+        return Trainer.objects.get(pk=self.request.user.trainer.pk)
+    
+    def test_func(self):
+        return hasattr(self.user, "trainer")
+
+
