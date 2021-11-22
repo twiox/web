@@ -199,7 +199,7 @@ class AbrechnungstableDetailView(LoginRequiredMixin, UserPassesTestMixin, Detail
 
 class TrainerListView(LoginRequiredMixin, ListView):
     model = Trainer
-    template_name = "trainer/trainer_list.html"
+    template_name = "user_handling/trainer_list.html"
 
 @login_required
 @permission_required('members.add_trainer', raise_exception=True)

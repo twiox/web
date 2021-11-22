@@ -69,6 +69,14 @@ def index(request):
 
 """FOR THE EVENTS"""
 
+class EventListView(LoginRequiredMixin, ListView, UserPassesTestMixin):
+    model = Event
+    template = "members/event_list.html"
+    
+    def test_func(self):
+        user_group = self.request.user.profile.group
+        return bool(hasattr(self.request.user, "trainer")+ hasattr(self.request.user,"chairman"))
+
 class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     #template: event_detail.html
     model = Event

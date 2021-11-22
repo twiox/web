@@ -12,10 +12,6 @@ urlpatterns = [
     path("abrechnung/ajax/delete_row/", views.delete_row, name='delete_row'),
     path("abrechnung/ajax/add_row/", views.add_row, name='add_row'),
     path("abrechnung/ajax/send_table/", views.send_table, name='send_table'),
-    path('alle',views.TrainerListView.as_view(), name="trainer_list"),
-    path('entferne/', views.remove_trainer, name="remove_trainer"),
-    path('ändere/<int:pk>', views.TrainerUpdateView.as_view(),name="trainer_update_form"),
     path('update/', views.TrainerSelfUpdateView.as_view(),name="trainer_self_update_form"),
-    path('neu/', views.register_trainer, name="register_trainer"),
 ]
 

@@ -23,7 +23,6 @@ urlpatterns = [
     path("hinweis/neu/trainingseinheit/", views.MessageSessCreateView.as_view(),name="message_sess_create"),
     path("hinweis/<int:pk>/löschen/", views.MessageDeleteView.as_view(),name="message_delete"),
     path("hinweis/<int:pk>/ändern/", views.MessageUpdateView.as_view(),name="message_update"),
-    path("gruppe/", views.GroupListView.as_view(),name="group_list"),
     path("gruppe/neu/", views.GroupCreateView.as_view(),name="group_create"),
     path("gruppe/<int:pk>/ändern", views.GroupUpdateView.as_view(),name="group_update"),
     path("gruppe/<int:pk>/löschen/", views.GroupDeleteView.as_view(),name="group_delete"),

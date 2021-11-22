@@ -1,16 +1,17 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
-        Mitglieder </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}#nav">
+        Übersicht </a>
     <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Vorstände</a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Vorstandsliste</a>
 </div>
 {% endblock %}
 {%block content %}
+<h1>Vorstandsdokument </h1>
 <section id="training">
-        <div id="container">
-        <h1>Alle Vorstände</h1>
+     <div id="container">
+        <h3>Vorstandsliste</h3>
             <div class="trainer_ui">
                 {% if perms.members.add_chairman %}
                     <a class="blue_font" href="{% url 'chairman_create' %}#nav" title="Vorstand hinzufügen"><i class="far fa-plus-square" style="font-size:27px;"></i></a>

@@ -1,18 +1,72 @@
 {% extends "members/base.html" %}
 {% block content %}
-<section style="text-align:center;">
-    <h1>Vorstandsdokument</h1>
-    <ul>
-        <p>TODO</p>
-        <li>Mitglieder handling </li>
-        <li>Trainer handling</li>
-        <li>Vorstands handling </li>
-        <li>Die Gruppen</li>
-        <li>Mailverteiler!</li>
-        <li>Probetrainingsanfragen</li>
-        <li>Formulare/Vorlagen</li>
-        <li>Ausflüge</li>
-    </ul>
+<h1>Vorstandsdokument</h1>
+<section>
+    <h3>Benutzerverwaltung</h3>
+    <div style="display:flex; justify-content:flex-start">
+        <a class="padding_all_small" href="{% url 'member_list' %}#nav">
+            <div class=" prim_hover tertiary_bg padding_all_big">
+                <i class="fas fa-user" style="font-size:20px;">
+                    <p style="font-weight:500;padding-top:5px;">Mitglieder</p>
+                </i>
+            </div>
+        </a>
+        <a class=" padding_all_small" href="{% url 'trainer_list' %}#nav">
+            <div class="prim_hover tertiary_bg padding_all_big">
+                <i class="fas fa-user-cog" style="font-size:20px;">
+                    <p style="font-weight:500;padding-top:5px;">Trainer</p>
+                </i>
+            </div>
+        </a>
+        <a class=" padding_all_small" href="{% url 'chairman_list' %}#nav">
+            <div class="prim_hover tertiary_bg padding_all_big">
+                <i class="fas fa-user-tie" style="font-size:20px;">
+                    <p style="font-weight:500;padding-top:5px;">Vorstände</p>
+                </i>
+            </div>
+        </a>
+    </div>
+</section>
+<br>
+<section>
+<h3>Sonstiges</h3>
+    <div style="display:flex; justify-content:flex-start; flex-wrap:wrap;">
+        <a class="padding_all_small" href="{% url 'group_list' %}#nav">
+            <div class="prim_hover tertiary_bg padding_all_big">
+                <i class="fas fa-users" style="font-size:20px;">
+                    <p style="font-weight:500;padding-top:5px;">Gruppenverwaltung</p>
+                </i>
+            </div>
+        </a>
+        <a class="padding_all_small" href="#">
+            <div class="prim_hover tertiary_bg padding_all_big">
+                <i class="fas fa-at" style="font-size:20px;">
+                    <p style="font-weight:500;padding-top:5px;">Email-Verteiler</p>
+                </i>
+             </div>
+        </a>
+        <a class="padding_all_small" href="{% url 'event_list' %}">
+            <div class="prim_hover tertiary_bg padding_all_big">
+                 <i class="far fa-calendar-alt" style="font-size:20px;">
+                     <p style="font-weight:500;padding-top:5px;">Veranstaltungen</p>
+                 </i>
+             </div>
+        </a>
+        <a class="padding_all_small" href="#">
+            <div class="prim_hover tertiary_bg padding_all_big">
+                 <i class="fas fa-vial" style="font-size:20px;">
+                     <p style="font-weight:500;padding-top:5px;">Probetrainingsanfragen</p>
+                 </i>
+             </div>
+        </a>
+        <a class="padding_all_small" href="#">
+            <div class="prim_hover tertiary_bg padding_all_big">
+                 <i class="fas fa-file" style="font-size:20px;">
+                     <p style="font-weight:500;padding-top:5px;">Vorlagen</p>
+                 </i>
+             </div>
+        </a>
+    </div>
 
 </section>
 {% endblock %}

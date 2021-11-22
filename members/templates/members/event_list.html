@@ -1,0 +1,56 @@
+{% extends "members/base.html" %}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}">
+        Übersicht </a> <a class="float_left"> > </a> <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Alle Events </a>
+</div>
+{% endblock %}
+{%block content %}
+<h1> Vorstandsdokument </h1>
+<section id='container'>
+    <h3>Alle Events</h3>
+    <div>
+        <div style="display:flex">
+            <div class="padding_all_big side_scroll tertiary_bg" style="border: 1px solid; border_color:blue">
+                <table>
+                    <thead>
+                        <tr>
+                            <th nowrap="nowrap"><h5> Nr </h5></th>
+                            <th nowrap="nowrap"><h5> -</h5></th>
+                            <th nowrap="nowrap"><h5> -</h5></th>
+                            <th nowrap="nowrap"><h5> Name </h5></th>
+                            <th nowrap="nowrap"><h5> Von </h5></th>
+                            <th nowrap="nowrap"><h5> Bis </h5></th>
+                            <th nowrap="nowrap"><h5> Ort </h5></th>
+                            <th nowrap="nowrap"><h5> Kosten </h5></th>
+                        </tr>
+                    </thead>
+                    <tbody id="table_body">
+                    {% for event in object_list %}
+                        <tr class="{% cycle 'odd' 'even' %} table_row">
+                            <td nowrap="nowrap" class="counter"> {{forloop.counter}}</td>
+                            <td nowrap="nowrap">
+                                <a href="{% url 'event_update' event.id %}#nav" title="Bearbeiten">
+                                    <i class="fas fa-pen-square" style="font-size:17px;"></i>
+                                </a>
+                            </td>
+                            <td nowrap="nowrap">
+                                <a href="{% url 'event_delete' event.id %}#nav" title="Löschen">
+                                    <i class="far fa-minus-square" style="font-size:17px;"></i>
+                                </a>
+                            </td>
+                            <td nowrap="nowrap"> {%if event.title %} {{event.title}} {% endif %}</td>
+                            <td nowrap="nowrap"> {%if event.start_date %} {{event.start_date|date:"d.m.Y"}} {% endif %}</td>
+                            <td nowrap="nowrap"> {%if event.end_date %} {{event.end_date|date:"d.m.Y"}} {% endif %}</td>
+                            <td nowrap="nowrap"> {%if event.place %} {{event.place}} {% endif %} </td>
+                            <td nowrap="nowrap"> {%if event.costs %} {{event.costs}} € {% else %} 0,00 € {% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</section>
+{% endblock %}
