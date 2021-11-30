@@ -17,38 +17,48 @@
                     <a class="blue_font" href="{% url 'chairman_create' %}#nav" title="Vorstand hinzufügen"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
                 {% endif %}
             </div>
+    </div>
+    <div style="width:100%">
+        <div class="padding_all_big tertiary_bg side_scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th nowrap="nowrap"><h5> Nr </h5></th>
+                        <th nowrap="nowrap"><h5>-</h5></th>
+                        <th nowrap="nowrap"><h5>-</h5></th>
+                        <th nowrap="nowrap"><h5> Vorname </h5></th>
+                        <th nowrap="nowrap"><h5> Nachname </h5></th>
+                        <th nowrap="nowrap"><h5> E-Mail-Adresse </h5></th>
+                        <th nowrap="nowrap"><h5> Telefonnummer </h5></th>
+                        <th nowrap="nowrap"><h5> Kompetenzen </h5></th>
+                        <th nowrap="nowrap"><h5> Foto </h5></th>
+                    </tr>
+                </thead>
+                <tbody id="table_body">
+                {% for object in object_list %}
+                    <tr class="{% cycle 'odd' 'even' %} table_row">
+                        <td nowrap="nowrap" class="counter"> {{forloop.counter}}</td>
+                        <td nowrap="nowrap">
+                            <a href="{% url 'chairman_update' object.id %}#nav" title="Bearbeiten">
+                                <i class="fas fa-pen-square" style="font-size:17px;"></i>
+                            </a>
+                        </td>
+                        <td nowrap="nowrap">
+                            <a href="{% url 'chairman_delete' object.id %}#nav" title="Löschen">
+                                <i class="far fa-minus-square" style="font-size:17px;"></i>
+                            </a>
+                        </td>
+                        <td nowrap="nowrap"> {%if object.user.first_name %} {{object.user.first_name}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if object.user.last_name %} {{object.user.last_name}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if object.public_email %} {{object.public_email}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if object.public_telnr %} {{object.public_telnr}} {% endif %}</td>
+                        <td nowrap="nowrap"> {{object.competences}}</td>
+                        <td nowrap="nowrap"> <a class="more_info_button" style="padding-left:0px;" href="{{ object.image.url}}">Profilbild</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
-        <div>
-            {% for object in object_list %}
-            <div class="col-5 float_left padding_all_small" id="container">
-                <div class="tertiary_bg padding_all_small person_wrapper">
-                    <div class="padding_all_med trainer_ui">
-                        {% if perms.members.delete_chairman %}
-                        <a href="{% url 'chairman_delete' object.id%}" title="Löschen">
-                            <i class="far fa-minus-square" style="font-size:15px;"></i>
-                        </a>
-                        {% endif %}
-                        {% if perms.members.change_chairman %}
-                        <a href="{% url 'chairman_update' object.id%}#nav" title="Bearbeiten">
-                            <i class="fas fa-pen-square" style="font-size:15px;"></i>
-                        </a>
-                        {% endif %}
-                    </div>
-                    <div class="chair_col-4 flex_center">
-                        <img class="round_profile_pic_chairman padding_all_small" src="{{object.image.url}}">
-                    </div>
-                    <div class="chair_col-5 float_left padding_all_small person_info">
-                        <h3 class="padding_tb_small"> {{object.user.first_name |upper}} {{object.user.last_name |upper}}</h3>
-                        <div>
-                            <p> {{object.public_telnr}} </p>
-                            <p> {{object.public_email}} </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <h3> Leider gibt es im Moment keine Vorstände </h3>
-            {% endfor %}
-        </div>
-    </section>
+    </div>
+</section>
 {% endblock %}

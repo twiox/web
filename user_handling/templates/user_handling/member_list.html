@@ -34,6 +34,7 @@
                             <th nowrap="nowrap"><h5>-</h5></th>
                             <th nowrap="nowrap"><h5>-</h5></th>
                             <th nowrap="nowrap"><h5> Status </h5></th>
+                            <th nowrap="nowrap"><h5> Benutzername </h5></th>
                             <th nowrap="nowrap"><h5> Vorname </h5></th>
                             <th nowrap="nowrap"><h5> Nachname </h5></th>
                             <th nowrap="nowrap"><h5> Mitgl. </h5></th>
@@ -75,6 +76,7 @@
                                 </a>
                             </td>
                             <td nowrap="nowrap"> {%if member.profile.status %} {{member.profile.status}} {% endif %}</td>
+                            <td nowrap="nowrap"> {{member.username}}</td>
                             <td nowrap="nowrap"> {%if member.first_name %} {{member.first_name}} {% endif %}</td>
                             <td nowrap="nowrap"> {%if member.last_name %} {{member.last_name}} {% endif %}</td>
                             <td nowrap="nowrap"> {%if member.profile.member_num %} {{member.profile.member_num}}{% endif %} </td>

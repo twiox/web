@@ -85,8 +85,8 @@ class Event(models.Model):
         
 class Trainer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    trainer_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, default = "Hier die Nummer für die Website")
-    trainer_email = models.CharField("Öffentliche Email", max_length=150, default = "Hier die Email für die Website")
+    trainer_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, blank=True, null=True)
+    trainer_email = models.CharField("Öffentliche Email", max_length=150, blank=True, null=True)
     image = models.ImageField("Profilbild", upload_to="profile_pics/")
     salary = models.CharField("Bezahlung", blank=True, null=True, max_length=5)
     license_level = models.CharField("Lizenzstufe", max_length=100, blank=True, null=True)
@@ -97,8 +97,8 @@ class Trainer(models.Model):
     codex = models.FileField("Ehrencodex", upload_to="trainer_stuff", blank=True, null=True)
     
     def __str__(self):
-        return f"Trainer: {self.user.first_name} {self.user.last_name}"
-    
+        return f"{self.user.first_name} {self.user.last_name} ({self.user.profile.member_num})"
+
     def get_absolute_url(self):
         return reverse('trainer_list')
         
@@ -182,7 +182,7 @@ class Message(models.Model):
     )
     title = models.CharField("Titel",max_length=200)
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    message = models.TextField("Hinweis",default = "Deine Nachricht hier")
+    message = models.TextField("Hinweis",default = "Deine Nachricht hier", blank=True, null=True)
     date = models.DateTimeField(default=datetime(2020, 11, 14, 1, 54, 52, 799289))
     display = models.CharField(max_length=20, choices=choices, blank=True)
     groups = models.ManyToManyField(Group,verbose_name="Für die Gruppen")
@@ -199,8 +199,8 @@ class Chairman(models.Model):
               ('event_site', 'Anzeige Veranstalter'))
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    public_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, default = "Hier die Nummer für die Website")
-    public_email = models.CharField("Öffentliche Email", max_length=150, default = "Hier die Email für die Website")
+    public_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, blank=True, null=True)
+    public_email = models.CharField("Öffentliche Email", max_length=150, blank=True, null=True)
     competences = models.TextField("Zuständigkeiten (mit Komma getrennt)")
     image = models.ImageField("Profilbild", upload_to="profile_pics/")
     show = MultiSelectField(choices=choices, blank=True)
@@ -212,7 +212,7 @@ class Chairman(models.Model):
         return self.competences.split(",")
     
     def get_absolute_url(self):
-        return reverse('index')
+        return reverse('chairman_list')
     
     def save(self):
         super().save()

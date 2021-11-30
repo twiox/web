@@ -21,7 +21,7 @@ from django.views.generic import DeleteView, UpdateView, CreateView, ListView
 from django.contrib.auth.views import LoginView, PasswordResetView, LogoutView, PasswordResetConfirmView
 from django.urls import reverse
 
-
+@permission_required('auth.add_user', raise_exception=True)
 def index(request):
      return render(request, 'user_handling/index.html')
 
@@ -33,7 +33,6 @@ def register(request):
     if request.method == "POST": #if the form is filled out
         form = MemberCreationForm(request.POST) 
         form2 = ProfileCreationForm(request.POST)
-        
         if(form.is_valid() and form2.is_valid()): #and the form is valid
             real_user = form.save(commit=False) #save the user to fire the signal
             real_user.username=form.cleaned_data.get("first_name").lower()+form2.cleaned_data.get('member_num')
@@ -62,9 +61,10 @@ def register(request):
             messages.add_message(request, messages.SUCCESS, 'Account angelegt. Das Mitglied bekommt eine Email')
             return redirect("register")
     else:
+        current_member = sorted([x.member_num for x in Profile.objects.all()])[-1]
         form = MemberCreationForm()
         form2 = ProfileCreationForm()
-    return render(request, 'user_handling/register.html', context={"form":form, "form2":form2})
+    return render(request, 'user_handling/register.html', context={"form":form, "form2":form2,"current_member":current_member})
 
 def activate(request, uidb64, token):
     try:
@@ -158,6 +158,12 @@ class ChairmanCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView
     template_name="user_handling/chairman_form.html"
     permission_required = 'members.add_chairman'
     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["choices"] = [(x.pk, f"{x.first_name} {x.last_name} ({x.profile.member_num})") for x in User.objects.filter(chairman__id__isnull=True)]
+        return context
+    
+    
     def form_valid(self, form):
         self.object = form.save()
         user = self.object.user
@@ -198,9 +204,15 @@ class ChairmanDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView
 class ChairmanUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_form.html
     model = Chairman
-    fields=["user","public_telnr","public_email","competences","image","show"]
+    fields=["public_telnr","public_email","competences","image","show"]
     template_name="user_handling/chairman_form.html"
     permission_required = 'members.change_chairman'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["checked_shows"] = [x for x in self.get_object().show]
+        return context
+
     
 class ChairmanListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Chairman
