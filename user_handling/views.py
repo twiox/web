@@ -236,3 +236,14 @@ class PasswordResetConfirmView(PasswordResetConfirmView):
         """Return the URL to redirect to after processing a valid form."""
         messages.add_message(self.request, messages.SUCCESS, 'Passwort erstellt. Du kannst dich nun einloggen')
         return reverse("index")
+
+### AJAX Functions
+
+@permission_required('auth.add_user', raise_exception=True)
+def member_detail_form(request, pk):
+    user = User.objects.get(pk=int(pk))
+    groups = [(x.pk, f"Gruppe: {x.group_id}") for x in Group.objects.all()]
+    return render(request,"user_handling/ajax/member_detail.html", context={"user": user, "group_choices":groups})
+
+
+

@@ -20,4 +20,5 @@ urlpatterns = [
     path('trainer/neu/', trainer_views.register_trainer, name="register_trainer"),
     path("verwaltung/gruppen/", member_views.GroupListView.as_view(),name="group_list"),
     path("verwaltung/events/", member_views.EventListView.as_view(),name="event_list"),
+    path("ajax/mitglieder/detail_form/<int:pk>", views.member_detail_form,name="get_member_detail_form"),
 ]

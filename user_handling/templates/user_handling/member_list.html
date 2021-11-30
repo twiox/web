@@ -23,8 +23,8 @@
         </div>
     </div>
     
-    <div>
-        <div class="flex_center">
+    <div style="display:flex;flex-align:left;">
+        <div style="width:50%;">
             <div class="padding_all_big tertiary_bg side_scroll">
                 <table>
                     <thead>
@@ -58,7 +58,7 @@
                     </thead>
                     <tbody id="table_body">
                     {% for member in object_list %}
-                        <tr id={{member.profile.status}} class="{% cycle 'odd' 'even' %} table_row">
+                        <tr id="{{member.profile.status}}" class="{% cycle 'odd' 'even' %} table_row">
                             <td nowrap="nowrap" class="counter"> {{forloop.counter}}</td>
                             {% if member.is_active %}
                                 <td><i class="fas fa-check"></i></td>
@@ -95,11 +95,18 @@
                             <td nowrap="nowrap"> {%if member.profile.beitrag %} {{member.profile.beitrag}},00 €{% endif %}</td>
                             <td nowrap="nowrap"> {%if member.profile.notes_trainer %} {{member.profile.notes_trainer}} {% endif %}</td>
                             <td nowrap="nowrap"> {%if member.profile.notes_chairman %} {{member.profile.notes_chairman}} {% endif %}</td>
+                            <td nowrap="nowrap" hidden class="member_id">{{member.pk}}</td>
                             
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
+            </div>
+        </div>
+        <div class="padding_all_small" style="width:50%;">
+            <div class="tertiary_bg padding_all_small" style="border: solid 1px; border-color:white;">
+                <div id="member_detail">
+                </div>
             </div>
         </div>
     </div>
@@ -118,6 +125,19 @@
                 if(index%2===1){
                     $(this).addClass('odd');
                 };
+            });
+        });
+        // This is for the included detail view
+        $("tr").click(function () {
+            var pk = $(this).find($(".member_id")).html();
+            $.ajax({
+                url: '{% url "get_member_detail_form" 1234 %}'.replace("1234", pk.toString()),
+                type: 'GET',
+                success: function (data){
+                    $("#member_detail").html(data);
+                    fields = document.querySelectorAll('.mdc-text-field');
+                    fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+                }
             });
         });
     });

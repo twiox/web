@@ -1,0 +1,247 @@
+<h3>{{user.first_name}} {{user.last_name}}</h3>
+<form class="tertiary_bg" method="POST" enctype="multipart/form-data">
+    <div class ="inner_form">
+        {% csrf_token %}
+        <table>
+            <tr>
+                <td nowrap="nowrap"> <h6 id="member_core_data" style="cursor:pointer;" class="here_I_am" >Mitgliedsdaten</h6> </td>
+                <td nowrap="nowrap"> <h6 id="member_club_data" style="cursor:pointer;" >Vereinsdaten</h6> </td>
+                <td nowrap="nowrap"> <h6 id="member_account_data" style="cursor:pointer;" >Bankdaten</h6> </td>
+                <td nowrap="nowrap"> <h6 id="member_note_data" style="cursor:pointer;" >Notizen</h6> </td>
+            </tr>
+        </table>
+        
+        <div id="member_core_data_form" style="width:100%; display:flex; flex-wrap:wrap; justify-content:space-around;">
+            <label class="mdc-text-field mdc-text-field--filled first_name" style="width:40%;">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="first_name-label" name="first_name" required 
+                value="{{user.first_name}}">
+                <span class="mdc-floating-label" id="first_name-label">Vorname</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+            
+            <label class="mdc-text-field mdc-text-field--filled last_name" style="width:40%;">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="last_name-label" name="last_name" required 
+                value="{{user.last_name}}">
+                <span class="mdc-floating-label" id="last_name-label">Nachname</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+            
+            <label class="mdc-text-field mdc-text-field--filled address" style="width:40%;">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="address-label" name="address" 
+                value= "{{user.profile.address}}">
+                <span class="mdc-floating-label" id="address-label">Adresse</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+            
+            <label class="mdc-text-field mdc-text-field--filled birthday" style="width:40%;">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="birthday-label" name="birthday" value=
+                {{user.profile.birthday|date:"d.m.Y"}}>
+                <span class="mdc-floating-label" id="birthday-label">Geburtdatum</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+            
+            <label class="mdc-text-field mdc-text-field--filled telephone" style="width:40%;">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="telephone-label" name="telephone" value=
+                "{{user.profile.telephone}}">
+                <span class="mdc-floating-label" id="telephone-label">Telefonnummer</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+            
+            <label class="mdc-text-field mdc-text-field--filled email" style="width:40%;">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="email" class="mdc-text-field__input" aria-labelledby="email-label" name="email" value=
+                "{{user.email}}">
+                <span class="mdc-floating-label" id="email-label">E-Mail-Adresse</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+            
+            <label class="mdc-text-field mdc-text-field--filled sex" style="width:40%;">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="sex-label" name="sex" value=
+                "{{user.profile.sex}}">
+                <span class="mdc-floating-label" id="sex-label">Geschlecht</span>
+                <span class="mdc-line-ripple"></span>
+            </label>   
+        
+            <label class="mdc-text-field mdc-text-field--filled parent" style="width:40%;">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="parent-label" name="parent" value=
+                "{{user.profile.parent}}">
+                <span class="mdc-floating-label" id="parent-label">Ansprechpartner</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+        
+            <label class="mdc-text-field mdc-text-field--filled parent_telnr" style="width:40%;">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="parent_telnr-label" name="parent_telnr" value=
+                "{{user.profile.parent_telnr}}">
+                <span class="mdc-floating-label" id="parent_telnr-label">Notfallnummer</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+        </div>
+        
+        <div id="member_club_data_form" style="width:100%; display:flex; flex-wrap:wrap; justify-content:space-around;">
+        
+            <label class="mdc-text-field mdc-text-field--filled membership_start" style="width:40%;">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="membership_start-label" name="membership_start" value=
+                {{user.profile.membership_start|date:"d.m.Y"}}>
+                <span class="mdc-floating-label" id="membership_start-label">Start der Mitgliedschaft</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+            
+            <label class="mdc-text-field mdc-text-field--filled membership_end" style="width:40%;">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="membership_end-label" name="membership_end" value=
+                {{user.profile.membership_end|date:"d.m.Y"}}>
+                <span class="mdc-floating-label" id="membership_end-label">Kündigungsdatum</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+
+            <label class="mdc-text-field mdc-text-field--filled status" style="width:40%;">
+                <i class="mdc-select__dropdown-icon"></i>
+                <span class="mdc-text-field__ripple"></span>
+                <select id="select-status" class="mdc-text-field__input" style="background-color:#333333;" name="status">
+                    <option value={% if form2.instance.status %} "{{form2.instance.status}}" {% else %} "{{form2.data.status}}"{% endif %}>
+                    {% if form2.instance.status %} {{form2.instance.status}} {% else %} {{form2.data.status}} {% endif %}</option>
+                        {% for id, name in form2.status.field.choices %}
+                        {% if name != "---------" %}
+                        <option value="{{id}}">{{name}}</option>
+                        {% endif %}
+                        {% endfor %}
+                </select>
+                <span class="mdc-floating-label" id="status-label">Status</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+            
+
+            <label class="mdc-text-field mdc-text-field--filled member_num" style="width:40%;">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="member_num-label" name="member_num" placeholder="{{current_member|add:"1"}}" required value=
+                {% if form2.instance.member_num %} {{form2.instance.member_num}} {% else %} {{form2.data.member_num}} {% endif %}>
+                <span class="mdc-floating-label" id="member_num-label">Mitgliedsnummer</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+                
+            <label class="mdc-text-field mdc-text-field--filled group" style="width:40%;">
+                <i class="mdc-select__dropdown-icon"></i>
+                <span class="mdc-text-field__ripple"></span>
+                <select id="select-group" class="mdc-text-field__input" style="background-color:#333333;" name="group" required>
+                    <option value={% if user.profile.group %} "{{user.profile.group.id}}" {% endif %}>
+                    {% if user.profile.group %} Gruppe: {{user.profile.group.group_id}} {% endif %}
+                    </option>
+                        {% for id, name in group_choices %}
+                        {% if name != "---------" %}
+                        <option value="{{id}}">{{name}}</option>
+                        {% endif %}
+                        {% endfor %}
+                </select>
+                <span class="mdc-floating-label" id="group-label">Gruppe</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+        </div>
+        
+        <div id="member_account_data_form" style="width:100%; display:flex; flex-wrap:wrap; justify-content:space-around;">
+
+            <label class="mdc-text-field mdc-text-field--filled zahlungsart" style="width:40%;">
+                <i class="mdc-select__dropdown-icon"></i>
+                <span class="mdc-text-field__ripple"></span>
+                <select id="select-zahlungsart" class="mdc-text-field__input" style="background-color:#333333;" name="zahlungsart" required>
+                    <option value={% if form2.instance.zahlungsart %} "{{form2.instance.zahlungsart}}" {% else %} "{{form2.data.zahlungsart}}" {% endif %}>
+                    {% if form2.instance.zahlungsart %} {{form2.instance.zahlungsart}} {% else %} {{form2.data.zahlungsart}} {% endif %}</option>
+                        {% for id, name in form2.zahlungsart.field.choices %}
+                        {% if name != "---------" %}
+                        <option value="{{id}}">{{name}}</option>
+                        {% endif %}
+                        {% endfor %}
+                </select>
+                <span class="mdc-floating-label" id="zahlungsart-label">Zahlungsart</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+            
+
+            <label class="mdc-text-field mdc-text-field--filled beitrag" style="width:40%;">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="digit" class="mdc-text-field__input" aria-labelledby="beitrag-label" name="beitrag" required value=
+                {% if form2.instance.beitrag %}{{form2.instance.beitrag}}{% else %}{{form2.data.beitrag}}{% endif %}>
+                <span class="mdc-floating-label" id="beitrag-label">Mitgliedsbeitrag</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+
+            <label class="mdc-text-field mdc-text-field--filled mandatsref" style="width:40%;">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="digit" class="mdc-text-field__input" aria-labelledby="mandatsref-label" name="mandatsref" value=
+                {% if form2.instance.mandatsref %} "{{form2.instance.mandatsref}}" {% else %} "{{form2.data.mandatsref}}" {% endif %}>
+                <span class="mdc-floating-label" id="mandatsref-label">Mandatsreferenz</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+        </div>
+
+        <!--
+        <h6>Trainernotizen</h6>
+        {% if form.notes_trainer.errors %}
+            {% for error in form.notes_trainer.errors %}
+                <p style="color:red;">{{error}}</p>
+            {% endfor %}
+        {% endif %}
+        <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
+          <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="notes_trainer" id="id_comment" 
+          name="notes_trainer" >{% if form2.instance.notes_trainer %}{{form2.instance.notes_trainer}}{% else %}{{form2.data.notes_trainer}}{% endif %}</textarea>
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+        </label>
+        <h6>Vorstandsnotizen</h6>
+        {% if form.notes_chairman.errors %}
+            {% for error in form.notes_chairman.errors %}
+                <p style="color:red;">{{error}}</p>
+            {% endfor %}
+        {% endif %}
+        <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
+          <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="notes_chairman" id="id_comment" 
+          name="notes_chairman">{% if form2.instance.notes_chairman %}{{form2.instance.notes_chairman}}{% else %}{{form2.data.notes_chairman}}{% endif %}</textarea>
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+        </label>
+        -->
+        <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
+            <span >OK</span>
+        </button>
+    </div>
+</form>
+<script>
+$(document).ready(function(){
+    $("#member_club_data_form").hide();
+    $("#member_account_data_form").hide();
+    
+    
+    $("h6").click(function () {
+        $('.here_I_am').removeClass('here_I_am');
+        $(this).addClass("here_I_am");
+    });
+    $("#member_club_data").click(function () {
+        $("#member_core_data_form").hide();
+        $("#member_club_data_form").show();
+        $("#member_account_data_form").hide();
+    });
+    $("#member_core_data").click(function () {
+        $("#member_club_data_form").hide();
+        $("#member_core_data_form").show();
+        $("#member_account_data_form").hide();
+    });
+    $("#member_account_data").click(function () {
+        $("#member_club_data_form").hide();
+        $("#member_core_data_form").hide();
+        $("#member_account_data_form").show();
+    });
+});
+</script>
+</div>
