@@ -24,8 +24,8 @@
     </div>
     
     <div style="display:flex;flex-align:left;">
-        <div style="width:50%;">
-            <div class="padding_all_big tertiary_bg side_scroll">
+        <div id='table_data' style="width:50%;">
+            <div id='table_insert' class="padding_all_big tertiary_bg side_scroll">
                 <table>
                     <thead>
                         <tr>
@@ -105,41 +105,108 @@
         </div>
         <div class="padding_all_small" style="width:50%;">
             <div class="tertiary_bg padding_all_small" style="border: solid 1px; border-color:white;">
-                <div id="member_detail">
+                <div class='side_scroll' id="member_detail">
+                    Detailansicht: Klick auf eine Reihe!
                 </div>
             </div>
         </div>
     </div>
 </section>
+
 <script>
-    $(document).ready(function(){
-        $("#myInput").on("keyup", function() {
-            var value = $(this).val().toLowerCase();
-            $("#table_body tr").filter(function() {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-            });
-            $(".counter:visible").each(function(index, value){
-                $(this).html(index+1)});
-            $(".table_row:visible").each(function(index, value){
-                $(this).removeClass('odd');
-                if(index%2===1){
-                    $(this).addClass('odd');
-                };
-            });
-        });
-        // This is for the included detail view
-        $("tr").click(function () {
-            var pk = $(this).find($(".member_id")).html();
-            $.ajax({
-                url: '{% url "get_member_detail_form" 1234 %}'.replace("1234", pk.toString()),
-                type: 'GET',
-                success: function (data){
-                    $("#member_detail").html(data);
-                    fields = document.querySelectorAll('.mdc-text-field');
-                    fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
-                }
-            });
+function validate(){
+    var valid = true;
+    $("input:required").each(function(){
+        if(this.value === ""){
+            var formid = $(this).parent().closest('div').attr('id');
+            var headid = formid.substring(0, formid.lastIndexOf('_'));
+            $(`#${headid}`).css("color",'#7b1b42')
+            $(this).css("backgroundColor","#7b1b42")
+            valid = false;
+        }
+    });
+    setTimeout(function(){
+        $("input:required").each(function(){
+            if(this.value === ""){
+                $(this).css("backgroundColor","inherit");
+                var formid = $(this).parent().closest('div').attr('id');
+                var headid = formid.substring(0, formid.lastIndexOf('_'));
+                $(`#${headid}`).css("color",'inherit')
+            }
+        })
+    }, 1000);
+    if (valid) return true;
+    if (! valid) return false;
+}
+    
+function sendData(){
+    var pk = $('#user_pk').html();
+    if (! validate()) return false;
+    $.ajax({
+        type: 'POST',
+        url:"{% url 'member_detail_form_update' 1234 %}".replace("1234", pk.toString()),
+        data: $("form").serialize(),
+        success: function(data){
+            if(data["data"]!= false){
+                $('#table_data').load(document.URL + ' #table_insert', function(){
+                    bindButtonClick();
+                    updateTable()
+                    snackbar.labelText = "Daten aktualisiert";
+                    snackbar.open()
+                });
+            } else {
+                alert('error')
+            }
+        }
+    });
+}    
+    
+function updateTable(){
+    var value = $("#myInput").val().toLowerCase();
+    $("#table_body tr").filter(function() {
+        if($(this).text().toLowerCase().indexOf(value) > -1){
+            $(this).show()
+        } else {
+            $(this).hide()
+        }
+    });
+    $(".counter:visible").each(function(index, value){
+        $(this).html(index+1)});
+    $(".table_row:visible").each(function(index, value){
+        $(this).removeClass('odd');
+        if(index%2===1){
+            $(this).addClass('odd');
+        };
+    });
+};
+    
+    
+function bindButtonClick(){
+    // the search function
+    $("#myInput").on("keyup", function() {
+        updateTable()
+    });
+    // This is for the included detail view
+    $('body').on('click','#table_body tr',function(){
+        var pk = $(this).find($(".member_id")).html();
+        $.ajax({
+            url: '{% url "get_member_detail_form" 1234 %}'.replace("1234", pk.toString()),
+            type: 'GET',
+            success: function (data){
+                $("#member_detail").html(data);
+                fields = document.querySelectorAll('.mdc-text-field');
+                fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+            }
         });
     });
+};
+    
+</script>
+<script>
+$(document).ready(function(){
+    bindButtonClick();
+    updateTable()
+});
+
 </script>
 {% endblock %}

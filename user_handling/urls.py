@@ -21,4 +21,6 @@ urlpatterns = [
     path("verwaltung/gruppen/", member_views.GroupListView.as_view(),name="group_list"),
     path("verwaltung/events/", member_views.EventListView.as_view(),name="event_list"),
     path("ajax/mitglieder/detail_form/<int:pk>", views.member_detail_form,name="get_member_detail_form"),
+	path("ajax/mitglieder/detail_form/<int:pk>/update", views.member_detail_update,name="member_detail_form_update"),
+	
 ]

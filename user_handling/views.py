@@ -2,8 +2,9 @@ from .forms import *
 from .tokens import account_activation_token
 from .permissions import trainer_permissions, chairman_permissions
 from members.models import Group, Chairman, Profile
+import django
 from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.core.mail import EmailMessage
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
@@ -20,6 +21,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,P
 from django.views.generic import DeleteView, UpdateView, CreateView, ListView
 from django.contrib.auth.views import LoginView, PasswordResetView, LogoutView, PasswordResetConfirmView
 from django.urls import reverse
+
 
 @permission_required('auth.add_user', raise_exception=True)
 def index(request):
@@ -243,7 +245,48 @@ class PasswordResetConfirmView(PasswordResetConfirmView):
 def member_detail_form(request, pk):
     user = User.objects.get(pk=int(pk))
     groups = [(x.pk, f"Gruppe: {x.group_id}") for x in Group.objects.all()]
-    return render(request,"user_handling/ajax/member_detail.html", context={"user": user, "group_choices":groups})
+    membership_choices = user.profile.choices
+    zahlungsart_choices = user.profile.choices2
+
+    return render(request,"user_handling/ajax/member_detail.html", context={"user": user, "group_choices":groups, 
+                                                                            "zahlungsart_choices":zahlungsart_choices,
+                                                                           'membership_choices':membership_choices})
+@permission_required('auth.add_user', raise_exception=True)
+def member_detail_update(request, pk):
+    data = request.POST
+
+    user = User.objects.get(pk=pk)
+    data = {k:v[0] for (k,v) in dict(request.POST).items()}
+    
+    ## Save the data
+    user.first_name = data['first_name']
+    user.last_name = data['last_name']
+    user.email = data['email']
+    user.profile.birthday = data['birthday']
+    user.profile.address = data['address']
+    user.profile.telephone = data['telephone']
+    user.profile.sex = data['sex']
+    user.profile.parent = data['parent']
+    user.profile.parent_telnr = data['parent_telnr']
+    user.profile.status = data['status']
+    user.profile.member_num = data['member_num']
+    user.profile.group = Group.objects.get(pk=int(data['group']))
+    user.profile.membership_start = data['membership_start']
+    user.profile.membership_end = data['membership_end'] if data['membership_end'] != '' else None
+    user.profile.mandatsref = data['mandatsref']
+    user.profile.zahlungsart = data['zahlungsart']
+    user.profile.beitrag = int(data['beitrag'])
+    user.profile.notes_trainer = data['notes_trainer']
+    user.profile.notes_chairman = data['notes_chairman']
+
+    try:
+        user.save()
+    except django.core.exceptions.ValidationError:
+        return JsonResponse({"data":False})
+    return JsonResponse({"data":data})
+
+
+
 
 
 
