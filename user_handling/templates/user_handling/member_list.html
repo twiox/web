@@ -58,7 +58,7 @@
                     </thead>
                     <tbody id="table_body">
                     {% for member in object_list %}
-                        <tr id="{{member.profile.status}}" class="{% cycle 'odd' 'even' %} table_row">
+                        <tr id={{member.profile.status}} class="{% cycle 'odd' 'even' %} table_row">
                             <td nowrap="nowrap" class="counter"> {{forloop.counter}}</td>
                             {% if member.is_active %}
                                 <td><i class="fas fa-check"></i></td>
