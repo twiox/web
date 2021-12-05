@@ -338,7 +338,7 @@ class NewsDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 """For the Groups"""
 class GroupCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Group
-    permission_required = "members.create_group"
+    permission_required = "members.add_group"
     fields = ["group_id"]
 
     def form_valid(self, form):

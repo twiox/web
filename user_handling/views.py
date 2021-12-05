@@ -243,13 +243,12 @@ def mailing_lists(request):
     groups = Group.objects.all()
     return render(request,'user_handling/mailing-lists.html', context={'groups':groups})
     
-
 ### AJAX Functions
 @permission_required('auth.add_user', raise_exception=True)
 def get_all_emails(request):
     data = {k:v[0] for (k,v) in dict(request.GET).items()}
     emails = []
-    try: #non-id = status
+    try: #int(id) = group-pk
         group = Group.objects.get(pk=int(data['id']))
         for profile in Profile.objects.filter(group=group):
             emails.append(profile.user.email)
@@ -259,19 +258,24 @@ def get_all_emails(request):
         for session in sessions:
             for trainer in session.trainer.all():
                 emails.append(trainer.trainer_email)
+        if group.group_id == "T":
+            for trainer in Trainer.objects.all():
+                emails.append(trainer.trainer_email)
     except:
         if data['id']=='alle':
             for user in User.objects.all():
                 emails.append(user.email)
                 add_emails = AdditionalEmail.objects.filter(user=user)
                 emails.extend([x.email for x in add_emails])
-                try:
-                    trainer = Trainer.objects.get(user=user)
-                    emails.append(user.trainer.trainer_email)
-                except Trainer.DoesNotExist:
-                    pass
-        #TODO: Get the other cases covered!
-    string = ','.join(set(emails)) if len(emails)>0 else 'other'
+            for trainer in Trainer.objects.all():
+                emails.append(trainer.trainer_email)
+        else: #specific status
+            _,status = data['id'].split('_',1)
+            profiles = Profile.objects.filter(status=status)
+            for profile in profiles:
+                emails.append(profile.user.email)
+                emails.extend([x.email for x in AdditionalEmail.objects.filter(user=profile.user)])
+    string = ','.join(set(emails)) if len(emails)>0 else ''
     
     return JsonResponse({"data":data, 'string':string})
 
