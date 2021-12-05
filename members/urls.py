@@ -37,5 +37,7 @@ urlpatterns = [
     path("beiträge/neu/", views.NewsCreateView.as_view(),name="news_create"),
     path("beiträge/<int:pk>/ändern", views.NewsUpdateView.as_view(),name="news_update"),
     path("beiträge/<int:pk>/löschen", views.NewsDeleteView.as_view(),name="news_delete"),
+    path("ajax/weitere_email/neu", views.add_another_email, name='add_another_email'),
+    path("ajax/weitere_email/löschen", views.delete_additional_email, name='delete_additional_email')
 ]
 

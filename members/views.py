@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic import (
     ListView,
     DetailView,
@@ -8,7 +8,7 @@ from django.views.generic import (
     UpdateView,
     DeleteView
     )
-from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, News
+from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, News, AdditionalEmail
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
@@ -462,6 +462,11 @@ class UserDetailView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
     model = User
     template_name = 'members/user_detail.html'
     form_class = UpdateMemberInformationForm
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['additional_emails'] = AdditionalEmail.objects.filter(user=self.object)
+        return super().get_context_data(**context)
 
     def handle_uploaded_file(self,f, name):
         try:
@@ -567,3 +572,23 @@ class AddressChangeView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         user = self.request.user
         profile = self.get_object()
         return user.profile == profile
+    
+    
+## AJAX ##
+@login_required
+def add_another_email(request):
+    data = request.POST
+    user = request.user
+    data = {k:v[0] for (k,v) in dict(request.POST).items()}
+    email = AdditionalEmail.objects.create(user=user, title=data['title'], email=data['email'])
+    email.save()
+    return JsonResponse({"data":data})
+
+
+def delete_additional_email(request):
+    data = {x:v[0] for (x,v) in dict(request.GET).items()}
+    print(data)
+    user = request.user
+    email = AdditionalEmail.objects.get(user=user, pk=int(data['id']))
+    email.delete()
+    return JsonResponse({"data":data})

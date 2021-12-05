@@ -11,10 +11,33 @@
     <section>
         <h1>Dein Profil</h1>
         <div class="flex_center" style="flex-wrap:wrap;justify-content:space-between;">
-            <div class="chair_col-49 padding_all_small tertiary_bg">
+            <div class="chair_col-49 padding_all_small tertiary_bg" id='container'>
                 <div class="padding_all_big">
                     <h3 class="padding_tb_small"> Deine Daten </h3>
                     <div class="side_scroll">
+                        <div id='add_email_form' style='position:absolute; top:350px; left:30px; width:500px;display:none;'>
+                            <div class='tertiary_bg padding_all_small' style="border:solid white 1px;display:flex;">
+                                <form method='POST' enctype="multipart/form-data" id='add_email_form2'>
+                                    {% csrf_token %}
+                                    <label class="mdc-text-field mdc-text-field--filled title">
+                                        <span class="mdc-text-field__ripple"></span>
+                                        <input type="text" class="mdc-text-field__input" aria-labelledby="title-label" name="title" required>
+                                        <span class="mdc-floating-label" id="title-label">Titel</span>
+                                        <span class="mdc-line-ripple"></span>
+                                    </label>
+                                    <label class="mdc-text-field mdc-text-field--filled email">
+                                        <span class="mdc-text-field__ripple"></span>
+                                        <input type="email" class="mdc-text-field__input" aria-labelledby="email-label" name="email" required>
+                                        <span class="mdc-floating-label" id="email-label">Email</span>
+                                        <span class="mdc-line-ripple"></span>
+                                    </label>
+                                    <span class="form_button padding_all_small flex-center" style="margin:20px auto;text-align:center;cursor:pointer;" onclick=sendData()>
+                                        <span>OK</span>
+                                    </span>
+                                </form>
+                                <span id='add_email_close' class='padding_all_small' style='cursor:pointer;'><strong>X</strong></span>
+                            </div>
+                        </div>
                         <table class="padding_tb_small side_scroll">
                             <tr> <td><h4>Persönliche Daten</h4></td>
                             <td></td><td><a class="more_info_button" href="{% url 'profile_update_address' object.profile.id %}">Ändern</a></td></tr>
@@ -25,6 +48,20 @@
                             <tr> <td>Telefon:</td><td>{{object.profile.telephone}}</td> </tr>
                             <tr> <td>Ansprechpartner (U18):</td><td>{% if object.profile.parent %} {{object.profile.parent}} {%else%} - {% endif %}</td></tr>
                             <tr> <td>Notfallnummer (U18):</td><td>{% if object.profile.parent_telnr %} {{object.profile.parent_telnr}} {%else%} -  {% endif %}</td> </tr>
+                            <tr> <td> <h4 class='padding_tb_small'> Weitere Email-Adressen (für Infos) </h4> </td> <td></td>
+                                <td id='add_email_button' class='more_info_button' style='cursor:pointer;'>Hinzufügen</td>
+                            </tr>
+                            {% if additional_emails %}
+                                {% for email in additional_emails%}
+                                 <tr>
+                                     <td>{{email.title}}</td> 
+                                     <td>{{email.email}}</td>
+                                     <td><a class="js_delete_row" id="js_entry_{{email.pk}}"><i class="far fa-minus-square" style="font-size:15px;cursor:pointer;" aria-hidden="true"></i></a></td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                            <tr><td style='color:grey;'>Keine weiteren Emails</td></tr>
+                            {% endif %}
                             <tr> <td><h4 class="padding_tb_small">Websitedaten</h4></td> </tr>
                             <tr> <td>Nutzername:</td><td>{{object.username}}</td> <td><a class="more_info_button" href="{% url 'profile_update_username' object.id %}">Ändern</a></td> </tr>
                             <tr> <td>E-Mail:</td><td>{{object.email}}</td> <td><a class="more_info_button" href="{% url 'profile_update_email' object.id %}">Ändern</a></td> </tr>
@@ -99,4 +136,36 @@
             </div>
         </div>
     </section>
+    <script>
+        function sendData(){
+            $.ajax({
+                type: 'POST',
+                url:"{% url 'add_another_email' %}",
+                data: $("#add_email_form2").serialize(),
+                success: function(data){
+                    location.reload()
+                }
+            });
+        }
+        $("#add_email_button").on('click', function(){
+            $("#add_email_form").show()
+        });
+        $("#add_email_close").on('click', function(){
+            $("#add_email_form").hide()
+        });
+        $(".js_delete_row").on("click", function (){
+            $.ajax({
+            url: "{% url 'delete_additional_email' %}",
+            dataType: 'json',
+            data: { 'id': $(this).attr('id').split('_')[2] },
+            success: function (data){
+                location.reload()
+                }
+            });
+        });
+        
+        
+        
+    </script>
+
 {% endblock %}

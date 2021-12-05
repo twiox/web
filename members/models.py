@@ -268,3 +268,9 @@ class Profile(models.Model):
     def get_absolute_url(self):
         return reverse('member_list')
         
+
+class AdditionalEmail(models.Model):
+    title = models.CharField('Titel', max_length=200, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    email = models.CharField('Emailadresse', max_length=200, blank=True, null=True)
+    
