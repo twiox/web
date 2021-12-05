@@ -1,7 +1,7 @@
 from .forms import *
 from .tokens import account_activation_token
 from .permissions import trainer_permissions, chairman_permissions
-from members.models import Group, Chairman, Profile, AdditionalEmail
+from members.models import Group, Chairman, Profile, AdditionalEmail, Session
 import django
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, JsonResponse
@@ -239,7 +239,42 @@ class PasswordResetConfirmView(PasswordResetConfirmView):
         messages.add_message(self.request, messages.SUCCESS, 'Passwort erstellt. Du kannst dich nun einloggen')
         return reverse("index")
 
+def mailing_lists(request):
+    groups = Group.objects.all()
+    return render(request,'user_handling/mailing-lists.html', context={'groups':groups})
+    
+
 ### AJAX Functions
+@permission_required('auth.add_user', raise_exception=True)
+def get_all_emails(request):
+    data = {k:v[0] for (k,v) in dict(request.GET).items()}
+    emails = []
+    try: #non-id = status
+        group = Group.objects.get(pk=int(data['id']))
+        for profile in Profile.objects.filter(group=group):
+            emails.append(profile.user.email)
+            query = AdditionalEmail.objects.filter(user=profile.user)
+            emails.extend([x.email for x in query])
+        sessions = Session.objects.filter(group=group)
+        for session in sessions:
+            for trainer in session.trainer.all():
+                emails.append(trainer.trainer_email)
+    except:
+        if data['id']=='alle':
+            for user in User.objects.all():
+                emails.append(user.email)
+                add_emails = AdditionalEmail.objects.filter(user=user)
+                emails.extend([x.email for x in add_emails])
+                try:
+                    trainer = Trainer.objects.get(user=user)
+                    emails.append(user.trainer.trainer_email)
+                except Trainer.DoesNotExist:
+                    pass
+        #TODO: Get the other cases covered!
+    string = ','.join(set(emails)) if len(emails)>0 else 'other'
+    
+    return JsonResponse({"data":data, 'string':string})
+
 
 @permission_required('auth.add_user', raise_exception=True)
 def member_detail_form(request, pk):
@@ -256,7 +291,6 @@ def member_detail_form(request, pk):
 @permission_required('auth.add_user', raise_exception=True)
 def member_detail_update(request, pk):
     data = request.POST
-
     user = User.objects.get(pk=pk)
     data = {k:v[0] for (k,v) in dict(request.POST).items()}
     

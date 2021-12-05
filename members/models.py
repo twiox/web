@@ -170,7 +170,7 @@ class Session(models.Model):
         return reverse('session_detail', kwargs={"pk": self.pk})
 
     def __str__(self):
-        return f"Session: {self.title}_{self.group.group_id_self.day}"
+        return f"Session: {self.title}_{self.group.group_id}_{self.day}"
         
     class Meta:
         ordering = ["day_key"]

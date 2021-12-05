@@ -17,7 +17,7 @@
         {% if user.trainer %}
         <a class= "float_left" href="{% url 'trainer_index' %}#nav"><i class="fas fa-user-cog" style="font-size:20px;"><p>Trainer</p></i></a>
         {% endif %}        
-        {% if user.chairman %}
+        {% if perms.auth.add_user %}
         <a class= "float_left" href="{% url 'chairman_index' %}#nav"><i class="fas fa-user-tie" style="font-size:20px;"><p>Vorstände</p></i></a>
         {% endif %}
     </div>
