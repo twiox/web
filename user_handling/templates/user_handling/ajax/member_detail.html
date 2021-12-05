@@ -9,6 +9,7 @@
                 <td nowrap="nowrap"> <h6 id="member_club_data" style="cursor:pointer;" >Vereinsdaten</h6> </td>
                 <td nowrap="nowrap"> <h6 id="member_account_data" style="cursor:pointer;" >Bankdaten</h6> </td>
                 <td nowrap="nowrap"> <h6 id="member_notes_data" style="cursor:pointer;" >Notizen</h6> </td>
+                <td nowrap="nowrap"> <h6 id="additional_emails_data" style="cursor:pointer;" >Zusatzmails</h6> </td>
             </tr>
         </table>
         
@@ -205,17 +206,58 @@
             </label>
 
         </div>
+        <div id="additional_emails_data_form" style="width:100%; display:flex; flex-wrap:wrap; justify-content:space-around;">
+            <div class='padding_all_small'>
+                <table>
+            {% for email in additional_emails %}
+               <tr><td>{{email.title}}</td> 
+                   <td>{{email.email}}</td>
+                   <td><a class="js_delete_row" id="js_entry_{{email.pk}}"><i class="far fa-minus-square" style="font-size:15px;cursor:pointer;" aria-hidden="true"></i></a></td>
+               </tr>
+            {% empty %}
+                <tr><td style='color:grey'>Keine Emails</td></tr>
+            {% endfor %}
+                </table>
+            </div>
+            
+            <span style='width:100%'></span>
+            <label class="mdc-text-field mdc-text-field--filled add_email_title" style="width:40%;">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="text" class="mdc-text-field__input" aria-labelledby="add_email_title-label" name="add_email_title">
+                <span class="mdc-floating-label" id="add_email_title-label"> Titel</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+        
+            <label class="mdc-text-field mdc-text-field--filled add_email_email" style="width:40%;">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="email" class="mdc-text-field__input" aria-labelledby="add_email_email-label" name="add_email_email">
+                <span class="mdc-floating-label" id="add_email_email-label">Weitere E-Mail-Adresse</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
 
+        </div>
         <button class="form_button padding_all_small" style="margin:20px auto;" onclick=sendData() style="cursor: pointer;" name="send">
             <span >OK</span>
         </button>
     </div>
 </form>
 <script>
+$(".js_delete_row").on("click", function (){
+    $.ajax({
+    url: "{% url 'delete_additional_email_chair' user.pk %}",
+    dataType: 'json',
+    data: { 'id': $(this).attr('id').split('_')[2] },
+    success: function (data){
+        updateDetails()
+        }
+    });
+});
+    
 $(document).ready(function(){
     $("#member_club_data_form").hide();
     $("#member_account_data_form").hide();
     $("#member_notes_data_form").hide();
+    $("#additional_emails_data_form").hide();
     
     $("button").click(
         function(event) {
@@ -231,24 +273,35 @@ $(document).ready(function(){
         $("#member_club_data_form").show();
         $("#member_account_data_form").hide();
         $("#member_notes_data_form").hide();
+        $("#additional_emails_data_form").hide();
     });
     $("#member_core_data").click(function () {
         $("#member_club_data_form").hide();
         $("#member_core_data_form").show();
         $("#member_account_data_form").hide();
         $("#member_notes_data_form").hide();
+        $("#additional_emails_data_form").hide();
     });
     $("#member_account_data").click(function () {
         $("#member_club_data_form").hide();
         $("#member_core_data_form").hide();
         $("#member_account_data_form").show();
         $("#member_notes_data_form").hide();
+        $("#additional_emails_data_form").hide();
     });
     $("#member_notes_data").click(function () {
         $("#member_club_data_form").hide();
         $("#member_core_data_form").hide();
         $("#member_account_data_form").hide();
         $("#member_notes_data_form").show();
+        $("#additional_emails_data_form").hide();
+    });
+    $("#additional_emails_data").click(function () {
+        $("#member_club_data_form").hide();
+        $("#member_core_data_form").hide();
+        $("#member_account_data_form").hide();
+        $("#member_notes_data_form").hide();
+        $("#additional_emails_data_form").show();
     });
 });
 </script>

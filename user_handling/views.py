@@ -1,7 +1,7 @@
 from .forms import *
 from .tokens import account_activation_token
 from .permissions import trainer_permissions, chairman_permissions
-from members.models import Group, Chairman, Profile
+from members.models import Group, Chairman, Profile, AdditionalEmail
 import django
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, JsonResponse
@@ -247,10 +247,12 @@ def member_detail_form(request, pk):
     groups = [(x.pk, f"Gruppe: {x.group_id}") for x in Group.objects.all()]
     membership_choices = user.profile.choices
     zahlungsart_choices = user.profile.choices2
-
+    additional_emails = AdditionalEmail.objects.filter(user=user)
+    
     return render(request,"user_handling/ajax/member_detail.html", context={"user": user, "group_choices":groups, 
                                                                             "zahlungsart_choices":zahlungsart_choices,
-                                                                           'membership_choices':membership_choices})
+                                                                           'membership_choices':membership_choices,
+                                                                           'additional_emails':additional_emails})
 @permission_required('auth.add_user', raise_exception=True)
 def member_detail_update(request, pk):
     data = request.POST
@@ -278,6 +280,9 @@ def member_detail_update(request, pk):
     user.profile.beitrag = int(data['beitrag'])
     user.profile.notes_trainer = data['notes_trainer']
     user.profile.notes_chairman = data['notes_chairman']
+    if(data['add_email_email'] and data['add_email_title']):
+        mail = AdditionalEmail.objects.create(user=user, title=data['add_email_title'], email=data['add_email_email'])
+        mail.save()
 
     try:
         user.save()

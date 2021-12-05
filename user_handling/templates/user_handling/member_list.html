@@ -138,6 +138,17 @@ function validate(){
     if (valid) return true;
     if (! valid) return false;
 }
+function updateDetails(){
+    $.ajax({
+        url: '{% url "get_member_detail_form" 1234 %}'.replace("1234", $('#user_pk').html().toString()),
+        type: 'GET',
+        success: function (data){
+            $("#member_detail").html(data);
+            fields = document.querySelectorAll('.mdc-text-field');
+            fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+        }
+    });
+}
     
 function sendData(){
     var pk = $('#user_pk').html();
@@ -151,6 +162,7 @@ function sendData(){
                 $('#table_data').load(document.URL + ' #table_insert', function(){
                     bindButtonClick();
                     updateTable()
+                    updateDetails()
                     snackbar.labelText = "Daten aktualisiert";
                     snackbar.open()
                 });
@@ -179,7 +191,6 @@ function updateTable(){
         };
     });
 };
-    
     
 function bindButtonClick(){
     // the search function

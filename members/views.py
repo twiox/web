@@ -9,7 +9,7 @@ from django.views.generic import (
     DeleteView
     )
 from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, News, AdditionalEmail
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
 from .forms import EventUpdateParticipantForm,EventUpdateParticipantForm2, SessionForm, EventForm, UpdateMemberInformationForm,UpdateMemberEmailForm,SpotForm
@@ -584,11 +584,18 @@ def add_another_email(request):
     email.save()
     return JsonResponse({"data":data})
 
-
+@login_required
 def delete_additional_email(request):
     data = {x:v[0] for (x,v) in dict(request.GET).items()}
-    print(data)
     user = request.user
+    email = AdditionalEmail.objects.get(user=user, pk=int(data['id']))
+    email.delete()
+    return JsonResponse({"data":data})
+
+@permission_required('auth.add_user')
+def delete_additional_email_chair(request, pk):
+    data = {x:v[0] for (x,v) in dict(request.GET).items()}
+    user =  User.objects.get(pk=pk)
     email = AdditionalEmail.objects.get(user=user, pk=int(data['id']))
     email.delete()
     return JsonResponse({"data":data})
