@@ -208,8 +208,8 @@
                     {% endif %}
                     <label class="mdc-text-field mdc-text-field--filled member_num">
                         <span class="mdc-text-field__ripple"></span>
-                        <input type="text" class="mdc-text-field__input" aria-labelledby="member_num-label" name="member_num" placeholder="{{current_member|add:"1"}}" required value=
-                        {% if form2.instance.member_num %} {{form2.instance.member_num}} {% else %} {{form2.data.member_num}} {% endif %}>
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="member_num-label" name="member_num" required value=
+                        {% if form2.instance.member_num %} {{form2.instance.member_num}} {% elif form2.data.member_num %} {{form2.data.member_num}} {%else%} {{current_member|add:"1"}} {% endif %}>
                         <span class="mdc-floating-label" id="member_num-label">Mitgliedsnummer</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
@@ -274,7 +274,7 @@
                     <label class="mdc-text-field mdc-text-field--filled mandatsref">
                         <span class="mdc-text-field__ripple"></span>
                         <input type="digit" class="mdc-text-field__input" aria-labelledby="mandatsref-label" name="mandatsref" value=
-                        {% if form2.instance.mandatsref %} "{{form2.instance.mandatsref}}" {% else %} "{{form2.data.mandatsref}}" {% endif %}>
+                        {% if form2.instance.mandatsref %} "{{form2.instance.mandatsref}}" {% elif form2.data.mandatsref %} "{{form2.data.mandatsref}}" {% else %} {{ ref}} {% endif %}>
                         <span class="mdc-floating-label" id="mandatsref-label">Mandatsreferenz</span>
                         <span class="mdc-line-ripple"></span>
                     </label>

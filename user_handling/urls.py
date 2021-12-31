@@ -24,5 +24,4 @@ urlpatterns = [
     path("ajax/kopiere-email-listen", views.get_all_emails, name="get_all_emails"),
     path("ajax/mitglieder/detail_form/<int:pk>", views.member_detail_form,name="get_member_detail_form"),
     path("ajax/mitglieder/detail_form/<int:pk>/update", views.member_detail_update,name="member_detail_form_update"),
-    
 ]

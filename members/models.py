@@ -243,7 +243,7 @@ class Profile(models.Model):
     birthday = models.DateTimeField("Geburtstag",null=True, blank=True)
     address = models.CharField("Adresse", max_length=300, null=True, blank=True)
     telephone = models.CharField("Telephone", max_length=20, null=True, blank=True)
-    sex = models.CharField("Geschlecht", default="w", max_length=1)
+    sex = models.CharField("Geschlecht", max_length=1)
     
     #for u18
     parent = models.CharField("Ansprechpartner*in", max_length=100, null=True, blank=True)
@@ -251,7 +251,7 @@ class Profile(models.Model):
     
     # club data
     status = models.CharField(max_length=40, choices=choices, default="Ordentliches Mitglied")
-    member_num = models.CharField("Mitgliedsnummer", blank=True, max_length=30)
+    member_num = models.IntegerField("Mitgliedsnummer", blank=True)
     group = models.ForeignKey(Group, blank=True, null=True, on_delete=models.SET_NULL)
     membership_start = models.DateTimeField("Beginn der Mitgliedschaft",null=True, blank=True)
     membership_end = models.DateTimeField("Kündigung zum", null=True, blank=True) 
@@ -261,7 +261,10 @@ class Profile(models.Model):
     beitrag = models.IntegerField("Beitragshöhe", default = 20)
     notes_trainer = models.TextField("Notizen für den/die Trainer*in",null=True, blank=True)
     notes_chairman = models.TextField("Notizen für den Vorstand",null=True, blank=True)
-
+    
+    class Meta:
+        ordering = ['member_num']
+        
     def __str__(self):
         return f"{self.user.username}\'s Profile"
         

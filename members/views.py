@@ -21,9 +21,9 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.views import PasswordChangeView
 from django.conf import settings
 import markdown
-
 # Create your views here.
 import os
+
 
 @login_required
 def index(request):
@@ -376,11 +376,17 @@ class GroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     permission_required = 'members.delete_group'
     
 
-class RealGroupDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
+class RealGroupDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Group
-    permission_required = "members.view_group"
     template_name = "members/real_group_detail.html"
-
+    
+    def test_func(self):
+        if hasattr(self.request.user, 'trainer'):
+            return True
+        if hasattr(self.request.user,'chairman'):
+            return True
+        return False
+    
     def get_context_data(self, **kwargs):
         context = {"member_list":User.objects.filter(profile__group = self.object)}
         if self.object:
@@ -462,6 +468,10 @@ class UserDetailView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
     model = User
     template_name = 'members/user_detail.html'
     form_class = UpdateMemberInformationForm
+    
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

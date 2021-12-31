@@ -14,19 +14,26 @@ from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth.forms import UserCreationForm,PasswordChangeForm
-from django.contrib.auth.decorators import permission_required, login_required
+from django.contrib.auth.decorators import permission_required, login_required, user_passes_test
 from django.contrib.auth.models import User, Permission
 from django.contrib.auth.models import Group as Permission_group
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin, UserPassesTestMixin
 from django.views.generic import DeleteView, UpdateView, CreateView, ListView
 from django.contrib.auth.views import LoginView, PasswordResetView, LogoutView, PasswordResetConfirmView
 from django.urls import reverse
-
+import datetime
 
 @permission_required('auth.add_user', raise_exception=True)
 def index(request):
      return render(request, 'user_handling/index.html')
 
+def get_mandatsref(old_ref):
+    try:
+        num, y, n = old_ref.split('-',2)
+        year = datetime.datetime.now().year
+        return (str(year)[-2:], int(n)+1)
+    except:
+        return ('NA', 'NA')
 
 #register user
 @login_required
@@ -63,10 +70,12 @@ def register(request):
             messages.add_message(request, messages.SUCCESS, 'Account angelegt. Das Mitglied bekommt eine Email')
             return redirect("register")
     else:
-        current_member = sorted([x.member_num for x in Profile.objects.all()])[-1]
+        current_member = Profile.objects.latest('member_num')
+        y,num = get_mandatsref(current_member.mandatsref)
+        ref = f"{int(current_member.member_num)+1}-{y}-{num}"
         form = MemberCreationForm()
         form2 = ProfileCreationForm()
-    return render(request, 'user_handling/register.html', context={"form":form, "form2":form2,"current_member":current_member})
+    return render(request, 'user_handling/register.html', context={"form":form, "form2":form2,"current_member":current_member.member_num, 'ref':ref})
 
 def activate(request, uidb64, token):
     try:
@@ -102,7 +111,6 @@ def resend_activate(request, uidb64, token):
             "token":account_activation_token.make_token(real_user),
             }       
         )
-        
         email=EmailMessage(mail_subject, message, to=[to_email])
         email.send()
         messages.add_message(request, messages.SUCCESS, 'Neuer Aktivierungslink verschickt')
@@ -115,8 +123,6 @@ class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     permission_required = 'auth.add_user'
     template_name = "user_handling/member_list.html"
     
-    def get_queryset(self):
-        return User.objects.order_by('profile__membership_start')
     
 class UserDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = User
@@ -239,19 +245,33 @@ class PasswordResetConfirmView(PasswordResetConfirmView):
         messages.add_message(self.request, messages.SUCCESS, 'Passwort erstellt. Du kannst dich nun einloggen')
         return reverse("index")
 
+
 def mailing_lists(request):
     groups = Group.objects.all()
     return render(request,'user_handling/mailing-lists.html', context={'groups':groups})
     
+def trainer_or_chairman(user):
+    if hasattr(user,'trainer'):
+        return True
+    if hasattr(user, 'chairman'):
+        return True
+    return False
 
 ### AJAX Functions
-@permission_required('auth.add_user', raise_exception=True)
+@user_passes_test(trainer_or_chairman)
 def get_all_emails(request):
     data = {k:v[0] for (k,v) in dict(request.GET).items()}
+    if data['only_active'] == 'true':
+        active_only=True
+    else:
+        active_only=False
     emails = []
     try: #non-id = status
         group = Group.objects.get(pk=int(data['id']))
         for profile in Profile.objects.filter(group=group):
+            status = profile.status
+            if active_only and status != 'Ordentliches Mitglied':
+                continue
             emails.append(profile.user.email)
             query = AdditionalEmail.objects.filter(user=profile.user)
             emails.extend([x.email for x in query])
@@ -265,14 +285,16 @@ def get_all_emails(request):
                 emails.append(user.email)
                 add_emails = AdditionalEmail.objects.filter(user=user)
                 emails.extend([x.email for x in add_emails])
-                try:
+                if hasattr(user, 'trainer'):
                     trainer = Trainer.objects.get(user=user)
                     emails.append(user.trainer.trainer_email)
-                except Trainer.DoesNotExist:
-                    pass
-        #TODO: Get the other cases covered!
+        elif data['id'].startswith('email'):
+            _,stat = data['id'].split('_')
+            for profile in Profile.objects.filter(status=stat):
+                emails.append(profile.user.email)
+                query = AdditionalEmail.objects.filter(user=profile.user)
+                emails.extend([x.email for x in query])
     string = ','.join(set(emails)) if len(emails)>0 else 'other'
-    
     return JsonResponse({"data":data, 'string':string})
 
 
@@ -284,10 +306,12 @@ def member_detail_form(request, pk):
     zahlungsart_choices = user.profile.choices2
     additional_emails = AdditionalEmail.objects.filter(user=user)
     
-    return render(request,"user_handling/ajax/member_detail.html", context={"user": user, "group_choices":groups, 
-                                                                            "zahlungsart_choices":zahlungsart_choices,
-                                                                           'membership_choices':membership_choices,
-                                                                           'additional_emails':additional_emails})
+    return render(request,"user_handling/ajax/member_detail.html", context={
+            "user": user, "group_choices":groups, 
+            "zahlungsart_choices":zahlungsart_choices,
+           'membership_choices':membership_choices,
+           'additional_emails':additional_emails})
+
 @permission_required('auth.add_user', raise_exception=True)
 def member_detail_update(request, pk):
     data = request.POST
@@ -317,7 +341,6 @@ def member_detail_update(request, pk):
     if(data['add_email_email'] and data['add_email_title']):
         mail = AdditionalEmail.objects.create(user=user, title=data['add_email_title'], email=data['add_email_email'])
         mail.save()
-
     try:
         user.save()
     except django.core.exceptions.ValidationError:
@@ -325,7 +348,10 @@ def member_detail_update(request, pk):
     return JsonResponse({"data":data})
 
 
-
+@permission_required('auth.add_user', raise_exception=True)
+def order_members(request, key):
+    members = Profile.objects.all().order_by(key)
+    return JsonResponse({"members":members})
 
 
 

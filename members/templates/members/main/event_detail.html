@@ -1,0 +1,89 @@
+{% extends "members/base.html" %}
+{% block navbar2 %} 
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#events">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{object.title}}</a>
+    {% if perms.members.delete_event %}
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_participants' object.id %}#nav">
+        Teilnehmer </a>
+    {% endif %}
+</div>
+{% endblock %}
+{%block content %}
+    <section>
+        <h1>{{object.title}}</h1>
+        <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
+            <div class="trainer_ui">
+                {% if perms.members.change_event %}
+                <a href="{% url 'event_update' object.id  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+                {% endif %}
+                {% if perms.members.delete_event %}
+                <a href="{% url 'event_delete' object.id  %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
+                {% endif %}
+            </div>
+            <div class="tertiary_bg chair_col-20 padding_all_big">
+                <h4>{{object.place}}</h4>
+                <div class="padding_tb_small">
+                    <p>{{object.start_date|date:'d.m'}} - {{object.end_date|date:'d.m.Y'}}</p>
+                    <p>Kosten: {{object.costs}} € </p>
+                </div>
+            </div>
+            <div class="chair_col-80 tertiary_bg padding_all_big">
+                <div class="markdown">
+                    {{object.description_rendered|safe}}
+                </div>
+            </div>
+        </div>
+        <br>
+        {% if not object.info_only %}
+            <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
+                <div class="padding_all_big chair_col-5">
+                    <ul>
+                    {% if object.teilnahmebedingungen %}
+                    <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{object.teilnahmebedingungen.url}}"><p>Teilnahmebedingungen</p><i class="fas fa-file-download"></i></a></li>
+                    {% endif %}
+                    {% if object.datenschutz %}
+                    <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{object.datenschutz.url}}"><p>Datenschutzerklärung</p><i class="fas fa-file-download"></i></a></li>
+                    {% endif %}
+                    {% if object.einverstaendnis %}
+                    <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{object.einverstaendnis.url}}"><p>Einverständniserklärung</p><i class="fas fa-file-download"></i></a></li>
+                    {% endif %}
+                    </ul>
+                </div>
+                {% if not object.deadline_reached %}
+                <div class="padding_all_big chair_col-20">
+                    <div class="flex_center">
+                        <div class="flex_center_vertical">
+                            {% if request.user in object.participants.all %}
+                                <div>
+                                    <a class="form_button_sec" href="{% url 'event_unparticipate' object.id %}#nav">Abmelden</a>
+                                    <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
+                                </div>
+                            {% else %}
+                                <div>
+                                    <a class="form_button" href="{% url 'event_participate' object.id %}#nav">Anmelden</a>
+                                    <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="padding_all_big chair_col-20">
+                    <div class="flex_center">
+                        <div class="flex_center_vertical">
+                            <p>Anmeldung vorbei</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+        {% else %}
+            <div class="flex_center padding_all_big">
+                <h5> Anmeldung noch nicht geöffnet </h5>
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}
