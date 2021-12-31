@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic import (
     ListView,
     DetailView,
@@ -8,8 +8,8 @@ from django.views.generic import (
     UpdateView,
     DeleteView
     )
-from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, News
-from django.contrib.auth.decorators import login_required
+from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, News, AdditionalEmail
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
 from .forms import EventUpdateParticipantForm,EventUpdateParticipantForm2, SessionForm, EventForm, UpdateMemberInformationForm,UpdateMemberEmailForm,SpotForm
@@ -21,9 +21,9 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.views import PasswordChangeView
 from django.conf import settings
 import markdown
-
 # Create your views here.
 import os
+
 
 @login_required
 def index(request):
@@ -68,6 +68,14 @@ def index(request):
             )
 
 """FOR THE EVENTS"""
+
+class EventListView(LoginRequiredMixin, ListView, UserPassesTestMixin):
+    model = Event
+    template = "members/event_list.html"
+    
+    def test_func(self):
+        user_group = self.request.user.profile.group
+        return bool(hasattr(self.request.user, "trainer")+ hasattr(self.request.user,"chairman"))
 
 class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     #template: event_detail.html
@@ -368,11 +376,17 @@ class GroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     permission_required = 'members.delete_group'
     
 
-class RealGroupDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
+class RealGroupDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Group
-    permission_required = "members.view_group"
     template_name = "members/real_group_detail.html"
-
+    
+    def test_func(self):
+        if hasattr(self.request.user, 'trainer'):
+            return True
+        if hasattr(self.request.user,'chairman'):
+            return True
+        return False
+    
     def get_context_data(self, **kwargs):
         context = {"member_list":User.objects.filter(profile__group = self.object)}
         if self.object:
@@ -454,6 +468,15 @@ class UserDetailView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
     model = User
     template_name = 'members/user_detail.html'
     form_class = UpdateMemberInformationForm
+    
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['additional_emails'] = AdditionalEmail.objects.filter(user=self.object)
+        return super().get_context_data(**context)
 
     def handle_uploaded_file(self,f, name):
         try:
@@ -559,3 +582,30 @@ class AddressChangeView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         user = self.request.user
         profile = self.get_object()
         return user.profile == profile
+    
+    
+## AJAX ##
+@login_required
+def add_another_email(request):
+    data = request.POST
+    user = request.user
+    data = {k:v[0] for (k,v) in dict(request.POST).items()}
+    email = AdditionalEmail.objects.create(user=user, title=data['title'], email=data['email'])
+    email.save()
+    return JsonResponse({"data":data})
+
+@login_required
+def delete_additional_email(request):
+    data = {x:v[0] for (x,v) in dict(request.GET).items()}
+    user = request.user
+    email = AdditionalEmail.objects.get(user=user, pk=int(data['id']))
+    email.delete()
+    return JsonResponse({"data":data})
+
+@permission_required('auth.add_user')
+def delete_additional_email_chair(request, pk):
+    data = {x:v[0] for (x,v) in dict(request.GET).items()}
+    user =  User.objects.get(pk=pk)
+    email = AdditionalEmail.objects.get(user=user, pk=int(data['id']))
+    email.delete()
+    return JsonResponse({"data":data})

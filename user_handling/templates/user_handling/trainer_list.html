@@ -1,0 +1,72 @@
+{% extends "members/base.html" %}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}">
+        Übersicht </a> <a class="float_left"> > </a> <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Trainerliste </a>
+</div>
+{% endblock %}
+{%block content %}
+<h1> Vorstandsdokument </h1>
+<section id='container'>
+    <h3> Trainerliste </h3>
+    <div class="trainer_ui flex_wrap">
+        {% if perms.members.add_trainer %}
+            <a href="{% url 'register_trainer' %}#nav" title="Trainer hinzufügen"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
+        {% endif %}
+        {% if perms.members.delete_trainer %}
+            <a href="{% url 'remove_trainer' %}#nav" title="Trainer entfernen"><i class="far fa-minus-square" style="font-size:27px;"></i></a>
+        {% endif %}
+    </div>
+    <div style="width:100%">
+        <div class="padding_all_big tertiary_bg side_scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th nowrap="nowrap"><h5> Nr </h5></th>
+                        <th nowrap="nowrap"><h5>-</h5></th>
+                        <th nowrap="nowrap"><h5> Vorname </h5></th>
+                        <th nowrap="nowrap"><h5> Nachname </h5></th>
+                        <th nowrap="nowrap"><h5> E-Mail-Adresse </h5></th>
+                        <th nowrap="nowrap"><h5> Telefonnummer </h5></th>
+                        <th nowrap="nowrap"><h5> TAE </h5></th>
+                        <th nowrap="nowrap"><h5> Lizenzstufe </h5></th>
+                        <th nowrap="nowrap"><h5> Lizenznummer </h5></th>
+                        <th nowrap="nowrap"><h5> Gültig bis </h5></th>
+                        <th nowrap="nowrap"><h5> Lizenz </h5></th>
+                        <th nowrap="nowrap"><h5> Vertrag </h5></th>
+                        <th nowrap="nowrap"><h5> Kodex </h5></th>
+                        <th nowrap="nowrap"><h5> Foto </h5></th>
+                    </tr>
+                </thead>
+                <tbody id="table_body">
+                {% for object in object_list %}
+                    <tr class="{% cycle 'odd' 'even' %} table_row">
+                        <td nowrap="nowrap" class="counter"> {{forloop.counter}}</td>
+                        <td nowrap="nowrap">
+                            <a href="{% url 'trainer_update_form' object.id %}#nav" title="Bearbeiten">
+                                <i class="fas fa-pen-square" style="font-size:17px;"></i>
+                            </a>
+                        </td>
+                        <td nowrap="nowrap"> {%if object.user.first_name %} {{object.user.first_name}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if object.user.last_name %} {{object.user.last_name}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if object.trainer_email %} {{object.trainer_email}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if object.trainer_telnr %} {{object.trainer_telnr}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if object.salary %} {{object.salary}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if object.license_level %} {{object.license_level}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if object.license_number %} {{object.license_number}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if object.license_valid %} {{object.license_valid|date:'d.m.Y'}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if object.license %} <a class="more_info_button" style="padding-left:0px" href="{{object.license.url}}">Lizenz</a> {% endif %}</td>
+                        <td nowrap="nowrap"> {%if object.contract %} <a class="more_info_button" style="padding-left:0px" href="{{object.contract.url}}">Vertrag</a> {% endif %}</td>
+                        <td nowrap="nowrap"> {%if object.codex %} <a class="more_info_button" style="padding-left:0px" href="{{object.codex.url}}">Ehrenkodex</a> {% endif %}</td>
+                        <td nowrap="nowrap"> <a class="more_info_button" style="padding-left:0px;" href="{{ object.image.url}}">Profilbild</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    
+    </div>
+</section>
+{% endblock %}

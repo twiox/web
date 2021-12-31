@@ -1,0 +1,52 @@
+{% extends "members/base.html" %}
+{% block content %}
+<section>
+    <h1>Mailverteiler</h1>
+    <div style='display:flex;'>
+        <div style='display:flex;flex-direction:column;'>
+            <h3>Gruppenverteiler</h3>
+            {% for group in groups %}
+                <div id='{{group.pk}}' class='mail_click padding_all_small tertiary_bg prim_hover' style='cursor:pointer'>Gruppe {{group.group_id}}</div>
+                <span style='height:15px;'> </span>
+            {% endfor %}
+            <div style='align:left'>
+                <input type="checkbox" id="only_active" checked>
+                <label for="only_active">Nur ordentliche Mitglieder</label><br><br>
+            </div>
+            <div>Kopiere alle Emails, <br> 
+                Zusatzemails und Trainermails <br>
+                in die Zwischenablage  </div>
+        </div>
+        <span style='width:30px'></span>
+        <div style='display:flex;flex-direction:column'>
+            <h3>Status Verteiler</h3>
+            <div id='alle' class='mail_click padding_all_small tertiary_bg prim_hover' style='cursor:pointer'>Alle Mitglieder</div>
+            <span style='height:15px;'> </span>
+            {% for stat_id,status in user.profile.choices %}
+                <div id='email_{{stat_id}}' class='mail_click padding_all_small tertiary_bg prim_hover' style='cursor:pointer'>Status: {{status}}</div>
+                <span style='height:15px;'> </span>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<script>
+    $('.mail_click').on('click', function(){
+        if($("#only_active").is(':checked')){
+            var only_active = true;
+        }else{
+            var only_active = false;
+        }
+        $.ajax({
+            data: {'id':$(this).attr("id"), 'only_active':only_active},
+            url: '{% url "get_all_emails" %}',
+            type: 'GET',
+            success: function (data){
+                navigator.clipboard.writeText(data['string']);
+            }
+        });
+    });
+    
+</script>
+
+
+{% endblock %}

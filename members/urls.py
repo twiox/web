@@ -23,12 +23,11 @@ urlpatterns = [
     path("hinweis/neu/trainingseinheit/", views.MessageSessCreateView.as_view(),name="message_sess_create"),
     path("hinweis/<int:pk>/löschen/", views.MessageDeleteView.as_view(),name="message_delete"),
     path("hinweis/<int:pk>/ändern/", views.MessageUpdateView.as_view(),name="message_update"),
-    path("gruppe/", views.GroupListView.as_view(),name="group_list"),
     path("gruppe/neu/", views.GroupCreateView.as_view(),name="group_create"),
     path("gruppe/<int:pk>/ändern", views.GroupUpdateView.as_view(),name="group_update"),
     path("gruppe/<int:pk>/löschen/", views.GroupDeleteView.as_view(),name="group_delete"),
     path("gruppe/<int:pk>/detail/", views.RealGroupDetailView.as_view(),name="real_group_detail"),
-    path("profil/<int:pk>/detail/", views.UserDetailView.as_view(),name="profile_detail"),
+    path("profil/", views.UserDetailView.as_view(),name="profile_detail"),
     path("profil/<int:pk>/ändere_email/", views.EmailUpdateView.as_view(),name="profile_update_email"),
     path("profil/<int:pk>/ändere_nutzername/", views.UsernameUpdateView.as_view(),name="profile_update_username"),
     path("profil/<int:pk>/ändere_daten/", views.AddressChangeView.as_view(),name="profile_update_address"),
@@ -38,5 +37,8 @@ urlpatterns = [
     path("beiträge/neu/", views.NewsCreateView.as_view(),name="news_create"),
     path("beiträge/<int:pk>/ändern", views.NewsUpdateView.as_view(),name="news_update"),
     path("beiträge/<int:pk>/löschen", views.NewsDeleteView.as_view(),name="news_delete"),
+    path("ajax/weitere_email/neu", views.add_another_email, name='add_another_email'),
+    path("ajax/weitere_email/löschen", views.delete_additional_email, name='delete_additional_email'),
+    path("ajax/weitere_email/löschen/<int:pk>", views.delete_additional_email_chair, name='delete_additional_email_chair')
 ]
 

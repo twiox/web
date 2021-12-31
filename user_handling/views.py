@@ -1,9 +1,10 @@
 from .forms import *
 from .tokens import account_activation_token
 from .permissions import trainer_permissions, chairman_permissions
-from members.models import Group, Chairman, Profile
+from members.models import Group, Chairman, Profile, AdditionalEmail, Session
+import django
 from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.core.mail import EmailMessage
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
@@ -13,13 +14,26 @@ from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth.forms import UserCreationForm,PasswordChangeForm
-from django.contrib.auth.decorators import permission_required, login_required
+from django.contrib.auth.decorators import permission_required, login_required, user_passes_test
 from django.contrib.auth.models import User, Permission
 from django.contrib.auth.models import Group as Permission_group
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin, UserPassesTestMixin
 from django.views.generic import DeleteView, UpdateView, CreateView, ListView
 from django.contrib.auth.views import LoginView, PasswordResetView, LogoutView, PasswordResetConfirmView
 from django.urls import reverse
+import datetime
+
+@permission_required('auth.add_user', raise_exception=True)
+def index(request):
+     return render(request, 'user_handling/index.html')
+
+def get_mandatsref(old_ref):
+    try:
+        num, y, n = old_ref.split('-',2)
+        year = datetime.datetime.now().year
+        return (str(year)[-2:], int(n)+1)
+    except:
+        return ('NA', 'NA')
 
 #register user
 @login_required
@@ -28,7 +42,6 @@ def register(request):
     if request.method == "POST": #if the form is filled out
         form = MemberCreationForm(request.POST) 
         form2 = ProfileCreationForm(request.POST)
-        
         if(form.is_valid() and form2.is_valid()): #and the form is valid
             real_user = form.save(commit=False) #save the user to fire the signal
             real_user.username=form.cleaned_data.get("first_name").lower()+form2.cleaned_data.get('member_num')
@@ -57,9 +70,12 @@ def register(request):
             messages.add_message(request, messages.SUCCESS, 'Account angelegt. Das Mitglied bekommt eine Email')
             return redirect("register")
     else:
+        current_member = Profile.objects.latest('member_num')
+        y,num = get_mandatsref(current_member.mandatsref)
+        ref = f"{int(current_member.member_num)+1}-{y}-{num}"
         form = MemberCreationForm()
         form2 = ProfileCreationForm()
-    return render(request, 'user_handling/register.html', context={"form":form, "form2":form2})
+    return render(request, 'user_handling/register.html', context={"form":form, "form2":form2,"current_member":current_member.member_num, 'ref':ref})
 
 def activate(request, uidb64, token):
     try:
@@ -95,7 +111,6 @@ def resend_activate(request, uidb64, token):
             "token":account_activation_token.make_token(real_user),
             }       
         )
-        
         email=EmailMessage(mail_subject, message, to=[to_email])
         email.send()
         messages.add_message(request, messages.SUCCESS, 'Neuer Aktivierungslink verschickt')
@@ -108,8 +123,6 @@ class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     permission_required = 'auth.add_user'
     template_name = "user_handling/member_list.html"
     
-    def get_queryset(self):
-        return User.objects.order_by('profile__membership_start')
     
 class UserDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = User
@@ -153,6 +166,12 @@ class ChairmanCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView
     template_name="user_handling/chairman_form.html"
     permission_required = 'members.add_chairman'
     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["choices"] = [(x.pk, f"{x.first_name} {x.last_name} ({x.profile.member_num})") for x in User.objects.filter(chairman__id__isnull=True)]
+        return context
+    
+    
     def form_valid(self, form):
         self.object = form.save()
         user = self.object.user
@@ -193,9 +212,15 @@ class ChairmanDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView
 class ChairmanUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_form.html
     model = Chairman
-    fields=["user","public_telnr","public_email","competences","image","show"]
+    fields=["public_telnr","public_email","competences","image","show"]
     template_name="user_handling/chairman_form.html"
     permission_required = 'members.change_chairman'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["checked_shows"] = [x for x in self.get_object().show]
+        return context
+
     
 class ChairmanListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Chairman
@@ -219,3 +244,114 @@ class PasswordResetConfirmView(PasswordResetConfirmView):
         """Return the URL to redirect to after processing a valid form."""
         messages.add_message(self.request, messages.SUCCESS, 'Passwort erstellt. Du kannst dich nun einloggen')
         return reverse("index")
+
+
+def mailing_lists(request):
+    groups = Group.objects.all()
+    return render(request,'user_handling/mailing-lists.html', context={'groups':groups})
+    
+def trainer_or_chairman(user):
+    if hasattr(user,'trainer'):
+        return True
+    if hasattr(user, 'chairman'):
+        return True
+    return False
+
+### AJAX Functions
+@user_passes_test(trainer_or_chairman)
+def get_all_emails(request):
+    data = {k:v[0] for (k,v) in dict(request.GET).items()}
+    if data['only_active'] == 'true':
+        active_only=True
+    else:
+        active_only=False
+    emails = []
+    try: #non-id = status
+        group = Group.objects.get(pk=int(data['id']))
+        for profile in Profile.objects.filter(group=group):
+            status = profile.status
+            if active_only and status != 'Ordentliches Mitglied':
+                continue
+            emails.append(profile.user.email)
+            query = AdditionalEmail.objects.filter(user=profile.user)
+            emails.extend([x.email for x in query])
+        sessions = Session.objects.filter(group=group)
+        for session in sessions:
+            for trainer in session.trainer.all():
+                emails.append(trainer.trainer_email)
+    except:
+        if data['id']=='alle':
+            for user in User.objects.all():
+                emails.append(user.email)
+                add_emails = AdditionalEmail.objects.filter(user=user)
+                emails.extend([x.email for x in add_emails])
+                if hasattr(user, 'trainer'):
+                    trainer = Trainer.objects.get(user=user)
+                    emails.append(user.trainer.trainer_email)
+        elif data['id'].startswith('email'):
+            _,stat = data['id'].split('_')
+            for profile in Profile.objects.filter(status=stat):
+                emails.append(profile.user.email)
+                query = AdditionalEmail.objects.filter(user=profile.user)
+                emails.extend([x.email for x in query])
+    string = ','.join(set(emails)) if len(emails)>0 else 'other'
+    return JsonResponse({"data":data, 'string':string})
+
+
+@permission_required('auth.add_user', raise_exception=True)
+def member_detail_form(request, pk):
+    user = User.objects.get(pk=int(pk))
+    groups = [(x.pk, f"Gruppe: {x.group_id}") for x in Group.objects.all()]
+    membership_choices = user.profile.choices
+    zahlungsart_choices = user.profile.choices2
+    additional_emails = AdditionalEmail.objects.filter(user=user)
+    
+    return render(request,"user_handling/ajax/member_detail.html", context={
+            "user": user, "group_choices":groups, 
+            "zahlungsart_choices":zahlungsart_choices,
+           'membership_choices':membership_choices,
+           'additional_emails':additional_emails})
+
+@permission_required('auth.add_user', raise_exception=True)
+def member_detail_update(request, pk):
+    data = request.POST
+    user = User.objects.get(pk=pk)
+    data = {k:v[0] for (k,v) in dict(request.POST).items()}
+    
+    ## Save the data
+    user.first_name = data['first_name']
+    user.last_name = data['last_name']
+    user.email = data['email']
+    user.profile.birthday = data['birthday']
+    user.profile.address = data['address']
+    user.profile.telephone = data['telephone']
+    user.profile.sex = data['sex']
+    user.profile.parent = data['parent']
+    user.profile.parent_telnr = data['parent_telnr']
+    user.profile.status = data['status']
+    user.profile.member_num = data['member_num']
+    user.profile.group = Group.objects.get(pk=int(data['group']))
+    user.profile.membership_start = data['membership_start']
+    user.profile.membership_end = data['membership_end'] if data['membership_end'] != '' else None
+    user.profile.mandatsref = data['mandatsref']
+    user.profile.zahlungsart = data['zahlungsart']
+    user.profile.beitrag = int(data['beitrag'])
+    user.profile.notes_trainer = data['notes_trainer']
+    user.profile.notes_chairman = data['notes_chairman']
+    if(data['add_email_email'] and data['add_email_title']):
+        mail = AdditionalEmail.objects.create(user=user, title=data['add_email_title'], email=data['add_email_email'])
+        mail.save()
+    try:
+        user.save()
+    except django.core.exceptions.ValidationError:
+        return JsonResponse({"data":False})
+    return JsonResponse({"data":data})
+
+
+@permission_required('auth.add_user', raise_exception=True)
+def order_members(request, key):
+    members = Profile.objects.all().order_by(key)
+    return JsonResponse({"members":members})
+
+
+

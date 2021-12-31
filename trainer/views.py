@@ -199,11 +199,12 @@ class AbrechnungstableDetailView(LoginRequiredMixin, UserPassesTestMixin, Detail
 
 class TrainerListView(LoginRequiredMixin, ListView):
     model = Trainer
-    template_name = "trainer/trainer_list.html"
+    template_name = "user_handling/trainer_list.html"
 
 @login_required
 @permission_required('members.add_trainer', raise_exception=True)
 def register_trainer(request):
+    choices = [(x.pk, f"{x.first_name} {x.last_name} ({x.profile.member_num})") for x in User.objects.filter(trainer__id__isnull=True)]
     if(request.method == "POST"): #if the form is filled out
         form = TrainerCreationForm(request.POST,request.FILES) 
         if(form.is_valid()):
@@ -226,10 +227,10 @@ def register_trainer(request):
                 messages.add_message(request, messages.SUCCESS, "Trainer angelegt. Gruppe wurde auf T gesetzt")
                 return redirect("register_trainer")
         else:
-            return render(request, 'trainer/trainer_form.html', context={'form': form})
+            return render(request, 'trainer/trainer_form.html', context={'form': form, "choices":choices})
     else:
         form = TrainerCreationForm()
-    return render(request, 'trainer/trainer_form.html', context={"form":form})
+    return render(request, 'trainer/trainer_form.html', context={"form":form,"choices":choices})
 
 @login_required
 @permission_required('members.delete_trainer', raise_exception=True)

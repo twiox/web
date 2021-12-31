@@ -85,8 +85,8 @@ class Event(models.Model):
         
 class Trainer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    trainer_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, default = "Hier die Nummer für die Website")
-    trainer_email = models.CharField("Öffentliche Email", max_length=150, default = "Hier die Email für die Website")
+    trainer_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, blank=True, null=True)
+    trainer_email = models.CharField("Öffentliche Email", max_length=150, blank=True, null=True)
     image = models.ImageField("Profilbild", upload_to="profile_pics/")
     salary = models.CharField("Bezahlung", blank=True, null=True, max_length=5)
     license_level = models.CharField("Lizenzstufe", max_length=100, blank=True, null=True)
@@ -97,8 +97,8 @@ class Trainer(models.Model):
     codex = models.FileField("Ehrencodex", upload_to="trainer_stuff", blank=True, null=True)
     
     def __str__(self):
-        return f"Trainer: {self.user.first_name} {self.user.last_name}"
-    
+        return f"{self.user.first_name} {self.user.last_name} ({self.user.profile.member_num})"
+
     def get_absolute_url(self):
         return reverse('trainer_list')
         
@@ -170,7 +170,7 @@ class Session(models.Model):
         return reverse('session_detail', kwargs={"pk": self.pk})
 
     def __str__(self):
-        return f"Session: {self.title}_{self.group.group_id_self.day}"
+        return f"Session: {self.title}_{self.group.group_id}_{self.day}"
         
     class Meta:
         ordering = ["day_key"]
@@ -182,7 +182,7 @@ class Message(models.Model):
     )
     title = models.CharField("Titel",max_length=200)
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    message = models.TextField("Hinweis",default = "Deine Nachricht hier")
+    message = models.TextField("Hinweis",default = "Deine Nachricht hier", blank=True, null=True)
     date = models.DateTimeField(default=datetime(2020, 11, 14, 1, 54, 52, 799289))
     display = models.CharField(max_length=20, choices=choices, blank=True)
     groups = models.ManyToManyField(Group,verbose_name="Für die Gruppen")
@@ -199,8 +199,8 @@ class Chairman(models.Model):
               ('event_site', 'Anzeige Veranstalter'))
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    public_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, default = "Hier die Nummer für die Website")
-    public_email = models.CharField("Öffentliche Email", max_length=150, default = "Hier die Email für die Website")
+    public_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, blank=True, null=True)
+    public_email = models.CharField("Öffentliche Email", max_length=150, blank=True, null=True)
     competences = models.TextField("Zuständigkeiten (mit Komma getrennt)")
     image = models.ImageField("Profilbild", upload_to="profile_pics/")
     show = MultiSelectField(choices=choices, blank=True)
@@ -212,7 +212,7 @@ class Chairman(models.Model):
         return self.competences.split(",")
     
     def get_absolute_url(self):
-        return reverse('index')
+        return reverse('chairman_list')
     
     def save(self):
         super().save()
@@ -243,7 +243,7 @@ class Profile(models.Model):
     birthday = models.DateTimeField("Geburtstag",null=True, blank=True)
     address = models.CharField("Adresse", max_length=300, null=True, blank=True)
     telephone = models.CharField("Telephone", max_length=20, null=True, blank=True)
-    sex = models.CharField("Geschlecht", default="w", max_length=1)
+    sex = models.CharField("Geschlecht", max_length=1)
     
     #for u18
     parent = models.CharField("Ansprechpartner*in", max_length=100, null=True, blank=True)
@@ -251,7 +251,7 @@ class Profile(models.Model):
     
     # club data
     status = models.CharField(max_length=40, choices=choices, default="Ordentliches Mitglied")
-    member_num = models.CharField("Mitgliedsnummer", blank=True, max_length=30)
+    member_num = models.IntegerField("Mitgliedsnummer", blank=True)
     group = models.ForeignKey(Group, blank=True, null=True, on_delete=models.SET_NULL)
     membership_start = models.DateTimeField("Beginn der Mitgliedschaft",null=True, blank=True)
     membership_end = models.DateTimeField("Kündigung zum", null=True, blank=True) 
@@ -261,10 +261,19 @@ class Profile(models.Model):
     beitrag = models.IntegerField("Beitragshöhe", default = 20)
     notes_trainer = models.TextField("Notizen für den/die Trainer*in",null=True, blank=True)
     notes_chairman = models.TextField("Notizen für den Vorstand",null=True, blank=True)
-
+    
+    class Meta:
+        ordering = ['member_num']
+        
     def __str__(self):
         return f"{self.user.username}\'s Profile"
         
     def get_absolute_url(self):
         return reverse('member_list')
         
+
+class AdditionalEmail(models.Model):
+    title = models.CharField('Titel', max_length=200, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    email = models.CharField('Emailadresse', max_length=200, blank=True, null=True)
+    

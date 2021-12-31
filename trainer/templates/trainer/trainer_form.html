@@ -37,9 +37,9 @@
                         <span class="mdc-text-field__ripple"></span>
                         <select id="select-user" class="mdc-text-field__input" style="background-color:#333333;" name="user" required>
                             <option value="" selected></option>
-                                {% for id, name in form.user.field.choices %}
-                                {% if name != "---------" %}
-                                <option value="{{ id }}">{{ name }}</option>
+                                {% for id, string in choices %}
+                                {% if user != "---------" %}
+                                <option value="{{ id }}">{{string}}</option>
                                 {% endif %}
                                 {% endfor %}
                         </select>

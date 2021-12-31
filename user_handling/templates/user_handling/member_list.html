@@ -1,17 +1,18 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
-        Mitglieder </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}#nav">
+        Übersicht </a>
     <a class="float_left"> > </a>
     <a class="float_left strong" style="font-size: 1.1rem; color:white;">Mitgliederliste</a>
 </div>
 {% endblock %}
 
 {%block content %}
+<h1>Vorstandsdokument </h1>
 <section>
-    <div id="container" style="text-align:center;">
-        <h1>Alle Mitglieder</h1>
+    <div id="container">
+        <h3>Mitgliederliste</h3>
         <div class="trainer_ui">
             {% if perms.auth.add_user %}
                 <a href="{% url 'register' %}#nav" title="Benutzer hinzufügen"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
@@ -22,9 +23,9 @@
         </div>
     </div>
     
-    <div>
-        <div class="flex_center">
-            <div class="padding_all_big tertiary_bg side_scroll">
+    <div style="display:flex;flex-align:left;">
+        <div id='table_data' style="width:50%;">
+            <div id='table_insert' class="padding_all_big tertiary_bg side_scroll">
                 <table>
                     <thead>
                         <tr>
@@ -33,6 +34,7 @@
                             <th nowrap="nowrap"><h5>-</h5></th>
                             <th nowrap="nowrap"><h5>-</h5></th>
                             <th nowrap="nowrap"><h5> Status </h5></th>
+                            <th nowrap="nowrap"><h5> Benutzername </h5></th>
                             <th nowrap="nowrap"><h5> Vorname </h5></th>
                             <th nowrap="nowrap"><h5> Nachname </h5></th>
                             <th nowrap="nowrap"><h5> Mitgl. </h5></th>
@@ -74,6 +76,7 @@
                                 </a>
                             </td>
                             <td nowrap="nowrap"> {%if member.profile.status %} {{member.profile.status}} {% endif %}</td>
+                            <td nowrap="nowrap"> {{member.username}}</td>
                             <td nowrap="nowrap"> {%if member.first_name %} {{member.first_name}} {% endif %}</td>
                             <td nowrap="nowrap"> {%if member.last_name %} {{member.last_name}} {% endif %}</td>
                             <td nowrap="nowrap"> {%if member.profile.member_num %} {{member.profile.member_num}}{% endif %} </td>
@@ -92,6 +95,7 @@
                             <td nowrap="nowrap"> {%if member.profile.beitrag %} {{member.profile.beitrag}},00 €{% endif %}</td>
                             <td nowrap="nowrap"> {%if member.profile.notes_trainer %} {{member.profile.notes_trainer}} {% endif %}</td>
                             <td nowrap="nowrap"> {%if member.profile.notes_chairman %} {{member.profile.notes_chairman}} {% endif %}</td>
+                            <td nowrap="nowrap" hidden class="member_id">{{member.pk}}</td>
                             
                         </tr>
                     {% endfor %}
@@ -99,24 +103,121 @@
                 </table>
             </div>
         </div>
+        <div class="padding_all_small" style="width:50%;">
+            <div class="tertiary_bg padding_all_small" style="border: solid 1px; border-color:white;">
+                <div class='side_scroll' id="member_detail">
+                    Detailansicht: Klick auf eine Reihe!
+                </div>
+            </div>
+        </div>
     </div>
 </section>
+
 <script>
-    $(document).ready(function(){
-        $("#myInput").on("keyup", function() {
-            var value = $(this).val().toLowerCase();
-            $("#table_body tr").filter(function() {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-            });
-            $(".counter:visible").each(function(index, value){
-                $(this).html(index+1)});
-            $(".table_row:visible").each(function(index, value){
-                $(this).removeClass('odd');
-                if(index%2===1){
-                    $(this).addClass('odd');
-                };
-            });
+function validate(){
+    var valid = true;
+    $("input:required").each(function(){
+        if(this.value === ""){
+            var formid = $(this).parent().closest('div').attr('id');
+            var headid = formid.substring(0, formid.lastIndexOf('_'));
+            $(`#${headid}`).css("color",'#7b1b42')
+            $(this).css("backgroundColor","#7b1b42")
+            valid = false;
+        }
+    });
+    setTimeout(function(){
+        $("input:required").each(function(){
+            if(this.value === ""){
+                $(this).css("backgroundColor","inherit");
+                var formid = $(this).parent().closest('div').attr('id');
+                var headid = formid.substring(0, formid.lastIndexOf('_'));
+                $(`#${headid}`).css("color",'inherit')
+            }
+        })
+    }, 1000);
+    if (valid) return true;
+    if (! valid) return false;
+}
+function updateDetails(){
+    $.ajax({
+        url: '{% url "get_member_detail_form" 1234 %}'.replace("1234", $('#user_pk').html().toString()),
+        type: 'GET',
+        success: function (data){
+            $("#member_detail").html(data);
+            fields = document.querySelectorAll('.mdc-text-field');
+            fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+        }
+    });
+}
+    
+function sendData(){
+    var pk = $('#user_pk').html();
+    if (! validate()) return false;
+    $.ajax({
+        type: 'POST',
+        url:"{% url 'member_detail_form_update' 1234 %}".replace("1234", pk.toString()),
+        data: $("form").serialize(),
+        success: function(data){
+            if(data["data"]!= false){
+                $('#table_data').load(document.URL + ' #table_insert', function(){
+                    bindButtonClick();
+                    updateTable()
+                    updateDetails()
+                    snackbar.labelText = "Daten aktualisiert";
+                    snackbar.open()
+                });
+            } else {
+                alert('error')
+            }
+        }
+    });
+}    
+    
+function updateTable(){
+    var value = $("#myInput").val().toLowerCase();
+    $("#table_body tr").filter(function() {
+        if($(this).text().toLowerCase().indexOf(value) > -1){
+            $(this).show()
+        } else {
+            $(this).hide()
+        }
+    });
+    $(".counter:visible").each(function(index, value){
+        $(this).html(index+1)});
+    $(".table_row:visible").each(function(index, value){
+        $(this).removeClass('odd');
+        if(index%2===1){
+            $(this).addClass('odd');
+        };
+    });
+};
+    
+function bindButtonClick(){
+    // the search function
+    $("#myInput").on("keyup", function() {
+        updateTable()
+    });
+    // This is for the included detail view
+    $('body').on('click','#table_body tr',function(){
+        var pk = $(this).find($(".member_id")).html();
+        $.ajax({
+            url: '{% url "get_member_detail_form" 1234 %}'.replace("1234", pk.toString()),
+            type: 'GET',
+            success: function (data){
+                $("#member_detail").html(data);
+                fields = document.querySelectorAll('.mdc-text-field');
+                fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+            }
         });
     });
+};
+    
+</script>
+<script>
+$(document).ready(function(){
+    bindButtonClick();
+    updateTable()
+});
+
 </script>
 {% endblock %}
