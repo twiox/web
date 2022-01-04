@@ -208,7 +208,7 @@
                     {% endif %}
                     <label class="mdc-text-field mdc-text-field--filled member_num">
                         <span class="mdc-text-field__ripple"></span>
-                        <input type="text" class="mdc-text-field__input" aria-labelledby="member_num-label" name="member_num" required value=
+                        <input type="number" class="mdc-text-field__input" aria-labelledby="member_num-label" name="member_num" required value=
                         {% if form2.instance.member_num %} {{form2.instance.member_num}} {% elif form2.data.member_num %} {{form2.data.member_num}} {%else%} {{current_member|add:"1"}} {% endif %}>
                         <span class="mdc-floating-label" id="member_num-label">Mitgliedsnummer</span>
                         <span class="mdc-line-ripple"></span>

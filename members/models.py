@@ -251,7 +251,7 @@ class Profile(models.Model):
     
     # club data
     status = models.CharField(max_length=40, choices=choices, default="Ordentliches Mitglied")
-    member_num = models.IntegerField("Mitgliedsnummer", blank=True)
+    member_num = models.CharField("Mitgliedsnummer", blank=True, max_length=30)
     group = models.ForeignKey(Group, blank=True, null=True, on_delete=models.SET_NULL)
     membership_start = models.DateTimeField("Beginn der Mitgliedschaft",null=True, blank=True)
     membership_end = models.DateTimeField("Kündigung zum", null=True, blank=True) 

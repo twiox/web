@@ -23,9 +23,9 @@
         </div>
     </div>
     
-    <div style="display:flex;flex-align:left;">
-        <div id='table_data' style="width:50%;">
-            <div id='table_insert' class="padding_all_big tertiary_bg side_scroll">
+    <div style="display:flex;flex-align:left;height:750px">
+        <div id='table_data' style="width:50%;overflow:auto;">
+            <div id='table_insert' style='display:inline-block' class="padding_all_big tertiary_bg">
                 <table>
                     <thead>
                         <tr>
@@ -103,8 +103,13 @@
                 </table>
             </div>
         </div>
-        <div class="padding_all_small" style="width:50%;">
-            <div class="tertiary_bg padding_all_small" style="border: solid 1px; border-color:white;">
+        <div >
+            <div id='toggle_detail' class='primary_bg flex_center_vertical' style="height:750px;width:10px;cursor:pointer">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        </div>
+        <div id='update_tab' style="width:50%;">
+            <div class="tertiary_bg padding_all_small" style="border: solid 1px; border-color:white; position:sticky; top:0">
                 <div class='side_scroll' id="member_detail">
                     Detailansicht: Klick auf eine Reihe!
                 </div>
@@ -210,7 +215,20 @@ function bindButtonClick(){
             }
         });
     });
+    $('#toggle_detail').on('click', function(){
+        if($("#update_tab").width() != 0){
+            $("#update_tab").width('0%')
+            $("#table_data").width('100%')
+            $('#toggle_detail').html('<i class="fas fa-chevron-left"></i>')
+        }
+        else{
+            $("#update_tab").width('50%')
+            $("#table_data").width('50%')
+            $('#toggle_detail').html('<i class="fas fa-chevron-right"></i>')
+        }
+    });
 };
+    
     
 </script>
 <script>

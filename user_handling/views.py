@@ -21,11 +21,18 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,P
 from django.views.generic import DeleteView, UpdateView, CreateView, ListView
 from django.contrib.auth.views import LoginView, PasswordResetView, LogoutView, PasswordResetConfirmView
 from django.urls import reverse
+from django.db.models.functions import Cast
 import datetime
 
 @permission_required('auth.add_user', raise_exception=True)
 def index(request):
      return render(request, 'user_handling/index.html')
+
+def get_ordering(n):
+    try:
+        return int(n.profile.member_num)
+    except:
+        return 0
 
 def get_mandatsref(old_ref):
     try:
@@ -39,6 +46,9 @@ def get_mandatsref(old_ref):
 @login_required
 @permission_required('auth.add_user', raise_exception=True)
 def register(request):
+    current_member = User.objects.latest('pk')
+    y,num = get_mandatsref(current_member.profile.mandatsref)
+    ref = f"{get_ordering(current_member)+1}-{y}-{num}"
     if request.method == "POST": #if the form is filled out
         form = MemberCreationForm(request.POST) 
         form2 = ProfileCreationForm(request.POST)
@@ -70,12 +80,9 @@ def register(request):
             messages.add_message(request, messages.SUCCESS, 'Account angelegt. Das Mitglied bekommt eine Email')
             return redirect("register")
     else:
-        current_member = Profile.objects.latest('member_num')
-        y,num = get_mandatsref(current_member.mandatsref)
-        ref = f"{int(current_member.member_num)+1}-{y}-{num}"
         form = MemberCreationForm()
         form2 = ProfileCreationForm()
-    return render(request, 'user_handling/register.html', context={"form":form, "form2":form2,"current_member":current_member.member_num, 'ref':ref})
+    return render(request, 'user_handling/register.html', context={"form":form, "form2":form2,"current_member":get_ordering(current_member), 'ref':ref})
 
 def activate(request, uidb64, token):
     try:
@@ -118,10 +125,23 @@ def resend_activate(request, uidb64, token):
         messages.add_message(request, messages.SUCCESS, 'FEHLER: Der Benutzer existiert nicht. Bitte wende dich an den Vorstand')
     return redirect("activate", uidb64=uidb64, token=token)
 
+
+def get_ordering(n):
+    try:
+        return int(n.profile.member_num)
+    except:
+        return 0
+
+
 class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = User
     permission_required = 'auth.add_user'
     template_name = "user_handling/member_list.html"
+    
+    def get_queryset(self):
+        ordered = sorted(User.objects.all(), key=lambda n: get_ordering(n))
+        return ordered
+        #User.objects.all().order_by("profile__member_num")
     
     
 class UserDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
