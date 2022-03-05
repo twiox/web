@@ -463,7 +463,7 @@ class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
         return super(MessageUpdateView, self).form_valid(form)
 
 """USER STUFF"""
-class UserDetailView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
+class UserDetailView(LoginRequiredMixin, UpdateView):
     # TODO: get email for every change in "Hinweis"
     model = User
     template_name = 'members/user_detail.html'
@@ -505,17 +505,16 @@ class UserDetailView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
         return render(request, self.template_name, {'form': form})
 
 
-    def test_func(self):
-        user = self.request.user
-        person = self.get_object()
-        return user == person
-
 
 class EmailUpdateView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
     model = User
     template_name = 'members/update_email.html'
     form_class = UpdateMemberEmailForm
-
+    
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
+    
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():
@@ -526,7 +525,7 @@ class EmailUpdateView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
                     request.user.email = form.cleaned_data.get("email1")
                     request.user.save()
                     messages.add_message(request, messages.SUCCESS, 'E-Mail erfolgreich geändert')
-                    return HttpResponseRedirect(reverse("profile_detail", kwargs={"pk": request.user.id}))
+                    return HttpResponseRedirect(reverse("profile_detail"))
                 form.add_error('email1', 'Die E-Mails stimmen nicht überein')
                 return render(request, self.template_name, {'form': form, "object":request.user})
             form.add_error('password', 'Das Passwort stimmt nicht')
@@ -540,6 +539,10 @@ class EmailUpdateView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
 
 class PasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     template_name = 'members/update_pw.html'
+
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
@@ -558,31 +561,36 @@ class PasswordChangeView(LoginRequiredMixin, PasswordChangeView):
 
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS, 'Passwort erfolgreich geändert')
-        return HttpResponseRedirect(reverse("profile_detail", kwargs={"pk": request.user.id}))
+        return HttpResponseRedirect(reverse("profile_detail"))
 
 class UsernameUpdateView(LoginRequiredMixin, UpdateView):
     model = User
     template_name = 'members/update_username.html'
     fields = ["username"]
     
+
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
+
     def get_success_url(self):
         messages.add_message(self.request, messages.SUCCESS, 'Nutzername erfolgreich geändert')
-        return reverse('profile_detail', kwargs={'pk':self.object.pk})
+        return reverse('profile_detail')
         
 
-class AddressChangeView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class AddressChangeView(LoginRequiredMixin, UpdateView):
     model = Profile
     template_name = 'members/update_address.html'
     fields = ["address", "telephone", "parent", "parent_telnr"]
     
-    def get_success_url(self):
-        return reverse('profile_detail', kwargs={'pk':self.object.user.pk})
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
 
-    def test_func(self):
-        user = self.request.user
-        profile = self.get_object()
-        return user.profile == profile
+    def get_success_url(self):
+        return reverse('profile_detail')
     
+
     
 ## AJAX ##
 @login_required

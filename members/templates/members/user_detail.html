@@ -40,7 +40,7 @@
                         </div>
                         <table class="padding_tb_small side_scroll">
                             <tr> <td><h4>Persönliche Daten</h4></td>
-                            <td></td><td><a class="more_info_button" href="{% url 'profile_update_address' object.profile.id %}">Ändern</a></td></tr>
+                            <td></td><td><a class="more_info_button" href="{% url 'profile_update_address' %}">Ändern</a></td></tr>
                             <tr> <td>Name:</td><td>{{object.first_name}} {{object.last_name}}</td> </tr>
                             <tr> <td>Adresse:</td><td>{{object.profile.address}}</td> </tr>
                             <tr> <td>Geburtsdatum:</td><td>{{object.profile.birthday|date:"d.m.Y"}}</td> </tr>
@@ -63,9 +63,9 @@
                             <tr><td style='color:grey;'>Keine weiteren Emails</td></tr>
                             {% endif %}
                             <tr> <td><h4 class="padding_tb_small">Websitedaten</h4></td> </tr>
-                            <tr> <td>Nutzername:</td><td>{{object.username}}</td> <td><a class="more_info_button" href="{% url 'profile_update_username' object.id %}">Ändern</a></td> </tr>
-                            <tr> <td>E-Mail:</td><td>{{object.email}}</td> <td><a class="more_info_button" href="{% url 'profile_update_email' object.id %}">Ändern</a></td> </tr>
-                            <tr> <td>Passwort:</td><td>*************</td> <td><a class="more_info_button" href="{% url 'profile_update_pw' object.id %}">Ändern</a></td> </tr>
+                            <tr> <td>Nutzername:</td><td>{{object.username}}</td> <td><a class="more_info_button" href="{% url 'profile_update_username' %}">Ändern</a></td> </tr>
+                            <tr> <td>E-Mail:</td><td>{{object.email}}</td> <td><a class="more_info_button" href="{% url 'profile_update_email' %}">Ändern</a></td> </tr>
+                            <tr> <td>Passwort:</td><td>*************</td> <td><a class="more_info_button" href="{% url 'profile_update_pw' %}">Ändern</a></td> </tr>
                             <tr> <td><h4 class="padding_tb_small">Vereinsdaten</h4></td> </tr>
                             <tr> <td>Mitgliedsstatus:</td><td>{{object.profile.status}}</td> </tr>
                             <tr> <td>Mitglied seit:</td><td>{{object.profile.membership_start|date:"m/Y"}}</td> </tr>
