@@ -584,7 +584,7 @@ class AddressChangeView(LoginRequiredMixin, UpdateView):
     fields = ["address", "telephone", "parent", "parent_telnr"]
     
     def get_object(self, queryset=None):
-        obj = self.request.user
+        obj = self.request.user.profile
         return obj
 
     def get_success_url(self):
