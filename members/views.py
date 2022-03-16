@@ -8,7 +8,7 @@ from django.views.generic import (
     UpdateView,
     DeleteView
     )
-from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, News, AdditionalEmail
+from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, News, AdditionalEmail,ShopItem, Image, Gallery
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
@@ -590,6 +590,22 @@ class AddressChangeView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse('profile_detail')
     
+
+class ShopItemListView(LoginRequiredMixin, ListView):
+    model = ShopItem
+
+
+class ShopItemUpdateView(LoginRequiredMixin, UpdateView):
+    model = ShopItem
+    fields = ["title","description","price"]
+
+    def get_success_url(self):
+        return reverse('shop')
+    
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.description_rendered = markdown.markdown(self.object.description)
+        return super().form_valid(form)
 
     
 ## AJAX ##
