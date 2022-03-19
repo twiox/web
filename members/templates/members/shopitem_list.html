@@ -12,32 +12,34 @@
 {% block content %}
 <h1> Vereinskleidung </h1>
 
-<div class="padding_all_big flex_left">
+<div class="padding_all_big flex_left" style="gap:30px;">
     {% for obj in object_list %}
-    <h3>{{obj.title}}</h3>
-    <div class="padding_all_small chair tertiary_bg" style="width:100%; display: flex; flex-wrap: wrap; position:relative">
-        <div class="trainer_ui">
-            {% if perms.members.change_shop_item %}
-            <a href="{% url 'shopitem_update' obj.id  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
-            {% endif %}
-        </div>
-        <div class="chair_col-4 flex_left" style="justify-content:space-between;" > 
-            {% for img in obj.get_images %}
-                {% if forloop.counter == 1 %}
-                    <img style="width:100%;" src="{{img.image.url}}">
-                {% else %}
-                    <img style="width:33%;" src="{{img.image.url}}">
+    <div style="width: 100%;">
+        <h3>{{obj.title}}</h3>
+        <div class="padding_all_small chair tertiary_bg" style="width:100%; display: flex; flex-wrap: wrap; position:relative">
+            <div class="trainer_ui">
+                {% if perms.members.change_shop_item %}
+                <a href="{% url 'shopitem_update' obj.id  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
                 {% endif %}
-            {% endfor %}
-        </div>
-        <div class="chair_col-60"> 
-            <div class="padding_all_big flex_center_vertical_even" style="justify-content:space-between; height: 100%;">
-                <div>
-                    {{obj.description_rendered|safe}} 
-                </div>
-                <div> 
-                    <p style="font-size:30px;" >Preis: {{obj.price}} € </p>
-                    <p style="font-size:20px;color:grey"> Bitte schreibt uns eine Email! </p>
+            </div>
+            <div class="chair_col-4 flex_left" {%if obj.n_images > 3 %} style="justify-content:space-between;"{% else%} style="justify-content:left;" {% endif %}> 
+                {% for img in obj.get_images %}
+                    {% if forloop.counter == 1 %}
+                        <img style="width:100%;" src="{{img.image.url}}">
+                    {% else %}
+                        <img style="width:33%;" src="{{img.image.url}}">
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="chair_col-60"> 
+                <div class="padding_all_big flex_center_vertical_even" style="justify-content:space-between; height: 100%;">
+                    <div>
+                        {{obj.description_rendered|safe}} 
+                    </div>
+                    <div> 
+                        <p style="font-size:30px;" >Preis: {{obj.price}} € </p>
+                        <p style="font-size:20px;color:grey"> Bitte schreibt uns eine Email! </p>
+                    </div>
                 </div>
             </div>
         </div>

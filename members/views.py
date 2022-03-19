@@ -10,6 +10,7 @@ from django.views.generic import (
     )
 from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, News, AdditionalEmail,ShopItem, Image, Gallery
 from django.contrib.auth.decorators import login_required, permission_required
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
 from .forms import EventUpdateParticipantForm,EventUpdateParticipantForm2, SessionForm, EventForm, UpdateMemberInformationForm,UpdateMemberEmailForm,SpotForm
@@ -589,15 +590,18 @@ class AddressChangeView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('profile_detail')
-    
+
+
 
 class ShopItemListView(LoginRequiredMixin, ListView):
     model = ShopItem
 
 
-class ShopItemUpdateView(LoginRequiredMixin, UpdateView):
+class ShopItemUpdateView(LoginRequiredMixin, UpdateView, PermissionRequiredMixin):
     model = ShopItem
     fields = ["title","description","price"]
+    permission_required = 'members.update_shop_item'
+
 
     def get_success_url(self):
         return reverse('shop')
@@ -609,6 +613,36 @@ class ShopItemUpdateView(LoginRequiredMixin, UpdateView):
 
     
 ## AJAX ##
+@login_required
+def get_image_data(request):
+    data = {x:v[0] for (x,v) in dict(request.GET).items()}
+    image = Image.objects.get(pk=data["id"])
+    return JsonResponse({"data":{"title":image.title, "alt":image.alt, "priority":image.priority}})
+
+
+@login_required
+def set_image_data(request):
+    data = {x:v[0] for (x,v) in dict(request.GET).items()}
+    image = Image.objects.get(pk=data["id"])
+    image.alt = data['alt']
+    image.priority = data['prio']
+    image.title = data['title']
+    image.save()
+    return JsonResponse({"data":{"title":image.title, "alt":image.alt, "priority":image.priority}})
+
+
+@login_required
+def delete_image(request):
+    data = {x:v[0] for (x,v) in dict(request.GET).items()}
+    image = Image.objects.get(pk=data["id"])
+    image.delete()
+    return JsonResponse({"data":True})
+
+@csrf_exempt
+def add_image(request):
+    print('test')
+    print(request)
+
 @login_required
 def add_another_email(request):
     data = request.POST
