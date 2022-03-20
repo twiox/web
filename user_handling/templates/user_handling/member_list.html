@@ -215,16 +215,17 @@ function bindButtonClick(){
             }
         });
     });
-    $('#toggle_detail').on('click', function(){
-        if($("#update_tab").width() != 0){
-            $("#update_tab").width('0%')
-            $("#table_data").width('100%')
-            $('#toggle_detail').html('<i class="fas fa-chevron-left"></i>')
+    $('body').on('click', '#toggle_detail', function(e){
+        e.stopImmediatePropagation();
+        if($('body').find("#update_tab").width() != 0){
+            $('body').find("#update_tab").width('0%')
+            $('body').find("#table_data").width('100%')
+            $('body').find('#toggle_detail').html('<i class="fas fa-chevron-left"></i>')
         }
         else{
-            $("#update_tab").width('50%')
-            $("#table_data").width('50%')
-            $('#toggle_detail').html('<i class="fas fa-chevron-right"></i>')
+            $('body').find("#update_tab").width('50%')
+            $('body').find("#table_data").width('50%')
+            $('body').find('#toggle_detail').html('<i class="fas fa-chevron-right"></i>')
         }
     });
 };
