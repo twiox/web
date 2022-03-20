@@ -592,19 +592,32 @@ class AddressChangeView(LoginRequiredMixin, UpdateView):
         return reverse('profile_detail')
 
 
+class ShopItemDeleteView(LoginRequiredMixin, DeleteView):
+    model = ShopItem
+
+    def get_success_url(self):
+        return reverse('shop')
+
 
 class ShopItemListView(LoginRequiredMixin, ListView):
     model = ShopItem
 
 
-class ShopItemCreateView(LoginRequiredMixin, CreateView):
-    model = ShopItem
-    fields = ["title","description","price"]
+
+def create_shopitem(request):
+    gallery = Gallery()
+    gallery.save()
+    gallery.refresh_from_db()
+    item = ShopItem(gallery=gallery, price=10, title='Neu', visible=False)
+    item.save()
+    item.refresh_from_db()
+    return HttpResponseRedirect(reverse('shopitem_update',args=[item.pk]))
+
 
 
 class ShopItemUpdateView(LoginRequiredMixin, UpdateView, PermissionRequiredMixin):
     model = ShopItem
-    fields = ["title","description","price"]
+    fields = ["title","description","price", "visible"]
     permission_required = 'members.update_shop_item'
 
 

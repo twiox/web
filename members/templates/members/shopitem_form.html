@@ -44,6 +44,11 @@
         </span>
     </label>
 
+    <div style='align:left'>
+        <input type="checkbox" id="visible" name="visible" {% if object.visible %} checked {% endif %}>
+        <label for="visible">Item auf Seite anzeigen</label><br><br>
+    </div>
+
     <h5>Bilder</5>
 
     <div class="padding_all_big chair_col-5" id="image_form" style="border: solid 1px white; position:relative; display: none;">

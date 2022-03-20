@@ -26,6 +26,9 @@
                 {% if perms.members.change_shop_item %}
                 <a href="{% url 'shopitem_update' obj.id  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
                 {% endif %}
+                {% if perms.members.change_shop_item %}
+                <a href="{% url 'shopitem_delete' obj.id  %}#nav" title="Löschen"><i class="fas fa-minus-square" style="font-size:17px;"></i></a>
+                {% endif %}
             </div>
             <div class="chair_col-4 flex_left" {%if obj.n_images_modulo == 1 %} style="justify-content:space-between;"{% else%} style="justify-content:left;" {% endif %}> 
                 {% for img in obj.get_images %}
