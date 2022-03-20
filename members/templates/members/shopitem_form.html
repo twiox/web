@@ -78,7 +78,7 @@
         </div>
     </div>
     
-    <div class="flex_left" style="justify-content: left; flex-wrap: wrap; gap:10px;">
+    <div id="image_container" class="flex_left" style="justify-content: left; flex-wrap: wrap; gap:10px;">
     {% for img in object.get_images %}
         <div id="container_img_{{img.pk}}" style="width: 200px; position: relative;" >
             <a class="edit_image" id="{{img.pk}}" style="position: absolute;right: 0; bottom: 0; padding: 0;" href="#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
@@ -113,21 +113,20 @@
 <script>
 
 $(document).on('change','#inputFileImage' , function(e){
-    var data = new FormData();
-    data.append('file', e.target.files[0]);
-    //var fileName = e.target.files[0].name
+    var image = $("#inputFileImage")[0].files[0]
+    var form_data = new FormData();
+    form_data.append('files[]', image);
+    form_data.append('object_id', "{{object.pk}}");
 
     $.ajax({
         type: "POST",
         url: "{% url 'upload_image_file' %}",
-        data: {
-            'data':data,
-            'csrfmiddlewaretoken': '{{ csrf_token }}'
-        },
+        data: form_data,
         processData: false,
         contentType: false,
+    }).done(function(data){
+        location.reload();
     });
-    alert('file_upload')
 });
 
 //Mark images to delete

@@ -597,6 +597,11 @@ class ShopItemListView(LoginRequiredMixin, ListView):
     model = ShopItem
 
 
+class ShopItemCreateView(LoginRequiredMixin, CreateView):
+    model = ShopItem
+    fields = ["title","description","price"]
+
+
 class ShopItemUpdateView(LoginRequiredMixin, UpdateView, PermissionRequiredMixin):
     model = ShopItem
     fields = ["title","description","price"]
@@ -640,8 +645,15 @@ def delete_image(request):
 
 @csrf_exempt
 def add_image(request):
-    print('test')
-    print(request)
+    #print(request.POST.__dir__())
+    #gallery = Gallery.objects.get(pk=1)
+    img = request.FILES['files[]']
+    obj = ShopItem.objects.get(pk=request.POST['object_id'])
+    gallery = obj.gallery
+    new = Image(image=img, gallery=gallery, priority=999, title='unset')
+    new.save()
+    new.refresh_from_db()
+    return JsonResponse({"url":new.image.url,'pk':new.pk})
 
 @login_required
 def add_another_email(request):

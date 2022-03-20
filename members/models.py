@@ -325,5 +325,9 @@ class ShopItem(models.Model):
         return Image.objects.filter(gallery=self.gallery).order_by('priority')
 
     @property
+    def n_images_modulo(self):
+        return len(Image.objects.filter(gallery=self.gallery))%3
+
+    @property
     def n_images(self):
         return len(Image.objects.filter(gallery=self.gallery))

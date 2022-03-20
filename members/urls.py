@@ -39,6 +39,7 @@ urlpatterns = [
     path("beiträge/<int:pk>/löschen", views.NewsDeleteView.as_view(),name="news_delete"),
     path("shop", views.ShopItemListView.as_view(),name='shop'),
     path("shop/ändere_item/<int:pk>", views.ShopItemUpdateView.as_view(),name='shopitem_update'),
+    path("shop/neues_item/", views.ShopItemCreateView.as_view(),name='shopitem_create'),
     path("ajax/get/bilder_daten", views.get_image_data, name="get_image_data"),
     path("ajax/set/bilder_daten", views.set_image_data, name="set_image_data"),
     path("ajax/entferne/bild", views.delete_image, name="delete_image"),
