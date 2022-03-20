@@ -20,6 +20,7 @@
         {% if perms.auth.add_user %}
         <a class= "float_left" href="{% url 'chairman_index' %}#nav"><i class="fas fa-user-tie" style="font-size:20px;"><p>Vorstände</p></i></a>
         {% endif %}
+        <a class="float_left" href="{% url 'shop' %}#nav"><i class="fas fa-tshirt" style="font-size:20px;"><p>Merch</p></i></a>
     </div>
     {% endif %}
     {% endblock %}

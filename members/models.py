@@ -317,6 +317,7 @@ class ShopItem(models.Model):
     gallery = models.OneToOneField(Gallery, on_delete=models.CASCADE)
     price = models.DecimalField("Price", blank=True, max_digits=4, decimal_places=2 )
     visible = models.BooleanField("Visible", default="True")
+    priority = models.IntegerField("Priority", default=99)
 
     def __str__(self):
         return self.title

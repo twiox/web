@@ -26,6 +26,15 @@ import markdown
 import os
 
 
+def chairman_check(request):
+    user = request.user
+    return (hasattr(user,'chairman') or user.is_superuser)
+
+def trainer_check(request):
+    user = request.user
+    return (hasattr(user,'trainer') or user.is_superuser)
+
+
 @login_required
 def index(request):
     """ This is the View for the homepage """
@@ -592,8 +601,11 @@ class AddressChangeView(LoginRequiredMixin, UpdateView):
         return reverse('profile_detail')
 
 
-class ShopItemDeleteView(LoginRequiredMixin, DeleteView):
+class ShopItemDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = ShopItem
+
+    def test_func(self):
+        return chairman_check(self.request)
 
     def get_success_url(self):
         return reverse('shop')
@@ -602,24 +614,41 @@ class ShopItemDeleteView(LoginRequiredMixin, DeleteView):
 class ShopItemListView(LoginRequiredMixin, ListView):
     model = ShopItem
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['privileged'] = chairman_check(self.request)
+        return context
+
+    def get_queryset(self):
+        user = self.request.user
+        if chairman_check(self.request):
+            object_list = ShopItem.objects.all().order_by('priority')
+        else:
+            object_list = ShopItem.objects.filter(visible=True).order_by('priority')
+        return object_list
 
 
+@login_required
 def create_shopitem(request):
-    gallery = Gallery()
-    gallery.save()
-    gallery.refresh_from_db()
-    item = ShopItem(gallery=gallery, price=10, title='Neu', visible=False)
-    item.save()
-    item.refresh_from_db()
-    return HttpResponseRedirect(reverse('shopitem_update',args=[item.pk]))
+    if chairman_check(request):
+        gallery = Gallery()
+        gallery.save()
+        gallery.refresh_from_db()
+        item = ShopItem(gallery=gallery, price=10, title='Neu', visible=False)
+        item.save()
+        item.refresh_from_db()
+        return HttpResponseRedirect(reverse('shopitem_update',args=[item.pk]))
+    else:
+        return HttpResponseRedirect(reverse('shop'))
 
 
 
-class ShopItemUpdateView(LoginRequiredMixin, UpdateView, PermissionRequiredMixin):
+class ShopItemUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = ShopItem
-    fields = ["title","description","price", "visible"]
-    permission_required = 'members.update_shop_item'
+    fields = ["title","description","price", "visible", "priority"]
 
+    def test_func(self):
+        return chairman_check(self.request)
 
     def get_success_url(self):
         return reverse('shop')
@@ -640,26 +669,32 @@ def get_image_data(request):
 
 @login_required
 def set_image_data(request):
-    data = {x:v[0] for (x,v) in dict(request.GET).items()}
-    image = Image.objects.get(pk=data["id"])
-    image.alt = data['alt']
-    image.priority = data['prio']
-    image.title = data['title']
-    image.save()
-    return JsonResponse({"data":{"title":image.title, "alt":image.alt, "priority":image.priority}})
+    if chairman_check(request):
+        data = {x:v[0] for (x,v) in dict(request.GET).items()}
+        image = Image.objects.get(pk=data["id"])
+        image.alt = data['alt']
+        image.priority = data['prio']
+        image.title = data['title']
+        image.save()
+        return JsonResponse({"data":{"title":image.title, "alt":image.alt, "priority":image.priority}})
+    else:
+        return JsonResponse({'data':False})
 
 
 @login_required
 def delete_image(request):
-    data = {x:v[0] for (x,v) in dict(request.GET).items()}
-    image = Image.objects.get(pk=data["id"])
-    image.delete()
-    return JsonResponse({"data":True})
+    if chairman_check(request):
+        data = {x:v[0] for (x,v) in dict(request.GET).items()}
+        image = Image.objects.get(pk=data["id"])
+        image.delete()
+        return JsonResponse({"data":True})
+    else:
+        return JsonResponse({'data':False})
+
 
 @csrf_exempt
+@login_required
 def add_image(request):
-    #print(request.POST.__dir__())
-    #gallery = Gallery.objects.get(pk=1)
     img = request.FILES['files[]']
     obj = ShopItem.objects.get(pk=request.POST['object_id'])
     gallery = obj.gallery

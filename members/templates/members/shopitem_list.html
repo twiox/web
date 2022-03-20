@@ -14,7 +14,7 @@
 
 <div class="padding_all_big flex_left" style="gap:30px;position: relative;">
     <div style="position: absolute; top: 0; right: 0;">
-        {% if perms.auth.add_user %}
+        {% if privileged %}
                 <a href="{% url 'shopitem_create' %}" title="Shop Item hinzufügen"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
         {% endif %}
     </div>
@@ -22,30 +22,32 @@
     <div style="width: 100%;">
         <h3>{{obj.title}}</h3>
         <div class="padding_all_small chair tertiary_bg" style="width:100%; display: flex; flex-wrap: wrap; position:relative">
+            {% if not obj.visible %}
+            <div style="position: absolute;left: 0; top: 0; background-color: red;">
+                <p class="padding_all_big" style="color:white;"><strong>Entwurf</strong></p>
+            </div>
+            {% endif %}
             <div class="trainer_ui">
-                {% if perms.members.change_shop_item %}
+                {% if privileged %}
                 <a href="{% url 'shopitem_update' obj.id  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
-                {% endif %}
-                {% if perms.members.change_shop_item %}
                 <a href="{% url 'shopitem_delete' obj.id  %}#nav" title="Löschen"><i class="fas fa-minus-square" style="font-size:17px;"></i></a>
                 {% endif %}
             </div>
             <div class="chair_col-4 flex_left" {%if obj.n_images_modulo == 1 %} style="justify-content:space-between;"{% else%} style="justify-content:left;" {% endif %}> 
                 {% for img in obj.get_images %}
-                    {% if forloop.counter == 1 %}
-                        <img style="width:100%;" src="{{img.image.url}}">
-                    {% else %}
-                        <img style="width:33%;" src="{{img.image.url}}">
-                    {% endif %}
+                    <img alt="{{img.alt}}" 
+                        title="{{img.title}}"
+                        {% if forloop.counter == 1 %} style="width:100%;" {% else %} style="width:33%;" {% endif %}
+                        src="{{img.image.url}}">
                 {% endfor %}
             </div>
-            <div class="chair_col-60"> 
+            <div class="chair_col-60" style="position: relative;"> 
                 <div class="padding_all_big flex_center_vertical_even" style="justify-content:space-between; height: 100%;">
                     <div>
                         {{obj.description_rendered|safe}} 
                     </div>
                     <div> 
-                        <p style="font-size:30px;" >Preis: {{obj.price}} € </p>
+                        <p style="font-size:30px;color:#088eaa;" >Preis: {{obj.price}} € </p>
                         <p style="font-size:20px;color:grey"> Bitte schreibt uns eine Email! </p>
                     </div>
                 </div>
