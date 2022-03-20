@@ -51,11 +51,11 @@ class Event(models.Model):
     place = models.CharField("Veranstaltungsort", max_length=200, blank=True, default="Leipzig")
     description = models.TextField("Beschreibung", blank=True)
     description_rendered = models.TextField(blank=True, null=True)
-    deadline = models.DateTimeField("Anmeldung/Abmeldung bis", default= datetime(2020, 11, 14, 1, 54, 52, 799289))
-    start_date = models.DateTimeField("Datum Beginn", default= datetime(2020, 11, 14, 1, 54, 52, 799289))
-    end_date = models.DateTimeField("Datum Ende", default= datetime(2020, 11, 14, 1, 54, 52, 799289))
+    deadline = models.DateTimeField("Anmeldung/Abmeldung bis", blank=True, null=True)
+    start_date = models.DateTimeField("Datum Beginn", blank=True, null=True)
+    end_date = models.DateTimeField("Datum Ende", blank=True, null=True)
     hinweis = models.CharField("Hinweis", blank=True, max_length=50)
-    costs = models.IntegerField("Kosten", blank=True, null=True)
+    costs = models.DecimalField("Kosten", blank=True, null=True, max_digits=4, decimal_places=2 )
     info_only = models.BooleanField("Nur Ankündigung?",default=False)
     
     teilnahmebedingungen = models.FileField("Teilnahmebedingungen", upload_to=f"Events/Docs/",null=True,blank=True)
@@ -77,8 +77,14 @@ class Event(models.Model):
         return datetime.now().replace(tzinfo=None) > self.end_date.replace(tzinfo=None) + timedelta(days=3)
     @property
     def deadline_reached(self):
-        return datetime.now().replace(tzinfo=None) > self.deadline.replace(tzinfo=None)
+        return datetime.now().replace(tzinfo=None) > self.deadline.replace(tzinfo=None) + timedelta(days=1)
     
+    @property
+    def multiple_days(self):
+        if not self.start_date == self.end_date:
+            return True
+        return False
+
     def __str__(self):
         return f"Event: {self.title}"
         

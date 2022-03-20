@@ -28,7 +28,11 @@
                 <h4>{{object.place}}</h4>
                 <div class="padding_tb_small">
                     <p>{{object.start_date|date:'d.m'}} - {{object.end_date|date:'d.m.Y'}}</p>
-                    <p>Kosten: {{object.costs}} € </p>
+                    {% if object.costs == 0 %}
+                    <p><strong>Kostenlos</strong></p>
+                    {% else %}
+                    <p><strong>Kosten: {{object.costs}} € </strong></p>
+                    {% endif %}
                 </div>
             </div>
             <div class="chair_col-80 tertiary_bg padding_all_big">
