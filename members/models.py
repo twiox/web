@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse #to get absolut_urls
 from datetime import datetime, timedelta
 from multiselectfield import MultiSelectField
-from PIL import Image
+from PIL import Image as Img
 
 class News(models.Model):
     title = models.CharField("Titel", max_length=200)
@@ -110,7 +110,7 @@ class Trainer(models.Model):
         
     def save(self):
         super().save()
-        img = Image.open(self.image.path)
+        img = Img.open(self.image.path)
         if(img.height > img.width):
             cut = int((img.height-img.width)/2)
             img = img.crop((0, 0+cut, img.width, img.height-cut))
@@ -222,7 +222,7 @@ class Chairman(models.Model):
     
     def save(self):
         super().save()
-        img = Image.open(self.image.path)
+        img = Img.open(self.image.path)
         if(img.height > img.width):
             cut = int((img.height-img.width)/2)
             img = img.crop((0, 0+cut, img.width, img.height-cut))
@@ -282,4 +282,60 @@ class AdditionalEmail(models.Model):
     title = models.CharField('Titel', max_length=200, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     email = models.CharField('Emailadresse', max_length=200, blank=True, null=True)
+
+
+# For the several gallery-projects
+class Gallery(models.Model):
+    title = models.CharField("Title",max_length=200, blank=True)
+
+    def __str__(self):
+        return self.title
+
+class Image(models.Model):
+    gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE)
+    image = models.ImageField('Image', upload_to=f'galleries/')
+    title = models.CharField("Title", max_length=200, blank=True)
+    alt = models.TextField("Alt text", null=True, blank=True)
+    priority = models.IntegerField("Priority")
+
+    def save(self):
+        super().save()
+        img = Img.open(self.image.path)
+        if(img.height > img.width):
+            cut = int((img.height-img.width)/2)
+            img = img.crop((0, 0+cut, img.width, img.height-cut))
+            img2 = img.resize((720,720))
+            img2.save(self.image.path)
+        elif(img.width > img.height):
+            cut = int((img.width-img.height)/2)
+            img = img.crop((0+cut, 0, img.width-cut, img.height))
+            img2 = img.resize((720,720))
+            img2.save(self.image.path)
+
+    def __str__(self):
+        return self.title
+
+
+class ShopItem(models.Model):
+    title = models.CharField("Title", max_length=300, blank=True)
+    description = models.TextField("Description", blank=True)
+    description_rendered = models.TextField(blank=True, null=True)
+    gallery = models.OneToOneField(Gallery, on_delete=models.CASCADE)
+    price = models.DecimalField("Price", blank=True, max_digits=4, decimal_places=2 )
+    visible = models.BooleanField("Visible", default="True")
+    priority = models.IntegerField("Priority", default=99)
+
+    def __str__(self):
+        return self.title
     
+    @property
+    def get_images(self):
+        return Image.objects.filter(gallery=self.gallery).order_by('priority')
+
+    @property
+    def n_images_modulo(self):
+        return len(Image.objects.filter(gallery=self.gallery))%3
+
+    @property
+    def n_images(self):
+        return len(Image.objects.filter(gallery=self.gallery))

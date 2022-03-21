@@ -8,8 +8,9 @@ from django.views.generic import (
     UpdateView,
     DeleteView
     )
-from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, News, AdditionalEmail
+from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, News, AdditionalEmail,ShopItem, Image, Gallery
 from django.contrib.auth.decorators import login_required, permission_required
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
 from .forms import EventUpdateParticipantForm,EventUpdateParticipantForm2, SessionForm, EventForm, UpdateMemberInformationForm,UpdateMemberEmailForm,SpotForm
@@ -23,6 +24,15 @@ from django.conf import settings
 import markdown
 # Create your views here.
 import os
+
+
+def chairman_check(request):
+    user = request.user
+    return (hasattr(user,'chairman') or user.is_superuser)
+
+def trainer_check(request):
+    user = request.user
+    return (hasattr(user,'trainer') or user.is_superuser)
 
 
 @login_required
@@ -589,10 +599,110 @@ class AddressChangeView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('profile_detail')
+
+
+class ShopItemDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = ShopItem
+
+    def test_func(self):
+        return chairman_check(self.request)
+
+    def get_success_url(self):
+        return reverse('shop')
+
+
+class ShopItemListView(LoginRequiredMixin, ListView):
+    model = ShopItem
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['privileged'] = chairman_check(self.request)
+        return context
+
+    def get_queryset(self):
+        user = self.request.user
+        if chairman_check(self.request):
+            object_list = ShopItem.objects.all().order_by('priority')
+        else:
+            object_list = ShopItem.objects.filter(visible=True).order_by('priority')
+        return object_list
+
+
+@login_required
+def create_shopitem(request):
+    if chairman_check(request):
+        gallery = Gallery()
+        gallery.save()
+        gallery.refresh_from_db()
+        item = ShopItem(gallery=gallery, price=10, title='Neu', visible=False)
+        item.save()
+        item.refresh_from_db()
+        return HttpResponseRedirect(reverse('shopitem_update',args=[item.pk]))
+    else:
+        return HttpResponseRedirect(reverse('shop'))
+
+
+
+class ShopItemUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = ShopItem
+    fields = ["title","description","price", "visible", "priority"]
+
+    def test_func(self):
+        return chairman_check(self.request)
+
+    def get_success_url(self):
+        return reverse('shop')
     
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.description_rendered = markdown.markdown(self.object.description)
+        return super().form_valid(form)
 
     
 ## AJAX ##
+@login_required
+def get_image_data(request):
+    data = {x:v[0] for (x,v) in dict(request.GET).items()}
+    image = Image.objects.get(pk=data["id"])
+    return JsonResponse({"data":{"title":image.title, "alt":image.alt, "priority":image.priority}})
+
+
+@login_required
+def set_image_data(request):
+    if chairman_check(request):
+        data = {x:v[0] for (x,v) in dict(request.GET).items()}
+        image = Image.objects.get(pk=data["id"])
+        image.alt = data['alt']
+        image.priority = data['prio']
+        image.title = data['title']
+        image.save()
+        return JsonResponse({"data":{"title":image.title, "alt":image.alt, "priority":image.priority}})
+    else:
+        return JsonResponse({'data':False})
+
+
+@login_required
+def delete_image(request):
+    if chairman_check(request):
+        data = {x:v[0] for (x,v) in dict(request.GET).items()}
+        image = Image.objects.get(pk=data["id"])
+        image.delete()
+        return JsonResponse({"data":True})
+    else:
+        return JsonResponse({'data':False})
+
+
+@csrf_exempt
+@login_required
+def add_image(request):
+    img = request.FILES['files[]']
+    obj = ShopItem.objects.get(pk=request.POST['object_id'])
+    gallery = obj.gallery
+    new = Image(image=img, gallery=gallery, priority=999, title='unset')
+    new.save()
+    new.refresh_from_db()
+    return JsonResponse({"url":new.image.url,'pk':new.pk})
+
 @login_required
 def add_another_email(request):
     data = request.POST

@@ -1,0 +1,208 @@
+{% extends "members/base.html" %}
+{% load l10n %}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'shop' %}#nav">
+        Shop </a>
+    <a class="float_left"> > </a>
+    {% if object.id %}
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> {{object.title}} </a>
+    {% else %}
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Neu </a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<form id="form"  method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+<h3>Daten</h3>
+    <label class="mdc-text-field mdc-text-field--filled title">
+        <span class="mdc-text-field__ripple"></span>
+        <input type="text" class="mdc-text-field__input" aria-labelledby="title-label" name="title" required
+        value="{% if object.id%} {{object.title}} {% endif %}">
+        <span class="mdc-floating-label" id="title-label">Titel</span>
+        <span class="mdc-line-ripple"></span>
+    </label>
+
+    <label class="mdc-text-field mdc-text-field--filled price">
+        <span class="mdc-text-field__ripple"></span>
+        <input type="number" step="0.01" class="mdc-text-field__input" aria-labelledby="price-label" name="price" required
+            value="{% if object.id%}{{object.price|unlocalize}}{% endif %}">
+        <span class="mdc-floating-label" id="price-label">Preis</span>
+        <span class="mdc-line-ripple"></span>
+    </label>
+
+    <label class="mdc-text-field mdc-text-field--filled priority">
+        <span class="mdc-text-field__ripple"></span>
+        <input id="priority_field" type="number" class="mdc-text-field__input" aria-labelledby="priority-label" name="priority" value="{{object.priority}}" >
+        <span class="mdc-floating-label mdc-floating-label--float-above" id="priority-label">Reihenfolge</span>
+        <span class="mdc-line-ripple"></span>
+    </label>
+    <br><br>
+    <h5>Beschreibung</h5>
+
+    <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
+        <textarea class="mdc-text-field__input" rows="5" cols="200" aria-label="description" id="id_description" name="description">{% if object.id %}{{object.description}}{% endif %}
+        </textarea>
+        <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__trailing"></span>
+        </span>
+    </label>
+
+    <div style='align:left'>
+        <input type="checkbox" id="visible" name="visible" {% if object.visible %} checked {% endif %}>
+        <label for="visible">Item auf Seite anzeigen</label><br><br>
+    </div>
+
+    <h5>Bilder</5>
+
+    <div class="padding_all_big chair_col-5" id="image_form" style="border: solid 1px white; position:relative; display: none;">
+        <div id="close_image_form" class="tertiary_bg" style="width:20px; height:20px; position: absolute;top: 10px; right: 10px;cursor: pointer;">
+            <p style="width: 100%;text-align: center;">X</p>
+        </div>
+        <h6>Bild Informationen</h6>
+        <label class="mdc-text-field mdc-text-field--filled img_title">
+            <span class="mdc-text-field__ripple"></span>
+            <input id="img_title_field" type="text" class="mdc-text-field__input" aria-labelledby="price-label" name="img_title">
+            <span class="mdc-floating-label mdc-floating-label--float-above" id="img_title-label">Titel</span>
+            <span class="mdc-line-ripple"></span>
+        </label>
+
+        <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
+            <textarea id="img_alt_field" class="mdc-text-field__input" rows="5" cols="200" aria-label="img_alt" id="id_img_alt" name="img_alt" placeholder="Alt-Text" ></textarea>
+            <span class="mdc-notched-outline">
+                <span class="mdc-notched-outline__leading"></span>
+                <span class="mdc-notched-outline__trailing"></span>
+            </span>
+        </label>
+
+        <label class="mdc-text-field mdc-text-field--filled img_prio">
+            <span class="mdc-text-field__ripple"></span>
+            <input id="img_order_field" type="number" step="1" class="mdc-text-field__input" aria-labelledby="price-label" name="img_prio">
+            <span class="mdc-floating-label mdc-floating-label--float-above" id="img_prio-label">Reihenfolge</span>
+            <span class="mdc-line-ripple"></span>
+        </label>
+
+        <div style="width: 100%;display: flex; justify-content: right; gap: 15px;">
+            <div class="web_button flex_center update_img_button" style="cursor: pointer;"><p class="padding_all_small" style="text-align: center;">Update</p></div>
+        </div>
+    </div>
+    
+    <div id="image_container" class="flex_left" style="justify-content: left; flex-wrap: wrap; gap:10px;">
+    {% for img in object.get_images %}
+        <div id="container_img_{{img.pk}}" style="width: 200px; position: relative;" >
+            <a class="edit_image" id="{{img.pk}}" style="position: absolute;right: 0; bottom: 0; padding: 0;" href="#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+            <a class="delete_image" id="{{img.pk}}" style="position: absolute;right: 20px; bottom: 0; padding: 0;" href="#nav" title="Löschen"><i class="fa fa-minus-square" style="font-size:17px;"></i></a>
+            <p id="img_title_{{img.pk}}"> {{img.title}}</p>
+            <img id="the_image_{{img.pk}}" style="width: 100%;" src="{{img.image.url}}">   
+            <p id="img_pos_{{img.pk}}"> Position: {{img.priority}}</p>
+        </div>
+    {% endfor %}
+
+        <script>
+            
+        </script>
+
+        <div class="flex_center_vertical" >
+            <label>
+                <div class="tertiary_bg" style="width: 75px; height: 75px;cursor: pointer;">
+                    <div style="padding:5px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path fill="grey" d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"/>
+                        </svg>
+                    </div>
+                </div>
+                <input type="file" id="inputFileImage" style="display: none" name="new_image">
+            </label>
+        </div>
+    </div>
+    <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
+        <span >OK</span>
+    </button>
+</form>
+<script>
+
+$(document).on('change','#inputFileImage' , function(e){
+    var image = $("#inputFileImage")[0].files[0]
+    var form_data = new FormData();
+    form_data.append('files[]', image);
+    form_data.append('object_id', "{{object.pk}}");
+
+    $.ajax({
+        type: "POST",
+        url: "{% url 'upload_image_file' %}",
+        data: form_data,
+        processData: false,
+        contentType: false,
+    }).done(function(data){
+        location.reload();
+    });
+});
+
+//Mark images to delete
+$(".delete_image").click(function(){
+    imgid = $(this).attr('id');
+    if($(this).hasClass('delete')){
+        $("#the_image_"+imgid).fadeTo(1,1);
+        $(this).removeClass('delete')
+    } else {
+        $(this).addClass('delete')
+        $("#the_image_"+imgid).fadeTo(1, 0.3);
+    }
+});
+
+//Show the Update Form and populate the fields
+$(".edit_image").click(function(){
+    imgid = $(this).attr('id')
+    $.ajax({
+        url: "{% url 'get_image_data' %}?id="+imgid,
+    }).done(function(data){
+        $("#img_title_field").val(data.data.title);
+        $("#img_alt_field").val(data.data.alt);
+        $("#img_order_field").val(data.data.priority);
+    })
+    $("#image_form").show('slow');
+    $(".update_img_button").attr("id", imgid);
+});
+$("#close_image_form").click(function(){
+    $("#image_form").hide('slow');
+});
+
+//Update the Image upon clicking the update-button
+$(".update_img_button").click(function(){
+    id = $(this).attr('id')
+    title = $("#img_title_field").val()
+    alt = $("#img_alt_field").val();
+    prio = $("#img_order_field").val()
+
+    $.ajax({
+        url: "{% url 'set_image_data' %}?id="+id+"&title="+title+"&alt="+alt+"&prio="+prio,
+    }).done(function(data){
+        $("#img_title_"+id).html(data.data.title);
+        $("#img_alt_field").html(data.data.alt);
+        $("#img_pos_"+id).html('Position: '+data.data.priority);
+    })
+    $("#image_form").hide('slow');
+});
+
+//Delete marked images before doing default submit
+$("#form").one('submit', function(e){
+    e.preventDefault();
+    $(".delete").each(function(){
+        $.ajax({
+            async: false,
+            url: "{% url 'delete_image' %}?id="+$(this).attr('id'),
+        }) 
+    });
+    $(this).submit();
+});
+</script>
+
+<script>
+    const fields = document.querySelectorAll('.mdc-text-field');
+    fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+</script>
+
+{% endblock %}
