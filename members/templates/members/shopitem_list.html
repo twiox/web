@@ -47,7 +47,7 @@
                         {{obj.description_rendered|safe}} 
                     </div>
                     <div> 
-                        <p style="font-size:30px;color:#088eaa;" >Preis: {{obj.price}} € </p>
+                        <p style="font-size:30px;color:#088eaa;" >{% if obj.price == 0 %} Kostenlos {% else %} Preis: {{obj.price}} € {% endif %}</p>
                         <p style="font-size:20px;color:grey"> Bitte schreibt uns eine Email! </p>
                     </div>
                 </div>
