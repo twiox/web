@@ -55,7 +55,7 @@ class Event(models.Model):
     start_date = models.DateTimeField("Datum Beginn", blank=True, null=True)
     end_date = models.DateTimeField("Datum Ende", blank=True, null=True)
     hinweis = models.CharField("Hinweis", blank=True, max_length=50)
-    costs = models.DecimalField("Kosten", blank=True, null=True, max_digits=4, decimal_places=2 )
+    costs = models.DecimalField("Kosten", blank=True, null=True, max_digits=8, decimal_places=2 )
     info_only = models.BooleanField("Nur Ankündigung?",default=False)
     
     teilnahmebedingungen = models.FileField("Teilnahmebedingungen", upload_to=f"Events/Docs/",null=True,blank=True)
