@@ -13,10 +13,10 @@
 
 {% block content %}
 <section>
-    <div style="text-align:center">
+    <div style="text-align:left">
         <h1> Teilnehmer</h1>
     </div>
-    <div class="flex_center">
+    <div>
         <div class="padding_all_big tertiary_bg side_scrolL">
             <table >
             <tr>
@@ -44,5 +44,23 @@
             </table>
         </div>
     </div>
+    <br>
+    <span style='width:150px;display:block;cursor:pointer'>
+        <div id='{{object.pk}}' class='mail_click padding_all_small tertiary_bg prim_hover'>
+            Mailverteiler
+        </div>
+    </span>  
+    <script>
+    $('.mail_click').on('click', function(){
+        $.ajax({
+            data: {'id':$(this).attr("id")},
+            url: '{% url "get_participants_emails" %}',
+            type: 'GET',
+            success: function (data){
+                navigator.clipboard.writeText(data['string']);
+            }
+        });
+    });
+</script>
 </section>
 {% endblock %}

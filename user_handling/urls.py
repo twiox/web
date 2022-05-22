@@ -22,6 +22,7 @@ urlpatterns = [
     path("verwaltung/events/", member_views.EventListView.as_view(),name="event_list"),
     path("verwaltung/mailing-lists/", views.mailing_lists,name="mailing_lists"),
     path("ajax/kopiere-email-listen", views.get_all_emails, name="get_all_emails"),
+    path('ajax/kopiere-participant-listen',views.get_participants_emails, name='get_participants_emails'),
     path("ajax/mitglieder/detail_form/<int:pk>", views.member_detail_form,name="get_member_detail_form"),
     path("ajax/mitglieder/detail_form/<int:pk>/update", views.member_detail_update,name="member_detail_form_update"),
 ]
