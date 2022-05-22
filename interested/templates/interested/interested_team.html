@@ -81,6 +81,7 @@
             {% endfor %}
             </div>
         </div>
+        {% if jena_people.all %}
         <div id="container">
             <h2 class="padding_tb_big">Jena</h2>
             <div class="trainer_ui">
@@ -131,6 +132,7 @@
             {% endfor %}
             </div>
         </div>
+        {% endif %}
     </section>
     <script>
         $(document).ready(function(){
