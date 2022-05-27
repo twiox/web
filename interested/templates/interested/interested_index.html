@@ -23,29 +23,42 @@
         {% if perms.interested.add_publicevent %}
             <a href="{%url 'public_event_add' %}" target="_blank" class="more_info_button"> Hinzufügen </a>
         {% endif %}
-        <div class="flex_left">
-        {% for event in public_events %}
-        <div class="padding_all_small chair_col-4">
-            <div class="tertiary_bg" style="height:100%;" id="container">
-                <div style="display:flex; flex-direction:column; height:100%;">
-                    <div class="primary padding_all_small absolute_link">
-                      <h4>{{event.title}}</h4>
-                      <a href="{% url 'public_event' event.slug %}#nav"></a>
-                    </div>
-                    <div class="padding_trl_big">
-                        <h5>{{event.start_date |date:'d.m.Y'}}</h5>
-                    </div>
-                    <div class="padding_all_big"><p style="padding-bottom:15px;">{{event.capture}}</p></div>
-                    <div style="position: absolute; right:0px; bottom:-3px; width:50%;" class="secondary_bg polygon2">
-                        <a href="{% url 'public_event' event.slug %}#nav" style="padding:0px; text-align:right;">
-                             <p class="more_info_button" style="margin-top: 6px">Weiterlesen</p>
-                        </a>
+        <div style="display:flex;flex-direction:column;gap:30px">
+            {% for event in public_events %}
+            <a style="padding:0px;" href="{% url 'public_event' event.slug %}#nav">
+                <div style="width: 100%;">
+                    <div class='events' id="event_{{event.pk}}" style="width:100%;position: relative;">
+                        <picture style="display: block;">
+                            <source 
+                                media="(orientation: landscape)"
+                                srcset="{{event.thumbnail_long.url}}">
+                            <source 
+                                media="(orientation: portrait)"
+                                srcset="{{event.thumbnail_high.url}}">
+                            <img src="" width="100%" height="auto" style="display:block;">
+                        </picture>
+                        <div id="event_hover_{{event.pk}}" style="display:none;width:100%;height:100%;background-color:rgba(0, 0, 0, 0.7);position: absolute;top: 0;left: 0;" class="padding_all_big">
+                            <h1 style="margin: 0px;" class="hero">{{event.title}}</h1>
+                            <p style="color:white;">{{event.capture}}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </a>
+            {% endfor %}
         </div>
-        {% endfor %}
-        </div>
+        <script>
+            $('.events').hover(
+                //mouse in
+                function(){
+                    let id = $(this).attr('id').split('_')[1] 
+                    $('#event_hover_'+id).fadeIn(100);       
+                }, 
+                //mouse out
+                function(){
+                    let id = $(this).attr('id').split('_')[1] 
+                    $('#event_hover_'+id).fadeOut(100);
+                })
+        </script>
     </section>
     {% endif %}
     <section id="The_Club">
@@ -99,7 +112,7 @@
     {% endblock %}
     {% block picture2 %}
     <div class="image_wrapper pic2cont" id="container">
-        <img src="{{ STATIC_URL }}/static/media/aktuelles.jpg" id='news'>
+        <img src="{{ STATIC_URL }}/static/media/aktuelles.jpg" id='news' alt="Image credits: Albrecht Voss">
         <script type="text/javascript">
             $("document").ready(function(){
                 var ele = document.getElementsByClassName("pic2cont")[0].getBoundingClientRect()

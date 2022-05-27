@@ -12,7 +12,6 @@ urlpatterns = [
     path("team/<int:pk>/löschen/", views.TeamerDeleteView.as_view(),name="teamer_delete"),
     path('events/<slug:event_slug>/', views.PublicEventView.as_view(), name='public_event'),
     path('events/neu', views.PublicEventCreateView.as_view(), name='public_event_add'),
-    path('events/<slug:event_slug>/anmelden', views.event_participant_create_view, name='event_participant_create'),
     path('events/<slug:event_slug>/list', views.event_participant_list_view, name='event_participant_list'),
     path('events/<int:pk>/löschen', views.PublicEventDeleteView.as_view(), name='public_event_delete'),
     path('events/<int:pk>/bearbeiten', views.PublicEventUpdateView.as_view(), name='public_event_change'),

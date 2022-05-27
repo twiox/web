@@ -49,6 +49,8 @@ class PublicEvent(models.Model):
     title = models.CharField("Event-name", max_length=100)
     slug = models.SlugField(unique=True, blank=True, null=True)
     header_picture = models.ImageField("Veranstaltungsbild", upload_to="PublicEvents/Images/Headers")
+    thumbnail_long = models.ImageField("Thumbnail Landscape format", upload_to="PublicEvents/Images/Thumbnails",blank=True, null=True)
+    thumbnail_high = models.ImageField("Thumbnail Portrait format", upload_to="PublicEvents/Images/Thumbnails",blank=True, null=True)
     place = models.CharField("Veranstaltungsort", max_length=200, blank=True, default="Leipzig")
     capture =  models.TextField("Kurzbeschreibung", blank=True, null=True)
     description = models.TextField("Beschreibung", blank=True)
@@ -72,6 +74,7 @@ class PublicEvent(models.Model):
         self.slug = self.slug or slugify(self.title)
         self.description_rendered = markdown.markdown(self.description)
         super().save(*args, **kwargs)
+        
     
     #This we need to return the url on creating a new event 
     def get_absolute_url(self):

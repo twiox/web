@@ -24,9 +24,9 @@
     </div>
     
     <div>
-        <div class="flex_center">
+        <div>
             <div class="padding_all_big tertiary_bg side_scroll">
-                <table>
+                <table style="width: 100%;">
                     <thead>
                         <tr>
                             <th nowrap="nowrap"><h5> Nr </h5></th>
@@ -77,6 +77,12 @@
             </div>
         </div>
     </div>
+    <br>
+    <span style='width:150px;display:block;cursor:pointer'>
+        <div id='{{event.pk}}' class='mail_click padding_all_small tertiary_bg prim_hover'>
+            Mailverteiler
+        </div>
+    </span>  
 </section>
 <script>
     $(document).ready(function(){
@@ -93,6 +99,16 @@
                     $(this).addClass('odd');
                 };
             });
+        });
+    });
+    $('.mail_click').on('click', function(){
+        $.ajax({
+            data: {'id':$(this).attr("id")},
+            url: '{% url "get_participants_emails" %}?type=public',
+            type: 'GET',
+            success: function (data){
+                navigator.clipboard.writeText(data['string']);
+            }
         });
     });
 </script>

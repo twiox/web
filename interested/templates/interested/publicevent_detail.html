@@ -29,69 +29,286 @@
             document.getElementById("home_view").style.top =(pic-win)*-0.15+"px";
         });
     </script>
-    {% if not object.info_only %}
-        {% if not object.deadline_reached %}
-        <div class="flex_center_vertical" style="align-self:end">
-            <a href="{% url 'event_participant_create' object.slug %}#nav" class="flex_center" style="z-index:5; text-align:center;">
-                <span class="form_button_simple_big" style="width:400px; padding:14px; font-size:24px;">Zur Anmeldung</span>
-            </a>
-        </div>
-        {% endif %}
-    {% endif %}
 </div>
 {% endblock %}
 {% block content %}
-    <section>
-        <h1>{{object.title}}</h1>
-        <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
-            <div class="trainer_ui">
-                {% if perms.interested.change_event %}
-                <a href="{% url 'public_event_change' object.pk  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
-                {% endif %}
-                {% if perms.interested.delete_pulicevent %}
-                <a href="{% url 'public_event_delete' object.pk %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
-                {% endif %}
+<section>
+    <div class="flex_center">
+        <div>
+            <h1 class="hero">{{object.title}}</h1>
+        </div>
+    </div>
+    <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
+        <div class="trainer_ui">
+            {% if perms.interested.change_event %}
+            <a href="{% url 'public_event_change' object.pk  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+            {% endif %}
+            {% if perms.interested.delete_pulicevent %}
+            <a href="{% url 'public_event_delete' object.pk %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
+            {% endif %}
+        </div>
+        <div class="chair_col-20">
+            <div class="padding_all_small tertiary_bg ">
+                <h2>Eckdaten</h2>
+                <h4>Wo: {{object.place}}</h4>
+                <h4>Von: {{object.start_date|date:'d.m.Y'}}</h4>  
+                <h4>Bis: {{object.end_date|date:'d.m.Y'}}</h4>
+                <h4>Kosten: {% if object.base_costs == 0 %} Konstenlos {% else %} {{object.base_costs|floatformat:2}} € {% endif %}</h4>
             </div>
-            <div class="tertiary_bg chair_col-20 padding_all_big">
-                <h3>{{object.place}}</h3>
-                <div class="padding_tb_small">
-                    <p style="font-size:21px;">{{object.start_date|date:'d.m.Y, H:i'}} - {{object.end_date|date:'d.m.Y, H:i'}}</h4>
-                    <h4>Kosten: {{object.base_costs|floatformat:2}} € </h4>
-                </div>
+            {% if event.teilnahmebedingungen or event.datenschutz or event.einverstaendnis %}
+            <br>
+            <h3> Dokumente </h3>
+            <div class="padding_all_small">
+                <ul>
+                {% if event.teilnahmebedingungen %}
+                <li style="padding:5px; width:100%;"><a class="download" href="{{event.teilnahmebedingungen.url}}" target="_blank"><p>Teilnahmebedingungen</p><i class="fas fa-file-download"></i></a></li>
+                {% endif %}
+                {% if event.datenschutz %}
+                <li style="padding:5px; width:100%;"><a class="download" href="{{event.datenschutz.url}}" target="_blank"><p>Datenschutzerklärung</p><i class="fas fa-file-download"></i></a></li>
+                {% endif %}
+                {% if event.einverstaendnis %}
+                <li style="padding:5px; width:100%;"><a class="download" href="{{event.einverstaendnis.url}}" target="_blank"><p>Einverständniserklärung</p><i class="fas fa-file-download"></i></a></li>
+                {% endif %}
+                </ul>
             </div>
-            <div class="chair_col-80 tertiary_bg padding_all_big">
-                <div class="markdown">
-                    {{object.description_rendered|safe}}
-                </div>
+            {% endif %}
+        </div>
+        <div class="chair_col-80">
+            <div class="markdown">
+                {{object.description_rendered|safe}}
+            </div>
+            <div>
+                <form class="padding_tb_big" id="event_form" method="POST">
+                    <h1 id="anmeldung"> Anmeldung </h1>
+                    {% csrf_token %}
+                    <div class="chair_col-5 float_left padding_rl_small">
+                        {% if form.first_name.errors %}
+                        {% for error in form.first_name.errors %}
+                            <p style="color:red;">{{error}}</p>
+                        {% endfor %}
+                        {% endif %}
+                        <label class="mdc-text-field mdc-text-field--filled first_name">
+                            <span class="mdc-text-field__ripple"></span>
+                            <input type="text" class="mdc-text-field__input" aria-labelledby="first_name-label" name="first_name" required value=
+                                    {% if form.instance.first_name %} "{{form.instance.first_name}}" {% else %} "{{form.data.first_name}}" {% endif %}>
+                            <span class="mdc-floating-label" id="first_name-label">Vorname</span>
+                            <span class="mdc-line-ripple"></span>
+                        </label>
+                    </div>
+                    <div class="chair_col-5 float_left padding_rl_small">
+                        {% if form.last_name.errors %}
+                        {% for error in form.last_name.errors %}
+                            <p style="color:red;">{{error}}</p>
+                        {% endfor %}
+                        {% endif %}
+                        <label class="mdc-text-field mdc-text-field--filled last_name">
+                            <span class="mdc-text-field__ripple"></span>
+                            <input type="text" class="mdc-text-field__input" aria-labelledby="last_name-label" name="last_name" required value=
+                                    {% if form.instance.last_name %} "{{form.instance.last_name}}" {% else %} "{{form.data.last_name}}" {% endif %}>
+                            <span class="mdc-floating-label" id="last_name-label">Nachname</span>
+                            <span class="mdc-line-ripple"></span>
+                        </label>
+                    </div>
+                    <div class="chair_col-5 float_left padding_rl_small">
+                        {% if form.birthday.errors %}
+                        {% for error in form.birthday.errors %}
+                            <p style="color:red;">{{error}}</p>
+                        {% endfor %}
+                        {% endif %}
+                        <label class="mdc-text-field mdc-text-field--filled birthday">
+                            <span class="mdc-text-field__ripple"></span>
+                            <input type="text" class="mdc-text-field__input" aria-labelledby="birthday-label" name="birthday" required value=
+                                    {% if form.instance.birthday %} "{{form.instance.birthday}}" {% else %} "{{form.data.birthday}}" {% endif %}>
+                            <span class="mdc-floating-label" id="birthday-label">Geburtsdatum (TT.MM.JJJJ)</span>
+                            <span class="mdc-line-ripple"></span>
+                        </label>
+                    </div>
+                    <div class="chair_col-5 float_left padding_rl_small">
+                        {% if form.phone.errors %}
+                        {% for error in form.phone.errors %}
+                            <p style="color:red;">{{error}}</p>
+                        {% endfor %}
+                        {% endif %}
+                        <label class="mdc-text-field mdc-text-field--filled phone">
+                            <span class="mdc-text-field__ripple"></span>
+                            <input type="text" class="mdc-text-field__input" aria-labelledby="phone-label" name="phone" required value=
+                                    {% if form.instance.phone %} "{{form.instance.phone}}" {% else %} "{{form.data.phone}}" {% endif %}>
+                            <span class="mdc-floating-label" id="phone-label">Telefonnummer</span>
+                            <span class="mdc-line-ripple"></span>
+                        </label>
+                    </div>
+                    <div class="chair_col-5 float_left padding_rl_small">
+                        {% if form.email.errors %}
+                        {% for error in form.email.errors %}
+                            <p style="color:red;">{{error}}</p>
+                        {% endfor %}
+                        {% endif %}
+                        <label class="mdc-text-field mdc-text-field--filled email">
+                            <input type="email" class="mdc-text-field__input" aria-labelledby="email-label" name="email" required value=
+                                    {% if form.instance.email %} "{{form.instance.email}}" {% else %} "{{form.data.email}}" {% endif %}>
+                            <span class="mdc-floating-label" id="email-label">E-Mail-Adresse</span>
+                            <span class="mdc-line-ripple"></span>
+                        </label>
+                    </div>
+                    <div class="chair_col-5 float_left padding_rl_small">
+                        {% if form.contact.errors %}
+                        {% for error in form.contact.errors %}
+                            <p style="color:red;">{{error}}</p>
+                        {% endfor %}
+                        {% endif %}
+                        <label class="mdc-text-field mdc-text-field--filled contact">
+                            <i class="mdc-select__dropdown-icon"></i>
+                            <span class="mdc-text-field__ripple"></span>
+                            <select id="select-contact" class="mdc-text-field__input" style="background-color:inherit;" name="contact" required>
+                                <option value=""></option>
+                                <option value="Telegram" {% if form.data.contact == "Telegram" %} selected {% endif %}>Telegram</option>
+                                <option value="Whatsapp" {% if form.data.contact == "Whatsapp" %} selected {% endif %}>WhatsApp</option>
+                                <option value="SMS" {% if form.data.contact == "SMS" %} selected {% endif %}>SMS</option>
+                            </select>
+                            <span class="mdc-floating-label" id="contact-label">Kontakt während der Veranstaltung</span>
+                            <span class="mdc-line-ripple"></span>
+                        </label>
+                    </div>
+
+                    {% if merch %}
+                    <div class="padding_all_small">
+                        <br>
+                        <h1>{{merch.title}}</h1>
+                        <div class="flex_left" id="container">
+                            <div class="trainer_ui">
+                                {% if perms.interested.change_event %}
+                                <a href="{% url 'eventmerch_update' merch.pk  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+                                {% endif %}
+                            </div>
+                            <div class="chair_col-5 padding_all_small">
+                                <img style="max-height:100%;max-width: 100%;" src="{{merch.image.url}}">
+                            </div>
+                            <div class="chair_col-5 padding_all_small" style="display:flex; flex-direction: column;">
+                                {{merch.description_rendered|safe}}
+                                <br><br>
+                                <p> <strong> Kosten: {{merch.price|floatformat:2}} €</strong> </p>
+                                <div class="mdc-form-field">
+                                    <div class="mdc-checkbox">
+                                    <input type="checkbox" class="mdc-checkbox__native-control" id="merch_yes" name="merch_wanted" {% if form.data.merch_wanted == "on" %} checked {% endif %}>
+                                    <div class="mdc-checkbox__background">
+                                        <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                                        <path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+                                        </svg>
+                                        <div class="mdc-checkbox__mixedmark"></div>
+                                    </div>
+                                    </div>
+                                    <label for="merch_yes" >
+                                        <div>{{merch.title}} dazubestellen</div>
+                                    </label>
+                                </div>
+                                <div id="merch_sizes" hidden>
+                                    {% if form.merch_size.errors %}
+                                    {% for error in form.merch_size.errors %}
+                                        <p style="color:red;">{{error}}</p>
+                                    {% endfor %}
+                                    {% endif %}
+                                    <label class="mdc-text-field mdc-text-field--filled merch_size">
+                                        <i class="mdc-select__dropdown-icon"></i>
+                                        <span class="mdc-text-field__ripple"></span>
+                                        <select id="select-merch_size" class="mdc-text-field__input" style="background-color:inherit;" name="merch_size">
+                                            <option value=""></option>
+                                            {% for k in sizes %}
+                                                <option value={{k}} {% if form.data.merch_size == k %} selected {% endif %}>{{k}}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <span class="mdc-floating-label" id="merch_size-label">Größe</span>
+                                        <span class="mdc-line-ripple"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <input id="real_costs" type="text" hidden name="costs">
+                    <div class="padding_all_small" style="padding-top:40px;">
+                        <div class="flex_center tertiary_bg " style="flex-wrap:wrap;">
+                            <div class=" padding_all_small"> Ich möchte mich verbindlich anmelden. Die Kosten für
+                            die Teilnahme und eventuelle Zubuchungen betragen <strong id="kosten"></strong> <strong> € </strong>
+                            </div>
+                            <div class="chair_col-5">
+                                <div class="mdc-form-field padding_all_big">
+                                    <div class="mdc-checkbox">
+                                      <input type="checkbox" class="mdc-checkbox__native-control" id="speicherung" name="confirm" required>
+                                      <div class="mdc-checkbox__background">
+                                        <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                                          <path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+                                        </svg>
+                                        <div class="mdc-checkbox__mixedmark"></div>
+                                      </div>
+                                    </div>
+                                    <div>
+                                    <label for="speicherung" >
+                                      <div>Ich stimme der Datenschutzerklärung und den Teilnahmebedingungen zu</div>
+                                    </label>
+                                    {% if form.confirm.errors %}
+                                      {% for error in form.confirm.errors %}
+                                        <p style="color:red;">{{error}}</p>
+                                      {% endfor %}
+                                    {% endif %}
+                                  </div>
+                                </div>
+                            </div>
+                            <div class="flex_center_vertical">
+                                <div class="flex_center padding_all_big">
+                                    <button style="cursor:pointer;" type="submit" class="form_button" id="event_button">Anmelden</button>
+                                </div>
+                            </div>
+                            <script>
+                                $(document).ready(function(){
+                                    $("#event_button").click(function(){
+                                        $(event_form).submit()
+                                        $(this).html('<i class="fas fa-spinner fa-pulse"></i>');
+                                        $(this).attr("disabled","")
+                                        setTimeout(function(){
+                                            $("#event_button").html("Anmelden");
+                                            $("#event_button").attr("disabled",false)
+                                        }, 3000);
+                                        });
+                                    });
+                            </script>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
-        <br>
-        {% if not object.info_only %}
-            <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
-                {% if not object.deadline_reached %}
-                <div class="padding_all_big chair_col-5"> </div>
-                <div class="padding_all_big chair_col-4">
-                    <div class="flex_center">
-                        <div class="flex_center_vertical" style="width:100%">
-                            <a class="form_button" href="{% url 'event_participant_create' object.slug %}#nav" style="width:100%;font-size:24px">Zur Anmeldung</a>
-                            <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
-                        </div>
-                    </div>
-                </div>
-                {% else %}
-                <div class="padding_all_big chair_col-20">
-                    <div class="flex_center">
-                        <div class="flex_center_vertical">
-                            <p>Anmeldung vorbei</p>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-        {% else %}
-            <div class="flex_center padding_all_big">
-                <h5> Anmeldung noch nicht geöffnet </h5>
-            </div>
-        {% endif %}
-    </section>
+    </div>
+</section>
+<script>
+    $(document).ready(function(){
+        $('input[name="birthday"]').mask('09.09.0099', {placeholder: "__.__.____"});
+        $("#members").removeClass("here_I_am");
+        $("#interested").addClass("here_I_am");
+        $("#kosten").html("{{event.base_costs}}")
+        $("#real_costs").attr("value", (parseFloat("{{event.base_costs}}".replace(',', '.'))).toFixed(2))
+        if(document.getElementById('merch_yes').checked){
+            $("#merch_sizes").attr("hidden", false)
+            $("#select-merch_size").attr("required", "")
+            $("#kosten").html((parseFloat("{{event.base_costs}}".replace(',', '.'))+parseFloat("{{merch.price}}".replace(',', '.'))).toFixed(2).replace(".",","))
+            $("#real_costs").attr("value", (parseFloat("{{event.base_costs}}".replace(',', '.'))+parseFloat("{{merch.price}}".replace(',', '.'))).toFixed(2))
+        }
+        $("#merch_yes").change(function(){
+            $("#merch_sizes").toggle(3);
+            if(document.getElementById('merch_yes').checked){
+                $("#select-merch_size").attr("required", '')
+                $("#kosten").html((parseFloat("{{event.base_costs}}".replace(',', '.'))+parseFloat("{{merch.price}}".replace(',', '.'))).toFixed(2).replace(".",","))
+                $("#real_costs").attr("value", (parseFloat("{{event.base_costs}}".replace(',', '.'))+parseFloat("{{merch.price}}".replace(',', '.'))).toFixed(2))
+            }
+            else{
+                $("#select-merch_size").removeAttr("required")
+                $("#kosten").html("{{event.base_costs|floatformat:2}}")
+                $("#real_costs").attr("value", (parseFloat("{{event.base_costs}}".replace(',', '.'))).toFixed(2))
+            }
+        });
+    });
+</script>
+<script>
+    const fields = document.querySelectorAll('.mdc-text-field');
+    fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+</script>
+
 {% endblock %}

@@ -162,30 +162,33 @@ class PublicEventCreateView(PermissionRequiredMixin, CreateView):
     fields = "__all__"
     template_name = "interested/publicevent_form.html"
 
+
 class PublicEventView(DetailView):
     model = PublicEvent
     slug_url_kwarg = 'event_slug'
     slug_field = 'slug' # DetailView's default value: optional
+    form_class = PublicEventForm
 
-@permission_required("interested_change_eventparticipant")
-def event_participant_list_view(request, event_slug):
-    event = PublicEvent.objects.get(slug=event_slug)
-    object_list = EventParticipant.objects.filter(event=event)
-    return render(request, "interested/eventparticipant_list.html", {"object_list":object_list, "event": event})
+    def get_context_data(self, **kwargs):
+        context = super(PublicEventView, self).get_context_data(**kwargs)
+        context['event'] = self.get_object()
+        merch = EventMerch.objects.filter(event=self.get_object())
+        if merch:
+            merch = merch.all()[0]
+            context['sizes'] = [x for x in merch.sizes.split("\t")]
+        else:
+            context['sizes'] = []
+        context['merch'] = merch
+        return context
 
-
-def event_participant_create_view(request, event_slug):
-    event = PublicEvent.objects.get(slug=event_slug)
-    merch = EventMerch.objects.filter(event=event.pk)
-    if merch:
-        merch = merch[0]
-        sizes = [x for x in merch.sizes.split("\t")]
-    else:
-        sizes = []
-    if (request.method == "POST"):
+    def post(self, request, *args, **kwargs):
         form = PublicEventForm(request.POST)
+        event = self.get_object()
+        self.object = event
+        context = super(PublicEventView, self).get_context_data(**kwargs)
+        merch = merch = EventMerch.objects.filter(event=event).first()
+
         if form.is_valid():
-            # get Form data
             participant = EventParticipant(
                 event=event,
                 first_name=form.cleaned_data.get('first_name'),
@@ -220,15 +223,23 @@ def event_participant_create_view(request, event_slug):
             )
             email = EmailMessage(mail_subject2, message, to=[settings.TO_EMAIL])
             email2 = EmailMessage(mail_subject, message, to=[participant.email])
-            email.send()
-            email2.send()
+            #email.send()
+            #email2.send()
             
             messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich angemeldet')
-            return HttpResponseRedirect(reverse("public_event", kwargs={'event_slug':event_slug}))
+            context['form'] = PublicEventForm
+            return self.render_to_response(context=context)
+
         else:
-            return render(request,"interested/eventparticipant_form.html", {"form":form, "event": event, "merch":merch, "sizes":sizes})
-    form = PublicEventForm()
-    return render(request,"interested/eventparticipant_form.html", {"form":form, "event": event, "merch":merch, "sizes":sizes})
+            context['form'] = form
+            return self.render_to_response( context=context)
+
+
+@permission_required("interested_change_eventparticipant")
+def event_participant_list_view(request, event_slug):
+    event = PublicEvent.objects.get(slug=event_slug)
+    object_list = EventParticipant.objects.filter(event=event)
+    return render(request, "interested/eventparticipant_list.html", {"object_list":object_list, "event": event})
 
 
 class EventParticipantDeleteView(PermissionRequiredMixin, DeleteView):

@@ -2,6 +2,7 @@ from .forms import *
 from .tokens import account_activation_token
 from .permissions import trainer_permissions, chairman_permissions
 from members.models import Group, Chairman, Profile, AdditionalEmail, Session, Event
+from interested.models import PublicEvent, EventParticipant
 import django
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, JsonResponse
@@ -282,11 +283,16 @@ def trainer_or_chairman(user):
 def get_participants_emails(request):
     data = {k:v[0] for (k,v) in dict(request.GET).items()}
     emails = []
-    event = Event.objects.get(pk=int(data['id']))
-    for part in event.participants.all():
-        emails.append(part.email)
-        query = AdditionalEmail.objects.filter(user=part)
-        emails.extend([x.email for x in query])
+    if 'type' in data:
+        event = PublicEvent.objects.get(pk=int(data['id']))
+        for part in EventParticipant.objects.filter(event=event).all():
+            emails.append(part.email)
+    else:    
+        event = Event.objects.get(pk=int(data['id']))
+        for part in event.participants.all():
+            emails.append(part.email)
+            query = AdditionalEmail.objects.filter(user=part)
+            emails.extend([x.email for x in query])
     string = ','.join(set(emails)) if len(emails)>0 else ''
     return JsonResponse({'string':string})
 
