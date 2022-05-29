@@ -223,8 +223,8 @@ class PublicEventView(DetailView):
             )
             email = EmailMessage(mail_subject2, message, to=[settings.TO_EMAIL])
             email2 = EmailMessage(mail_subject, message, to=[participant.email])
-            #email.send()
-            #email2.send()
+            email.send()
+            email2.send()
             
             messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich angemeldet')
             context['form'] = PublicEventForm

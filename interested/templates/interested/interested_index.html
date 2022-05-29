@@ -26,7 +26,7 @@
         <div style="display:flex;flex-direction:column;gap:30px">
             {% for event in public_events %}
             <a style="padding:0px;" href="{% url 'public_event' event.slug %}#nav">
-                <div style="width: 100%;">
+                <div style="width: 100%;max-height: 300px;">
                     <div class='events' id="event_{{event.pk}}" style="width:100%;position: relative;">
                         <picture style="display: block;">
                             <source 
