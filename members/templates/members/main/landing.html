@@ -33,12 +33,20 @@
                     <img src="{{ STATIC_URL }}/static/media/twiox_logo.svg">
                 </a>
             </header>
+            {%for event in public_events %}
+            <a style="display:block;background-color:#044755;padding: 0px;" href="{% url 'public_event' event.slug %}">
+                <div class="prim_hover padding_all_small">
+                    <h3>+++ {{event.start_date|date:'d.m.Y'}}: {{event.title}} +++</h3>
+                    <p style="color:grey;">Noch {{event.start_date|timeuntil}}</p>
+                </div>
+            </a>
+            {% endfor%}
 
             <div id="container">
-                <div style="height: 350px;" class="image_wrapper">
+                <div style="height: 500px;" class="image_wrapper">
                     <img class="landing_img" src="{{ STATIC_URL }}/static/media/landing.jpg">
                 </div>
-                <section class="flex_center_vertical" style="position: absolute; top:0; height: 350px; width: 100%">
+                <section class="flex_center_vertical" style="position: absolute; top:0; height: 500px; width: 100%">
                     <div class="landing_flex" style="overflow:visible;">
                         <div class="landing_buffer">
                             <a href="{% url 'index' %}">
@@ -63,6 +71,7 @@
                         </div>
                     </div>
                 </section>
+                
             </div>
 
             <div class="mdc-snackbar mdc-snackbar">
@@ -81,7 +90,6 @@
                     snackbar.open()
                 </script>
             {% endfor %}
-
         </div>
         <footer class="padding_tb_big">
                 <div class="social_test">
