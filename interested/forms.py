@@ -20,7 +20,7 @@ class PublicEventForm(forms.Form):
     last_name = forms.CharField()
     birthday = forms.DateField()
     email = forms.EmailField()
-    phone = forms.CharField()
+    phone = forms.CharField(required=False)
     contact = forms.CharField(required=False)
     costs = forms.CharField(required=False)
     confirm = forms.BooleanField()

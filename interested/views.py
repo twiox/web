@@ -316,5 +316,7 @@ class EventMerchDeleteView(PermissionRequiredMixin, DeleteView):
         messages.add_message(self.request, messages.SUCCESS, 'Merch erfolgreich gelöscht')
         return reverse("public_event_change", kwargs={'pk':event_pk})
     
-
+def roundnet_landing(request):
+    #static page for now
+    return render(request, 'interested/roundnet_landing.html')
 

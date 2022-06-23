@@ -115,8 +115,8 @@ class EventParticipant(models.Model):
     last_name = models.CharField("Nachname", max_length=300)
     birthday = models.DateTimeField("Geburtsdatum")
     email = models.CharField("Emailadresse", max_length=300)
-    phone = models.CharField("Telefonnummer",max_length=30)
-    contact = models.CharField("Kontaktmöglichkeit", max_length=200) #for the journey. Dropdown in UI
+    phone = models.CharField("Telefonnummer",max_length=30,blank=True,null=True)
+    contact = models.CharField("Kontaktmöglichkeit", max_length=200, blank=True,null=True) #for the journey. Dropdown in UI
     invoice = models.FloatField("Kosten", blank=True, null=True)
     payed = models.BooleanField("Bezahlt", default=False)
     merch_wanted = models.BooleanField("Merch bestellt", default=False)

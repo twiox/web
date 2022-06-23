@@ -20,5 +20,6 @@ urlpatterns = [
     path('events/merch/neu', views.EventMerchCreateView.as_view(), name='eventmerch_create'),
     path('events/merch/<int:pk>/ändern', views.EventMerchUpdateView.as_view(), name='eventmerch_update'),
     path('events/merch/<int:pk>/löschen', views.EventMerchDeleteView.as_view(), name='eventmerch_delete'),
+    path('roundnet', views.roundnet_landing,name='roundnet_landing')
 ]
 

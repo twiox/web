@@ -115,17 +115,19 @@
         <div style="display:flex;flex-direction:column;gap:30px">
             {% for event in public_events %}
             <a style="padding:0px;" href="{% url 'public_event' event.slug %}#nav">
-                <div style="width: 100%;max-height: 300px;">
-                    <div class='events' id="event_{{event.pk}}" style="width:100%;position: relative;">
-                        <picture style="display: block;">
-                            <source 
-                                media="(orientation: landscape)"
-                                srcset="{{event.thumbnail_long.url}}">
-                            <source 
-                                media="(orientation: portrait)"
-                                srcset="{{event.thumbnail_high.url}}">
-                            <img src="" width="100%" height="auto" style="display:block;">
-                        </picture>
+                <div style="width: 100%;height: 300px; position: relative;">
+                    <div class='events' id="event_{{event.pk}}" style="width:100%;height:300px;">
+                        <div>
+                            <picture>
+                                <source 
+                                    media="(orientation: landscape)"
+                                    srcset="{{event.thumbnail_long.url}}">
+                                <source 
+                                    media="(orientation: portrait)"
+                                    srcset="{{event.thumbnail_high.url}}">
+                                <img id="{{event.pk}}_image" src="" width="100%" height="auto" style="display:block;position: absolute;bottom: 0;">
+                            </picture>
+                        </div>
                         <div id="event_hover_{{event.pk}}" style="display:none;width:100%;height:100%;background-color:rgba(0, 0, 0, 0.7);position: absolute;top: 0;left: 0;" class="padding_all_big">
                             <h1 style="margin: 0px;" class="hero">{{event.title}}</h1>
                             <p style="color:white;">{{event.capture}}</p>
@@ -133,6 +135,7 @@
                     </div>
                 </div>
             </a>
+
             {% endfor %}
         </div>
         <script>

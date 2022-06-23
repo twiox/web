@@ -511,7 +511,7 @@ class UserDetailView(LoginRequiredMixin, UpdateView):
                 email.attach_file('media/user_uploads/'+str(document))
             email.send()
             messages.add_message(request, messages.SUCCESS, 'Nachricht erfolgreich versendet')
-            return HttpResponseRedirect(reverse("profile_detail", kwargs={"pk": request.user.id}))
+            return HttpResponseRedirect(reverse("profile_detail"))
         return render(request, self.template_name, {'form': form})
 
 
