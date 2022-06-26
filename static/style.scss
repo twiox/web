@@ -245,6 +245,13 @@ $padding_small: 10px;
         background-color:$primary;
     }
 }
+.download_square {
+    background-color:$quartiary_bg;
+    &:hover{
+        background-color:$primary;
+    }
+}
+
 .upload {
     width: 30px;
     height: 30px;
