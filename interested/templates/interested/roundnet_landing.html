@@ -1,17 +1,10 @@
 {% extends "members/base.html" %}
     {% block picture %}
-    <div class="image_wrapper2 pic1cont">
-        <img src="{{ STATIC_URL }}/static/media/roundnet_1.jpeg" id='roundnet_1'>
+    <div class="image_wrapper pic1cont">
+        <img src="{{ STATIC_URL }}/static/media/roundnet_1.jpeg" id='roundnet_1' width="100%" max-height="100%">
         <script type="text/javascript">
-            $("document").ready(function(){
-                var pic = window.pageYOffset + document.getElementsByClassName("pic1cont")[0].getBoundingClientRect().top
-                var win = window.pageYOffset
-                document.getElementById("roundnet_1").style.top =(pic-win)*-0.15+"px";
-            });
             window.addEventListener('scroll',function(){
-                var pic = window.pageYOffset + document.getElementsByClassName("pic1cont")[0].getBoundingClientRect().top
-                var win = window.pageYOffset
-                document.getElementById("roundnet_1").style.top =(pic-win)*-0.15+"px";
+                document.getElementById("roundnet_1").style.bottom=-window.scrollY*0.25+"px";
             });
         </script>
     </div>
@@ -19,53 +12,107 @@
     {% block content %}
     <section id="Roundnet">
         <h1> Roundnet </h1>
-        <h3>Jetzt auch in Leipzig</h3><br>
-        <p class="two_cols">
-            Wir, der Twio X e.V., sind nun auch ein Verein mit einer eigenen Roundnetabteilung! 
-            Wir haben es uns als Ziel gesetzt, den Roundnetsport in seiner ganzen Vielfalt zu unterstützen und die Reichweite in Leipzig zu vergrößern. 
-            Dies wollen wir anfangs in einer kleinen Gruppe mit einem freien Training beginnen, um es später mit mehr Mitgliederzahlen zu regelmäßigen Trainingseinheiten zu bringen. 
-            Im Vordergrund stehen dabei für uns der Spielspaß, das soziale Miteinander, der Sport und die Philosophie des Twio X.
-            Roundnet ist ein Teamsport, welcher von 2 Teams a 2 SpielerInnen gegeneinander um ein Netz auf verschiedenen Untergründen gespielt wird. Dies wird mittels einem kleinen Ball gemacht, welcher mit maximal 3 Kontakten auf das Netz gebracht werden muss. Dabei darf sich frei um das Netz bewegt werden.
-        </p>
-        <br>
+        <h3>Jetzt auch bei uns</h3>
+        <div style="display:flex;flex-wrap: wrap;">
+        <div class="chair_col-5 padding_all_small">
+            <p style="font-size:13pt;">
+            Wir, der Twio X e.V., sind nun auch ein Verein mit einer eigenen Roundnetabteilung! <br>
+            Damit haben es uns als Ziel gesetzt, den Roundnetsport in seiner ganzen Vielfalt zu unterstützen und die Reichweite in Leipzig zu vergrößern. <br>
+            <br>
+            Für das Training bei uns im Verein bedeutet das anfangs die Organisation eines freien Treffs mit einem <strong>offenen Training</strong>
+            und kleineren, selbstständigen Gruppen. Später - wenn die Gruppen größer und beständiger sind - können daraus auch regelmäßigen 
+            angeleitete Trainingseinheiten entstehen. Im Vordergrund stehen für uns aber der <strong>Spielspaß</strong>, das soziale <strong>Miteinander</strong> und der <strong>Sport</strong>. <br>
+            <br>
+            </p>
+            <h3>Was ist Roundnet?</h3>
+            <p style="font-size:13pt;">
+            Roundnet ist ein Teamsport, welcher von 2 Teams a 2 SpielerInnen gegeneinander um ein Netz auf verschiedenen Untergründen gespielt wird. 
+            Dies wird mittels einem kleinen Ball gemacht, welcher mit maximal 3 Kontakten auf das Netz gebracht werden muss. Dabei darf sich frei um das 
+            Netz bewegt werden.
+            </p>
+        </div>
+        <img class="chair_col-5" src="{{ STATIC_URL }}/static/media/roundnet_2.jpeg">
+        
+        </div>
         <h1> Aktuelles </h1>
+        <div style="display:flex;flex-wrap:wrap;">
+            <div class="chair_col-5">
+                <h3> Auftaktveranstaltung </h3>
+                <p>
+                    Hier sollte etwas zur Veranstaltung stehen
+                </p>
+            </div>
+            <div class="chair_col-5">
+                <h3> Anmeldung </h3>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div>
+                        <div class="padding_rl_small">
+                            <label class="mdc-text-field mdc-text-field--filled name">
+                                <span class="mdc-text-field__ripple"></span>
+                                <input type="text" class="mdc-text-field__input" aria-labelledby="name-label" name="name" required>
+                                <span class="mdc-floating-label" id="name-label">Name</span>
+                                <span class="mdc-line-ripple"></span>
+                            </label>
+                        </div>
+                        <div class="padding_rl_small">
+                            <label class="mdc-text-field mdc-text-field--filled email">
+                                <input type="text" class="mdc-text-field__input" aria-labelledby="email-label" name="email" required>
+                                <span class="mdc-floating-label" id="email-label">E-Mail-Adresse</span>
+                                <span class="mdc-line-ripple"></span>
+                            </label>
+                        </div>
+                        <div class="padding_rl_small">
+                            <label class="mdc-text-field mdc-text-field--filled age">
+                                <span class="mdc-text-field__ripple"></span>
+                                <input type="integer" class="mdc-text-field__input" aria-labelledby="age-label" name="age">
+                                <span class="mdc-floating-label" id="age-label">Alter</span>
+                                <span class="mdc-line-ripple"></span>
+                            </label>
+                        </div>
+                        <div style="clear:both;">
+                            <div class="flex_center_vertical">
+                                <div class="flex_center padding_all_big">
+                                    <button type="reset" class="form_button" id="prob_button">Absenden</button> <!-- Disabled at the moment -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
     </section>
     {% endblock %}
     
     {% block chairmen %}
-    {% if chairmen %}
+    {% if contact %}
     <section style="margin-bottom:150px;">
         <h1>DEINE ANSPRECHPARTNER</h1>
         <div class="flex_left">
-        {% for object in chairmen.all %}
-            <div class="col-5 padding_all_small">
+        {% for object in contact.all %}
+            <div class="col-5">
                 <div style="height:100%;">
-                    <div class="flex_left">
+                    <div class="flex_center_vertical">
                         <div class="chair_col-5 flex_center_vertical">
                             <div class="flex_center">
-                                <img class="padding_all_small round_profile_pic_chairman" src="{{object.image.url}}">
+                                <img class="padding_all_small round_profile_pic_chairman" src="{{object.picture.url}}">
                             </div>
                         </div>
-                        <div class="chair_col-5 flex_center">
-                            <div class="flex_center_vertical_even padding_all_small">
-                                <h3>{{object.user.first_name |upper}} {{object.user.last_name |upper}}</h3>
-                                <div class="padding_all_big">
-                                    <ul class="competences padding_rl_big">
-                                        {% for comp in object.complist %}
-                                            <li> {{comp}} </li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
+                        <div class="chair_col-5 flex_center ">
+                            <div class="flex_center_vertical_even">
                                 <div>
-                                    <p> {{object.public_telnr}} </p>
-                                    <p> {{object.public_email}} </p>
+                                <h3>{{object.name}}</h3>
                                 </div>
+                                <ul>
+                                    <li><i class="fas fa-mobile"></i> {{object.public_telnr}} </li>
+                                    <li><i class="fas fa-envelope"></i> {{object.public_email}} </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-             {% endfor %}
+        {% endfor %}
         </div>
     </section>
     {% endif %}

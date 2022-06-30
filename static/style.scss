@@ -34,6 +34,7 @@ $padding_small: 10px;
 [class*="col-"] {
   width: 100%;
 }
+select { -webkit-appearance: none; }
 
 /*MESSAGES */
 .message_success{

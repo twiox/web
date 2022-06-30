@@ -92,6 +92,7 @@
             <div class="markdown">
                 {{object.description_rendered|safe}}
             </div>
+            <form  id="event_form" method="POST">
             {% if merch %}
             <div class="padding_all_small">
                 <br>
@@ -133,9 +134,9 @@
                                 <i class="mdc-select__dropdown-icon"></i>
                                 <span class="mdc-text-field__ripple"></span>
                                 <select id="select-merch_size" class="mdc-text-field__input" style="background-color:inherit;" name="merch_size">
-                                    <option value=""></option>
+                                    <option value="" style="background-color:inherit;"></option>
                                     {% for k in sizes %}
-                                        <option value={{k}} {% if form.data.merch_size == k %} selected {% endif %}>{{k}}</option>
+                                        <option value='{{k}}' style="background-color:inherit;" {% if form.data.merch_size == k %} selected {% endif %}>{{k}}</option>
                                     {% endfor %}
                                 </select>
                                 <span class="mdc-floating-label" id="merch_size-label">Größe</span>
@@ -147,8 +148,7 @@
             </div>
             {% endif %}
             {% if not event.info_only %}
-            <div>
-                <form class="padding_tb_big" id="event_form" method="POST">
+            <div class="padding_tb_big">
                     <h1 id="anmeldung"> Anmeldung </h1>
                     {% csrf_token %}
                     <div style="display:flex;flex-wrap:wrap;">
@@ -257,7 +257,7 @@
                                         </div>
                                         <div>
                                             <label for="speicherung" >
-                                            <div>Ich stimme der Datenschutzerklärung zu</div>
+                                            <div>Ich stimme der {%if object.datenschutz %}<a class="more_info_button" style="padding:0px" href="{{event.datenschutz.url}}">Datenschutzerklärung</a>{% else %} Datenschutzerklärung {%endif%} zu</div>
                                             </label>
                                             {% if form.confirm.errors %}
                                             {% for error in form.confirm.errors %}
@@ -278,7 +278,8 @@
                                         </div>
                                         <div>
                                         <label for="speicherung2" >
-                                        <div>Ich stimme den Teilnahmebedingungen zu</div>
+                                        <div>Ich stimme den {% if event.teilnahmebedingungen %} <a class="more_info_button" style="padding:0px" href="{{event.teilnahmebedingungen.url}}">Teilnahmebedingungen</a>
+                                             {% else %}Teilnahmebedingungen {% endif %} zu</div>
                                         </label>
                                         {% if form.confirm.errors %}
                                         {% for error in form.confirm.errors %}

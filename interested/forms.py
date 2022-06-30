@@ -1,5 +1,15 @@
 from django import forms
 
+
+class RoundnetLandingForm(forms.Form):
+    name = forms.CharField()
+    email = forms.EmailField() 
+    age = forms.IntegerField()
+
+    class Meta:
+        fields = ['__all__']
+
+
 class ProbetrainingForm(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()

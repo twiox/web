@@ -41,6 +41,7 @@
                             <th nowrap="nowrap"><h5> Merch </h5></th>
                             <th nowrap="nowrap"><h5> Merch-Größe </h5></th>
                             <th nowrap="nowrap"><h5> Rechnung </h5></th>
+                            <th nowrap="nowrap"><h5> Rechnungsnummer </h5></th>
                             <th nowrap="nowrap"><h5> Bezahlt </h5></th>
                             <th nowrap="nowrap"><h5> Notizen </h5></th>
                         </tr>
@@ -68,6 +69,7 @@
                             <td nowrap="nowrap"> {% if participant.merch_wanted %} Ja {% else %} Nein {%endif %}</td>
                             <td nowrap="nowrap"> {% if participant.merch_size %} {{participant.merch_size}} {%else%} - {%endif%}</td>
                             <td nowrap="nowrap"> {{participant.invoice}} €</td>
+                            <td nowrap="nowrap"> Anmeldung/{{event.title|slugify}}/{{participant.id}}</td>
                             <td nowrap="nowrap"> {%if participant.payed %} Jawoll {%else%} Nope {%endif%}</td>
                             <td nowrap="nowrap"> {%if participant.notes %} {{participant.notes}} {%else%} - {%endif%}</td>
                         </tr>

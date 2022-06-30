@@ -8,9 +8,9 @@ from django.contrib import messages
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.conf import settings
-from .forms import ProbetrainingForm, PublicEventForm
+from .forms import ProbetrainingForm, PublicEventForm, RoundnetLandingForm
 from members.models import Chairman
-from .models import Teamer, PublicEvent, EventParticipant, EventMerch
+from .models import Teamer, PublicEvent, EventParticipant, EventMerch, ContactPerson
 
 def interested_index(request):
     chairmen = Chairman.objects.filter(show__contains="interested_site")
@@ -219,6 +219,8 @@ class PublicEventView(DetailView):
                 "merch_title": merch.title if merch else None,
                 "merch_size": participant.merch_size,
                 "costs": participant.invoice,
+                "id":participant.id,
+                "event":event.title.replace(" ","-")
                 }
             )
             email = EmailMessage(mail_subject2, message, to=[settings.TO_EMAIL])
@@ -315,8 +317,38 @@ class EventMerchDeleteView(PermissionRequiredMixin, DeleteView):
         event_pk = self.get_object().event.pk
         messages.add_message(self.request, messages.SUCCESS, 'Merch erfolgreich gelöscht')
         return reverse("public_event_change", kwargs={'pk':event_pk})
-    
+
+  
 def roundnet_landing(request):
     #static page for now
-    return render(request, 'interested/roundnet_landing.html')
+    contact = ContactPerson.objects.filter(tag__contains='roundnet')
+    context = {'contact':contact}
+    form = RoundnetLandingForm(request.POST)
+    if form.is_valid():
+        name = form.cleaned_data.get('name')
+        form_email = form.cleaned_data.get('email')
+        age = form.cleaned_data.get('age')
+
+        mail_subject = f"Twio X e.V. | Roundnet: Anmeldebestätigung"
+        mail_subject2 = f"Anmeldung: Roundnet: {name}"
+        message = render_to_string("interested/roundnet_confirm.html", {
+            "name": name,
+            "email": form_email,
+            "age": age
+            }
+        )
+        email = EmailMessage(mail_subject2, message, to=[settings.TO_EMAIL])
+        email2 = EmailMessage(mail_subject, message, to=[form_email])
+        email.send()
+        email2.send()
+        
+        messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich angemeldet')
+        context['form'] = RoundnetLandingForm
+        return render(request, 'interested/roundnet_landing.html', context=context)
+
+    else:
+        context['form'] = form
+        return render(request, 'interested/roundnet_landing.html', context=context)
+
+    
 

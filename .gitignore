@@ -10,6 +10,7 @@ media/trainer_tables/*.txt
 media/Events/*
 media/PublicEvents/*
 media/galleries/*
+media/contacts/*
 twio_web/secrets.py
 api_key.txt
 *static/CACHE/*
