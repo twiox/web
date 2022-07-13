@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.urls import reverse
 from django.http import HttpResponseRedirect
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import permission_required
 from django.views.generic import (CreateView, UpdateView, DeleteView, DetailView, ListView)
 from django.contrib import messages
@@ -11,6 +11,8 @@ from django.conf import settings
 from .forms import ProbetrainingForm, PublicEventForm, RoundnetLandingForm
 from members.models import Chairman
 from .models import Teamer, PublicEvent, EventParticipant, EventMerch, ContactPerson
+from members.views import chairman_check, trainer_check
+
 
 def interested_index(request):
     chairmen = Chairman.objects.filter(show__contains="interested_site")
@@ -179,6 +181,8 @@ class PublicEventView(DetailView):
         else:
             context['sizes'] = []
         context['merch'] = merch
+        context['chairman'] = chairman_check(self.request)
+
         return context
 
     def post(self, request, *args, **kwargs):
@@ -237,60 +241,76 @@ class PublicEventView(DetailView):
             return self.render_to_response( context=context)
 
 
-@permission_required("interested_change_eventparticipant")
 def event_participant_list_view(request, event_slug):
+    if not chairman_check(request):
+        return render(request, "login")
     event = PublicEvent.objects.get(slug=event_slug)
     object_list = EventParticipant.objects.filter(event=event)
     return render(request, "interested/eventparticipant_list.html", {"object_list":object_list, "event": event})
 
 
-class EventParticipantDeleteView(PermissionRequiredMixin, DeleteView):
+class EventParticipantDeleteView(UserPassesTestMixin, DeleteView):
     model=EventParticipant
     permission_required="interested_remove_eventparticipant"
     
+    def test_func(self):
+        return chairman_check(self.request)
+
     def get_success_url(self, **kwargs):
         slug = self.get_object().event.slug
         messages.add_message(self.request, messages.SUCCESS, 'Teilnehmer*in erfolgreich gelöscht')
         return reverse("event_participant_list", kwargs={'event_slug':slug})
 
-class EventParticipantUpdateView(PermissionRequiredMixin, UpdateView):
+class EventParticipantUpdateView(UserPassesTestMixin, UpdateView):
     model=EventParticipant
     permission_required="interested_change_eventparticipant"
     template_name = "interested/eventparticipant_form_update.html"
     fields = ["first_name", "last_name", "birthday", "email", "phone", "contact", "invoice", "payed", "merch_wanted", "merch_size", "notes"]
     
+    def test_func(self):
+        return chairman_check(self.request)
+
     def get_success_url(self, **kwargs):
         slug = self.get_object().event.slug
         messages.add_message(self.request, messages.SUCCESS, 'Teilnehmer*in erfolgreich geändert')
         return reverse("event_participant_list", kwargs={'event_slug':slug})
 
 
-class PublicEventDeleteView(PermissionRequiredMixin, DeleteView):
+class PublicEventDeleteView(UserPassesTestMixin, DeleteView):
     model = PublicEvent
     permission_required = "interested_publicevent_delete"
     
+    def test_func(self):
+        return chairman_check(self.request)
+            
     def get_success_url(self, **kwargs):
         slug = self.get_object().slug
         messages.add_message(self.request, messages.SUCCESS, 'Veranstaltung erfolgreich gelöscht')
         return reverse("interested_index")
     
 
-class PublicEventUpdateView(PermissionRequiredMixin, UpdateView):
+class PublicEventUpdateView(UserPassesTestMixin, UpdateView):
     model = PublicEvent
     permission_required="interested_change_eventparticipant"
     fields = "__all__"
     
+    def test_func(self):
+        return chairman_check(self.request)
+
     def get_success_url(self, **kwargs):
         slug = self.get_object().slug
         messages.add_message(self.request, messages.SUCCESS, 'Veranstaltung erfolgreich geändert')
         return reverse("public_event", kwargs={'event_slug':slug})
     
 
-class EventMerchCreateView(PermissionRequiredMixin, CreateView):
+class EventMerchCreateView(UserPassesTestMixin, CreateView):
     model = EventMerch
     permission_required = "interested_change_eventmerch"
     fields = "__all__"
     
+    def test_func(self):
+        return chairman_check(self.request)
+
     def form_valid(self, form):
         self.object = form.save()
         return super().form_valid(form)
@@ -299,20 +319,26 @@ class EventMerchCreateView(PermissionRequiredMixin, CreateView):
         messages.add_message(self.request, messages.SUCCESS, 'Merch erfolgreich hinzugefügt')
         return reverse("public_event_change", kwargs={'pk':self.object.event.pk})
 
-class EventMerchUpdateView(PermissionRequiredMixin, UpdateView):
+class EventMerchUpdateView(UserPassesTestMixin, UpdateView):
     model = EventMerch
     permission_required = "interested_change_eventmerch"
     fields = "__all__"
+
+    def test_func(self):
+        return chairman_check(self.request)
 
     def get_success_url(self, **kwargs):
         event_pk = self.get_object().event.pk
         messages.add_message(self.request, messages.SUCCESS, 'Merch erfolgreich geändert')
         return reverse("public_event_change", kwargs={'pk':event_pk})
 
-class EventMerchDeleteView(PermissionRequiredMixin, DeleteView):
+class EventMerchDeleteView(UserPassesTestMixin, DeleteView):
     model = EventMerch
     permission_required = "interested_change_eventmerch"
     
+    def test_func(self):
+        return chairman_check(self.request)
+
     def get_success_url(self, **kwargs):
         event_pk = self.get_object().event.pk
         messages.add_message(self.request, messages.SUCCESS, 'Merch erfolgreich gelöscht')
