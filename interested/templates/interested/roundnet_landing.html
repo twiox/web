@@ -9,53 +9,69 @@
         </script>
     </div>
     {% endblock %}
+    {% block navbar1 %} 
+    <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+        <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'interested_index' %}#The_Club">
+            Interessierte </a>
+        <a class="float_left"> > </a>
+        <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Roundnet </a>
+    </div>
+    {% endblock %}
+
     {% block content %}
     <section id="Roundnet">
-        <h1> Roundnet </h1>
-        <h3>Jetzt auch bei uns</h3>
+        <h1> Roundnet im Twio X </h1>
         <div style="display:flex;flex-wrap: wrap;">
-        <div class="chair_col-5 padding_all_small">
-            <p style="font-size:13pt;">
-            Wir, der Twio X e.V., sind nun auch ein Verein mit einer eigenen Roundnetabteilung! <br>
-            Damit haben es uns als Ziel gesetzt, den Roundnetsport in seiner ganzen Vielfalt zu unterstützen und die Reichweite in Leipzig zu vergrößern. <br>
-            <br>
-            Für das Training bei uns im Verein bedeutet das anfangs die Organisation eines freien Treffs mit einem <strong>offenen Training</strong>
-            und kleineren, selbstständigen Gruppen. Später - wenn die Gruppen größer und beständiger sind - können daraus auch regelmäßigen 
-            angeleitete Trainingseinheiten entstehen. Im Vordergrund stehen für uns aber der <strong>Spielspaß</strong>, das soziale <strong>Miteinander</strong> und der <strong>Sport</strong>. <br>
-            <br>
-            </p>
-            <h3>Was ist Roundnet?</h3>
-            <p style="font-size:13pt;">
-            Roundnet ist ein Teamsport, welcher von 2 Teams a 2 SpielerInnen gegeneinander um ein Netz auf verschiedenen Untergründen gespielt wird. 
-            Dies wird mittels einem kleinen Ball gemacht, welcher mit maximal 3 Kontakten auf das Netz gebracht werden muss. Dabei darf sich frei um das 
-            Netz bewegt werden.
-            </p>
-        </div>
-        <img class="chair_col-5" src="{{ STATIC_URL }}/static/media/roundnet_2.jpeg">
-        </div>
-
-        <h1 style="padding-top:15px"> Aktuelles </h1>
-        <div style="display:flex;flex-wrap:wrap;">
-            <div class="chair_col-5">
-                <h3> Auftaktveranstaltung </h3>
-                <p>Um unsere Roundnetabteilung gebührend einzuweihen, wollen Wir gemeinsam mit Euch eine große Auftaktveranstaltung planen. 
-                    Ziel ist es, so viele SpielerInnen wie möglich zusammen zu bekommen, um die ganze Festwiese mit Netzen erblühen zu lassen. 
-                    Es gibt keine Teilnahmegebühren außer den Fun und die Sonne. Dies solltet Ihr mitbringen. Außerdem solltet Ihr es an alle eure 
-                    FreundInnen weitertragen, damit man nicht immer gegen die Gleichen spielt.</p> 
-
+            <div class="chair_col-5 padding_all_small tertiary_bg">
+                <h3>Jetzt auch bei uns</h3>
+                <p style="font-size:14pt;">
+                Wir, der Twio X, haben nun eine eigene Roundnetabteilung! <br>
+                Damit haben es uns als Ziel gesetzt, den Roundnetsport in seiner ganzen Vielfalt zu unterstützen und die Reichweite in Leipzig zu vergrößern. <br>
                 <br>
-                <p>Die Anmeldung bitte ganz fix auf der Rechten Seite vornehmen und dann kann es auch schon losgehen! </p>
-
-                <p>
-                Wann? 30.07.2022 ab 11 Uhr
-                Wo? Festwiese Leipzig, direkt vor dem Stadion
-                Wie? Wer ein Netz hat bitte, bitte mitbringen!
-                Was? Ganz viel Roundnetspaß, wir stellen auch einige Getränke und Essen zum schmalen Studententaler bereit. 
+                Für das Training bei uns im Verein bedeutet das anfangs die Organisation eines <strong>freien Treffs</strong> mit einem <strong>offenen Training</strong>
+                und kleineren, selbstständigen Gruppen. Später - wenn die Gruppen größer und beständiger sind - können daraus auch regelmäßigen 
+                angeleitete Trainingseinheiten entstehen. Im Vordergrund stehen für uns aber der <strong>Spielspaß</strong>, das soziale <strong>Miteinander</strong> und der <strong>Sport</strong>. <br>
+                <br>
+                </p>
+                <h3>Was ist Roundnet?</h3>
+                <p style="font-size:14pt;">
+                Roundnet ist ein Teamsport, bei welchem zwei Teams mit jeweils 2 Spieler*innen gegeneinander um ein Netz auf verschiedenen Untergründen spielen. 
+                Spielobjekt ist ein kleiner Ball, welcher mit maximal 3 Kontakten auf das Netz gebracht werden muss. Dabei darf sich frei um das 
+                Netz bewegt werden.
                 </p>
             </div>
             <div class="chair_col-5">
+                <img class="chair_col-80" style="display:block" src="{{ STATIC_URL }}/static/media/roundnet_2.jpeg">
+            </div>
+        </div>
+
+        <h1 style="padding-top:15px"> Auftaktveranstaltung </h1>
+        <div style="display:flex;flex-wrap:wrap;">
+            <div class="chair_col-5 padding_all_small">
+                <p style="font-size:14pt;">Um unsere neue Abteilung gebührend einzuweihen, haben wir eine große <strong>Auftaktveranstaltung</strong> 
+                    geplant um die ganze Festwiese mit Netzen erblühen lassen. <br><br>
+
+                    <div class="primary padding_all_big chair_col-80">
+                        <ul>
+                            <li style="font-size:14pt;"><i class="fas fa-calendar"></i> 30.07.2022 ab 11 Uhr</li>
+                            <li style="font-size:14pt;"><i class="fas fa-map-marker"></i> Festwiese Leipzig, direkt beim Stadion</li>
+                            <li style="font-size:14pt;"><i class="fas fa-circle"></i> Wer ein Netz hat, bitte, bitte mitbringen!</li>
+                            <li style="font-size:14pt;"> <i class="fas fa-apple-alt"></i> Wir stellen Getränke und Essen - solange der Vorrat reicht </li>
+                        </ul>
+                    </div><br>
+                
+                </p><p style="font-size:14pt;">
+                    Es gibt <strong style="font-size:14pt;">keine Teilnahmegebühren</strong>! <br> Nur ganz viel Roundnetspaß, den Fun und die Sonne. Dies solltet Ihr mitbringen. 
+                    Außerdem - bitte die Zeit und den Ort an alle eure Freund*innen weitertragen, damit man nicht immer gegen die Gleichen spielt.</p> 
+
+                <br>
+                <p>Bitte meldet euch fix auf der über die Seite an, damit wir Netze und Speisen planen können und dann kann es auch schon losgehen! </p>
+
+               
+            </div>
+            <div class="chair_col-5">
                 <h3> Anmeldung </h3>
-                <form method="POST">
+                <form method="POST" class="chair_col-80">
                     {% csrf_token %}
                     <div>
                         <div class="padding_rl_small">
