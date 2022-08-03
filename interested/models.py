@@ -142,7 +142,7 @@ class EventParticipant(models.Model):
     invoice = models.FloatField("Kosten", blank=True, null=True)
     payed = models.BooleanField("Bezahlt", default=False)
     merch_wanted = models.BooleanField("Merch bestellt", default=False)
-    merch_size = models.CharField("Größe", max_length=10, blank=True, null=True)
+    merch_size = models.CharField("Größe", max_length=200, blank=True, null=True)
     notes = models.TextField("Notizen", blank=True, null=True)
     
     def __str__(self):
