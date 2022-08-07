@@ -57,7 +57,7 @@
                     <label class="mdc-text-field mdc-text-field--filled base_costs">
                         <span class="mdc-text-field__ripple"></span>
                         <input type="number" step="0.1" class="mdc-text-field__input" aria-labelledby="base_costs-label" name="base_costs" required value=
-                            {% if form.instance.base_costs %} {{form.instance.base_costs}} {% else %} {{form.data.base_costs}} {% endif %}>
+                            {% if form.instance.base_costs %} {{form.instance.base_costs|floatformat:.2}} {% else %} {{form.data.base_costs|floatformat:.2}}  {% endif %}>
                         <span class="mdc-floating-label" id="base_costs-label">Kosten</span>
                         <span class="mdc-line-ripple"></span>
                     </label>

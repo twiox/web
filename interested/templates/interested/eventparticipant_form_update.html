@@ -97,7 +97,7 @@
                     <label class="mdc-text-field mdc-text-field--filled contact">
                         <i class="mdc-select__dropdown-icon"></i>
                         <span class="mdc-text-field__ripple"></span>
-                        <select id="select-contact" class="mdc-text-field__input" style="background-color:#333333;" name="contact" required>
+                        <select id="select-contact" class="mdc-text-field__input" style="background-color:#333333;" name="contact">
                             <option value={% if form.instance.contact %} "{{form.instance.contact }}" {% else %} "" {%endif %} selected>{% if form.instance.contact %} "{{form.instance.contact }}" {% else %} "" {%endif %}</option>
                             <option value="Telegram">Telegram</option>
                             <option value="Whatsapp">WhatsApp</option>
@@ -154,7 +154,7 @@
                         <label class="mdc-text-field mdc-text-field--filled invoice">
                             <span class="mdc-text-field__ripple"></span>
                             <input type="number" class="mdc-text-field__input" aria-labelledby="invoice-label" name="invoice" required 
-                                value={% if form.instance.invoice %} "{{form.instance.invoice}}" {% else %} "{{form.data.invoice}}" {% endif %}>
+                                value={% if form.instance.invoice %} "{{form.instance.invoice|floatformat:"0"}}" {% else %} "{{form.data.invoice|floatformat:"0"}}" {% endif %}>
                             <span class="mdc-floating-label" id="invoice-label">Kosten</span>
                             <span class="mdc-line-ripple"></span>
                         </label>
