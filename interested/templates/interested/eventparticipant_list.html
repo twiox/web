@@ -48,7 +48,7 @@
                     </thead>
                     <tbody id="table_body">
                     {% for participant in object_list %}
-                        <tr class="{% cycle 'odd' 'even' %} table_row">
+                        <tr class="{% cycle 'odd' 'even' %} table_row" id="{{forloop.counter}}_row">
                             <td nowrap="nowrap" class="counter"> {{forloop.counter}}</td>
                             <td nowrap="nowrap">
                                 <a href="{% url 'eventparticipant_change' participant.id %}" title="Bearbeiten">
@@ -70,7 +70,7 @@
                             <td nowrap="nowrap"> {% if participant.merch_size %} {{participant.merch_size}} {%else%} - {%endif%}</td>
                             <td nowrap="nowrap"> {{participant.invoice}} €</td>
                             <td nowrap="nowrap"> Anmeldung/{{event.title|slugify}}/{{participant.id}}</td>
-                            <td nowrap="nowrap"> {%if participant.payed %} Jawoll {%else%} Nope {%endif%}</td>
+                            <td nowrap="nowrap" id="{{forloop.counter}}_payed">{%if participant.payed %}Jawoll{%else%}Nope{%endif%}</td>
                             <td nowrap="nowrap"> {%if participant.notes %} {{participant.notes}} {%else%} - {%endif%}</td>
                         </tr>
                     {% endfor %}
@@ -88,20 +88,12 @@
 </section>
 <script>
     $(document).ready(function(){
-        $("#myInput").on("keyup", function() {
-            var value = $(this).val().toLowerCase();
-            $("#table_body tr").filter(function() {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-            });
-            $(".counter:visible").each(function(index, value){
-                $(this).html(index+1)});
-            $(".table_row:visible").each(function(index, value){
-                $(this).removeClass('odd');
-                if(index%2===1){
-                    $(this).addClass('odd');
-                };
-            });
-        });
+        $(".table_row:visible").each(function(index, value){
+            console.log("test")
+            if($("#"+index+"_payed").text() == "Jawoll"){
+                $("#"+index+"_row").css("background-color",'DarkGreen');
+            }
+        });            
     });
     $('.mail_click').on('click', function(){
         $.ajax({
