@@ -20,13 +20,17 @@
             <div class ="inner_form padding_all_big flex_center">
                 <label class="mdc-text-field mdc-text-field--filled agegroup_lower">
                     <span class="mdc-text-field__ripple"></span>
-                    <input type="number" class="mdc-text-field__input"  name="lower" required>
+                    <input type="number" class="mdc-text-field__input"  name="lower"
+                    value="{% if object.lower %}{{object.lower}}{% else %}0{% endif %}"
+                    required>
                     <span class="mdc-floating-label" id="agegroup_lower-label">Von</span>
                     <span class="mdc-line-ripple"></span>
                 </label>
                 <label class="mdc-text-field mdc-text-field--filled">
                     <span class="mdc-text-field__ripple"></span>
-                    <input type="number" class="mdc-text-field__input" name="upper" required>
+                    <input type="number" class="mdc-text-field__input" name="upper"
+                    value="{% if object.upper %}{{object.upper}}{% else %}99{% endif %}"
+                    required>
                     <span class="mdc-floating-label" id="agegroup_lower-label">Bis</span>
                     <span class="mdc-line-ripple"></span>
                 </label>

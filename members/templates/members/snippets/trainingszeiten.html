@@ -50,10 +50,10 @@
         </div>
         <!-- Show only selected groups -->
         <script>
-            $(document).ready(function(){ 
+            $(document).ready(function(){
                 $(".training").hide();
             });
-            
+
             $(".training_button").click(function(){
                 $(".training").hide();
                 var group = $(this).attr("class").split(/\s+/)[1];
@@ -81,14 +81,14 @@
                     <div class="second_section padding_all_big">
                         <p> {{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
                         <h4> {{session.spot.title}}</h4>
-                        <p> Gruppe {{session.group.group_id }} </p>
+                        <p> {{session.agegroup}} </p>
                     </div>
                 </div>
                 <div class="third_session tertiary_bg padding_all_med">
                     <a class="more_info_button" href="{% url 'session_detail' session.id %}#nav">weitere Informationen</a>
                 </div>
             </div>
-            
+
         </div>
         {% empty %}
         <h3> Leider gibt es im Moment keine Einheiten für dich </h3>

@@ -29,6 +29,9 @@
                         {% if perms.members.delete_agegroup %}
                         <a href="{% url 'agegroup_delete' object.pk %}" title="Löschen"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                         {% endif %}
+                        {% if perms.members.change_agegroup %}
+                        <a href="{% url 'agegroup_update' object.id %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

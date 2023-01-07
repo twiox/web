@@ -1,15 +1,15 @@
 from django import forms
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm 
+from django.contrib.auth.forms import UserCreationForm
 from .models import Event, Session, Group, Spot
 
 class SpotForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(SpotForm, self).__init__(*args, **kwargs)
         self.fields['description'].strip = False
-    
+
     description = forms.CharField(widget=forms.Textarea)
-    
+
     class Meta:
         model = Spot
         fields = ["title","lat","long","description"]
@@ -18,7 +18,7 @@ class SpotForm(forms.ModelForm):
 class SessionForm(forms.ModelForm):
     class Meta:
         model = Session
-        fields=["title","day","start_time","end_time","hinweis","spot","trainer","group"]
+        fields=["title","day","start_time","end_time","hinweis","spot","trainer",'agegroup']
         widgets = {
             'trainer': forms.CheckboxSelectMultiple,
         }
@@ -38,12 +38,12 @@ class EventUpdateParticipantForm(forms.ModelForm):
     class Meta:
         model=Event
         fields = ["confirm"]
- 
+
 class EventUpdateParticipantForm2(forms.ModelForm):
     class Meta:
         model=Event
         fields = []
-        
+
 
 class UpdateMemberInformationForm(forms.ModelForm):
     comment = forms.CharField(label="Kommentar", widget=forms.Textarea, required=False)
@@ -51,7 +51,7 @@ class UpdateMemberInformationForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ["comment", "attachment"]
-        
+
 class UpdateMemberEmailForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
     email1 = forms.EmailField()

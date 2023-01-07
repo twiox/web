@@ -28,6 +28,7 @@ urlpatterns = [
     path("gruppe/<int:pk>/löschen/", views.GroupDeleteView.as_view(),name="group_delete"),
     path("gruppe/<int:pk>/detail/", views.RealGroupDetailView.as_view(),name="real_group_detail"),
     path("altersgruppe/neu/", views.AgeGroupCreateView.as_view(),name="agegroup_create"),
+    path("altersgruppe/<int:pk>/ändern", views.AgeGroupUpdateView.as_view(),name="agegroup_update"),
     path("altersgruppe/<int:pk>/löschen/", views.AgeGroupDeleteView.as_view(),name="agegroup_delete"),
     path("profil/", views.UserDetailView.as_view(),name="profile_detail"),
     path("profil/ändere_email/", views.EmailUpdateView.as_view(),name="profile_update_email"),

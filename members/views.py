@@ -39,7 +39,7 @@ def trainer_check(request):
 def index(request):
     """ This is the View for the homepage """
     group = Profile.objects.get(user = request.user).group
-    sessions = Session.objects.filter(group=group)
+    sessions = Session.objects.all()
     events = Event.objects.filter(allowed_groups=group)
     chairmen = Chairman.objects.filter(show__contains="member_site")
     training_messags = Message.objects.filter(groups=group).filter(display="sessions")
@@ -408,6 +408,16 @@ class AgeGroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = AgeGroup
     permission_required = 'members.delete_agegroup'
 
+class AgeGroupUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = AgeGroup
+    #who can update the event?
+    permission_required = 'members.change_agegroup'
+    fields = ["lower","upper"]
+
+    def form_valid(self, form):
+        self.object = form.save()
+        messages.add_message(self.request, messages.SUCCESS, 'Altersgruppe geändert')
+        return super().form_valid(form)
 
 class RealGroupDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Group

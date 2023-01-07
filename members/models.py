@@ -38,8 +38,11 @@ class AgeGroup(models.Model):
     lower = models.IntegerField('von', default=0)
     upper = models.IntegerField('bis', default=99)
 
+    class Meta:
+        ordering = ['lower']
+
     def __str__(self):
-        return f'Altersgruppe: {self.lower} - {self.upper}'
+        return f'Altersgruppe: {self.lower} - {self.upper} Jahre'
 
     def get_absolute_url(self):
         return reverse('agegroup_list')
@@ -49,7 +52,7 @@ class Group(models.Model):
     group_id = models.CharField("Gruppe (z.B 'A')", max_length=10)
 
     def __str__(self):
-        return f"Gruppe: {self.group_id}"
+        return f"Gruppe: {self.group_id}" if self.group_id else 'Gruppe ohne Id'
 
     def get_absolute_url(self):
         return reverse('group_list')
@@ -145,6 +148,7 @@ class Trainer(models.Model):
 class Session(models.Model):
 
     group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name = u"Gruppe",blank=True, null=True,)
+    agegroup = models.ForeignKey(AgeGroup, on_delete=models.SET_NULL, verbose_name='Altersgruppe', related_name='agegroup', blank=True, null=True)
     trainer = models.ManyToManyField(Trainer, blank=True, verbose_name =u"Trainer")
     spot = models.ForeignKey(Spot, blank=True, null=True, on_delete=models.SET_NULL, verbose_name=u"Spot")
 
@@ -187,7 +191,7 @@ class Session(models.Model):
         return reverse('session_detail', kwargs={"pk": self.pk})
 
     def __str__(self):
-        return f"Session: {self.title}_{self.group.group_id}_{self.day}"
+        return f"Session: {self.title}_{self.group}_{self.day}"
 
     class Meta:
         ordering = ["day_key"]

@@ -1,5 +1,5 @@
 {% extends "members/base.html" %}
-{% block navbar2 %} 
+{% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}#nav">
         Übersicht </a>
@@ -9,6 +9,21 @@
 {% endblock %}
 
 {%block content %}
+<style>
+.tscroll table{
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.tscroll td:first-child{
+  position: sticky;
+  left: 0;
+  background-color: DarkSlateGray;
+}
+
+.tscroll td, th{
+  border: solid grey 1px;
+}
+</style>
 <h1>Vorstandsdokument </h1>
 <section>
     <div id="container">
@@ -22,89 +37,72 @@
             <input class="searchbar" id="myInput" type="text" placeholder="Suche..">
         </div>
     </div>
-    
-    <div style="display:flex;flex-align:left;height:750px">
-        <div id='table_data' style="width:50%;overflow:auto;">
-            <div id='table_insert' style='display:inline-block' class="padding_all_big tertiary_bg">
-                <table>
-                    <thead>
-                        <tr>
-                            <th nowrap="nowrap"><h5> Nr </h5></th>
-                            <th nowrap="nowrap"><h5><i class="fas fa-user-check"></i></h5></th>
-                            <th nowrap="nowrap"><h5>-</h5></th>
-                            <th nowrap="nowrap"><h5>-</h5></th>
-                            <th nowrap="nowrap"><h5> Status </h5></th>
-                            <th nowrap="nowrap"><h5> Benutzername </h5></th>
-                            <th nowrap="nowrap"><h5> Vorname </h5></th>
-                            <th nowrap="nowrap"><h5> Nachname </h5></th>
-                            <th nowrap="nowrap"><h5> Mitgl. </h5></th>
-                            <th nowrap="nowrap"><h5> Gruppe </h5></th>
-                            <th nowrap="nowrap"><h5> Geschlecht </h5></th>
-                            <th nowrap="nowrap"><h5> Geb.-Datum </h5></th>
-                            <th nowrap="nowrap"><h5> E-Mail-Adresse </h5></th>
-                            <th nowrap="nowrap"><h5> Ansprechpartner </h5></th>
-                            <th nowrap="nowrap"><h5> Adresse </h5></th>
-                            <th nowrap="nowrap"><h5> Telefonnummer </h5></th>
-                            <th nowrap="nowrap"><h5> Notfallnummer </h5></th>
-                            <th nowrap="nowrap"><h5> Anmeldung </h5></th>
-                            <th nowrap="nowrap"><h5> Kündigung </h5></th>
-                            <th nowrap="nowrap"><h5> Mandatsreferenz </h5></th>
-                            <th nowrap="nowrap"><h5> Zahlungsart </h5></th>
-                            <th nowrap="nowrap"><h5> Beitrag </h5></th>
-                            <th nowrap="nowrap"><h5> Notizen Trainer </h5></th>
-                            <th nowrap="nowrap"><h5> Notizen Vorstand </h5></th>
-                            
-                        </tr>
-                    </thead>
-                    <tbody id="table_body">
-                    {% for member in object_list %}
-                        <tr id={{member.profile.status}} class="{% cycle 'odd' 'even' %} table_row">
-                            <td nowrap="nowrap" class="counter"> {{forloop.counter}}</td>
-                            {% if member.is_active %}
-                                <td><i class="fas fa-check"></i></td>
-                            {% else %}
-                                <td> X </td>
-                            {% endif %}
-                            <td nowrap="nowrap">
-                                <a href="{% url 'update_user' member.id %}#nav" title="Bearbeiten">
-                                    <i class="fas fa-pen-square" style="font-size:17px;"></i>
-                                </a>
-                            </td>
-                            <td nowrap="nowrap">
-                                <a href="{% url 'remove_user' member.id %}#nav" title="Löschen">
-                                    <i class="far fa-minus-square" style="font-size:17px;"></i>
-                                </a>
-                            </td>
-                            <td nowrap="nowrap"> {%if member.profile.status %} {{member.profile.status}} {% endif %}</td>
-                            <td nowrap="nowrap"> {{member.username}}</td>
-                            <td nowrap="nowrap"> {%if member.first_name %} {{member.first_name}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.last_name %} {{member.last_name}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.profile.member_num %} {{member.profile.member_num}}{% endif %} </td>
-                            <td nowrap="nowrap"> {%if member.profile.group.group_id %} {{member.profile.group.group_id }} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.profile.sex %} {{member.profile.sex}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.profile.birthday %} {{member.profile.birthday|date:"d.m.Y"}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.email %} {{member.email}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.profile.parent %} {{member.profile.parent}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.profile.address %} {{member.profile.address}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.profile.telephone %} {{member.profile.telephone}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.profile.parent_telnr %} {{member.profile.parent_telnr}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.profile.membership_start %} {{member.profile.membership_start|date:"m/Y"}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.profile.membership_end %} Kündigung: {{member.profile.membership_end|date:"d.m.Y"}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.profile.mandatsref %} {{member.profile.mandatsref}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.profile.zahlungsart %} {{member.profile.zahlungsart}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.profile.beitrag %} {{member.profile.beitrag}},00 €{% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.profile.notes_trainer %} {{member.profile.notes_trainer}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if member.profile.notes_chairman %} {{member.profile.notes_chairman}} {% endif %}</td>
-                            <td nowrap="nowrap" hidden class="member_id">{{member.pk}}</td>
-                            
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+
+    <div style="display:flex;max-height:600px;">
+        <div id='table_data' style="width:50%; overflow:auto"  class="tertiary_bg tscroll">
+            <!--
+            <div id='table_insert' style='display:inline-block' class="tertiary_bg tscroll">
+            -->
+            <table id="the_table">
+                <thead style="position: sticky; top:0; background-color:DarkSlateGray;z-index:3;">
+                    <tr>
+                        <th nowrap="nowrap">Nr</th>
+                        <th nowrap="nowrap">Benutzername</th>
+                        <th class="sticky-col" nowrap="nowrap">Vorname</th>
+                        <th nowrap="nowrap">Nachname</th>
+                        <th nowrap="nowrap">Mitgl.</th>
+                        <!--<th nowrap="nowrap"><h5> Gruppe </th>-->
+                        <th nowrap="nowrap">Geschlecht</th>
+                        <th nowrap="nowrap">Geb.-Datum</th>
+                        <th nowrap="nowrap">E-Mail-Adresse</th>
+                        <th nowrap="nowrap">Ansprechpartner</th>
+                        <th nowrap="nowrap">Adresse</th>
+                        <th nowrap="nowrap">Telefonnummer</th>
+                        <th nowrap="nowrap">Notfallnummer</th>
+                        <th nowrap="nowrap">Anmeldung</th>
+                        <th nowrap="nowrap">Kündigung</th>
+                        <th nowrap="nowrap">Mandatsreferenz</th>
+                        <th nowrap="nowrap">Zahlungsart</th>
+                        <th nowrap="nowrap">Beitrag</th>
+                        <th nowrap="nowrap">Notizen Trainer</th>
+                        <th nowrap="nowrap">Notizen Vorstand</th>
+                        <th nowrap="nowrap">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="table_body">
+                {% for member in object_list %}
+                    <tr id={{member.profile.status}} class="{% cycle 'odd' 'even' %} table_row" data-url="{% url 'get_member_detail_form' member.pk %}">
+                        <td nowrap="nowrap" class="counter"> {{forloop.counter}}</td>
+                        <td nowrap="nowrap"> {{member.username}}</td>
+                        <td nowrap="nowrap"> {%if member.first_name %} {{member.first_name}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if member.last_name %} {{member.last_name}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if member.profile.member_num %} {{member.profile.member_num}}{% endif %} </td>
+                        <!--
+                        <td nowrap="nowrap"> {%if member.profile.group.group_id %} {{member.profile.group.group_id }} {% endif %}</td>
+                        -->
+                        <td nowrap="nowrap"> {%if member.profile.sex %} {{member.profile.sex}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if member.profile.birthday %} {{member.profile.birthday|date:"d.m.Y"}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if member.email %} {{member.email}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if member.profile.parent %} {{member.profile.parent}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if member.profile.address %} {{member.profile.address}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if member.profile.telephone %} {{member.profile.telephone}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if member.profile.parent_telnr %} {{member.profile.parent_telnr}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if member.profile.membership_start %} {{member.profile.membership_start|date:"m/Y"}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if member.profile.membership_end %} Kündigung: {{member.profile.membership_end|date:"d.m.Y"}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if member.profile.mandatsref %} {{member.profile.mandatsref}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if member.profile.zahlungsart %} {{member.profile.zahlungsart}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if member.profile.beitrag %} {{member.profile.beitrag}},00 €{% endif %}</td>
+                        <td nowrap="nowrap"> {%if member.profile.notes_trainer %} {{member.profile.notes_trainer}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if member.profile.notes_chairman %} {{member.profile.notes_chairman}} {% endif %}</td>
+                        <td nowrap="nowrap"> {%if member.profile.status %} {{member.profile.status}} {% endif %}</td>
+                        <td nowrap="nowrap" hidden class="member_id">{{member.pk}}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
         <div >
-            <div id='toggle_detail' class='primary_bg flex_center_vertical' style="height:750px;width:10px;cursor:pointer">
+            <div id='toggle_detail' class='primary_bg flex_center_vertical' style="max-height:600px;width:10px;cursor:pointer">
                 <i class="fas fa-chevron-right"></i>
             </div>
         </div>
@@ -154,7 +152,7 @@ function updateDetails(){
         }
     });
 }
-    
+
 function sendData(){
     var pk = $('#user_pk').html();
     if (! validate()) return false;
@@ -164,7 +162,7 @@ function sendData(){
         data: $("form").serialize(),
         success: function(data){
             if(data["data"]!= false){
-                $('#table_data').load(document.URL + ' #table_insert', function(){
+                $('#table_data').html("").load(document.URL + ' #the_table', function(){
                     bindButtonClick();
                     updateTable()
                     updateDetails()
@@ -176,8 +174,8 @@ function sendData(){
             }
         }
     });
-}    
-    
+}
+
 function updateTable(){
     var value = $("#myInput").val().toLowerCase();
     $("#table_body tr").filter(function() {
@@ -196,7 +194,7 @@ function updateTable(){
         };
     });
 };
-    
+
 function bindButtonClick(){
     // the search function
     $("#myInput").on("keyup", function() {
@@ -206,7 +204,7 @@ function bindButtonClick(){
     $('body').on('click','#table_body tr',function(){
         var pk = $(this).find($(".member_id")).html();
         $.ajax({
-            url: '{% url "get_member_detail_form" 1234 %}'.replace("1234", pk.toString()),
+            url: $(this).attr('data-url'),
             type: 'GET',
             success: function (data){
                 $("#member_detail").html(data);
@@ -229,8 +227,8 @@ function bindButtonClick(){
         }
     });
 };
-    
-    
+
+
 </script>
 <script>
 $(document).ready(function(){

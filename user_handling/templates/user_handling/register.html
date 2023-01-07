@@ -1,5 +1,5 @@
 {% extends "members/base.html" %}
-{% block navbar2 %} 
+{% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
         Mitglieder </a>
@@ -45,7 +45,7 @@
                         <span class="mdc-floating-label" id="first_name-label">Vorname</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
-                    
+
                     {% if form.last_name.errors %}
                         {% for error in form.last_name.errors %}
                             <p style="color:red;">{{error}}</p>
@@ -58,7 +58,7 @@
                         <span class="mdc-floating-label" id="last_name-label">Nachname</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
-                    
+
                     {% if form.address.errors %}
                         {% for error in form.address.errors %}
                             <p style="color:red;">{{error}}</p>
@@ -71,7 +71,7 @@
                         <span class="mdc-floating-label" id="address-label">Adresse</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
-                    
+
                     {% if form.birthday.errors %}
                         {% for error in form.birthday.errors %}
                             <p style="color:red;">{{error}}</p>
@@ -85,7 +85,7 @@
                         <span class="mdc-line-ripple"></span>
                     </label>
                 </div>
-                
+
                 <div class="col-5 padding_all_small">
                     {% if form.telephone.errors %}
                         {% for error in form.telephone.errors %}
@@ -99,7 +99,7 @@
                         <span class="mdc-floating-label" id="telephone-label">Telefonnummer</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
-                    
+
                     {% if form.email.errors %}
                         {% for error in form.email.errors %}
                             <p style="color:red;">{{error}}</p>
@@ -112,19 +112,20 @@
                         <span class="mdc-floating-label" id="email-label">E-Mail-Adresse</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
-                    
-                    {% if form.sex.errors %}
-                        {% for error in form.sex.errors %}
-                            <p style="color:red;">{{error}}</p>
-                        {% endfor %}
-                    {% endif %}
+
                     <label class="mdc-text-field mdc-text-field--filled sex">
+                        <i class="mdc-select__dropdown-icon"></i>
                         <span class="mdc-text-field__ripple"></span>
-                        <input type="text" class="mdc-text-field__input" aria-labelledby="sex-label" name="sex" value=
-                        {% if form2.instance.sex %} "{{form2.instance.sex}}" {% else %} "{{form2.data.sex}}" {% endif %}>
-                        <span class="mdc-floating-label" id="sex-label">Geschlecht</span>
+                        <select id="select-group" class="mdc-text-field__input" style="background-color:#333333;" name="sex" required>
+                            <option selected value="{% if form2.instance.sex %} {{form2.instance.sex}} {% else %} {{form2.data.sex}} {% endif %}">
+                            {% if form2.instance.sex %} {{form2.instance.sex}} {% else %} {{form2.data.sex}} {% endif %}</option>
+                                <option value="m">m</option>
+                                <option value="w">w</option>
+                                <option value="d">d</option>
+                        </select>
+                        <span class="mdc-floating-label" id="group-label">Geschlecht</span>
                         <span class="mdc-line-ripple"></span>
-                    </label>   
+                    </label>
                 </div>
             </div>
             <br>
@@ -141,7 +142,7 @@
                         <span class="mdc-floating-label" id="parent-label">Ansprechpartner</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
-                    
+
                     {% if form.parent_telnr.errors %}
                         {% for error in form.parent_telnr.errors %}
                             <p style="color:red;">{{error}}</p>
@@ -154,12 +155,12 @@
                         <span class="mdc-floating-label" id="parent_telnr-label">Notfallnummer</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
-            
+
             <h5 class="padding_all_big">Vereinsdaten</h5>
             <div class="flex_center">
                 <div class="col-5 padding_all_small">
                     <h6>Verwaltung</h6>
-                    
+
                     {% if form.membership_start.errors %}
                         {% for error in form.membership_start.errors %}
                             <p style="color:red;">{{error}}</p>
@@ -213,11 +214,11 @@
                         <span class="mdc-floating-label" id="member_num-label">Mitgliedsnummer</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
-                    
+                    <!--
                     <label class="mdc-text-field mdc-text-field--filled group">
                         <i class="mdc-select__dropdown-icon"></i>
                         <span class="mdc-text-field__ripple"></span>
-                        <select id="select-group" class="mdc-text-field__input" style="background-color:#333333;" name="group" required>
+                        <select id="select-group" class="mdc-text-field__input" style="background-color:#333333;" name="group">
                             <option value={% if form2.instance.group %} "{{form2.instance.group.id}}" {% else %} "{{form2.data.group.id}}" {% endif %}>
                             {% if form2.instance.group %} {{form2.instance.group}} {% else %} {{form2.data.group}} {% endif %}</option>
                                 {% for id, name in form2.group.field.choices %}
@@ -229,7 +230,8 @@
                         <span class="mdc-floating-label" id="group-label">Gruppe</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
-                    
+                    -->
+
                 </div>
                 <div class="col-5 padding_all_small">
                     <h6>Mitgliedsbeitrag</h6>
@@ -253,7 +255,7 @@
                         <span class="mdc-floating-label" id="zahlungsart-label">Zahlungsart</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
-                    
+
                     {% if form.beitrag.errors %}
                         {% for error in form.beitrag.errors %}
                             <p style="color:red;">{{error}}</p>
@@ -288,7 +290,7 @@
                 {% endfor %}
             {% endif %}
             <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
-              <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="notes_trainer" id="id_comment" 
+              <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="notes_trainer" id="id_comment"
               name="notes_trainer" >{% if form2.instance.notes_trainer %}{{form2.instance.notes_trainer}}{% else %}{{form2.data.notes_trainer}}{% endif %}</textarea>
               <span class="mdc-notched-outline">
                 <span class="mdc-notched-outline__leading"></span>
@@ -302,7 +304,7 @@
                 {% endfor %}
             {% endif %}
             <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
-              <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="notes_chairman" id="id_comment" 
+              <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="notes_chairman" id="id_comment"
               name="notes_chairman">{% if form2.instance.notes_chairman %}{{form2.instance.notes_chairman}}{% else %}{{form2.data.notes_chairman}}{% endif %}</textarea>
               <span class="mdc-notched-outline">
                 <span class="mdc-notched-outline__leading"></span>

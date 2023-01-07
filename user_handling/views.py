@@ -51,7 +51,7 @@ def register(request):
     y,num = get_mandatsref(current_member.profile.mandatsref)
     ref = f"{get_ordering(current_member)+1}-{y}-{num}"
     if request.method == "POST": #if the form is filled out
-        form = MemberCreationForm(request.POST) 
+        form = MemberCreationForm(request.POST)
         form2 = ProfileCreationForm(request.POST)
         if(form.is_valid() and form2.is_valid()): #and the form is valid
             real_user = form.save(commit=False) #save the user to fire the signal
@@ -66,14 +66,14 @@ def register(request):
             real_user.save() #save the entries
             current_site = get_current_site(request)
             password_reset_token = PasswordResetTokenGenerator()
-            
+
             mail_subject="Aktiviere deinen Account für den Twio Mitgliederbereich"
             message= render_to_string("user_handling/acc_active_email.html",{
                 "user":real_user,
                 "domain":current_site.domain,
                 "uid": urlsafe_base64_encode(force_bytes(real_user.pk)),
                 "token":account_activation_token.make_token(real_user),
-                }       
+                }
             )
             to_email = form.cleaned_data.get("email")
             email=EmailMessage(mail_subject, message, to=[to_email])
@@ -94,22 +94,22 @@ def activate(request, uidb64, token):
     if user is not None and account_activation_token.check_token(user, token) and user.is_active==False:
         user.is_active = True
         user.save()
-        
+
         password_reset_token = PasswordResetTokenGenerator()
         uid2 = urlsafe_base64_encode(force_bytes(user.pk))
         token2 = password_reset_token.make_token(user)
-        
+
         # return redirect('home')
         return render(request, "user_handling/activate.html", context={"user":user, "uid":uid2, "token":token2})
     else:
-        return render(request, "user_handling/activate_fail.html", context={"uidb64":uidb64, "token":token}  )   
+        return render(request, "user_handling/activate_fail.html", context={"uidb64":uidb64, "token":token}  )
 
 def resend_activate(request, uidb64, token):
     uid = force_text(urlsafe_base64_decode(uidb64))
     try:
         real_user = User.objects.get(pk=uid)
         to_email = real_user.email
-    
+
         password_reset_token = PasswordResetTokenGenerator()
         mail_subject="Aktiviere deinen Account für den Twio Mitgliederbereich"
         message= render_to_string("user_handling/acc_active_email.html",{
@@ -117,7 +117,7 @@ def resend_activate(request, uidb64, token):
             "domain":get_current_site(request).domain,
             "uid": urlsafe_base64_encode(force_bytes(real_user.pk)),
             "token":account_activation_token.make_token(real_user),
-            }       
+            }
         )
         email=EmailMessage(mail_subject, message, to=[to_email])
         email.send()
@@ -138,19 +138,19 @@ class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = User
     permission_required = 'auth.add_user'
     template_name = "user_handling/member_list.html"
-    
+
     def get_queryset(self):
         ordered = sorted(User.objects.all(), key=lambda n: get_ordering(n))
         return ordered
         #User.objects.all().order_by("profile__member_num")
-    
-    
+
+
 class UserDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = User
     template_name = "user_handling/user_confirm_delete.html"
     #who can delete the user?
     permission_required = 'auth.delete_user'
-    
+
     def get_success_url(self, **kwargs):
         return reverse("member_list")
 
@@ -158,20 +158,20 @@ class UserDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 @permission_required('auth.add_user', raise_exception=True)
 def member_update(request, pk):
     real_user = get_object_or_404(User,pk=pk)
-    
+
     if request.method == "POST": #if the form is filled out
-    
-        form = MemberListUserUpdateForm(request.POST) 
+
+        form = MemberListUserUpdateForm(request.POST)
         form2 = MemberListProfileUpdateForm(request.POST)
-        
+
         if(form.is_valid() and form2.is_valid()): #and the form is valid
-            
+
             for key, value in form.cleaned_data.items():
                 setattr(real_user, key, value)
-                
+
             for key, value in form2.cleaned_data.items():
                 setattr(real_user.profile, key, value)
-                
+
             real_user.save() #save the entries
             messages.add_message(request, messages.SUCCESS, 'Account erfolgreich bearbeitet')
             return redirect("member_list")
@@ -186,18 +186,18 @@ class ChairmanCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView
     fields=["user","public_telnr","public_email","competences","image","show"]
     template_name="user_handling/chairman_form.html"
     permission_required = 'members.add_chairman'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["choices"] = [(x.pk, f"{x.first_name} {x.last_name} ({x.profile.member_num})") for x in User.objects.filter(chairman__id__isnull=True)]
         return context
-    
-    
+
+
     def form_valid(self, form):
         self.object = form.save()
         user = self.object.user
         try:
-            chairman_group = Permission_group.objects.get(name='Vorstand') 
+            chairman_group = Permission_group.objects.get(name='Vorstand')
         except:
             chairman_group = Permission_group(name="Vorstand")
             chairman_group.save()
@@ -208,12 +208,12 @@ class ChairmanCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView
             chairman_group.save()
             user.save()
         return super().form_valid(form)
-        
+
 class ChairmanDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Chairman
     template_name = "user_handling/chairman_confirm_delete.html"
     permission_required = 'members.delete_chairman'
-    
+
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
         user=self.object.user
@@ -223,10 +223,10 @@ class ChairmanDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView
             chairman_group.user_set.remove(user)
             chairman_group.save()
         except: #if we created chairman via the webiste...
-            pass 
+            pass
         self.object.delete()
         return HttpResponseRedirect(success_url)
-    
+
     def get_success_url(self, **kwargs):
         return reverse("chairman_list")
 
@@ -236,13 +236,13 @@ class ChairmanUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView
     fields=["public_telnr","public_email","competences","image","show"]
     template_name="user_handling/chairman_form.html"
     permission_required = 'members.change_chairman'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["checked_shows"] = [x for x in self.get_object().show]
         return context
 
-    
+
 class ChairmanListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Chairman
     permission_required = 'members.change_chairman'
@@ -252,14 +252,14 @@ class PasswordResetView(PasswordResetView):
     def get_success_url(self):
         """Return the URL to redirect to after processing a valid form."""
         messages.add_message(self.request, messages.SUCCESS, 'Email verschickt. Bitte schau in deinen Posteingang')
-        return reverse("login") 
+        return reverse("login")
 
 class LogoutView(LogoutView):
     def get_next_page(self):
         next_page = super(LogoutView, self).get_next_page()
         messages.add_message(self.request, messages.SUCCESS, 'Erfolgreich ausgeloggt')
         return next_page
-        
+
 class PasswordResetConfirmView(PasswordResetConfirmView):
     def get_success_url(self):
         """Return the URL to redirect to after processing a valid form."""
@@ -270,7 +270,7 @@ class PasswordResetConfirmView(PasswordResetConfirmView):
 def mailing_lists(request):
     groups = Group.objects.all()
     return render(request,'user_handling/mailing-lists.html', context={'groups':groups})
-    
+
 def trainer_or_chairman(user):
     if hasattr(user,'trainer'):
         return True
@@ -287,7 +287,7 @@ def get_participants_emails(request):
         event = PublicEvent.objects.get(pk=int(data['id']))
         for part in EventParticipant.objects.filter(event=event).all():
             emails.append(part.email)
-    else:    
+    else:
         event = Event.objects.get(pk=int(data['id']))
         for part in event.participants.all():
             emails.append(part.email)
@@ -344,9 +344,9 @@ def member_detail_form(request, pk):
     membership_choices = user.profile.choices
     zahlungsart_choices = user.profile.choices2
     additional_emails = AdditionalEmail.objects.filter(user=user)
-    
+
     return render(request,"user_handling/ajax/member_detail.html", context={
-            "user": user, "group_choices":groups, 
+            "user": user, "group_choices":groups,
             "zahlungsart_choices":zahlungsart_choices,
            'membership_choices':membership_choices,
            'additional_emails':additional_emails})
@@ -356,7 +356,7 @@ def member_detail_update(request, pk):
     data = request.POST
     user = User.objects.get(pk=pk)
     data = {k:v[0] for (k,v) in dict(request.POST).items()}
-    
+
     ## Save the data
     user.first_name = data['first_name']
     user.last_name = data['last_name']
@@ -369,7 +369,7 @@ def member_detail_update(request, pk):
     user.profile.parent_telnr = data['parent_telnr']
     user.profile.status = data['status']
     user.profile.member_num = data['member_num']
-    user.profile.group = Group.objects.get(pk=int(data['group']))
+    #user.profile.group = Group.objects.get(pk=int(data['group']))
     user.profile.membership_start = data['membership_start']
     user.profile.membership_end = data['membership_end'] if data['membership_end'] != '' else None
     user.profile.mandatsref = data['mandatsref']
