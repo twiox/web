@@ -8,7 +8,7 @@ from django.views.generic import (
     UpdateView,
     DeleteView
     )
-from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, News, AdditionalEmail,ShopItem, Image, Gallery
+from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, News, AdditionalEmail,ShopItem, Image, Gallery, AgeGroup
 from django.contrib.auth.decorators import login_required, permission_required
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
@@ -82,7 +82,7 @@ def index(request):
 class EventListView(LoginRequiredMixin, ListView, UserPassesTestMixin):
     model = Event
     template = "members/event_list.html"
-    
+
     def test_func(self):
         user_group = self.request.user.profile.group
         return bool(hasattr(self.request.user, "trainer")+ hasattr(self.request.user,"chairman"))
@@ -102,7 +102,7 @@ class EventCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Event
     form_class = EventForm
     permission_required = 'members.add_event'
-    
+
     def form_valid(self, form):
         self.object = form.save()
         self.object.description_rendered = markdown.markdown(self.object.description)
@@ -115,14 +115,14 @@ class EventUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     form_class = EventForm
     #who can update the event?
     permission_required = 'members.change_event'
-    
+
     def get_context_data(self, **kwargs):
         context = {"picked_groups" : [id for id,_ in self.object.allowed_groups.values_list()]}
         context['object'] = self.request.user
         context.update(kwargs)
         return super().get_context_data(**context)
-    
-    
+
+
     def form_valid(self, form):
         self.object = form.save()
         self.object.description_rendered = markdown.markdown(self.object.description)
@@ -134,7 +134,7 @@ class EventDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     #success_url = "/mitglieder/#events"
     #who can delete the event?
     permission_required = 'members.delete_event'
-    
+
     def get_success_url(self, **kwargs):
         return reverse("index")+"#events"
 
@@ -247,7 +247,7 @@ class SessionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView)
     def post(self, request, *args, **kwargs):
         messages.add_message(request, messages.SUCCESS, 'Einheit gelöscht')
         return self.delete(request, *args, **kwargs)
-    
+
     def get_success_url(self, **kwargs):
         return reverse("index")+"#training"
 
@@ -299,7 +299,7 @@ class SpotDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     def post(self, request, *args, **kwargs):
         messages.add_message(request, messages.SUCCESS, 'Spot gelöscht')
         return self.delete(request, *args, **kwargs)
-    
+
     def get_success_url(self, **kwargs):
         return reverse("spot_list")
 
@@ -341,7 +341,7 @@ class NewsDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     def post(self, request, *args, **kwargs):
         messages.add_message(request, messages.SUCCESS, 'Beitrag gelöscht')
         return self.delete(request, *args, **kwargs)
-    
+
     def get_success_url(self, **kwargs):
         return reverse("news_list")
 
@@ -377,26 +377,49 @@ class GroupDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         else:
             messages.add_message(request, messages.ERROR, 'Fehler. Die Gruppe ist nicht leer')
             return HttpResponseRedirect(reverse("group_delete",kwargs={"pk":self.object.id}))
-    
+
     def get_success_url(self, **kwargs):
         return reverse("group_list")
 
 class GroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Group
     permission_required = 'members.delete_group'
-    
+
+### Age Groups ###
+class AgeGroupCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = AgeGroup
+    permission_required = "members.create_agegroup"
+    fields = ["lower","upper"]
+
+    def form_valid(self, form):
+        self.object = form.save()
+        messages.add_message(self.request, messages.SUCCESS, 'Altersgruppe erstellt')
+        return super().form_valid(form)
+
+class AgeGroupDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = AgeGroup
+    permission_required = "members.delete_agegroup"
+
+    def get_success_url(self, **kwargs):
+        return reverse("agegroup_list")
+
+
+class AgeGroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = AgeGroup
+    permission_required = 'members.delete_agegroup'
+
 
 class RealGroupDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Group
     template_name = "members/real_group_detail.html"
-    
+
     def test_func(self):
         if hasattr(self.request.user, 'trainer'):
             return True
         if hasattr(self.request.user,'chairman'):
             return True
         return False
-    
+
     def get_context_data(self, **kwargs):
         context = {"member_list":User.objects.filter(profile__group = self.object)}
         if self.object:
@@ -449,7 +472,7 @@ class MessageSessCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
 class MessageDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Message
     permission_required = 'members.delete_message'
-    
+
     def get_success_url(self, **kwargs):
         return reverse("index")
 
@@ -458,13 +481,13 @@ class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
     model = Message
     fields=["title","message","groups"]
     permission_required = 'members.change_message'
-    
+
     def get_context_data(self, **kwargs):
         context = {"group_values" : [id for id,_ in self.object.groups.values_list()]}
         context['object'] = self.request.user
         context.update(kwargs)
         return super().get_context_data(**context)
-    
+
     def form_valid(self, form):
         message = form.save()
         message.author = self.request.user
@@ -478,11 +501,11 @@ class UserDetailView(LoginRequiredMixin, UpdateView):
     model = User
     template_name = 'members/user_detail.html'
     form_class = UpdateMemberInformationForm
-    
+
     def get_object(self, queryset=None):
         obj = self.request.user
         return obj
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['additional_emails'] = AdditionalEmail.objects.filter(user=self.object)
@@ -520,11 +543,11 @@ class EmailUpdateView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
     model = User
     template_name = 'members/update_email.html'
     form_class = UpdateMemberEmailForm
-    
+
     def get_object(self, queryset=None):
         obj = self.request.user
         return obj
-    
+
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():
@@ -562,7 +585,7 @@ class PasswordChangeView(LoginRequiredMixin, PasswordChangeView):
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
-            
+
     def get_context_data(self, **kwargs):
         context = {}
         context['object'] = self.request.user
@@ -577,7 +600,7 @@ class UsernameUpdateView(LoginRequiredMixin, UpdateView):
     model = User
     template_name = 'members/update_username.html'
     fields = ["username"]
-    
+
 
     def get_object(self, queryset=None):
         obj = self.request.user
@@ -586,13 +609,13 @@ class UsernameUpdateView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         messages.add_message(self.request, messages.SUCCESS, 'Nutzername erfolgreich geändert')
         return reverse('profile_detail')
-        
+
 
 class AddressChangeView(LoginRequiredMixin, UpdateView):
     model = Profile
     template_name = 'members/update_address.html'
     fields = ["address", "telephone", "parent", "parent_telnr"]
-    
+
     def get_object(self, queryset=None):
         obj = self.request.user.profile
         return obj
@@ -652,13 +675,13 @@ class ShopItemUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('shop')
-    
+
     def form_valid(self, form):
         self.object = form.save()
         self.object.description_rendered = markdown.markdown(self.object.description)
         return super().form_valid(form)
 
-    
+
 ## AJAX ##
 @login_required
 def get_image_data(request):

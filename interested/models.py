@@ -1,5 +1,4 @@
 from django.db import models
-from multiselectfield import MultiSelectField
 from PIL import Image
 from django.urls import reverse
 from datetime import datetime, timedelta
@@ -37,17 +36,17 @@ class Teamer(models.Model):
     )
     priority = models.IntegerField()
     city = models.CharField("Stadt",max_length=30,choices=choices,blank=True)
-    
+
     picture = models.ImageField("Foto", upload_to="team_pictures/")
     name = models.CharField("Name", max_length=100, default="Jon Doe")
     position = models.CharField("Position", max_length=100, default="Trainer")
     notes = models.TextField("Sonstiges", blank=True)
     public_telnr = models.CharField("Telefonnummer", max_length=100, blank=True, null=True)
     public_email = models.CharField("Email", max_length=150, blank=True, null=True)
-    
+
     def get_absolute_url(self):
         return reverse('team')
-        
+
     def save(self):
         super().save()
         img = Image.open(self.picture.path)
@@ -61,13 +60,13 @@ class Teamer(models.Model):
             img = img.crop((0+cut, 0, img.width-cut, img.height))
             img2 = img.resize((720,720))
             img2.save(self.picture.path)
-        
+
     class Meta:
         ordering = ["priority"]
 
 
 class PublicEvent(models.Model):
-    
+
     title = models.CharField("Event-name", max_length=100)
     slug = models.SlugField(unique=True, blank=True, null=True)
     header_picture = models.ImageField("Veranstaltungsbild", upload_to="PublicEvents/Images/Headers")
@@ -88,32 +87,32 @@ class PublicEvent(models.Model):
     datenschutz = models.FileField("Datenschutzerklärung",upload_to=f"PublicEvents/Docs/",null=True,blank=True)
     einverstaendnis = models.FileField("Einverständnis",upload_to=f"PublicEvents/Docs/",null=True,blank=True)
 
-    #if we query over events, we want the most recent one firsthand 
+    #if we query over events, we want the most recent one firsthand
     class Meta:
         ordering = ["start_date"]
-    
+
     def save(self, *args, **kwargs):
         self.slug = self.slug or slugify(self.title)
         self.description_rendered = markdown.markdown(self.description)
         super().save(*args, **kwargs)
-        
-    
-    #This we need to return the url on creating a new event 
+
+
+    #This we need to return the url on creating a new event
     def get_absolute_url(self):
         return reverse('public_event', kwargs={"event_slug": self.slug})
-    
+
     @property
     def is_past_due(self):
         return datetime.now().replace(tzinfo=None) > self.end_date.replace(tzinfo=None) + timedelta(days=3)
     @property
     def deadline_reached(self):
         return datetime.now().replace(tzinfo=None) > self.deadline.replace(tzinfo=None)
-    
+
     def __str__(self):
         return f"PublicEvent: {self.title}"
 
-    
-    
+
+
 class EventMerch(models.Model):
     event = models.ForeignKey(PublicEvent, on_delete=models.CASCADE, verbose_name = u"Event",blank=True, null=True)
     title = models.CharField("Titel", max_length=200)
@@ -122,15 +121,15 @@ class EventMerch(models.Model):
     sizes = models.TextField("Größen", default = "XS\tS\tM\tL\tXL\tXXL")
     description = models.TextField("Beschreibung", blank=True, null=True)
     description_rendered = models.TextField(blank=True, null=True)
-    
+
     def save(self, *args, **kwargs):
         self.description_rendered = markdown.markdown(self.description)
         super().save(*args, **kwargs)
-    
+
     def __str__(self):
         return f"EventMerch_{self.title}"
-    
-    
+
+
 class EventParticipant(models.Model):
     event = models.ForeignKey(PublicEvent, on_delete=models.CASCADE, verbose_name = u"Event_ID", blank=True, null=True)
     first_name = models.CharField("Vorname", max_length=300)
@@ -144,7 +143,7 @@ class EventParticipant(models.Model):
     merch_wanted = models.BooleanField("Merch bestellt", default=False)
     merch_size = models.CharField("Größe", max_length=200, blank=True, null=True)
     notes = models.TextField("Notizen", blank=True, null=True)
-    
+
     def __str__(self):
         return f"Participant_{self.first_name}_{self.last_name}"
 
@@ -153,38 +152,38 @@ class PublicEventParticipantMerch(models.Model):
     merch = models.ManyToManyField(EventMerch)
     participant = models.ManyToManyField(EventParticipant)
     size = models.CharField("Größe", max_length=100)
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

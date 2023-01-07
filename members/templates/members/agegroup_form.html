@@ -1,0 +1,44 @@
+{% extends "members/base.html" %}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'agegroup_list' %}#nav">
+        Altersgruppen </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Neu </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<section style="text-align:center;">
+<h1>Neue Altersgruppe</h1>
+    <div class="tertiary_bg padding_all_big">
+        <form class="form_wrapper" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class ="inner_form padding_all_big flex_center">
+                <label class="mdc-text-field mdc-text-field--filled agegroup_lower">
+                    <span class="mdc-text-field__ripple"></span>
+                    <input type="number" class="mdc-text-field__input"  name="lower" required>
+                    <span class="mdc-floating-label" id="agegroup_lower-label">Von</span>
+                    <span class="mdc-line-ripple"></span>
+                </label>
+                <label class="mdc-text-field mdc-text-field--filled">
+                    <span class="mdc-text-field__ripple"></span>
+                    <input type="number" class="mdc-text-field__input" name="upper" required>
+                    <span class="mdc-floating-label" id="agegroup_lower-label">Bis</span>
+                    <span class="mdc-line-ripple"></span>
+                </label>
+                <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
+                    <span >OK</span>
+                </button>
+            </div>
+        </form>
+        <script>
+            const fields = document.querySelectorAll('.mdc-text-field');
+            fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+        </script>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "members/base.html" %}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}#nav">
+        Übersicht</a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Gruppenliste </a>
+</div>
+{% endblock %}
+{%block content %}
+<h1>Vorstandsdokument</h1>
+<section id="training">
+        <div id="container">
+        <h3>Altersgruppen</h3>
+            <div class="trainer_ui">
+                {% if perms.members.add_agegroup %}
+                    <a class="blue_font" href="{% url 'agegroup_create' %}" title="Altersgruppe erstellen"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
+                {% endif %}
+            </div>
+        </div>
+        <div>
+            {% for object in object_list %}
+            <div class="padding_all_small float_left col-4" id="container">
+                <div style="display:flex;" class="tertiary_bg">
+                    <div class="padding_all_big">
+                            <h5 class="strong">{{object}}</h5>
+                    </div>
+                    <div class="padding_all_med trainer_ui">
+                        {% if perms.members.delete_agegroup %}
+                        <a href="{% url 'agegroup_delete' object.pk %}" title="Löschen"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+                <p> Leider gibt es im Moment keine Altersgruppen </p>
+            {% endfor %}
+        </div>
+    </section>
+{% endblock %}

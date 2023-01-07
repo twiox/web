@@ -1,5 +1,5 @@
 {% extends "members/base.html" %}
-{% block navbar2 %} 
+{% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}">
         Mitglieder </a>
@@ -43,7 +43,7 @@
                             <td></td><td><a class="more_info_button" href="{% url 'profile_update_address' %}">Ändern</a></td></tr>
                             <tr> <td>Name:</td><td>{{object.first_name}} {{object.last_name}}</td> </tr>
                             <tr> <td>Adresse:</td><td>{{object.profile.address}}</td> </tr>
-                            <tr> <td>Geburtsdatum:</td><td>{{object.profile.birthday|date:"d.m.Y"}}</td> </tr>
+                            <tr> <td>Geburtsdatum:</td><td>{{object.profile.birthday|date:"d.m.Y"}} ({{object.profile.age}})</td> </tr>
                             <tr> <td>Geschlecht:</td><td>{{object.profile.sex}}</td> </tr>
                             <tr> <td>Telefon:</td><td>{{object.profile.telephone}}</td> </tr>
                             <tr> <td>Ansprechpartner (U18):</td><td>{% if object.profile.parent %} {{object.profile.parent}} {%else%} - {% endif %}</td></tr>
@@ -54,7 +54,7 @@
                             {% if additional_emails %}
                                 {% for email in additional_emails%}
                                  <tr>
-                                     <td>{{email.title}}</td> 
+                                     <td>{{email.title}}</td>
                                      <td>{{email.email}}</td>
                                      <td><a class="js_delete_row" id="js_entry_{{email.pk}}"><i class="far fa-minus-square" style="font-size:15px;cursor:pointer;" aria-hidden="true"></i></a></td>
                                 </tr>
@@ -73,13 +73,13 @@
                             <tr> <td>Trainingsgruppe: </td><td>{{object.profile.group}}</td> </tr>
                         </table>
                     </div>
-                </div> 
+                </div>
             </div>
             <div class="chair_col-49 padding_all_small tertiary_bg">
                 <div class="padding_all_big">
                     <h3 class="padding_tb_small"> Änderungen mitteilen </h3>
                     <p align="justify"> Wenn sich statische Daten von dir ändern (Name, Geschlecht) oder nicht korrekt dargestellt sind, teile es uns über das Feld unten mit und
-                    wir ändern deine Daten in unserer Datenbank. Für eine Änderung der Bankverbindung ist 
+                    wir ändern deine Daten in unserer Datenbank. Für eine Änderung der Bankverbindung ist
                     <strong>immer ein neues SEPA Mandat</strong> notwendig, dieses kann direkt mit angehängt werden.
                     </p>
                     <form class="form_wrapper" method="POST" enctype="multipart/form-data">
@@ -163,9 +163,9 @@
                 }
             });
         });
-        
-        
-        
+
+
+
     </script>
 
 {% endblock %}
