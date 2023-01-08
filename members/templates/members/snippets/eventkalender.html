@@ -17,10 +17,10 @@
         {% for msg in event_messags %}
              <div class="padding_all_med" >
                 <div id="container">
+                    <span style="color:grey; font-size:0.9rem;padding:0px;">Von {{msg.author.first_name}} ({{msg.date |date:'d.m.Y'}})</span>
                     <h5>{{msg.title}}</h5>
                     <p>{{msg.message}}</p>
                     <div class="trainer_ui">
-                        <p>[{{msg.author.first_name}},{{msg.date |date:'d.m.Y'}}]</p>
                         {% if perms.members.delete_message %}
                         <a href="{% url 'message_delete' msg.id %}#nav" title="Löschen"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                         {% endif %}
@@ -38,6 +38,7 @@
     {% if events %}
     <section style="display:flex; flex-wrap:wrap; justify-content:left;">
         {% for event in events %}
+        {# show events that are not over, with the deadline not reached unless you are participant! #}
             {% if not event.is_past_due %}
                 <div class="padding_all_small col-4" id="container">
                     <div>
@@ -64,13 +65,17 @@
                             </div>
                         </div>
                         <div class="third_session tertiary_bg padding_all_med">
+                            {% if not event.deadline_reached or event.deadline_reached and user in event.participants.all or user.profile.privileged %}
                             <a class="more_info_button" href="{% url 'event_detail' event.id %}#nav">weitere Informationen</a>
+                            {% else %}
+                            <span style="color:grey; font-size: 0.9rem;">Anmeldung vorbei</span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             {% endif %}
         {% empty %}
-            <p> Leider gibt es im Moment keine Einheiten für dich </p>
+            <p> Leider gibt es im Moment keine Events für dich </p>
         {% endfor %}
     </section>
     {% else %}

@@ -45,15 +45,23 @@
                 <span class="mdc-floating-label" id="title-label">Titel</span>
                 <span class="mdc-line-ripple"></span>
             </label>
+
+            <label class="mdc-text-field mdc-text-field--filled autodelete">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="date" class="mdc-text-field__input" aria-labelledby="autodelete-label" name="autodelete"
+                value='{% if object.autodelete %}{{object.autodelete |date:"Y-m-d"}}{% endif %}'>
+                <span class="mdc-floating-label" id="autodelete-label">Lösche Nachricht nach</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
             </br></br>
-            <h5>Anzeigen für die Altersgruppen</h5>
+            <h6>Welche Altersgruppen</h6>
             <div style="display:flex; flex-wrap: wrap;">
                 {% for value, text in form.agegroup.field.choices %}
-                <div class="mdc-form-field padding_all_small">
+                <div class="mdc-form-field">
                     <div class="mdc-checkbox">
                       <input type="checkbox" class="mdc-checkbox__native-control" id="speicherung{{forloop.counter0}}" name="{{ form.agegroup.name }}" value="{{ value }}"
                        {% if value in group_values %} checked="checked" {% endif %}>
-                      <div class="mdc-checkbox__background">
+                      <div style="margin:0px;" class="mdc-checkbox__background">
                         <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
                           <path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
                         </svg>
@@ -61,15 +69,15 @@
                       </div>
                     </div>
                     <label for="speicherung{{forloop.counter0}}">
-                        <div align="left">{{ text }}</div>
+                        <div>{{ text }}</div>
                     </label>
                 </div>
                 {% endfor %}
             </div>
 
-            <h5>Beschreibung</h5>
+            <h6>Text</h6>
             <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
-              <textarea class="mdc-text-field__input" rows="4" cols="80" aria-label="message" id="id_comment" placeholder="Beschreibungstext"
+              <textarea class="mdc-text-field__input" rows="2" cols="80" aria-label="message" id="id_comment" placeholder="Beschreibungstext"
               name="message" >{% if object.message %} {{object.message}} {% endif %}</textarea>
               <span class="mdc-notched-outline">
                 <span class="mdc-notched-outline__leading"></span>

@@ -27,9 +27,9 @@ class EventForm(forms.ModelForm):
     class Meta:
         model = Event
         fields = ["title","place","info_only","costs","start_date","end_date","deadline","hinweis","description",
-            "allowed_groups","teilnahmebedingungen", "datenschutz", "einverstaendnis"]
+            "allowed_agegroups","teilnahmebedingungen", "datenschutz", "einverstaendnis"]
         widgets = {
-            'allowed_groups': forms.CheckboxSelectMultiple,
+            'allowed_agegroups': forms.CheckboxSelectMultiple,
         }
 
 class EventUpdateParticipantForm(forms.ModelForm):

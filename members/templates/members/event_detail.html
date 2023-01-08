@@ -1,5 +1,5 @@
 {% extends "members/base.html" %}
-{% block navbar2 %} 
+{% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#events">
         Mitglieder </a>
@@ -15,6 +15,11 @@
 {%block content %}
     <section>
         <h1>{{object.title}}</h1>
+        <div style="display:flex; gap:20px">
+            {% for agegroup in object.allowed_agegroups.all %}
+            <span style="color: grey; font-size:0.9rem;">{{agegroup}}</span>
+            {% endfor %}
+        </div>
         <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
             <div class="trainer_ui">
                 {% if perms.members.change_event %}
@@ -27,7 +32,11 @@
             <div class="tertiary_bg chair_col-20 padding_all_big">
                 <h4>{{object.place}}</h4>
                 <div class="padding_tb_small">
+                    {% if object.start_date == object.end_date %}
+                    <p>{{object.end_date|date:'d.m.Y'}}</p>
+                    {% else %}
                     <p>{{object.start_date|date:'d.m'}} - {{object.end_date|date:'d.m.Y'}}</p>
+                    {% endif %}
                     {% if object.costs == 0 %}
                     <p><strong>Kostenlos</strong></p>
                     {% else %}
@@ -76,13 +85,7 @@
                     </div>
                 </div>
                 {% else %}
-                <div class="padding_all_big chair_col-20">
-                    <div class="flex_center">
-                        <div class="flex_center_vertical">
-                            <p>Anmeldung vorbei</p>
-                        </div>
-                    </div>
-                </div>
+                     <span style="color:grey; font-size: 0.9rem;">Anmeldung vorbei</span>
                 {% endif %}
         {% else %}
             <div class="flex_center padding_all_big">

@@ -1,6 +1,6 @@
 {% extends "members/base.html" %}
 {% load l10n %}
-{% block navbar2 %} 
+{% block navbar2 %}
 {% if object.title %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#events">
@@ -76,7 +76,7 @@
                             <div align="left">Nur Ankündigung</div>
                         </label>
                     </div>
-                    
+
                 </div>
                 <div class="col-5">
                     <label class="mdc-text-field mdc-text-field--filled start_date">
@@ -111,11 +111,11 @@
             </div>
             <h5>Gruppen</h5>
             <div style="display:flex; flex-wrap: wrap;">
-            {% for value, text in form.allowed_groups.field.choices %}
+            {% for value, text in form.allowed_agegroups.field.choices %}
             <div class="mdc-form-field padding_all_small">
                 <div class="mdc-checkbox">
-                  <input type="checkbox" class="mdc-checkbox__native-control" id="speicherung{{forloop.counter0}}" name="{{ form.allowed_groups.name }}" value="{{ value }}" {% if value in picked_groups %} 
-                    checked="checked" {% endif %}>
+                  <input type="checkbox" class="mdc-checkbox__native-control" id="speicherung{{forloop.counter0}}" name="{{ form.allowed_agegroups.name }}"
+                  value="{{ value }}" {% if value in picked_groups %} checked="checked" {% endif %}>
                   <div class="mdc-checkbox__background">
                     <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
                       <path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
@@ -129,17 +129,17 @@
             </div>
             {% endfor %}
             </div>
-            
+
             <h5>Beschreibung</h5>
             <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
-              <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="description" id="id_comment" 
+              <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="description" id="id_comment"
               name="description" >{% if form.instance.description %} {{form.instance.description}} {% else %} {{form.data.description}} {% endif %}</textarea>
               <span class="mdc-notched-outline">
                 <span class="mdc-notched-outline__leading"></span>
                 <span class="mdc-notched-outline__trailing"></span>
               </span>
             </label>
-            
+
             <h5>Dokumente</h5>
             <div style="display:flex; margin-bottom:5px;">
                 <label class="upload">
@@ -154,7 +154,7 @@
                 $("#fileText1").html(fileName).show();
                     });
             </script>
-            
+
             <div style="display:flex; margin-bottom:5px;">
                 <label class="upload">
                     <span style="display:flex;justify-content:center;"><i class="fas fa-file-upload"></i></span>
@@ -168,7 +168,7 @@
                 $("#fileText2").html(fileName).show();
                     });
             </script>
-            
+
             <div style="display:flex; margin-bottom:5px;">
                 <label class="upload">
                     <span style="display:flex;justify-content:center;"><i class="fas fa-file-upload"></i></span>
@@ -182,7 +182,7 @@
                 $("#fileText3").html(fileName).show();
                     });
             </script>
-            
+
             <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
                 <span >OK</span>
             </button>

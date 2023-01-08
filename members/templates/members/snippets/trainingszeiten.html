@@ -1,3 +1,4 @@
+{% load custom_filters %}
 <section id="training">
     <div id="container">
         <h1>TRAININGSZEITEN</h1>
@@ -21,10 +22,10 @@
             {% for msg in training_messags %}
             <div class="padding_all_med" >
                 <div id="container">
+                    <span style="color:grey; font-size:0.9rem;padding:0px;">Von {{msg.author.first_name}} ({{msg.date |date:'d.m.Y'}})</span>
                     <h5>{{msg.title}}</h5>
                     <p>{{msg.message}}</p>
                     <div class="trainer_ui">
-                        <p>[{{msg.author.first_name}},{{msg.date |date:'d.m.Y'}}]</p>
                         {% if perms.members.delete_message %}
                         <a href="{% url 'message_delete' msg.id %}#nav" title="Löschen"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                         {% endif %}
@@ -38,61 +39,89 @@
         </div>
     </section>
     {% endif %}
-    <!--Now add Group-Sessions and Links to group -->
-    {% if chairman %}
-    <div>
-        <div class="padding_all_big">
-            <ul style="display:flex; flex-wrap: wrap;">
-            {% for group in groups %}
-                <li style="padding:5px;"> <button class="web_button gruppe{{group.group_id}} training_button padding_all_small">Gruppe {{group.group_id}} </button> </li>
-            {% endfor %}
-            </ul>
-        </div>
-        <!-- Show only selected groups -->
-        <script>
-            $(document).ready(function(){
-                $(".training").hide();
-            });
+    <div style="display:flex; gap:10px; overflow-x: auto;">
+        <!--<h3 id="group_header" style="display:none;"></h3>-->
+        {% for short,day,order in session_days %}
+            <!-- one column for the sessions of each day -->
+            <div class="col-20" style="overflow: visible; min-width:200px;">
+                <div class="primary padding_all_small flex_center" style="opacity:0.75;"><strong>{{ day }}</strong></div>
+                {% for session in sessions|lookup:short %}
+                    <!--session hinweise -->
+                    <div style="margin-top:10px;">
+                        {% if session.agegroup in request.user.profile.agegroups.all or request.user.profile.privileged %}
+                        {% if session.hinweis %}
+                        <div class="third_session" style="padding:3px; background-color: darkslategray;">
+                            <!-- Hinweise -->
+                            {{session.hinweis}}
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                        <div class="padding_all_small tertiary_bg" id="container">
+                            <div class="trainer_ui">
+                                {% if perms.members.change_session %}
+                                <a href="{% url 'session_update' session.id  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+                                {% endif %}
+                                {% if perms.members.delete_session %}
+                                <a href="{% url 'session_delete' session.id  %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
+                                {% endif %}
+                            </div>
 
-            $(".training_button").click(function(){
-                $(".training").hide();
-                var group = $(this).attr("class").split(/\s+/)[1];
-                $("div."+group).show();
-                var gr_id = $(this).text().split(/\s+/)[1];
-                $("#group_header").show().text("Trainingszeiten Gruppe "+gr_id);
-            });
-        </script>
-    </div>
-    {% endif %}
-    <div>
-        <h3 id="group_header" style="display:none;"></h3>
-        {% for session in sessions %}
-        <div class="padding_all_small float_left col-4 training gruppe{{session.group.group_id}}" id="container">
-            <div>
-                {% if session.hinweis %}
-                    <div id="info_position">
-                        <p class="session_alert"> {{session.hinweis}} </p>
+                            {% if session.agegroup %}
+                            {% if session.agegroup in request.user.profile.agegroups.all or request.user.profile.privileged %}
+                            <span style="font-size: 0.9rem;">Alter: {{session.agegroup.lower }} - {{session.agegroup.upper }} Jahre</span>
+                            {% else %}
+                            <span style="color:grey;font-size: 0.9rem;">Alter: {{session.agegroup.lower }} - {{session.agegroup.upper }} Jahre</span>
+                            {% endif %}
+                            {% endif %}
+                            {% if session.agegroup in request.user.profile.agegroups.all or request.user.profile.privileged %}
+                            <p>{{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
+                            {%else%}
+                            <p style="color:grey;">{{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
+                            {%endif%}
+                            {% if session.agegroup in request.user.profile.agegroups.all or request.user.profile.privileged %}
+                            <div style="display: flex; justify-content: space-between; gap:5px;">
+                                <h4> {{session.spot.title}}</h4>
+                                <a class="more_info_button" style="padding:0px" target="_blank"
+                                    href="https://www.google.de/maps/dir//{{session.spot.lat}},{{session.spot.long}}/@{{session.spot.lat}},{{session.spot.long}},17z">
+                                    <i style="font-size:0.8rem;" class="fas fa-map-marker-alt more_info_button"></i>
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div id="trainerchip_{{session.pk}}" class="third_session tertiary_bg padding_all_small" style="text-align: left; display:none;">
+                            <!-- Trainerchip -->
+                            {% if session.agegroup in request.user.profile.agegroups.all or request.user.profile.privileged %}
+                            {% for trainer in session.trainer.all %}
+                            {% if trainer.trainer_telnr %}
+                            <div style="display:flex; gap:5px; margin-bottom:5px;">
+
+                                <div style="max-width:50px;max-height:50px;" class="grey_cover">
+                                    <img style="object-fit:scale; width:100%; height:100%;" src="{{trainer.image.url}}">
+                                </div>
+                                <div style="text-align: left;">
+                                    <p style="font-size:1.1rem;">{{trainer.user.first_name}} {{trainer.user.last_name}}</p>
+                                    <a class="more_info_button" style="padding:0px;" href="tel:{{trainer.trainer_telnr}}">{{trainer.trainer_telnr}}</a>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            {% else %}
+                            <p style="color:grey;">Mit {{session.trainerlist}}</p>
+                            {% endif %}
+                        </div>
+                        <div id="trainerchipdisplay_{{session.pk}}" class="prim_hover third_session tertiary_bg trainerchip_display" style="cursor:pointer;">
+                            <i class="fas fa-angle-down prim_hover" style="color:grey"></i>
+                        </div>
                     </div>
-                {% endif %}
-                <div style="display:flex;" class="tertiary_bg">
-                    <div class="padding_all_big polygon primary">
-                            <p class="strong">{{session.day}}<p>
-                    </div>
-                    <div class="second_section padding_all_big">
-                        <p> {{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
-                        <h4> {{session.spot.title}}</h4>
-                        <p> {{session.agegroup}} </p>
-                    </div>
-                </div>
-                <div class="third_session tertiary_bg padding_all_med">
-                    <a class="more_info_button" href="{% url 'session_detail' session.id %}#nav">weitere Informationen</a>
-                </div>
+                {% endfor %}
             </div>
-
-        </div>
-        {% empty %}
-        <h3> Leider gibt es im Moment keine Einheiten für dich </h3>
-        {% endfor %}
+        {%endfor%}
     </div>
-    <!-- The container for the Trainersessions -->
+    <script>
+        $('body').on('click', '.trainerchip_display', function(){
+            var pk = $(this).attr('id').split('_')[1]
+            $(`#trainerchip_${pk}`).toggle(300)
+            $(this).find('i').toggleClass('fa-angle-down').toggleClass('fa-angle-up')
+        });
+    </script>
 </section>
