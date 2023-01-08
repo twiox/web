@@ -38,35 +38,37 @@ def trainer_check(request):
 @login_required
 def index(request):
     """ This is the View for the homepage """
-    group = Profile.objects.get(user = request.user).group
+    agegroups = request.user.profile.agegroups
     sessions = Session.objects.all()
-    events = Event.objects.filter(allowed_groups=group)
+    events = Event.objects.filter(
+        allowed_agegroups__in=agegroups
+    )
     chairmen = Chairman.objects.filter(show__contains="member_site")
-    training_messags = Message.objects.filter(groups=group).filter(display="sessions")
-    event_messags = Message.objects.filter(groups=group).filter(display="events")
+    training_messags = Message.objects.filter(agegroup__in=agegroups).filter(display="sessions")
+    event_messags = Message.objects.filter(agegroup__in=agegroups).filter(display="events")
     posts = News.objects.all().order_by('-id')
     if len(posts) > 3:
         posts = posts[:3]
 
+    trainer_sessions = None
+    trainer_groups = None
     if(hasattr(request.user, "trainer")):
-        if(group.group_id != "T"):
-            sessions = Session.objects.filter(group__group_id__in=["T",group.group_id])
+        #TODO: Trainer need to see all the sessions
+        #if(group.group_id != "T"):
+        #    sessions = Session.objects.filter(group__group_id__in=["T",group.group_id])
         events = Event.objects.all()
         training_messags = Message.objects.all().filter(display="sessions")
         event_messags = Message.objects.all().filter(display="events")
-    else:
-        trainer_sessions = None
-        trainer_groups = None
+
     if(hasattr(request.user, "chairman")):
-        sessions = Session.objects.all()
+        #sessions = Session.objects.all()
         events = Event.objects.all()
         training_messags = Message.objects.all().filter(display="sessions")
         event_messags = Message.objects.all().filter(display="events")
 
     return render(
         request, "members/index.html",
-        {"group":group,
-         "chairmen":chairmen,
+        {"chairmen":chairmen,
          "sessions":sessions,
          "events":events,
          "training_messags":training_messags,
@@ -75,7 +77,7 @@ def index(request):
          "groups":Group.objects.all(),
          "posts":posts,
          }
-            )
+    )
 
 """FOR THE EVENTS"""
 
@@ -454,9 +456,8 @@ class GroupUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
 """For The Messages"""
 class MessageEveCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    #template: event_detail.html
     model = Message
-    fields=["title","message","groups"]
+    fields=["title","message","agegroup"]
     permission_required = 'members.add_message'
 
     def form_valid(self, form):
@@ -467,9 +468,8 @@ class MessageEveCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateVi
         return super(MessageEveCreateView, self).form_valid(form)
 
 class MessageSessCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    #template: event_detail.html
     model = Message
-    fields=["title","message","groups"]
+    fields=["title","message","agegroup"]
     permission_required = 'members.add_message'
 
     def form_valid(self, form):
@@ -489,12 +489,12 @@ class MessageDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView)
 class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_form.html
     model = Message
-    fields=["title","message","groups"]
+    fields=["title","message","agegroup"]
     permission_required = 'members.change_message'
 
     def get_context_data(self, **kwargs):
-        context = {"group_values" : [id for id,_ in self.object.groups.values_list()]}
-        context['object'] = self.request.user
+        context = {"group_values" : [x for x in self.object.agegroup.values_list()[0]]}
+        context['object'] = self.get_object()
         context.update(kwargs)
         return super().get_context_data(**context)
 

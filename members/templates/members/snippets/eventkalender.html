@@ -34,7 +34,7 @@
         </div>
     </section>
     {% endif %}
-    
+
     {% if events %}
     <section style="display:flex; flex-wrap:wrap; justify-content:left;">
         {% for event in events %}
@@ -52,9 +52,9 @@
                             </div>
                             <div class="second_section padding_all_big" id="container">
                                 <p> {% if event.multiple_days %}
-                                    {{event.start_date|date:'d.m' }} - 
-                                    {% endif %} 
-                                    {{event.end_date|date:'d.m.Y' }} 
+                                    {{event.start_date|date:'d.m' }} -
+                                    {% endif %}
+                                    {{event.end_date|date:'d.m.Y' }}
                                     </p>
                                 <h4>{{event.title}}</h4>
                                 <p style="color:grey;"> {{event.place}}</p>
@@ -74,6 +74,6 @@
         {% endfor %}
     </section>
     {% else %}
-        <h3> Leider sind im Moment keine Events geplant </h3>
+        <p> Leider sind im Moment keine Events geplant </p>
     {% endif %}
 </section>

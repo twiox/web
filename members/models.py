@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse #to get absolut_urls
@@ -59,7 +60,8 @@ class Group(models.Model):
 
 
 class Event(models.Model):
-    allowed_groups = models.ManyToManyField(Group, verbose_name="Für die Gruppen")
+    allowed_groups = models.ManyToManyField(Group, verbose_name="Für die Gruppen", blank=True)
+    allowed_agegroups = models.ManyToManyField(AgeGroup, verbose_name="Altersgruppen", related_name='event', blank=True)
 
     title = models.CharField("Event-name", max_length=100)
     place = models.CharField("Veranstaltungsort", max_length=200, blank=True, default="Leipzig")
@@ -191,7 +193,7 @@ class Session(models.Model):
         return reverse('session_detail', kwargs={"pk": self.pk})
 
     def __str__(self):
-        return f"Session: {self.title}_{self.group}_{self.day}"
+        return f"Session: {self.title}_{self.day}"
 
     class Meta:
         ordering = ["day_key"]
@@ -206,7 +208,12 @@ class Message(models.Model):
     message = models.TextField("Hinweis",default = "Deine Nachricht hier", blank=True, null=True)
     date = models.DateTimeField(default=datetime(2020, 11, 14, 1, 54, 52, 799289))
     display = models.CharField(max_length=20, choices=choices, blank=True)
-    groups = models.ManyToManyField(Group,verbose_name="Für die Gruppen")
+    groups = models.ManyToManyField(Group,verbose_name="Für die Gruppen", blank=True)
+    agegroup = models.ManyToManyField(AgeGroup, verbose_name="Altersgruppen", related_name='message', blank=True)
+
+    def save(self, *args, **kwargs):
+        self.date = datetime.today()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Message: {self.title}"
@@ -290,6 +297,10 @@ class Profile(models.Model):
 
     class Meta:
         ordering = ['member_num']
+
+    @property
+    def agegroups(self):
+        return AgeGroup.objects.filter(Q(upper__gte=self.age) & Q(lower__lte=self.age))
 
     @property
     def age(self):

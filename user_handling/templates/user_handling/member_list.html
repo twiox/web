@@ -40,9 +40,6 @@
 
     <div style="display:flex;max-height:600px;">
         <div id='table_data' style="width:50%; overflow:auto"  class="tertiary_bg tscroll">
-            <!--
-            <div id='table_insert' style='display:inline-block' class="tertiary_bg tscroll">
-            -->
             <table id="the_table">
                 <thead style="position: sticky; top:0; background-color:DarkSlateGray;z-index:3;">
                     <tr>
@@ -162,7 +159,7 @@ function sendData(){
         data: $("form").serialize(),
         success: function(data){
             if(data["data"]!= false){
-                $('#table_data').html("").load(document.URL + ' #the_table', function(){
+                $('#the_table').html("").load(document.URL + ' #the_table', function(){
                     bindButtonClick();
                     updateTable()
                     updateDetails()
