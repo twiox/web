@@ -1,5 +1,5 @@
 {% extends "members/base.html" %}
-{% block navbar2 %} 
+{% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
         Mitglieder </a>
@@ -16,7 +16,7 @@
     <div>
         <div class="padding_all_small side_scroll">
             <table style='width:100%'>
-            <tr style="border-bottom:solid 1px white"> 
+            <tr style="border-bottom:solid 1px white">
                 <th><h6> Nr </h6></th>
                 <th><h6> status </h6></th>
                 <th><h6> Vorname </h6></th>
@@ -28,7 +28,7 @@
                 <th><h6> Anmerkungen </h6></th>
             </tr>
             {% for member in member_list %}
-            <tr id="{{member.profile.status}}" class="{% cycle 'odd' 'even' %}"> 
+            <tr id="{{member.profile.status}}" class="{% cycle 'odd' 'even' %}">
                 <td nowrap="nowrap">  {{ forloop.counter }}  </td>
                 <td nowrap="nowrap"> {{member.profile.status}} </td>
                 <td nowrap="nowrap"> {{member.first_name}} </td>
@@ -49,11 +49,11 @@
             Mailverteiler
         </div>
     </span>
-    <div style='align:left'>
+    <div style='text-align:left'>
         <input type="checkbox" id="only_active" checked>
         <label for="only_active">Nur ordentliche Mitglieder</label><br><br>
     </div>
-    
+
     <script>
     $('.mail_click').on('click', function(){
         if($("#only_active").is(':checked')){
@@ -71,7 +71,7 @@
         });
     });
 </script>
-    
-    
+
+
 </section>
 {% endblock %}

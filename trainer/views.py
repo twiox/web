@@ -42,7 +42,7 @@ def abrechnungstable(request):
     sessions = Session.objects.filter(trainer=request.user.trainer)
     if created:
         for sess in sessions.all():
-            Table_entry.objects.create(table=table, day=sess.day, group=sess.group.group_id, start=sess.start_time.strftime("%H:%M"), end=sess.end_time.strftime("%H:%M"))
+            Table_entry.objects.create(table=table, day=sess.day, group=sess.agegroup, start=sess.start_time.strftime("%H:%M"), end=sess.end_time.strftime("%H:%M"))
 
     entries = Table_entry.objects.filter(table=table).all()
     tables = Trainer_table.objects.filter(trainer=request.user.trainer, active=False).order_by('-id')[:10]
@@ -80,7 +80,7 @@ def reset_table(request):
     Table_entry.objects.filter(table=table).all().delete()
 
     for sess in sessions.all():
-        Table_entry.objects.create(table=table, day=sess.day, group=sess.group.group_id, start=sess.start_time.strftime("%H:%M"), end=sess.end_time.strftime("%H:%M"))
+        Table_entry.objects.create(table=table, day=sess.day, group=sess.agegroup, start=sess.start_time.strftime("%H:%M"), end=sess.end_time.strftime("%H:%M"))
 
     entries = Table_entry.objects.filter(table=table).all()
     data = {}
@@ -120,7 +120,7 @@ def add_week(request):
     entries = []
     data = {}
     for sess in sessions.all():
-        temp = Table_entry.objects.create(table=table, day=sess.day, group=sess.group.group_id, start=sess.start_time.strftime("%H:%M"), end=sess.end_time.strftime("%H:%M"))
+        temp = Table_entry.objects.create(table=table, day=sess.day, group=str(sess.agegroup), start=sess.start_time.strftime("%H:%M"), end=sess.end_time.strftime("%H:%M"))
         entries.append(temp)
 
     for obj in entries:
