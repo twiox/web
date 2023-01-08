@@ -45,6 +45,10 @@ class AgeGroup(models.Model):
     def __str__(self):
         return f'Altersgruppe: {self.lower} - {self.upper} Jahre'
 
+    def get_profiles(self):
+        profiles = Profile.objects.filter(birthday__isnull=False)
+        return [x for x in profiles if self in x.agegroups]
+
     def get_absolute_url(self):
         return reverse('agegroup_list')
 
@@ -328,7 +332,7 @@ class Profile(models.Model):
 
     @property
     def privileged(self):
-        return (hasattr(self.user,'chairman') or self.user.is_superuser or hasattr(user,'trainer'))
+        return (hasattr(self.user,'chairman') or self.user.is_superuser or hasattr(self.user,'trainer'))
 
     @property
     def agegroups(self):

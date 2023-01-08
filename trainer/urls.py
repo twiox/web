@@ -13,5 +13,6 @@ urlpatterns = [
     path("abrechnung/ajax/add_row/", views.add_row, name='add_row'),
     path("abrechnung/ajax/send_table/", views.send_table, name='send_table'),
     path('update/', views.TrainerSelfUpdateView.as_view(),name="trainer_self_update_form"),
+    path('mails/<int:sessionid>', views.get_session_emails, name='trainer_get_sessionemails')
 ]
 
