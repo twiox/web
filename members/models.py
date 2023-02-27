@@ -8,11 +8,13 @@ from multiselectfield import MultiSelectField
 from PIL import Image as Img
 
 class News(models.Model):
+
     title = models.CharField("Titel", max_length=200)
     capture = models.TextField("Kurzbeschreibung", blank=True, null=True)
     content = models.TextField("Beitrag", blank=True, null=True)
     content_rendered = models.TextField(blank=True, null=True)
     picture = models.ImageField("Stockphoto", blank=True, null=True, upload_to="beiträge/")
+    visible = models.BooleanField("Visible", default=False)
 
     def __str__(self):
         return f"Beitrag: {self.title}"

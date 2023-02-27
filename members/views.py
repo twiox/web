@@ -53,9 +53,7 @@ def index(request):
     chairmen = Chairman.objects.filter(show__contains="member_site")
     training_messags = Message.objects.filter(agegroup__in=agegroups).filter(display="sessions").distinct()
     event_messags = Message.objects.filter(agegroup__in=agegroups).filter(display="events").distinct()
-    posts = News.objects.all().order_by('-id')
-    if len(posts) > 3:
-        posts = posts[:3]
+    posts = News.objects.all()
 
     trainer_sessions = None
     trainer_groups = None
@@ -732,6 +730,16 @@ def set_image_data(request):
         return JsonResponse({'data':False})
 
 
+@csrf_exempt
+@login_required
+def add_news_item(request):
+    if chairman_check(request):
+        new = News(title="Ohne Titel")
+        new.save()
+        return JsonResponse({'status':True})
+    else:
+        return JsonResponse({'status':False})
+
 @login_required
 def delete_image(request):
     if chairman_check(request):
@@ -741,7 +749,6 @@ def delete_image(request):
         return JsonResponse({"data":True})
     else:
         return JsonResponse({'data':False})
-
 
 @csrf_exempt
 @login_required

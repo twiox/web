@@ -1,22 +1,53 @@
 {% if posts %}
-<section>
-    <h1 id="news">Neuigkeiten</h1>
-    <div style="display:flex; flex-wrap: wrap;">
+<section id="news_section">
+    <div id="container">
+        <h1>Neugkeiten</h1>
+        <div class="trainer_ui">
+            {% if perms.members.add_event %}
+                <i  title="News hinzufügen" id='add-news-button' data-url="{% url 'ajax_news_create' %}" class="far fa-plus-square" style="font-size:27px;"></i>
+            {% endif %}
+        </div>
+    </div>
+    <div style="display:flex; flex-wrap: wrap; gap:10px">
     {% for post in posts %}
-    <div class="padding_all_small col-4">
-        <div class="padding_all_small tertiary_bg" style="height:100%;" id="container">
-            <div style="display:flex; flex-direction:column; height:100%;">
-                <h4>{{post.title}}</h4>
-                <div class="padding_all_small"><p style="padding-bottom:15px;">{{post.capture}}</p></div>
-                <div style="position: absolute; right:0px; bottom:-3px; width:50%;" class="secondary_bg polygon2">
-                    <a href="{% url 'news_detail' post.id %}" style="padding:0px; text-align:right;">
-                         <p class="more_info_button">Weiterlesen</p>
-                    </a>
-                </div>
+    <div class="col-3">
+        <div class="padding_all_small tertiary_bg" id="container">
+            {% if not post.visible %}
+            <div style="position: absolute;right: 0; top: 0; background-color: red;">
+                <p class="padding_all_small" style="color:white;"><strong>Entwurf</strong></p>
             </div>
+            {% endif %}
+            <h4>{{post.title}}</h4>
+            <div class="padding_all_small"><p style="padding-bottom:15px;">{{post.capture}}</p></div>
+        </div>
+        <div style="margin-top: 1px;text-align: center" class="tertiary_bg padding_all_small">
+            <a href="{% url 'news_detail' post.id %}" class="more_info_button">Weiterlesen</a>
         </div>
     </div>
     {% endfor %}
     </div>
 </section>
 {% endif %}
+<script>
+    $("body").on('click','#add-news-button', function(){
+        console.log('click')
+        $.ajax({
+            type: "POST",
+            url: $(this).attr('data-url'),
+            }).done(function(data){
+                if(data['status']){
+                    $.ajax({
+                        url: document.URL,
+                        success: function(response) {
+                            // Find the element you want to load
+                            var update = $(response).find(`#news_section`);
+                            // Insert the element into the DOM
+                            $(`#news_section`).replaceWith(update)
+                        }
+                    })
+                } else {
+                    alert("Something went wrong")
+                }
+            });
+    });
+</script>

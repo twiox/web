@@ -1,35 +1,53 @@
 {% extends "members/base.html" %}
-{% block navbar2 %}
-<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#news">
-        Mitglieder </a>
-    <a class="float_left"> > </a>
-    <!--
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'news_list' %}#nav">
-        Alle Beiträge </a> 
-    <a class="float_left"> > </a> -->
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> {{object.title}} </a>
-</div>
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script><!-- Header -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.6.2"></script><!-- Image -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/nested-list@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script><!-- Table -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/link@latest"></script><!-- Link -->
 {% endblock %}
-{%block content %}
-<section>
-    <h1>{{object.title}}</h1>
-    <div>
-        <div id="container" style="overflow: visible;">
-            <div class="trainer_ui">
-                {% if perms.members.change_spot %}
-                <a href="{% url 'news_update' object.id  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
-                {% endif %}
-                {% if perms.members.delete_spot %}
-                <a href="{% url 'news_delete' object.id  %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
-                {% endif %}
-            </div>
-        </div>
-        <div class="markdown">
-            {{object.content_rendered|safe}}
-        </div>
-    </div>
 
-</section>
+{%block content %}
+<style>
+div{
+    overflow: visible !important;
+}
+</style>
+
+<div style="overflow:visible">
+<h1>{{object.title}}</h1>
+<div id="editorjs"></div>
+<!-- editorjs configs -->
+<script>
+    const editor = new EditorJS({
+    logLevel: 'VERBOSE',
+    holder: 'editorjs',
+    placeholder: 'Let`s write an awesome story!',
+    tools: {
+        header: {
+            class: Header,
+        },
+        list: {
+            class: NestedList,
+            inlineToolbar: true,
+            config: {
+                defaultStyle: 'unordered'
+            },
+        },
+        table: {
+            class: Table,
+            inlineToolbar: true,
+            config: {
+                rows: 2,
+                cols: 3,
+            },
+        }
+    },
+    data: {},
+})
+
+    </script>
+</div>
 {% endblock %}
 

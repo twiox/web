@@ -38,6 +38,7 @@ urlpatterns = [
     path("beiträge/", views.NewsListView.as_view(),name="news_list"),
     path("beiträge/<int:pk>/", views.NewsDetailView.as_view(),name="news_detail"),
     path("beiträge/neu/", views.NewsCreateView.as_view(),name="news_create"),
+    path("ajax/beiträge/neu/", views.add_news_item, name="ajax_news_create"),
     path("beiträge/<int:pk>/ändern", views.NewsUpdateView.as_view(),name="news_update"),
     path("beiträge/<int:pk>/löschen", views.NewsDeleteView.as_view(),name="news_delete"),
     path("shop", views.ShopItemListView.as_view(),name='shop'),
