@@ -8,7 +8,7 @@ from django.views.generic import (
     UpdateView,
     DeleteView
     )
-from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, News, AdditionalEmail,ShopItem, Image, Gallery, AgeGroup
+from .models import Group, Event, Profile, Chairman, Session, Trainer, Spot, Message, News, AdditionalEmail,ShopItem, Image, Gallery, AgeGroup, MemberParticipant, Document
 from django.contrib.auth.decorators import login_required, permission_required
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
@@ -139,7 +139,6 @@ class EventUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         context.update(kwargs)
         return super().get_context_data(**context)
 
-
     def form_valid(self, form):
         self.object = form.save()
         self.object.description_rendered = markdown.markdown(self.object.description)
@@ -164,8 +163,15 @@ class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         form = self.form_class(request.POST)
         if form.is_valid():
             event = self.get_object()
-            event.participants.add(request.user)
-            event.save()
+            user = request.user
+            part, created = MemberParticipant.objects.get_or_create(
+                event = event,
+                user = user,
+            )
+            if created==False:  #was storno before
+                part.storno = False
+                part.save()
+
             messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich angemeldet')
             return HttpResponseRedirect(reverse("event_detail", kwargs={"pk":event.id}))
         return render(request, self.template_name, {'form': form, 'object':self.get_object()})
@@ -182,9 +188,21 @@ class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():
+            user = request.user
             event = self.get_object()
-            event.participants.remove(self.request.user)
-            event.save()
+
+            try: #the very edge-case that in a legacy event people unparticipate before being converted to new participants
+                part = MemberParticipant.objects.get(event=event, user=request.user)
+                part.storno = True
+                part.save()
+            except:
+                pass
+
+            #because of legacy reasons
+            if user in event.participants.all():
+                event.participants.remove(user)
+                event.save()
+
             messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich abgemeldet')
             return HttpResponseRedirect(reverse("event_detail", kwargs={"pk":event.id}))
         return render(request, self.template_name, {'form': form})
@@ -193,12 +211,49 @@ class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
         event = self.get_object()
         return event_test_func(self.request, event)
 
-class EventParticipantsView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+class EventOrgaView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Event
-    template_name = 'members/event_participants.html'
+    template_name = 'members/event_organisation.html'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
+
+        # get a list of event participants
+        participants = list(MemberParticipant.objects.filter(event = self.object))
+        # for older events - convert participants to MemberParticipants
+        check = set([x.user for x in participants])
+        for user in self.object.participants.all():
+            if user not in check:
+                tmp = MemberParticipant(user=user, event=self.object)
+                tmp.save()
+                participants.append(tmp)
+                # remove from the legacy-list
+                self.object.participants.remove(user)
+
+        # update context
+        context.update({
+            'participants':sorted(participants, key=lambda x: x.user.last_name)
+        })
+
+        return self.render_to_response(context)
 
     def test_func(self):
         return trainer_check(self.request) or chairman_check(self.request)
+
+## Ajax Event Orga Stuff
+def update_memberparticipant(request):
+    part = MemberParticipant.objects.get(pk=request.POST.get('id'))
+    field = request.POST.get('field')
+    check, text = request.POST.get('value').split(',',1)
+    if field=='payed':
+        val = (check == 'true')
+    else:
+        val = text
+
+    setattr(part, field, val)
+    part.save()
+    return JsonResponse({'success': True})
 
 """FOR THE SESSIONS"""
 

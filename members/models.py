@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 from multiselectfield import MultiSelectField
 from PIL import Image as Img
 
+
+
 class News(models.Model):
     title = models.CharField("Titel", max_length=200)
     capture = models.TextField("Kurzbeschreibung", blank=True, null=True)
@@ -62,6 +64,24 @@ class Group(models.Model):
     def get_absolute_url(self):
         return reverse('group_list')
 
+## Event related models
+class Document(models.Model):
+    name = models.CharField('Name', max_length=200)
+    file = models.FileField('File', upload_to=f"Events/Docs/etc/",null=True, blank=True)
+    # foreign key relationships to where files can be saved
+    member_participants = models.ForeignKey('MemberParticipant', on_delete=models.CASCADE, null=True, blank=True)
+    event_public = models.ForeignKey('Event', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Zusätzliche Dateien', related_name='public_docs')
+    event_orga = models.ForeignKey('Event', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Dokumente (Orga)', related_name='orga_docs')
+
+class MemberParticipant(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True) #set null, so that we still see the number of participants even after user is gone
+    payed = models.BooleanField('Bezahlt', default=False)
+    notes = models.TextField('Notizen', blank=True, null=True)
+    event = models.ForeignKey('Event', on_delete=models.CASCADE)
+    storno = models.BooleanField('Storno', default=False)
+
+    def __str__(self):
+        return f'{self.user.first_name} {self.user.last_name}'
 
 class Event(models.Model):
     allowed_groups = models.ManyToManyField(Group, verbose_name="Für die Gruppen", blank=True)
@@ -91,6 +111,11 @@ class Event(models.Model):
     #This we need to return the url on creating a new event
     def get_absolute_url(self):
         return reverse('event_detail', kwargs={"pk": self.pk})
+
+    @property
+    def participant_users(self):
+        q = MemberParticipant.objects.filter(Q(event = self) & Q(storno = False))
+        return list([part.user for part in q])
 
     @property
     def is_past_due(self):
@@ -340,7 +365,9 @@ class Profile(models.Model):
 
     @property
     def age(self):
-        return calculate_age(self.birthday)
+        if self.birthday:
+            return calculate_age(self.birthday)
+        return None
 
     def __str__(self):
         return f"{self.user.username}\'s Profile"

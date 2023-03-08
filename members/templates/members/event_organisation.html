@@ -1,0 +1,117 @@
+{% extends "members/base.html" %}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#events">
+        Mitglieder </a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_detail' object.id %}#nav">
+        {{object.title}}</a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Orga</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<style>
+    .tscroll table{
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .tscroll td:first-child{
+      position: sticky;
+      left: 0;
+      background-color: DarkSlateGray;
+    }
+
+    .tscroll td, th{
+      border: solid grey 1px;
+    }
+    .success{
+        border: solid aqua 1px !important;
+    }
+    .storno td:first-child{
+        background-color: crimson !important;
+    }
+</style>
+<section>
+    {% csrf_token %}
+    <h1> Event Orga</h1>
+    <div>
+        <h3>Teilnehmende</h3>
+        <div class="tertiary_bg" style="max-height: 600px; display: flex;">
+            <div class="tscroll" style="overflow: auto;min-width: 100%;">
+                <table style="min-width:100%">
+                    <thead style="position: sticky; top:0; background-color:DarkSlateGray;z-index:3;">
+                        <th>Name</th>
+                        <th>Nr</th>
+                        <th>Geburtsdatum</th>
+                        <th>Email</th>
+                        <th>Telefon</th>
+                        <th>Ansprechpartner</th>
+                        <th>Notfallnummer</th>
+                        <th>Bezahlt</th>
+                        <th>Notizen</th>
+                        <th>Storno</th>
+                    </thead>
+                {% for participant in participants %}
+                <tr class="{% if participant.storno %}storno{% endif %}">
+                    <td nowrap="nowrap"> {{participant}} ({{participant.user.profile.member_num}}) </td>
+                    <td nowrap="nowrap"> {{forloop.counter}} </td>
+                    <td nowrap="nowrap"> {{participant.user.profile.birthday|date:"d.m.Y"}} ({{participant.user.profile.age}}) </td>
+                    <td nowrap="nowrap"> {{participant.user.email}} </td>
+                    <td nowrap="nowrap"> {% if participant.user.profile.telephone %} {{participant.user.profile.telephone}} {% else %} - {% endif %}</td>
+                    <td nowrap="nowrap"> {% if participant.user.profile.parent %} {{participant.user.profile.parent}} {% else %} - {% endif %} </td>
+                    <td nowrap="nowrap"> {% if participant.user.profile.parent_telnr %} {{participant.user.profile.parent_telnr}} {% else %} - {% endif %}</td>
+                    <td><input class='field_update' type="checkbox" {% if participant.payed %} checked {% endif %} data-participant="{{participant.pk}}" data-field="payed"></td>
+                    <td><input style="min-width: 100%;background-color: inherit;"
+                        class='field_update' type="text" data-participant="{{participant.pk}}" data-field="notes"
+                        value="{% if participant.notes %}{{participant.notes}}{% endif %}"></td>
+                    <td>{% if participant.storno %}STORNO{% endif %}</td>
+                </tr>
+                {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    <br>
+    <span style='width:150px;display:block;cursor:pointer'>
+        <div id='{{object.pk}}' class='mail_click padding_all_small tertiary_bg prim_hover'>
+            Mailverteiler
+        </div>
+    </span>
+    <script>
+    $('.field_update').on('change', function(){
+        ele = $(this)
+        formdata = new FormData()
+        formdata.append('csrfmiddlewaretoken',$('[name=csrfmiddlewaretoken]').val())
+        formdata.append('field', $(this).attr('data-field'))
+        formdata.append('id', $(this).attr('data-participant'))
+        formdata.append('value', [$(this).prop("checked")==true,$(this).val()])
+        $.ajax({
+            url:"{% url 'ajax_update_memberparticipant' %}",
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: formdata,
+            success: function (data){
+                ele.parent().addClass('success')
+                setTimeout(function(){
+                    ele.parent().removeClass('success')
+                }, 300);
+            }
+        });
+    })
+
+    $('.mail_click').on('click', function(){
+        $.ajax({
+            data: {'id':$(this).attr("id")},
+            url: '{% url "get_participants_emails" %}',
+            type: 'GET',
+            success: function (data){
+                navigator.clipboard.writeText(data['string']);
+            }
+        });
+    });
+</script>
+</section>
+{% endblock %}

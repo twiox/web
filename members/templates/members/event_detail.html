@@ -8,7 +8,7 @@
     {% if perms.members.delete_event %}
     <a class="float_left"> > </a>
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_participants' object.id %}#nav">
-        Teilnehmer </a>
+        Orga </a>
     {% endif %}
 </div>
 {% endblock %}
@@ -70,15 +70,15 @@
                 <div class="padding_all_big chair_col-20">
                     <div class="flex_center">
                         <div class="flex_center_vertical">
-                            {% if request.user in object.participants.all %}
+                            {% if request.user in object.participant_users %}
                                 <div>
                                     <a class="form_button_sec" href="{% url 'event_unparticipate' object.id %}#nav">Abmelden</a>
-                                    <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
+                                    <p class="time_info">Deadline {{object.deadline|date:'d.m.Y'}}</p>
                                 </div>
                             {% else %}
                                 <div>
                                     <a class="form_button" href="{% url 'event_participate' object.id %}#nav">Anmelden</a>
-                                    <p class="time_info">Noch {{object.deadline|timeuntil}}</p>
+                                    <p class="time_info">Deadline {{object.deadline|date:'d.m.Y'}}</p>
                                 </div>
                             {% endif %}
                         </div>

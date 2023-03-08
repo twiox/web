@@ -59,13 +59,13 @@
                                     </p>
                                 <h4>{{event.title}}</h4>
                                 <p style="color:grey;"> {{event.place}}</p>
-                                {% if user in event.participants.all %}
+                                {% if user in event.participant_users %}
                                     <p style="color:green" >angemeldet</p>
                                 {% endif %}
                             </div>
                         </div>
                         <div class="third_session tertiary_bg padding_all_med">
-                            {% if not event.deadline_reached or event.deadline_reached and user in event.participants.all or user.profile.privileged %}
+                            {% if not event.deadline_reached or event.deadline_reached and user in event.participant_users or user.profile.privileged %}
                             <a class="more_info_button" href="{% url 'event_detail' event.id %}#nav">weitere Informationen</a>
                             {% else %}
                             <span style="color:grey; font-size: 0.9rem;">Anmeldung vorbei</span>
