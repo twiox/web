@@ -233,7 +233,7 @@ class EventOrgaView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
         # update context
         context.update({
-            'participants':sorted(participants, key=lambda x: x.user.last_name)
+            'participants':sorted(participants, key=lambda x: x.user.first_name)
         })
 
         return self.render_to_response(context)

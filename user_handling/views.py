@@ -1,7 +1,7 @@
 from .forms import *
 from .tokens import account_activation_token
 from .permissions import trainer_permissions, chairman_permissions
-from members.models import Group, Chairman, Profile, AdditionalEmail, Session, Event
+from members.models import Group, Chairman, Profile, AdditionalEmail, Session, Event, MemberParticipant
 from interested.models import PublicEvent, EventParticipant
 import django
 from django.shortcuts import render, redirect
@@ -288,10 +288,10 @@ def get_participants_emails(request):
         for part in EventParticipant.objects.filter(event=event).all():
             emails.append(part.email)
     else:
-        event = Event.objects.get(pk=int(data['id']))
-        for part in event.participants.all():
-            emails.append(part.email)
-            query = AdditionalEmail.objects.filter(user=part)
+        event = Event.objects.get(pk=int(request.GET.get('id')))
+        for part in MemberParticipant.objects.filter(event=event):
+            emails.append(part.user.email)
+            query = AdditionalEmail.objects.filter(user=part.user)
             emails.extend([x.email for x in query])
     string = ','.join(set(emails)) if len(emails)>0 else ''
     return JsonResponse({'string':string})
