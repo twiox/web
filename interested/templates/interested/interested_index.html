@@ -25,8 +25,8 @@
                 <h3>Parkour in Leipzig</h3>
                 <p class="chair_col-80" style="font-size:14pt">
                 Wir widmen uns der Aufgabe den Parkoursport zu unterstützen, indem wir den Sport und die Philosophie dahinter trainieren, uns mit anderen Parkourgruppen vernetzen
-                und bei der Stadt für bessere Trainingsmöglichkeiten werben.<br> 
-                Für unsere Mitglieder bieten wir regelmäßiges, angeleitetes und freies Training an.  
+                und bei der Stadt für bessere Trainingsmöglichkeiten werben.<br>
+                Für unsere Mitglieder bieten wir regelmäßiges, angeleitetes und freies Training an.
                 </p>
             </div>
             <div class="chair_col-5">
@@ -109,10 +109,10 @@
                         <div class='events' id="event_tmp" style="width:100%;height:300px;">
                             <div>
                                 <picture>
-                                    <source 
+                                    <source
                                         media="(orientation: landscape)"
                                         srcset="{{ STATIC_URL }}/static/media/roundnet_index.jpeg">
-                                    <source 
+                                    <source
                                         media="(orientation: portrait)"
                                         srcset="{{ STATIC_URL }}/static/media/roundnet_index_portrait.jpeg">
                                     <img id="tmp_image" src="" width="100%" height="auto" style="display:block;position: absolute;bottom: 0;">
@@ -140,10 +140,10 @@
                         <div class='events' id="event_{{event.pk}}" style="width:100%;height:300px;">
                             <div>
                                 <picture>
-                                    <source 
+                                    <source
                                         media="(orientation: landscape)"
                                         srcset="{{event.thumbnail_long.url}}">
-                                    <source 
+                                    <source
                                         media="(orientation: portrait)"
                                         srcset="{{event.thumbnail_high.url}}">
                                     <img id="{{event.pk}}_image" src="" width="100%" height="auto" style="display:block;position: absolute;bottom: 0;">
@@ -156,19 +156,19 @@
                         </div>
                     </div>
                 </a>
-    
+
                 {% endfor %}
             </div>
             <script>
                 $('.events').hover(
                     //mouse in
                     function(){
-                        let id = $(this).attr('id').split('_')[1] 
-                        $('#event_hover_'+id).fadeIn(100);       
-                    }, 
+                        let id = $(this).attr('id').split('_')[1]
+                        $('#event_hover_'+id).fadeIn(100);
+                    },
                     //mouse out
                     function(){
-                        let id = $(this).attr('id').split('_')[1] 
+                        let id = $(this).attr('id').split('_')[1]
                         $('#event_hover_'+id).fadeOut(100);
                     })
             </script>
@@ -179,9 +179,9 @@
             <h3>Training für Ukrainer*innen</h3>
             <p style="font-size:11pt;color:grey;margin-top: -7px;">12.04.2022</p>
             <div class="padding_all_small">
-                <p>Для громадян, які рятуються від війни в Україні, ми пропонуємо додаткові безкоштовні тренування в <strong>неділю з 
-                    10.00 – 12.00</strong>.  Брати участь у тренуваннях можуть <strong>діти з 9 років</strong>.  Діти старшого віку та дорослі мають можливість також брати участь у 
-                    звичайних тренуваннях у будні дні.  Наші тренери розмовляють англійською, російською та німецькою мовами. Якщо ви зацікавлені, 
+                <p>Для громадян, які рятуються від війни в Україні, ми пропонуємо додаткові безкоштовні тренування в <strong>неділю з
+                    10.00 – 12.00</strong>.  Брати участь у тренуваннях можуть <strong>діти з 9 років</strong>.  Діти старшого віку та дорослі мають можливість також брати участь у
+                    звичайних тренуваннях у будні дні.  Наші тренери розмовляють англійською, російською та німецькою мовами. Якщо ви зацікавлені,
                     напишіть нам на електронну адресу <a class="more_info_button" style="padding:0px" href="mailto:parkour@twio-x.de">parkour@twio-x.de</a>. та залиште контакти для зв’язку, або зателефонуйте нам:
                 <br> <br>
                 <ul>
@@ -189,11 +189,11 @@
                     <li>Телеграм.:<strong> +49 177 211 9322</strong></li>
                 </ul>
                 <br>
-                На сторінці <a class="more_info_button" style="padding:0px;" target="_blank" href="https://www.ssb-leipzig.de/leistungen/vereinsberatung/integration-durch-sport/">ssb-leipzig.de</a> ви знайдете інформацію про інші курси та спортивні гуртки в м. Лейпцигу. 
+                На сторінці <a class="more_info_button" style="padding:0px;" target="_blank" href="https://www.ssb-leipzig.de/leistungen/vereinsberatung/integration-durch-sport/">ssb-leipzig.de</a> ви знайдете інформацію про інші курси та спортивні гуртки в м. Лейпцигу.
                 </p>
             </div>
         </div>
- 
+
     </div>
     {% endblock %}
     {% block picture3 %}
@@ -228,7 +228,9 @@
         <section id="participate">
         <h1> Teilnahme </h1>
             <div class="padding_all_big secondary">
-                <h4>Achtung! Aktuell ist kein Probetraining möglich.</h4>
+                <span style="font-size:20pt;">Ab März 2023 haben wir ein neues Trainingsangebot für Mädchen ab 9 Jahren und <a style="font-size:20pt; padding:0px" class="more_info_button" href="https://de.wikipedia.org/wiki/FLINTA*">FLINTA*</a> Personen</span>
+                <br><span style="font-size:16pt;">Bitte meldet euch über das Probetrainingsformular an</span>
+
             </div>
             <br>
             <div class="flex_2even">
@@ -347,14 +349,16 @@
                                             <p style="color:red;">{{error}}</p>
                                         {% endfor %}
                                         {% endif %}
-                                        <label class="mdc-text-field mdc-text-field--filled city">
+                                        <label class="mdc-text-field mdc-text-field--filled sex">
                                             <i class="mdc-select__dropdown-icon"></i>
                                             <span class="mdc-text-field__ripple"></span>
-                                            <select id="select-city" class="mdc-text-field__input" style="background-color:#333333;" name="city" required>
+                                            <select id="select-sex" class="mdc-text-field__input" style="background-color:#333333;" name="sex" required>
                                                 <option value="" selected></option>
-                                                <option style="color:grey;" disabled="disabled" value="Leipzig">Leipzig</option>
+                                                <option style="color:grey;" value="weiblich">weiblich</option>
+                                                <option style="color:grey;" value="divers">divers</option>
+                                                <option style="color:grey;" disabled="disabled" value="männlich">männlich (keine Plätze frei)</option>
                                             </select>
-                                            <span class="mdc-floating-label" id="city-label">Deine Stadt</span>
+                                            <span class="mdc-floating-label" id="sex-label">Dein Geschlecht</span>
                                             <span class="mdc-line-ripple"></span>
                                         </label>
                                     </div>

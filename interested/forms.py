@@ -3,7 +3,7 @@ from django import forms
 
 class RoundnetLandingForm(forms.Form):
     name = forms.CharField()
-    email = forms.EmailField() 
+    email = forms.EmailField()
     age = forms.IntegerField()
 
     class Meta:
@@ -14,14 +14,14 @@ class ProbetrainingForm(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()
     birth_date = forms.DateField()
-    city = forms.CharField()
+    sex = forms.CharField()
     email = forms.EmailField()
     telephone = forms.CharField()
     notes = forms.CharField(required=False)
     confirm = forms.BooleanField()
 
     class Meta:
-        fields = ["first_name", "last_name", "birth_date", "email", "telephone", "notes", "confirm"]
+        fields = ["first_name", "last_name", "birth_date", "email", "telephone", "notes", "confirm",'sex']
 
 
 class PublicEventForm(forms.Form):

@@ -17,7 +17,7 @@ from members.views import chairman_check, trainer_check
 def interested_index(request):
     chairmen = Chairman.objects.filter(show__contains="interested_site")
     public_events = [x for x in PublicEvent.objects.all() if not x.is_past_due]
-    
+
     if (request.method == "POST"):
         form = ProbetrainingForm(request.POST)  # if no files
         if form.is_valid():
@@ -27,7 +27,7 @@ def interested_index(request):
             birthdate = form.cleaned_data.get('birth_date')
             int_email = form.cleaned_data.get('email')
             telnr = form.cleaned_data.get('telephone')
-            city = form.cleaned_data.get('city')
+            sex = form.cleaned_data.get('sex')
             notes = form.cleaned_data.get('notes')
 
             mail_subject = f'Anfrage Probetraining von {first_name} {last_name}'
@@ -37,7 +37,7 @@ def interested_index(request):
                 "birthdate": birthdate,
                 "email": int_email,
                 "telnr": telnr,
-                "city": city,
+                "sex": sex,
                 "notes": notes,
                 }
                                        )
@@ -153,9 +153,9 @@ class TeamerDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     def post(self, request, *args, **kwargs):
         messages.add_message(request, messages.SUCCESS, 'Teammitglied gelöscht')
         return self.delete(request, *args, **kwargs)
-        
+
     def get_success_url(self):
-        return reverse("team")+"#nav" 
+        return reverse("team")+"#nav"
 
 
 class PublicEventCreateView(PermissionRequiredMixin, CreateView):
@@ -231,7 +231,7 @@ class PublicEventView(DetailView):
             email2 = EmailMessage(mail_subject, message, to=[participant.email])
             email.send()
             email2.send()
-            
+
             messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich angemeldet')
             context['form'] = PublicEventForm
             return self.render_to_response(context=context)
@@ -252,7 +252,7 @@ def event_participant_list_view(request, event_slug):
 class EventParticipantDeleteView(UserPassesTestMixin, DeleteView):
     model=EventParticipant
     permission_required="interested_remove_eventparticipant"
-    
+
     def test_func(self):
         return chairman_check(self.request)
 
@@ -266,7 +266,7 @@ class EventParticipantUpdateView(UserPassesTestMixin, UpdateView):
     permission_required="interested_change_eventparticipant"
     template_name = "interested/eventparticipant_form_update.html"
     fields = ["first_name", "last_name", "birthday", "email", "phone", "contact", "invoice", "payed", "merch_wanted", "merch_size", "notes"]
-    
+
     def test_func(self):
         return chairman_check(self.request)
 
@@ -279,21 +279,21 @@ class EventParticipantUpdateView(UserPassesTestMixin, UpdateView):
 class PublicEventDeleteView(UserPassesTestMixin, DeleteView):
     model = PublicEvent
     permission_required = "interested_publicevent_delete"
-    
+
     def test_func(self):
         return chairman_check(self.request)
-            
+
     def get_success_url(self, **kwargs):
         slug = self.get_object().slug
         messages.add_message(self.request, messages.SUCCESS, 'Veranstaltung erfolgreich gelöscht')
         return reverse("interested_index")
-    
+
 
 class PublicEventUpdateView(UserPassesTestMixin, UpdateView):
     model = PublicEvent
     permission_required="interested_change_eventparticipant"
     fields = "__all__"
-    
+
     def test_func(self):
         return chairman_check(self.request)
 
@@ -301,20 +301,20 @@ class PublicEventUpdateView(UserPassesTestMixin, UpdateView):
         slug = self.get_object().slug
         messages.add_message(self.request, messages.SUCCESS, 'Veranstaltung erfolgreich geändert')
         return reverse("public_event", kwargs={'event_slug':slug})
-    
+
 
 class EventMerchCreateView(UserPassesTestMixin, CreateView):
     model = EventMerch
     permission_required = "interested_change_eventmerch"
     fields = "__all__"
-    
+
     def test_func(self):
         return chairman_check(self.request)
 
     def form_valid(self, form):
         self.object = form.save()
         return super().form_valid(form)
-    
+
     def get_success_url(self, **kwargs):
         messages.add_message(self.request, messages.SUCCESS, 'Merch erfolgreich hinzugefügt')
         return reverse("public_event_change", kwargs={'pk':self.object.event.pk})
@@ -335,7 +335,7 @@ class EventMerchUpdateView(UserPassesTestMixin, UpdateView):
 class EventMerchDeleteView(UserPassesTestMixin, DeleteView):
     model = EventMerch
     permission_required = "interested_change_eventmerch"
-    
+
     def test_func(self):
         return chairman_check(self.request)
 
@@ -344,7 +344,7 @@ class EventMerchDeleteView(UserPassesTestMixin, DeleteView):
         messages.add_message(self.request, messages.SUCCESS, 'Merch erfolgreich gelöscht')
         return reverse("public_event_change", kwargs={'pk':event_pk})
 
-  
+
 def roundnet_landing(request):
     #static page for now
     contact = ContactPerson.objects.filter(tag__contains='roundnet')
@@ -367,7 +367,7 @@ def roundnet_landing(request):
         email2 = EmailMessage(mail_subject, message, to=[form_email])
         email.send()
         email2.send()
-        
+
         messages.add_message(request, messages.SUCCESS, 'Du hast dich erfolgreich angemeldet')
         context['form'] = RoundnetLandingForm
         return render(request, 'interested/roundnet_landing.html', context=context)
@@ -376,5 +376,5 @@ def roundnet_landing(request):
         context['form'] = form
         return render(request, 'interested/roundnet_landing.html', context=context)
 
-    
+
 
