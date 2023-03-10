@@ -1,7 +1,17 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Event, Session, Group, Spot
+from .models import Event, Session, Group, Spot, Document
+
+
+class EventFileForm(forms.ModelForm):
+    orga = forms.BooleanField(required=False)
+
+    class Meta:
+        model = Document
+        fields = ['name', 'file', 'orga']
+
+
 
 class SpotForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

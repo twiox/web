@@ -73,6 +73,15 @@ class Document(models.Model):
     event_public = models.ForeignKey('Event', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Zusätzliche Dateien', related_name='public_docs')
     event_orga = models.ForeignKey('Event', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Dokumente (Orga)', related_name='orga_docs')
 
+    def event_toggle(self):
+        if self.event_public:
+            self.event_orga = self.event_public
+            self.event_public = None
+        else:
+            self.event_public = self.event_orga
+            self.event_orga = None
+        self.save()
+
 class MemberParticipant(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True) #set null, so that we still see the number of participants even after user is gone
     payed = models.BooleanField('Bezahlt', default=False)

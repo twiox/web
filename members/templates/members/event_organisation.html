@@ -42,8 +42,8 @@
             <div class="tscroll" style="overflow: auto;min-width: 100%;">
                 <table style="min-width:100%">
                     <thead style="position: sticky; top:0; background-color:DarkSlateGray;z-index:3;">
-                        <th>Name</th>
                         <th>Nr</th>
+                        <th>Name</th>
                         <th>Geburtsdatum</th>
                         <th>Email</th>
                         <th>Telefon</th>
@@ -55,8 +55,8 @@
                     </thead>
                 {% for participant in participants %}
                 <tr class="{% if participant.storno %}storno{% endif %}">
-                    <td nowrap="nowrap"> {{participant}} ({{participant.user.profile.member_num}}) </td>
                     <td nowrap="nowrap"> {{forloop.counter}} </td>
+                    <td nowrap="nowrap"> {{participant}} ({{participant.user.profile.member_num}}) </td>
                     <td nowrap="nowrap"> {{participant.user.profile.birthday|date:"d.m.Y"}} ({{participant.user.profile.age}}) </td>
                     <td nowrap="nowrap"> {{participant.user.email}} </td>
                     <td nowrap="nowrap"> {% if participant.user.profile.telephone %} {{participant.user.profile.telephone}} {% else %} - {% endif %}</td>
@@ -74,12 +74,94 @@
         </div>
     </div>
     <br>
-    <span style='width:150px;display:block;cursor:pointer'>
-        <div id='{{object.pk}}' class='mail_click padding_all_small tertiary_bg prim_hover'>
-            Mailverteiler
-        </div>
-    </span>
+    <div style="display: flex; gap: 5px;">
+        <span style='width:150px;display:block;cursor:pointer'>
+            <div id='{{object.pk}}' class='mail_click padding_all_small tertiary_bg prim_hover'>
+                Mailverteiler
+            </div>
+        </span>
+        <span class="tertiary_bg padding_all_small" style='width:200px'>
+            <h5>Dokument hinzufügen</h5>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input id="id_file" name='file' type="file" style="margin-bottom:3px" required>
+                <input id="id_name" type="text" name="name" maxlength="200" required style="background-color: inherit; width: 100%; border: solid 1px grey; margin-bottom:3px;">
+                <!-- Radio button -->
+                <label for="id_orga_orga">Privat</label>
+                <input id="id_orga_orga" name='orga' value='private' required type="radio">
+                <label for="id_orga_public">Öffentlich</label>
+                <input id="id_orga_public" name='orga' value='public' type="radio">
+                <button class="form_button" type="submit">Hochladen</button>
+            </form>
+        </span>
+        <span id="file_viewer" class="tertiary_bg padding_all_small" style='width:200px'>
+            <h5>Dokumente</h5>
+            {% if event.public_docs.first %}
+                {% for file in event.public_docs.all %}
+                    <div style="display: flex; gap:3px; border: solid 1px grey;justify-content: space-around;" class="padding_all_small">
+                        <span class="file_handle" data-type="toggle" data-file="{{file.pk}}" style="cursor: pointer;">
+                            <i style="color:greenyellow;" class="fas fa-eye"></i>
+                        </span>
+                        <a href="{{file.file.url}}" target="_blank" style="padding:0px;">
+                            <i class="far fa-file more_info_button"></i>
+                        </a>
+                        <span>{{file.name}}</span>
+                        <div>
+                            <span class="file_handle" data-type="delete" data-file="{{file.pk}}" style="cursor: pointer;">
+                                <i class="fas fa-trash"></i>
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            {% if event.orga_docs.first %}
+                {% for file in event.orga_docs.all %}
+                    <div style="display: flex; gap:3px; border: solid 1px grey;justify-content: space-around;" class="padding_all_small">
+                        <span class="file_handle" data-type="toggle" data-file="{{file.pk}}" style="cursor: pointer;">
+                            <i style="color:salmon;" class="fas fa-eye"></i>
+                        </span>
+                        <a href="{{file.file.url}}" target="_blank" style="padding:0px;">
+                            <i class="far fa-file more_info_button"></i>
+                        </a>
+                        <span>{{file.name}}</span>
+                        <div>
+                            <span class="file_handle" data-type="delete" data-file="{{file.pk}}" style="cursor: pointer;">
+                                <i class="fas fa-trash"></i>
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </span>
+    </div>
     <script>
+    $('body').on('click','.file_handle', function(){
+        ele = $(this)
+        formdata = new FormData()
+        formdata.append('csrfmiddlewaretoken',$('[name=csrfmiddlewaretoken]').val())
+        formdata.append('type', $(this).attr('data-type'))
+        formdata.append('id', $(this).attr('data-file'))
+        $.ajax({
+            url:"{% url 'ajax_event_filehandle' %}",
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: formdata,
+            success: function (){
+                $.ajax({
+                    url: document.URL,
+                    success: function(response) {
+                        // Find the element you want to load
+                        var update = $(response).find(`#file_viewer`);
+                        // Insert the element into the DOM
+                        $(`#file_viewer`).replaceWith(update)
+                    }
+                });
+            }
+        });
+    })
+
+
     $('.field_update').on('change', function(){
         ele = $(this)
         formdata = new FormData()

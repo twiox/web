@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin,PermissionRequiredMixin
-from .forms import EventUpdateParticipantForm,EventUpdateParticipantForm2, SessionForm, EventForm, UpdateMemberInformationForm,UpdateMemberEmailForm,SpotForm
+from .forms import EventUpdateParticipantForm,EventUpdateParticipantForm2, SessionForm, EventForm, UpdateMemberInformationForm,UpdateMemberEmailForm,SpotForm, EventFileForm
 from django.contrib import messages
 from datetime import datetime
 from django.contrib.auth.models import User
@@ -233,13 +233,34 @@ class EventOrgaView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
         # update context
         context.update({
-            'participants':sorted(participants, key=lambda x: x.user.first_name)
+            'participants':sorted(participants, key=lambda x: x.user.first_name),
+            'form': EventFileForm(request.POST, request.FILES)
         })
-
         return self.render_to_response(context)
+
+    def post(self, request,*args, **kwargs):
+        event = self.get_object()
+        file = request.FILES.get('file')
+        name = request.POST.get('name')
+        if private := request.POST.get('orga') == 'private':
+            tmp = Document(file=file, event_orga = event, name=name)
+        else:
+            tmp = Document(file=file, event_public = event, name=name)
+        tmp.save()
+        return JsonResponse({'test':True})
+
 
     def test_func(self):
         return trainer_check(self.request) or chairman_check(self.request)
+
+def ajax_event_filehandle(request):
+    doc = Document.objects.get(pk=int(request.POST.get('id')))
+    if request.POST.get('type') == 'toggle':
+        doc.event_toggle()
+    if request.POST.get('type') == 'delete':
+        doc.delete()
+    return JsonResponse({'success':True})
+
 
 ## Ajax Event Orga Stuff
 def update_memberparticipant(request):

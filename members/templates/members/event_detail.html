@@ -64,6 +64,9 @@
                     {% if object.einverstaendnis %}
                     <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{object.einverstaendnis.url}}"><p>Einverständniserklärung</p><i class="fas fa-file-download"></i></a></li>
                     {% endif %}
+                    {% for doc in object.public_docs.all %}
+                    <li style="padding:5px; width:100%;"><a class="download padding_rl_big" target="_blank" href="{{doc.file.url}}"><p>{{doc.name}}</p><i class="fas fa-file-download"></i></a></li>
+                    {% endfor %}
                     </ul>
                 </div>
                 {% if not object.deadline_reached %}
