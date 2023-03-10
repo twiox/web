@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic import (
@@ -247,7 +247,7 @@ class EventOrgaView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         else:
             tmp = Document(file=file, event_public = event, name=name)
         tmp.save()
-        return JsonResponse({'test':True})
+        return redirect(request.META['HTTP_REFERER'])
 
 
     def test_func(self):
