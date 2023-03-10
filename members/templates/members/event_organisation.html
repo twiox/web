@@ -40,7 +40,7 @@
         <h3>Teilnehmende</h3>
         <div class="tertiary_bg" style="max-height: 600px; display: flex;">
             <div class="tscroll" style="overflow: auto;min-width: 100%;">
-                <table style="min-width:100%">
+                <table id='participant_list' style="min-width:100%">
                     <thead style="position: sticky; top:0; background-color:DarkSlateGray;z-index:3;">
                         <th>Nr</th>
                         <th>Name</th>
@@ -74,13 +74,16 @@
         </div>
     </div>
     <br>
-    <div style="display: flex; gap: 5px;">
+    <div style="display: flex; gap: 5px;" class="side_scroll">
         <span style='width:150px;display:block;cursor:pointer'>
-            <div id='{{object.pk}}' class='mail_click padding_all_small tertiary_bg prim_hover'>
+            <div id='{{object.pk}}' class='mail_click padding_all_small tertiary_bg prim_hover' style="margin-bottom:5px;">
                 Mailverteiler
             </div>
+            <div id='download_list' class='list_click padding_all_small tertiary_bg prim_hover'>
+                Teilnehmerliste
+            </div>
         </span>
-        <span class="tertiary_bg padding_all_small" style='width:200px'>
+        <span class="tertiary_bg padding_all_small" style='min-width:200px'>
             <h5>Dokument hinzufügen</h5>
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
@@ -94,7 +97,7 @@
                 <button class="form_button" type="submit">Hochladen</button>
             </form>
         </span>
-        <span id="file_viewer" class="tertiary_bg padding_all_small" style='width:200px'>
+        <span id="file_viewer" class="tertiary_bg padding_all_small" style='min-width:200px'>
             <h5>Dokumente</h5>
             {% if event.public_docs.first %}
                 {% for file in event.public_docs.all %}
@@ -194,6 +197,47 @@
             }
         });
     });
+    // I copied this from the internet...
+
+    const toCsv = function (table) {
+    // Query all rows
+    const rows = table.find('tr');
+
+    return [].slice
+        .call(rows)
+        .map(function (row) {
+            // Query all cells
+            const cells = row.querySelectorAll('th,td');
+            return [].slice
+                .call(cells)
+                .map(function (cell) {
+                    return cell.textContent;
+                })
+                .join(',');
+        })
+        .join('\n');
+    };
+
+    const download = function (text, fileName) {
+    const link = document.createElement('a');
+    link.setAttribute('href', `data:text/csv;charset=utf-8,${encodeURIComponent(text)}`);
+    link.setAttribute('download', fileName);
+
+    link.style.display = 'none';
+    document.body.appendChild(link);
+
+    link.click();
+    document.body.removeChild(link);
+    };
+
+    $('#download_list').on('click', function () {
+        // Export to csv
+        const csv = toCsv($('#participant_list'));
+
+        // Download it
+        download(csv, 'teilnehmerliste.csv');
+    });
+
 </script>
 </section>
 {% endblock %}
