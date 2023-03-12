@@ -10,7 +10,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from .forms import ProbetrainingForm, PublicEventForm, RoundnetLandingForm
 from members.models import Chairman
-from .models import Teamer, PublicEvent, EventParticipant, EventMerch, ContactPerson
+from .models import Teamer, PublicEvent, EventParticipant, EventMerch, ContactPerson, Tester
 from members.views import chairman_check, trainer_check
 
 
@@ -22,34 +22,22 @@ def interested_index(request):
         form = ProbetrainingForm(request.POST)  # if no files
         if form.is_valid():
             # get Form data
-            first_name = form.cleaned_data.get('first_name')
-            last_name = form.cleaned_data.get('last_name')
-            birthdate = form.cleaned_data.get('birth_date')
-            int_email = form.cleaned_data.get('email')
-            telnr = form.cleaned_data.get('telephone')
-            sex = form.cleaned_data.get('sex')
-            notes = form.cleaned_data.get('notes')
+            test = form.save()
+            test.save()
 
-            mail_subject = f'Anfrage Probetraining von {first_name} {last_name}'
+            mail_subject = f'Anfrage Probetraining von {test.first_name} {test.last_name}'
             message = render_to_string('interested/probe_email.html', {
-                "first_name": first_name,
-                "last_name": last_name,
-                "birthdate": birthdate,
-                "email": int_email,
-                "telnr": telnr,
-                "sex": sex,
-                "notes": notes,
-                }
+                "object": test,
+            }
                                        )
             email = EmailMessage(mail_subject, message, to=[settings.TO_EMAIL])
             email.send()
             # And the message to the interested
             message2 = render_to_string("interested/probe_email_answer.html", {
-                "first_name": first_name,
-                "last_name": last_name
+                "object": test,
                 }
             )
-            EmailMessage(f"Twio X e.V. - Deine Anfrage auf Probetraining", message2, to=[int_email]).send()
+            EmailMessage(f"Twio X e.V. - Deine Anfrage auf Probetraining", message2, to=[test.email]).send()
             messages.add_message(request, messages.SUCCESS, 'Anmeldung verschickt')
             return HttpResponseRedirect(reverse("interested_index"))
         else:

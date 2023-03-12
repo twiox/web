@@ -7,6 +7,21 @@ from django.template.defaultfilters import slugify
 import markdown
 
 # Create your models here.
+## Probetrainingsanmeldungen
+class Tester(models.Model):
+    first_name = models.CharField('Vorname', max_length=400)
+    last_name = models.CharField('Nachname', max_length=400)
+    email = models.CharField('Email', max_length=300)
+    birthday = models.DateTimeField('Geburtstag')
+    telnr = models.CharField('Telefonnummer', max_length=300, blank=True, null=True)
+    sex = models.CharField('Geschlecht', max_length=30)
+    notes = models.TextField('Anmerkungen', blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+
+
+
 class ContactPerson(models.Model):
     tag = models.CharField('Nach diesem Schlagwort wird gefiltert (z.B. Twiju)', max_length=300)
     picture = models.ImageField("Foto", upload_to="contacts/")

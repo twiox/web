@@ -1,12 +1,12 @@
 {% autoescape off %}
 Jemand möchte an einem Probetraining teilnehmen
 
-Name: {{first_name}} {{last_name}},
-Geburtsdatum: {{birthdate}},
-Geschlecht: {{sex}},
+Name: {{object.first_name}} {{object.last_name}},
+Geburtsdatum: {{object.birthday|date:'d.m.Y'}},
+Geschlecht: {{object.sex}},
 
-E-Mails: {{email}},
-Telefon: {{telnr}},
+E-Mails: {{object.email}},
+{% if object.telnr %}Telefon:{{object.telnr}},{%endif%}
 
-Anmerkungen: {{notes}},
+{% if object.notes %}Anmerkungen: {{object.notes}},{% endif %}
 {% endautoescape %}

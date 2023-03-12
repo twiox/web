@@ -1,5 +1,5 @@
 from django import forms
-
+from .models import Tester
 
 class RoundnetLandingForm(forms.Form):
     name = forms.CharField()
@@ -10,18 +10,12 @@ class RoundnetLandingForm(forms.Form):
         fields = ['__all__']
 
 
-class ProbetrainingForm(forms.Form):
-    first_name = forms.CharField()
-    last_name = forms.CharField()
-    birth_date = forms.DateField()
-    sex = forms.CharField()
-    email = forms.EmailField()
-    telephone = forms.CharField()
-    notes = forms.CharField(required=False)
+class ProbetrainingForm(forms.ModelForm):
     confirm = forms.BooleanField()
 
     class Meta:
-        fields = ["first_name", "last_name", "birth_date", "email", "telephone", "notes", "confirm",'sex']
+        model = Tester
+        fields = ["first_name", "last_name", "birthday", "email", "telnr", "notes", "confirm",'sex']
 
 
 class PublicEventForm(forms.Form):

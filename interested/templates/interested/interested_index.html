@@ -293,28 +293,28 @@
                                         </label>
                                     </div>
                                     <div class="chair_col-5 float_left padding_rl_small">
-                                        {% if form.birth_date.errors %}
-                                        {% for error in form.birth_date.errors %}
+                                        {% if form.birthday.errors %}
+                                        {% for error in form.birthday.errors %}
                                             <p style="color:red;">{{error}}</p>
                                         {% endfor %}
                                         {% endif %}
-                                        <label class="mdc-text-field mdc-text-field--filled birth_date">
+                                        <label class="mdc-text-field mdc-text-field--filled birthday">
                                             <span class="mdc-text-field__ripple"></span>
-                                            <input type="text" class="mdc-text-field__input" aria-labelledby="birth_date-label" name="birth_date" required>
-                                            <span class="mdc-floating-label" id="birth_date-label">Geburtsdatum</span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="birthday-label" name="birthday" required>
+                                            <span class="mdc-floating-label" id="birthday-label">Geburtsdatum</span>
                                             <span class="mdc-line-ripple"></span>
                                         </label>
                                     </div>
                                     <div class="chair_col-5 float_left padding_rl_small">
-                                        {% if form.telephone.errors %}
-                                        {% for error in form.telephone.errors %}
+                                        {% if form.telnr.errors %}
+                                        {% for error in form.telnr.errors %}
                                             <p style="color:red;">{{error}}</p>
                                         {% endfor %}
                                         {% endif %}
-                                        <label class="mdc-text-field mdc-text-field--filled telephone">
+                                        <label class="mdc-text-field mdc-text-field--filled telnr">
                                             <span class="mdc-text-field__ripple"></span>
-                                            <input type="text" class="mdc-text-field__input" aria-labelledby="telephone-label" name="telephone" required>
-                                            <span class="mdc-floating-label" id="telephone-label">Telefonnummer</span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="telnr-label" name="telnr">
+                                            <span class="mdc-floating-label" id="telnr-label">Telefonnummer</span>
                                             <span class="mdc-line-ripple"></span>
                                         </label>
                                     </div>
