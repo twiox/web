@@ -474,6 +474,12 @@ class GroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     permission_required = 'members.delete_group'
 
 ### Age Groups ###
+class AgeGroupDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    model = AgeGroup
+
+    def test_func(self):
+        return self.request.user.profile.privileged
+
 class AgeGroupCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = AgeGroup
     fields = ["lower","upper"]

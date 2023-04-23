@@ -32,6 +32,7 @@ urlpatterns = [
     path("altersgruppe/neu/", views.AgeGroupCreateView.as_view(),name="agegroup_create"),
     path("altersgruppe/<int:pk>/ändern", views.AgeGroupUpdateView.as_view(),name="agegroup_update"),
     path("altersgruppe/<int:pk>/löschen/", views.AgeGroupDeleteView.as_view(),name="agegroup_delete"),
+    path("altersgruppe/<int:pk>", views.AgeGroupDetailView.as_view(),name="agegroup_detail"),
     path("profil/", views.UserDetailView.as_view(),name="profile_detail"),
     path("profil/ändere_email/", views.EmailUpdateView.as_view(),name="profile_update_email"),
     path("profil/ändere_nutzername/", views.UsernameUpdateView.as_view(),name="profile_update_username"),
