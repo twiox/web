@@ -1,0 +1,50 @@
+{% extends "members/base.html" %}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}#nav">
+        Übersicht</a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Probetrainingsanfragen</a>
+</div>
+{% endblock %}
+
+{%block content %}
+<section style="display: flex; flex-wrap:wrap">
+    <section class="chair_col-5 padding_all_small">
+        <h1>Alle Anmeldungen</h1>
+        <div class="tertiary_bg padding_all_small side_scroll">
+            <table style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th nowrap="nowrap"><h5> Nr </h5></th>
+                        <th nowrap="nowrap"><h5> Vorname </h5></th>
+                        <th nowrap="nowrap"><h5> Nachname </h5></th>
+                        <th nowrap="nowrap"><h5> Geb.-Datum </h5></th>
+                        <th nowrap="nowrap"><h5> E-Mail-Adresse </h5></th>
+                        <th nowrap="nowrap"><h5> Telefonnummer </h5></th>
+                        <th nowrap="nowrap"><h5> Notizen </h5></th>
+                    </tr>
+                </thead>
+                <tbody id="table_body">
+                {% for tester in object_list %}
+                    <tr class="{% cycle 'odd' 'even' %} table_row" id="{{forloop.counter}}_row">
+                        <td nowrap="nowrap" class="counter"> {{forloop.counter}}</td>
+                        <td nowrap="nowrap"> {{tester.first_name}}</td>
+                        <td nowrap="nowrap"> {{tester.last_name}}</td>
+                        <td nowrap="nowrap"> {{tester.birthday|date:'d.m.Y'}}</td>
+                        <td nowrap="nowrap"> {{tester.email}}</td>
+                        <td nowrap="nowrap"> {{tester.telnr}}</td>
+                        <td nowrap="nowrap"> {%if tester.notes %} {{tester.notes}} {%else%} - {%endif%}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <section class="chair_col-5 padding_all_small">
+        <div>
+        <h1>Probetrainingsgruppen</h1>
+        </div>
+    </section>
+</section>
+{% endblock %}

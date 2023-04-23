@@ -98,6 +98,13 @@ def interested_team(request):
                   {"leipzig_people": leipzig_people, "jena_people": jena_people})
 
 
+class TesterListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Tester
+
+    def test_func(self):
+        return chairman_check(self.request)
+
+
 class TeamerLeipzigCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Teamer
     fields = ["priority", "picture", "name", "position", "notes", "public_telnr", "public_email"]
