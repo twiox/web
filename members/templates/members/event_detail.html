@@ -43,6 +43,34 @@
                     <p><strong>Kosten: {{object.costs}} € </strong></p>
                     {% endif %}
                 </div>
+                <div class="padding_tb_small">
+                    {% if part %}
+                    <h4>Deine Informationen</h4>
+                    <table>
+                        <thead>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Deutschlandticket während der Veranstaltung</td>
+                                <td>{% if part.has_ticket %}<span style="color:green">Ja{% else %}
+                                    <span style="color:red">Nein{% endif %}</span></td>
+                            </tr>
+                            {% if part.payed %}
+                            <tr>
+                                <td>Bezahlt</td>
+                                <td><span style="color:green">Ja</span></td>
+                            </tr>
+                            {% endif %}
+                            {% if part.storno %}
+                            <tr>
+                                <td>Storniert</td>
+                                <td><span style="color:red">Ja</span></td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                </div>
             </div>
             <div class="chair_col-80 tertiary_bg padding_all_big">
                 <div class="markdown">

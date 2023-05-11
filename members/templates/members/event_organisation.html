@@ -51,6 +51,7 @@
                         <th>Notfallnummer</th>
                         <th>Bezahlt</th>
                         <th>Notizen</th>
+                        <th>Deutschlandticket</th>
                         <th>Storno</th>
                     </thead>
                 {% for participant in participants %}
@@ -66,6 +67,7 @@
                     <td><input style="min-width: 100%;background-color: inherit;"
                         class='field_update' type="text" data-participant="{{participant.pk}}" data-field="notes"
                         value="{% if participant.notes %}{{participant.notes}}{% endif %}"></td>
+                    <td><input class='field_update' type="checkbox" {% if participant.has_ticket %} checked {% endif %} data-participant="{{participant.pk}}" data-field="has_ticket"></td>
                     <td>{% if participant.storno %}STORNO{% endif %}</td>
                 </tr>
                 {% endfor %}

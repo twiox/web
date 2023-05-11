@@ -41,6 +41,22 @@
                         Einverständnis der Eltern benötigen!</strong></div>
                     </label>
                 </div>
+
+                <div class="mdc-form-field padding_all_big">
+                    <div class="mdc-checkbox">
+                      <input type="checkbox" class="mdc-checkbox__native-control" id="ticket" name="ticket">
+                      <div class="mdc-checkbox__background">
+                        <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                          <path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+                        </svg>
+                        <div class="mdc-checkbox__mixedmark"></div>
+                      </div>
+                    </div>
+                    <label for="ticket" >
+                        <span>Ich besitze zur Zeit der Veranstaltung ein <strong>Deutschlandticket</strong></span>
+                    </label>
+                </div>
+
                 <h6> Die An- und Abmeldefrist endet am {{object.deadline|date:"d.m.Y"}} </h6>
                 <br>
                 <button type="submit" class="form_button" style="margin: 0 auto;">Jawoll</button>
