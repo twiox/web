@@ -44,6 +44,7 @@
                     {% endif %}
                 </div>
                 <div class="padding_tb_small">
+                    {% csrf_token %}
                     {% if part %}
                     <h4>Deine Informationen</h4>
                     <table>
@@ -52,8 +53,13 @@
                         <tbody>
                             <tr>
                                 <td>Deutschlandticket während der Veranstaltung</td>
+                                {% if not object.deadline_reached %}
+                                <td><input class='field_update' type="checkbox" {% if part.has_ticket %} checked {% endif %} data-participant="{{part.pk}}" data-field="has_ticket"></td>
+                                {% else %}
                                 <td>{% if part.has_ticket %}<span style="color:green">Ja{% else %}
-                                    <span style="color:red">Nein{% endif %}</span></td>
+                                    <span style="color:red">Nein{% endif %}</span>
+                                </td>
+                                {% endif %}
                             </tr>
                             {% if part.payed %}
                             <tr>
@@ -124,4 +130,28 @@
             </div>
         {% endif %}
     </section>
+
+    <script>
+        $('.field_update').on('change', function(){
+        ele = $(this)
+        formdata = new FormData()
+        formdata.append('csrfmiddlewaretoken',$('[name=csrfmiddlewaretoken]').val())
+        formdata.append('field', $(this).attr('data-field'))
+        formdata.append('id', $(this).attr('data-participant'))
+        formdata.append('value', [$(this).prop("checked")==true,$(this).val()])
+        $.ajax({
+            url:"{% url 'ajax_update_memberparticipant' %}",
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: formdata,
+            success: function (data){
+                    ele.parent().addClass('success')
+                    setTimeout(function(){
+                        ele.parent().removeClass('success')
+                    }, 300);
+                }
+            });
+        })
+    </script>
 {% endblock %}

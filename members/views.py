@@ -139,7 +139,10 @@ class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(EventDetailView, self).get_context_data(**kwargs)
-        tmp = {"part": MemberParticipant.objects.get(event=self.object, user=self.request.user)}
+        try:
+            tmp = {"part": MemberParticipant.objects.get(event=self.object, user=self.request.user)}
+        except:
+            tmp = {}
         context.update(tmp)
         return context
 
@@ -319,8 +322,6 @@ def update_memberparticipant(request):
 
     setattr(part, field, val)
     part.save()
-
-    print(part.has_ticket)
 
     return JsonResponse({"success": True})
 
