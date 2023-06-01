@@ -1,5 +1,6 @@
-## Web-App Twio X Member-Area ##
-This project is meant to provide a scaled version of the current web-page at https://twio-x.de/mitglieder.
+## Twio X Website ##
+This Repo contains the codebase for our current website at https://twio-x.de/.
+
 ### 1. Set Up ###
 
 #### Option 1: local setup ####
