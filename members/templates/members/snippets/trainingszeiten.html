@@ -80,7 +80,7 @@
                             {%endif%}
                             {% if session.agegroup in request.user.profile.agegroups.all or request.user.profile.privileged %}
                             <div style="display: flex; justify-content: space-between; gap:5px;">
-                                <h4> {{session.spot.title}}</h4>
+                                <h4 style="text-overflow: ellipsis; overflow: hidden;" title="{{session.spot.title}}">{{session.spot.title}}</h4>
                                 <a class="more_info_button" style="padding:0px" target="_blank"
                                     href="https://www.google.de/maps/dir//{{session.spot.lat}},{{session.spot.long}}/@{{session.spot.lat}},{{session.spot.long}},17z">
                                     <i style="font-size:0.8rem;" class="fas fa-map-marker-alt more_info_button"></i>
