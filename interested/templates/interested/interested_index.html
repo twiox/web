@@ -29,17 +29,6 @@
                 Für unsere Mitglieder bieten wir regelmäßiges, angeleitetes und freies Training an.
                 </p>
             </div>
-            <div class="chair_col-5">
-                <h3>Roundnet in Leipzig</h3>
-                <p class="chair_col-80" style="font-size:14pt">
-                Du willst Roundnet spielen, oder einfach nur wissen, was Roundnet ist?<br>
-                Dann schaue doch mal bei unserem neuen Angebot vorbei!
-                <br><br>
-                <a href="{% url 'roundnet_landing' %}" class="prim_hover tertiary_bg padding_all_small chair_col-80" style="display: block;">
-                    Mehr erfahren
-                </a>
-                </p>
-            </div>
         <div style="display:flex;flex-wrap: wrap;">
             <div class="col-4">
                 <a href="{% url 'offers' %}">
@@ -102,32 +91,6 @@
     {% block content2 %}
     <div class="frame">
         <h1> Aktuelles </h1>
-        <section>
-            <div style="display:flex;flex-direction:column;gap:30px">
-                <a style="padding:0px;" href="{% url 'roundnet_landing' %}#nav">
-                    <div style="width: 100%;height: 300px; position: relative;">
-                        <div class='events' id="event_tmp" style="width:100%;height:300px;">
-                            <div>
-                                <picture>
-                                    <source
-                                        media="(orientation: landscape)"
-                                        srcset="{{ STATIC_URL }}/static/media/roundnet_index.jpeg">
-                                    <source
-                                        media="(orientation: portrait)"
-                                        srcset="{{ STATIC_URL }}/static/media/roundnet_index_portrait.jpeg">
-                                    <img id="tmp_image" src="" width="100%" height="auto" style="display:block;position: absolute;bottom: 0;">
-                                </picture>
-                            </div>
-                            <div id="event_hover_tmp" style="display:none;width:100%;height:100%;background-color:rgba(0, 0, 0, 0.7);position: absolute;top: 0;left: 0;" class="padding_all_big">
-                                <h1 style="margin: 0px;" class="hero">Roundnet</h1>
-                                <p style="color:white;">Unsere neue Abteilung</p>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-        </section>
         {% if public_events or perms.interested.add_publicevent %}
         <section id="Events">
             {% if perms.interested.add_publicevent %}

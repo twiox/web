@@ -1,25 +1,26 @@
 from django import forms
 from .models import Tester
 
-class RoundnetLandingForm(forms.Form):
-    name = forms.CharField()
-    email = forms.EmailField()
-    age = forms.IntegerField()
-
-    class Meta:
-        fields = ['__all__']
-
 
 class ProbetrainingForm(forms.ModelForm):
     confirm = forms.BooleanField()
 
     class Meta:
         model = Tester
-        fields = ["first_name", "last_name", "birthday", "email", "telnr", "notes", "confirm",'sex']
+        fields = [
+            "first_name",
+            "last_name",
+            "birthday",
+            "email",
+            "telnr",
+            "notes",
+            "confirm",
+            "sex",
+        ]
 
 
 class PublicEventForm(forms.Form):
-    #user-data
+    # user-data
     first_name = forms.CharField()
     last_name = forms.CharField()
     birthday = forms.DateField()
@@ -28,10 +29,20 @@ class PublicEventForm(forms.Form):
     contact = forms.CharField(required=False)
     costs = forms.CharField(required=False)
     confirm = forms.BooleanField()
-    #merch-data
+    # merch-data
     merch_wanted = forms.BooleanField(required=False)
     merch_size = forms.CharField(required=False)
 
     class Meta:
-        fields = ["first_name", "last_name", "birthday", "email", "phone", "contact", "merch_wanted", "merch_size", "costs", "confirm"]
-
+        fields = [
+            "first_name",
+            "last_name",
+            "birthday",
+            "email",
+            "phone",
+            "contact",
+            "merch_wanted",
+            "merch_size",
+            "costs",
+            "confirm",
+        ]
