@@ -1,10 +1,10 @@
-{% extends "members/base.html" %}
+{% extends "main/base.html" %}
 {% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'public_event' object.event.slug %}"> {{object.event.title}} </a>
     <a class="float_left"> > </a>
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_participant_list' object.event.slug %}"> Anmeldungen </a>
-    <a class="float_left"> > </a> 
+    <a class="float_left"> > </a>
     <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Bearbeiten </a>
 </div>
 {% endblock %}
@@ -28,7 +28,7 @@
                         <span class="mdc-line-ripple"></span>
                     </label>
                 </div>
-                
+
                 <div class="chair_col-5 float_left padding_rl_small">
                     {% if form.last_name.errors %}
                     {% for error in form.last_name.errors %}
@@ -43,7 +43,7 @@
                         <span class="mdc-line-ripple"></span>
                     </label>
                 </div>
-                
+
                 <div class="chair_col-5 float_left padding_rl_small">
                     {% if form.birthday.errors %}
                     {% for error in form.birthday.errors %}
@@ -58,7 +58,7 @@
                         <span class="mdc-line-ripple"></span>
                     </label>
                 </div>
-                
+
                 <div class="chair_col-5 float_left padding_rl_small">
                     {% if form.phone.errors %}
                     {% for error in form.phone.errors %}
@@ -73,7 +73,7 @@
                         <span class="mdc-line-ripple"></span>
                     </label>
                 </div>
-                
+
                 <div class="chair_col-5 float_left padding_rl_small">
                     {% if form.email.errors %}
                     {% for error in form.email.errors %}
@@ -87,7 +87,7 @@
                         <span class="mdc-line-ripple"></span>
                     </label>
                 </div>
-                
+
                 <div class="chair_col-5 float_left padding_rl_small">
                     {% if form.contact.errors %}
                     {% for error in form.contact.errors %}
@@ -106,7 +106,7 @@
                         <span class="mdc-floating-label" id="contact-label">Kontakt während der Veranstaltung</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
-                </div>      
+                </div>
             </div>
             <br>
             <h3>Veranstaltungs-merch</h3>
@@ -139,7 +139,7 @@
                         <span class="mdc-line-ripple"></span>
                     </label>
                     </div>
-                    
+
                 </div>
             </div>
             <br>
@@ -153,7 +153,7 @@
                         {% endif %}
                         <label class="mdc-text-field mdc-text-field--filled invoice">
                             <span class="mdc-text-field__ripple"></span>
-                            <input type="number" class="mdc-text-field__input" aria-labelledby="invoice-label" name="invoice" required 
+                            <input type="number" class="mdc-text-field__input" aria-labelledby="invoice-label" name="invoice" required
                                 value={% if form.instance.invoice %} "{{form.instance.invoice|floatformat:"0"}}" {% else %} "{{form.data.invoice|floatformat:"0"}}" {% endif %}>
                             <span class="mdc-floating-label" id="invoice-label">Kosten</span>
                             <span class="mdc-line-ripple"></span>
@@ -188,7 +188,7 @@
                         </label>
                     </div>
                 </div>
-            
+
             <div class="flex_center_vertical">
                 <div class="flex_center padding_all_big">
                     <button type="submit" class="form_button" id="prob_button">Absenden</button>

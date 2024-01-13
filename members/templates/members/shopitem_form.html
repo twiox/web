@@ -1,4 +1,4 @@
-{% extends "members/base.html" %}
+{% extends "main/base.html" %}
 {% load l10n %}
 {% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
@@ -89,20 +89,20 @@
             <div class="web_button flex_center update_img_button" style="cursor: pointer;"><p class="padding_all_small" style="text-align: center;">Update</p></div>
         </div>
     </div>
-    
+
     <div id="image_container" class="flex_left" style="justify-content: left; flex-wrap: wrap; gap:10px;">
     {% for img in object.get_images %}
         <div id="container_img_{{img.pk}}" style="width: 200px; position: relative;" >
             <a class="edit_image" id="{{img.pk}}" style="position: absolute;right: 0; bottom: 0; padding: 0;" href="#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
             <a class="delete_image" id="{{img.pk}}" style="position: absolute;right: 20px; bottom: 0; padding: 0;" href="#nav" title="Löschen"><i class="fa fa-minus-square" style="font-size:17px;"></i></a>
             <p id="img_title_{{img.pk}}"> {{img.title}}</p>
-            <img id="the_image_{{img.pk}}" style="width: 100%;" src="{{img.image.url}}">   
+            <img id="the_image_{{img.pk}}" style="width: 100%;" src="{{img.image.url}}">
             <p id="img_pos_{{img.pk}}"> Position: {{img.priority}}</p>
         </div>
     {% endfor %}
 
         <script>
-            
+
         </script>
 
         <div class="flex_center_vertical" >
@@ -194,7 +194,7 @@ $("#form").one('submit', function(e){
         $.ajax({
             async: false,
             url: "{% url 'delete_image' %}?id="+$(this).attr('id'),
-        }) 
+        })
     });
     $(this).submit();
 });

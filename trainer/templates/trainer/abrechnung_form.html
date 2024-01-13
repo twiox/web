@@ -1,4 +1,4 @@
-{% extends 'members/base.html' %}
+{% extends 'main/base.html' %}
 {% block content %}
 <h1>Trainerdokument</h1>
 <div style="display:flex; justify-content: left; flex-wrap:wrap;">
@@ -25,7 +25,7 @@
     <br>
     <form method="POST" id="trainer_form">
         {% csrf_token %}
-        <div  class="side_scroll"> 
+        <div  class="side_scroll">
             <table id="abrechenform">
                 <thead>
                     <tr id="bs4_header">
@@ -91,12 +91,12 @@
 function getTableString(key,value,counter){
     return '<tr id="js_row_'+key+'"class="bs4_body">\n'+
     '<td style="display:None;"><input hidden name="id" value="'+key+'"></td>\n'+
-    '<td><input class="date" name="date" type="date" required onkeyup="javascript:updateDay();"></td>\n' + 
+    '<td><input class="date" name="date" type="date" required onkeyup="javascript:updateDay();"></td>\n' +
     '<td><input name="day" value="'+ value.day +'" required></td>\n' +
     '<td><input name="group" value="'+ value.group +'" required></td>\n' +
-    '<td><input name="start" type="time" value="'+ value.start_time +'" required></td>\n' + 
-    '<td><input name="end" type="time" value="'+ value.end_time +'" required></td>\n' + 
-    '<td><input name="dur" value="2" onkeyup="javascript:updateCalc();" class="js-count_hours" required></td>\n' + 
+    '<td><input name="start" type="time" value="'+ value.start_time +'" required></td>\n' +
+    '<td><input name="end" type="time" value="'+ value.end_time +'" required></td>\n' +
+    '<td><input name="dur" value="2" onkeyup="javascript:updateCalc();" class="js-count_hours" required></td>\n' +
     '<td><input name="notes" value="'+value.notes+'"></td>\n'+
     '<td><a class="js_delete_row" id="js_entry_'+key+'"> </a></td></tr>\n'
     }
@@ -200,7 +200,7 @@ $("#abrechenform").on("click",".js_delete_row", function (){
                 $('#'+value).remove();
                 updateCalc();
             });
-            
+
         }
     });
 });
@@ -243,7 +243,7 @@ $("#abrechenform").on("change",".date", function() {
 
 $("#prob_button").click(function(){
         $(this).html('<i class="fas fa-spinner fa-pulse"></i>');
-        setTimeout(function(){ 
+        setTimeout(function(){
             $("#prob_button").html("Absenden");
             }, 3000);
 });

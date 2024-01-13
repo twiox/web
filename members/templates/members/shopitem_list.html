@@ -1,4 +1,4 @@
-{% extends "members/base.html" %}
+{% extends "main/base.html" %}
 {% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
@@ -33,20 +33,20 @@
                 <a href="{% url 'shopitem_delete' obj.id  %}#nav" title="Löschen"><i class="fas fa-minus-square" style="font-size:17px;"></i></a>
                 {% endif %}
             </div>
-            <div class="chair_col-4 flex_left" {%if obj.n_images_modulo == 1 %} style="justify-content:space-between;"{% else%} style="justify-content:left;" {% endif %}> 
+            <div class="chair_col-4 flex_left" {%if obj.n_images_modulo == 1 %} style="justify-content:space-between;"{% else%} style="justify-content:left;" {% endif %}>
                 {% for img in obj.get_images %}
-                    <img alt="{{img.alt}}" 
+                    <img alt="{{img.alt}}"
                         title="{{img.title}}"
                         {% if forloop.counter == 1 %} style="width:100%;" {% else %} style="width:33%;" {% endif %}
                         src="{{img.image.url}}">
                 {% endfor %}
             </div>
-            <div class="chair_col-60" style="position: relative;"> 
+            <div class="chair_col-60" style="position: relative;">
                 <div class="padding_all_big flex_center_vertical_even" style="justify-content:space-between; height: 100%;">
                     <div>
-                        {{obj.description_rendered|safe}} 
+                        {{obj.description_rendered|safe}}
                     </div>
-                    <div> 
+                    <div>
                         <p style="font-size:30px;color:#088eaa;" >{% if obj.price == 0 %} Kostenlos {% else %} Preis: {{obj.price}} € {% endif %}</p>
                         <p style="font-size:20px;color:grey"> Bitte schreibt uns eine Email! </p>
                     </div>

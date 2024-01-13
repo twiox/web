@@ -1,10 +1,10 @@
-{% extends "members/base.html" %}
-{% block navbar2 %} 
+{% extends "main/base.html" %}
+{% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'public_event' object.event.slug %}"> {{object.event.title}} </a>
     <a class="float_left"> > </a>
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_participant_list' object.event.slug %}"> Anmeldungen </a>
-    <a class="float_left"> > </a> 
+    <a class="float_left"> > </a>
     <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Löschen </a>
 </div>
 {% endblock %}

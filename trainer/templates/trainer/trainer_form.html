@@ -1,5 +1,5 @@
-{% extends "members/base.html" %}
-{% block navbar2 %} 
+{% extends "main/base.html" %}
+{% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
         Mitglieder </a>
@@ -142,7 +142,7 @@
                     $("#fileText").html(fileName).show();
                         });
                 </script>
-                
+
                 {% if form.contract.errors %}
                 {% for error in form.contract.errors %}
                     <p style="color:red;">{{error}}</p>
@@ -164,7 +164,7 @@
                     $("#fileTextContract").html(fileName).show();
                         });
                 </script>
-                
+
                 {% if form.license.errors %}
                 {% for error in form.license.errors %}
                     <p style="color:red;">{{error}}</p>
@@ -186,7 +186,7 @@
                     $("#fileTextLicense").html(fileName).show();
                         });
                 </script>
-                
+
                 {% if form.codex.errors %}
                 {% for error in form.codex.errors %}
                     <p style="color:red;">{{error}}</p>
@@ -208,7 +208,7 @@
                     $("#fileTextCodex").html(fileName).show();
                         });
                 </script>
-                
+
                 <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
                     <span >OK</span>
                 </button>

@@ -1,4 +1,4 @@
-{% extends "members/base.html" %}
+{% extends "main/base.html" %}
 {% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#news">
@@ -6,7 +6,7 @@
     <a class="float_left"> > </a>
     <!--
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'news_list' %}#nav">
-        Alle Beiträge </a> 
+        Alle Beiträge </a>
     <a class="float_left"> > </a> -->
     <a class="float_left strong" style="font-size: 1.1rem; color:white;"> {{object.title}} </a>
 </div>

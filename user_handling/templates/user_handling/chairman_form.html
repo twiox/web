@@ -1,5 +1,5 @@
-{% extends "members/base.html" %}
-{% block navbar2 %} 
+{% extends "main/base.html" %}
+{% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
         Mitglieder </a>
@@ -75,7 +75,7 @@
                     <span class="mdc-floating-label" id="public_email-label">Öffentliche E-Mail-Adresse</span>
                     <span class="mdc-line-ripple"></span>
                 </label>
-                
+
                 {% if form.competences.errors %}
                 {% for error in form.competences.errors %}
                     <p style="color:red;">{{error}}</p>
@@ -88,7 +88,7 @@
                     <span class="mdc-floating-label" id="competences-label">Kompetenzen</span>
                     <span class="mdc-line-ripple"></span>
                 </label>
-                
+
                 {% if form.image.errors %}
                 {% for error in form.image.errors %}
                     <p style="color:red;">{{error}}</p>

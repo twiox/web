@@ -1,5 +1,5 @@
-{% extends "members/base.html" %}
-{% block navbar2 %} 
+{% extends "main/base.html" %}
+{% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#nav">
         Mitglieder </a>
@@ -18,7 +18,7 @@
     <div class="flex_center">
         <div class="padding_all_big tertiary_bg side_scroll">
             <table >
-            <tr> 
+            <tr>
                 <th><h5> Nr </h5></th>
                 <th><h5> status </h5></th>
                 <th><h5> Vorname </h5></th>
@@ -30,7 +30,7 @@
                 <th><h5> Anmerkungen </h5></th>
             </tr>
             {% for member in member_list %}
-            <tr id="{{member.profile.status}}" class="{% cycle 'odd' 'even' %}"> 
+            <tr id="{{member.profile.status}}" class="{% cycle 'odd' 'even' %}">
                 <td nowrap="nowrap">  {{ forloop.counter }}  </td>
                 <td nowrap="nowrap"> {{member.profile.status}} </td>
                 <td nowrap="nowrap"> {{member.first_name}} </td>

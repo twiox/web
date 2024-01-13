@@ -1,5 +1,5 @@
-{% extends "members/base.html" %}
-    {% block picture %}
+{% extends "main/main.html" %}
+    {% block content %}
     <div class="image_wrapper">
         <img src="{{ STATIC_URL }}/static/media/home.jpg" id='home_view'>
         <script type="text/javascript">
@@ -8,32 +8,25 @@
             });
         </script>
     </div>
-    {% endblock %}
-    {% block navbar2 %}
     {% if user.is_authenticated %}
     <div class="navbar primary_bg">
         <a class="float_right" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt" style="font-size:20px;"><p>Logout</p></i></a>
         <a class="float_left" href="{% url 'profile_detail' %} "><i class="fas fa-user-circle" style="font-size:20px;"><p>Profil</p></i></a>
         {% if user.trainer %}
         <a class= "float_left" href="{% url 'trainer_index' %}#nav"><i class="fas fa-user-cog" style="font-size:20px;"><p>Trainer</p></i></a>
-        {% endif %}        
+        {% endif %}
         {% if perms.auth.add_user %}
         <a class= "float_left" href="{% url 'chairman_index' %}#nav"><i class="fas fa-user-tie" style="font-size:20px;"><p>Vorstände</p></i></a>
         {% endif %}
         <a class="float_left" href="{% url 'shop' %}#nav"><i class="fas fa-tshirt" style="font-size:20px;"><p>Merch</p></i></a>
     </div>
     {% endif %}
-    {% endblock %}
-    {% block content %}
     {% include "members/snippets/news.html"%}
     <!-- Say Hello -->
     <!-- The container for the Sessions -->
     {% include "members/snippets/trainingszeiten.html"%}
     <!-- Here the Container for the Events -->
     {% include "members/snippets/eventkalender.html"%}
-    {% endblock %}
-    
-    {% block chairmen %}
     {% if chairmen %}
     <section style="margin-bottom:150px;">
         <h1>DEINE ANSPRECHPARTNER</h1>

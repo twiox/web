@@ -1,11 +1,11 @@
-{% extends "members/base.html" %}
-{% block navbar2 %} 
+{% extends "main/base.html" %}
+{% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'interested_index' %}#Events">
         Interessierte </a>
     <a class="float_left"> > </a>
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'public_event' event.slug %}"> {{event.title}} </a>
-    <a class="float_left"> > </a> 
+    <a class="float_left"> > </a>
     <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Anmeldungen </a>
 </div>
 {% endblock %}
@@ -22,7 +22,7 @@
         </div>
         -->
     </div>
-    
+
     <div>
         <div>
             <div class="padding_all_big tertiary_bg side_scroll">
@@ -84,7 +84,7 @@
         <div id='{{event.pk}}' class='mail_click padding_all_small tertiary_bg prim_hover'>
             Mailverteiler
         </div>
-    </span>  
+    </span>
 </section>
 <script>
     $(document).ready(function(){
@@ -93,7 +93,7 @@
             if($("#"+index+"_payed").text() == "Jawoll"){
                 $("#"+index+"_row").css("background-color",'DarkGreen');
             }
-        });            
+        });
     });
     $('.mail_click').on('click', function(){
         $.ajax({

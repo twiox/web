@@ -1,4 +1,4 @@
-{% extends "members/base.html" %}
+{% extends "main/base.html" %}
 {% block content %}
 <section>
     <div style="text-align:center;">
@@ -66,14 +66,14 @@
                     {% endfor %}
                     {% endif %}
                     <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
-                      <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="description" id="id_comment" 
+                      <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="description" id="id_comment"
                       name="description" >{% if form.instance.description %} {{form.instance.description}} {% else %} {{form.data.description}} {% endif %}</textarea>
                       <span class="mdc-notched-outline">
                         <span class="mdc-notched-outline__leading"></span>
                         <span class="mdc-notched-outline__trailing"></span>
                       </span>
                     </label>
-                    
+
                 </div>
             </div>
             <div class="padding_all_small">
@@ -100,7 +100,7 @@
                         });
                 </script>
             </div>
-            
+
             <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
                 <span >OK</span>
             </button>

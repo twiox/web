@@ -1,4 +1,4 @@
-{% extends "members/base.html" %}
+{% extends "main/base.html" %}
     {% block picture %}
     <div class="image_wrapper2 pic1cont">
         <img src="{{ STATIC_URL }}/static/media/organizers2.jpg" id='home_view'>
@@ -26,17 +26,17 @@
                 <h3> Showprogramme </h3>
                 <br>
                 <p style="padding-right:45px;">
-                Neben der allgemeinen Vereinstätigkeit sind wir auch Ansprechpartner für die <strong>Ausgestaltung von Showprogrammen</strong> für verschiedenste Veranstaltungen. 
+                Neben der allgemeinen Vereinstätigkeit sind wir auch Ansprechpartner für die <strong>Ausgestaltung von Showprogrammen</strong> für verschiedenste Veranstaltungen.
                 Gerne erarbeiten wir gemeinsam mit Ihnen ein passendes Konzept und präsentieren mit einem erfahrenen Showteam einen kreativen Mix aus Parkour und Freerunning.
                 <br><br>
                 </p>
                 <h3>Workshops</h3>
                 <br>
                 <p style="padding-right:45px;">
-                Darüber hinaus bieten wir individuelle <strong>Workshops, allgemeine Fortbildungen und Lehrgänge</strong> für Lehrer und Dozenten an. 
-                Sie erhalten fundiertes Wissen von Traceuren mit langjähriger Erfahrung und entsprechendes Material zur persönlichen Nachbereitung. Je nach Lehrgansumfang 
-                behandeln wir grundlegende, fortgeschrittene und professionelle Parkourtechniken. Auf Anfrage widmen wir uns bei unseren Lehrgängen 
-                besonderen Themen, wie beispielsweise Fall- und Sturztechniken, Verletzungsprävention, Kraft- und Ausdauertraining für Sportler 
+                Darüber hinaus bieten wir individuelle <strong>Workshops, allgemeine Fortbildungen und Lehrgänge</strong> für Lehrer und Dozenten an.
+                Sie erhalten fundiertes Wissen von Traceuren mit langjähriger Erfahrung und entsprechendes Material zur persönlichen Nachbereitung. Je nach Lehrgansumfang
+                behandeln wir grundlegende, fortgeschrittene und professionelle Parkourtechniken. Auf Anfrage widmen wir uns bei unseren Lehrgängen
+                besonderen Themen, wie beispielsweise Fall- und Sturztechniken, Verletzungsprävention, Kraft- und Ausdauertraining für Sportler
                 sowie Knie- und Fußstabilisation.
                 </p>
                 <br><br>
@@ -79,7 +79,7 @@
                                         <span class="mdc-line-ripple"></span>
                                     </label>
                                 </div>
-                                
+
                                 <div class="chair_col-5 float_left padding_rl_small">
                                     {% if form.telephone.errors %}
                                     {% for error in form.telephone.errors %}
@@ -93,7 +93,7 @@
                                         <span class="mdc-line-ripple"></span>
                                     </label>
                                 </div>
-                                
+
                                 <div class="chair_col-5 float_left padding_rl_small">
                                     {% if form.email.errors %}
                                     {% for error in form.email.errors %}
@@ -106,7 +106,7 @@
                                         <span class="mdc-line-ripple"></span>
                                     </label>
                                 </div>
-                                
+
                                 <div class="float_left padding_rl_small" style="width:100%;">
                                     {% if form.notes.errors %}
                                     {% for error in form.notes.errors %}
@@ -131,13 +131,13 @@
                                             <div class="mdc-checkbox__mixedmark"></div>
                                           </div>
                                         </div>
-                                        
+
                                         <label for="speicherung" >
                                             <div>Ich stimme der <a class="more_info_button" style="padding:0px;" href="{% url 'dataprotection' %}">Datenschutzerklärung</a> zu </div>
                                         </label>
                                     </div>
                                 </div>
-                                
+
                                 <div style="clear:both;">
                                     <div class="flex_center_vertical">
                                         <div class="flex_center padding_all_big">
@@ -145,14 +145,14 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                             </div>
                         </form>
                         <script>
                             $(document).ready(function(){
                                 $("#orga_button").click(function(){
                                     $(this).html('<i class="fas fa-spinner fa-pulse"></i>');
-                                    setTimeout(function(){ 
+                                    setTimeout(function(){
                                         $("#orga_button").html("Absenden");
                                     }, 3000);
                                 });
