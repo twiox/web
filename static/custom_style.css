@@ -15,7 +15,6 @@ body{
 .image_wrapper {
   height: 500px;
   width: 100%;
-  background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: cover;
   opacity: 0.8;

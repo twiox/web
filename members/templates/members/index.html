@@ -1,8 +1,18 @@
 {% load static %}
 
 <style>
-    #main_image{
-        background-image: url("{% static 'media/interested.jpg'%}");
+    @media (orientation: portrait){
+        #main_image {
+            background-image: url("{% static 'media/interested_portrait.jpg'%}");
+            background-position: top right;
+        }
+    }
+
+    @media (orientation: landscape){
+        #main_image {
+            background-image: url("{% static 'media/interested.jpg'%}");
+            background-position: top;
+        }
     }
 </style>
 
