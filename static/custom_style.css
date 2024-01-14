@@ -1,0 +1,26 @@
+body{
+  background-color: #f3f3f3;
+}
+.content{
+  max-width:960px;
+  margin:0 auto;
+  padding:40px
+}
+
+.section{
+  padding-top: 30px;
+  padding-bottom: 50px;
+}
+
+.image_wrapper {
+  height: 500px;
+  width: 100%;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  opacity: 0.8;
+}
+
+#news_section{
+  background-color: white;
+}

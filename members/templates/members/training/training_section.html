@@ -1,7 +1,7 @@
 {% load custom_filters %}
-<section id="training">
-    <div id="container">
-        <h1>TRAININGSZEITEN</h1>
+<section class="section" id="training_section">
+    <div class="content">
+        <h1 class="mdl-typography--display-4">Training</h1>
         <div class="trainer_ui">
             {% if perms.members.add_session %}
                 <a href="{% url 'session_create' %}#nav" title="Trainingseinheit hinzufügen"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
