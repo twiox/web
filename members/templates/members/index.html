@@ -26,15 +26,10 @@
 <div class="parallax">
     <div id="main_section" class="parallax__group">
         <div class="parallax__layer parallax__layer--base">
-            <div class="content">
-                <div class="bottom_right">
-                    <a href="#training_section" id="to_training_button" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
-                        <i class="material-icons">south</i>
-                    </a>
-                    <span class="mdl-tooltip mdl-tooltip--left mdl-tooltip--large" for="to_training_button">
-                        Zum Training
-                    </span>
-                </div>
+            <div class="bottom_right m-2">
+                <a href="#training_section" id="to_training_button" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
+                    <i class="material-icons">south</i>
+                </a>
             </div>
         </div>
     </div>
@@ -56,6 +51,13 @@
 
     <!-- Say Hello -->
     <!-- The container for the Sessions -->
+    <style>
+    #training_section {
+        z-index: 5;
+        background-color: #f3f3f3;
+        position: relative;
+    }
+    </style>
     {% include "members/training/training_section.html"%}
     <!-- Here the Container for the Events -->
     {% include "members/events/event_section.html"%}

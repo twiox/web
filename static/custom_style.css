@@ -3,13 +3,19 @@ body{
 }
 .content{
   max-width:960px;
-  min-height: 60vh;
   margin:0 auto;
   padding:40px;
   position:relative;
 }
 .content .mdl-tooltip{
   position: unset !important;
+}
+
+.m-2{
+  margin:20px;
+}
+.p-2{
+  padding:20px;
 }
 
 .top_right{
@@ -54,7 +60,7 @@ body{
 /* --------------------------------------------- */
 .parallax {
   height: 500px; /* fallback for older browsers */
-  height: 100vh;
+  height: 80vh;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-perspective: 300px;
@@ -64,7 +70,7 @@ body{
 .parallax__group {
   position: relative;
   height: 500px; /* fallback for older browsers */
-  height: 100vh;
+  height: 80vh;
   -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
 }
