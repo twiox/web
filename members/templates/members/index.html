@@ -1,29 +1,63 @@
 {% load static %}
 
 <style>
-    @media (orientation: portrait){
-        #main_image {
-            background-image: url("{% static 'media/interested_portrait.jpg'%}");
-            background-position: top right;
-        }
-    }
+/* this is the first section of the page */
+#main_section {
+    z-index: 5;
+}
+#main_section .parallax__layer--base {
+    background: #607d8b;
+}
 
-    @media (orientation: landscape){
-        #main_image {
-            background-image: url("{% static 'media/interested.jpg'%}");
-            background-position: top;
-        }
+@media (orientation: portrait){
+    #main_image {
+        background-image: url("{% static 'media/interested_portrait.jpg'%}");
+        background-position: top right;
     }
+}
+
+@media (orientation: landscape){
+    #main_image {
+        background-image: url("{% static 'media/interested.jpg'%}");
+        background-position: top;
+    }
+}
 </style>
+<div class="parallax">
+    <div id="main_section" class="parallax__group">
+        <div class="parallax__layer parallax__layer--base">
+            <div class="content">
+                <div class="bottom_right">
+                    <a href="#training_section" id="to_training_button" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
+                        <i class="material-icons">south</i>
+                    </a>
+                    <span class="mdl-tooltip mdl-tooltip--left mdl-tooltip--large" for="to_training_button">
+                        Zum Training
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="parallax__group">
+        <div class="parallax__layer parallax__layer--back">
+            <div id="main_image" class="image_wrapper"></div>
+        </div>
+    </div>
 
-<div id="main_image" class="image_wrapper"></div>
+    <style>
+    /* this is the News section of the page */
+    #news_section {
+        z-index: 5;
+        background: white;
+        position: relative;
+    }
+    </style>
+    {% include "members/news/news_section.html"%}
 
-<!-- WIP -->
-
-{% include "members/news/news_section.html"%}
-<!-- Say Hello -->
-<!-- The container for the Sessions -->
-{% include "members/training/training_section.html"%}
-<!-- Here the Container for the Events -->
-{% include "members/events/event_section.html"%}
-<!--Now include contacts-->
+    <!-- Say Hello -->
+    <!-- The container for the Sessions -->
+    {% include "members/training/training_section.html"%}
+    <!-- Here the Container for the Events -->
+    {% include "members/events/event_section.html"%}
+    <!--Now include contacts-->
+</div>
