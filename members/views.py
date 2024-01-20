@@ -52,24 +52,49 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.views import PasswordChangeView
 from django.conf import settings
 import markdown
-
-# Create your views here.
 import os
 
+#
+#
+# Everything related to the main page
+#
+#
 
-def chairman_check(request):
-    user = request.user
-    return hasattr(user, "chairman") or user.is_superuser
+
+def chairman_check():
+    return True
 
 
-def trainer_check(request):
-    user = request.user
-    return hasattr(user, "trainer") or user.is_superuser
+def trainer_check():
+    return True
 
 
 def index(request):
     """This is the View for the Members homepage"""
     return render(request, "members/index.html", {})
+
+
+def get_training_section(request):
+    sessions = Session.objects.all()
+    training_messags = Message.objects.filter(display="sessions").distinct()
+
+    session_days = sorted(
+        list(set([(x.day, x.weekday, x.order) for x in sessions])), key=lambda x: x[2]
+    )
+    # group sessions by day and pack into dict
+    grouped_sessions = {}
+    for short, day, order in session_days:
+        grouped_sessions[short] = Session.objects.filter(day=short).order_by(
+            "start_time"
+        )
+
+    context = {
+        "sessions": grouped_sessions,
+        "session_days": session_days,
+        "training_messages": training_messags,
+    }
+
+    return render(request, "members/training/training_section.html", context)
 
 
 """FOR THE EVENTS"""

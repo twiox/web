@@ -58,7 +58,10 @@
         position: relative;
     }
     </style>
-    {% include "members/training/training_section.html"%}
+    <section id="training-section-wrapper"
+        hx-get="{% url 'get_training_section' %}"
+        hx-trigger="load once">
+    </section>
     <!-- Here the Container for the Events -->
     {% include "members/events/event_section.html"%}
     <!--Now include contacts-->

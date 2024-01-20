@@ -1,157 +1,85 @@
 {% load custom_filters %}
+
 <section class="section" id="training_section">
     <div class="content">
         <h1 class="mdl-typography--display-4">Training</h1>
-        <div class="trainer_ui">
-            {% if perms.members.add_session %}
-                <a href="{% url 'session_create' %}#nav" title="Trainingseinheit hinzufügen"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
-            {% endif %}
-            {% if perms.members.add_message %}
-                <a href="{% url 'message_sess_create' %}#nav" title="Hinweis hinzufügen"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
-            {% endif %}
-            {% if perms.members.add_spot %}
-                <a href="{% url 'spot_list' %}#nav" title="Spots verwalten"><i class="fas fa-map-marker-alt" style="font-size:27px;"></i></a>
-            {% endif %}
-        </div>
-    </div>
-    <!-- Here the Messages -->
-    {% if training_messags %}
-    <section>
-        <div class="secondary padding_all_med"><h4 class="strong">Wichtige Hinweise</h4></div>
-        <div class="tertiary_bg padding_tb_small">
-            {% for msg in training_messags %}
-            <div class="padding_all_med" >
-                <div id="container">
-                    <span style="color:grey; font-size:0.9rem;padding:0px;">Von {{msg.author.first_name}} ({{msg.date |date:'d.m.Y'}})</span>
-                    <h5>{{msg.title}}</h5>
-                    <p>{{msg.message}}</p>
-                    <div class="trainer_ui">
-                        {% if perms.members.delete_message %}
-                        <a href="{% url 'message_delete' msg.id %}#nav" title="Löschen"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
-                        {% endif %}
-                        {% if perms.members.change_message %}
-                        <a href="{% url 'message_update' msg.id %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
-                        {% endif %}
+        <!-- Here the Messages -->
+        {% if training_messages %}
+        <section>
+            <div class="secondary padding_all_med"><h4 class="strong">Wichtige Hinweise</h4></div>
+            <div class="tertiary_bg padding_tb_small">
+                {% for msg in training_messags %}
+                <div class="padding_all_med" >
+                    <div id="container">
+                        <span style="color:grey; font-size:0.9rem;padding:0px;">Von {{msg.author.first_name}} ({{msg.date |date:'d.m.Y'}})</span>
+                        <h5>{{msg.title}}</h5>
+                        <p>{{msg.message}}</p>
+                        <div class="trainer_ui">
+                            {% if perms.members.delete_message %}
+                            <a href="{% url 'message_delete' msg.id %}#nav" title="Löschen"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
+                            {% endif %}
+                            {% if perms.members.change_message %}
+                            <a href="{% url 'message_update' msg.id %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+        <div class="mdl-grid" >
+            {% for short, day, order in session_days %}
+            <!-- one column for the sessions of each day -->
+            <div class="mdl-cell mdl-cell--2-col">
+                <div><strong>{{ day }}</strong>
+                </div>
+                {% for session in sessions|lookup:short %}
+                <!--session hinweise -->
+                <div class="demo-card-event mdl-card mdl-shadow--2dp">
+                    <div class="mdl-card__title mdl-card--expand">
+                      <div>
+                        {{session.format_start_time}} - {{session.format_end_time}} Uhr<br>
+                      </div>
+                    </div>
+                    <div class="mdl-card__actions mdl-card--border">
+                      <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                        Add to Calendar
+                      </a>
+                      <div class="mdl-layout-spacer"></div>
+                      <i class="material-icons">event</i>
+                    </div>
+                </div>
+                <div>
+                    <span style="font-size: 0.9rem;">Alter: {{session.agegroup.lower }} - {{session.agegroup.upper }} Jahre</span>
+                    <p></p>
+                    <div>
+                        <h4> {{session.spot.title}}</h4>
+                        <a target="_blank"
+                            href="https://www.google.de/maps/dir//{{session.spot.lat}},{{session.spot.long}}/@{{session.spot.lat}},{{session.spot.long}},17z">
+                            <i>Marker</i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <div id="emaillist_{{session.pk}}"
+                        data-url="{% url 'trainer_get_sessionemails' session.pk %}"
+                        style="display:none; cursor: pointer; width:50%">
+                        <i class="far fa-envelope padding_all_small"><p>Emails</p></i>
+                    </div>
+                    <a href="{% url 'agegroup_detail' session.agegroup.pk %}">
+                        <div id="userlist_{{session.pk}}"
+                            style="display:none; cursor: pointer">
+                            <i class="far fa-user"><p>Liste</p></i>
+                        </div>
+                    </a>
+                </div>
+                <div id="trainerchip_{{session.pk}}" style="text-align: left; display:none;">
+
+                </div>
+                {% endfor %}
             </div>
             {% endfor %}
         </div>
-    </section>
-    {% endif %}
-    <div style="display:flex; gap:10px; overflow-x: auto;">
-        <!--<h3 id="group_header" style="display:none;"></h3>-->
-        {% for short,day,order in session_days %}
-            <!-- one column for the sessions of each day -->
-            <div class="col-20" style="overflow: visible; min-width:200px;">
-                <div class="primary padding_all_small flex_center" style="opacity:0.75;"><strong>{{ day }}</strong></div>
-                {% for session in sessions|lookup:short %}
-                    <!--session hinweise -->
-                    <div style="margin-top:10px;">
-                        {% if session.agegroup in request.user.profile.agegroups.all or request.user.profile.privileged %}
-                        {% if session.hinweis %}
-                        <div class="third_session" style="padding:3px; background-color: darkslategray;">
-                            <!-- Hinweise -->
-                            {{session.hinweis}}
-                        </div>
-                        {% endif %}
-                        {% endif %}
-                        <div class="padding_all_small tertiary_bg" id="container">
-                            <div class="trainer_ui">
-                                {% if perms.members.change_session %}
-                                <a href="{% url 'session_update' session.id  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
-                                {% endif %}
-                                {% if perms.members.delete_session %}
-                                <a href="{% url 'session_delete' session.id  %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
-                                {% endif %}
-                            </div>
-
-                            {% if session.agegroup %}
-                            {% if session.agegroup in request.user.profile.agegroups.all or request.user.profile.privileged %}
-                            <span style="font-size: 0.9rem;">Alter: {{session.agegroup.lower }} - {{session.agegroup.upper }} Jahre</span>
-                            {% else %}
-                            <span style="color:grey;font-size: 0.9rem;">Alter: {{session.agegroup.lower }} - {{session.agegroup.upper }} Jahre</span>
-                            {% endif %}
-                            {% endif %}
-                            {% if session.agegroup in request.user.profile.agegroups.all or request.user.profile.privileged %}
-                            <p>{{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
-                            {%else%}
-                            <p style="color:grey;">{{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
-                            {%endif%}
-                            {% if session.agegroup in request.user.profile.agegroups.all or request.user.profile.privileged %}
-                            <div style="display: flex; justify-content: space-between; gap:5px;">
-                                <h4> {{session.spot.title}}</h4>
-                                <a class="more_info_button" style="padding:0px" target="_blank"
-                                    href="https://www.google.de/maps/dir//{{session.spot.lat}},{{session.spot.long}}/@{{session.spot.lat}},{{session.spot.long}},17z">
-                                    <i style="font-size:0.8rem;" class="fas fa-map-marker-alt more_info_button"></i>
-                                </a>
-                            </div>
-                            {% endif %}
-                        </div>
-                        {% if request.user.profile.privileged %}
-                        <div style="display: flex;">
-                            <div id="emaillist_{{session.pk}}"
-                                data-url="{% url 'trainer_get_sessionemails' session.pk %}"
-                                class="third_session tertiary_bg prim_hover email_copy" style="display:none; cursor: pointer; width:50%">
-                                <i class="far fa-envelope padding_all_small"><p>Emails</p></i>
-                            </div>
-                            <a href="{% url 'agegroup_detail' session.agegroup.pk %}" style="width:50%;padding:0px;">
-                                <div id="userlist_{{session.pk}}"
-                                    class="third_session tertiary_bg prim_hover" style="display:none; cursor: pointer">
-                                    <i class="far fa-user padding_all_small"><p>Liste</p></i>
-                                </div>
-                            </a>
-                        </div>
-                        {% endif %}
-                        <div id="trainerchip_{{session.pk}}" class="third_session tertiary_bg padding_all_small" style="text-align: left; display:none;">
-                            <!-- Trainerchip -->
-                            {% if session.agegroup in request.user.profile.agegroups.all or request.user.profile.privileged %}
-                            {% for trainer in session.trainer.all %}
-                            {% if trainer.trainer_telnr %}
-                            <div style="display:flex; gap:5px; margin-bottom:5px;">
-
-                                <div style="max-width:50px;max-height:50px;" class="grey_cover">
-                                    <img style="object-fit:scale; width:100%; height:100%;" src="{{trainer.image.url}}">
-                                </div>
-                                <div style="text-align: left;">
-                                    <p style="font-size:1.1rem;">{{trainer.user.first_name}} {{trainer.user.last_name}}</p>
-                                    <a class="more_info_button" style="padding:0px;" href="tel:{{trainer.trainer_telnr}}">{{trainer.trainer_telnr}}</a>
-                                </div>
-                            </div>
-                            {% endif %}
-                            {% endfor %}
-                            {% else %}
-                            <p style="color:grey;">Mit {{session.trainerlist}}</p>
-                            {% endif %}
-                        </div>
-                        <div id="trainerchipdisplay_{{session.pk}}" class="prim_hover third_session tertiary_bg trainerchip_display" style="cursor:pointer;">
-                            <i class="fas fa-angle-down prim_hover" style="color:grey"></i>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {%endfor%}
     </div>
-    <script>
-        $('body').on('click', '.trainerchip_display', function(){
-            var pk = $(this).attr('id').split('_')[1]
-            $(`#trainerchip_${pk}`).toggle(300)
-            $(`#emaillist_${pk}`).toggle(300)
-            $(`#userlist_${pk}`).toggle(300)
-            $(this).find('i').toggleClass('fa-angle-down').toggleClass('fa-angle-up')
-        });
-
-        $('body').on('click', '.email_copy', function(){
-            var pk= $(this).attr('id').split('_')[1]
-            $.ajax({
-                url: $(this).attr('data-url'),
-                success: function(data) {
-                    //write emails to clipboqrd
-                    navigator.clipboard.writeText(data['emailstring']);
-                    //close the menu
-                    $(`#trainerchipdisplay_${pk}`).click()
-                }
-            });
-        })
-    </script>
 </section>
