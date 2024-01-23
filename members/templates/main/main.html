@@ -37,7 +37,7 @@
         </nav>
     </div>
     <!-- Main page -->
-    <main class="mdl-layout__content mdl-color-text--grey-600">
+    <main class="mdl-layout__content mdl-color-text--grey-600" style="overflow: hidden;">
         <section class="mdl-layout__tab-panel" id="fixed-tab-1">
             <div class="page-content"></div>
         </section>
@@ -54,12 +54,12 @@
         <!-- footer -->
 
     </main>
-    <footer class="m-0 mdl-grid">
+    <div class="m-0 mdl-grid footer">
         <div class="mdl-grid">
             <div class="mdl-cell mdl-cell--12-col">
                 <a href="{%url 'impressum' %}">Impressum</a> ⋅ <a href="{%url 'dataprotection' %}">Datenschutz</a>
             </div>
         </div>
-    </footer>
+    </div>
 </div>
 {% endblock %}
