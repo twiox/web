@@ -7,15 +7,25 @@ body{
   padding:40px;
   position:relative;
 }
-.content .mdl-tooltip{
-  position: unset !important;
+h1,h2,h3,h4{
+  font-weight: 300 !important;
 }
 
 .m-2{
   margin:20px;
 }
+.my-2{
+  margin-top:20px;
+  margin-bottom:20px;
+}
+.m-0{
+  margin:0px !important;
+}
 .p-2{
   padding:20px;
+}
+.p-0{
+  padding:0px !important;
 }
 
 .top_right{
@@ -49,6 +59,10 @@ body{
   background-repeat: no-repeat;
   background-size: cover;
   opacity: 0.8;
+}
+
+.secondary-bg {
+  background-color: #ff4081 !important;
 }
 
 /* Start with the base page  */
