@@ -52,16 +52,14 @@
         </section>
 
         <!-- footer -->
-        <footer class="mdl-mini-footer">
-            <div class="mdl-mini-footer__left-section">
-                <div class="mdl-logo">Links</div>
-                <ul class="mdl-mini-footer__link-list">
-                <li><a href="{%url 'impressum' %}">Impressum</a>
-                </li>
-                <li><a href="{%url 'dataprotection' %}">Datenschutz</a></li>
-                </ul>
-            </div>
-        </footer>
+
     </main>
+    <footer class="m-0 mdl-grid">
+        <div class="mdl-grid">
+            <div class="mdl-cell mdl-cell--12-col">
+                <a href="{%url 'impressum' %}">Impressum</a> ⋅ <a href="{%url 'dataprotection' %}">Datenschutz</a>
+            </div>
+        </div>
+    </footer>
 </div>
 {% endblock %}
