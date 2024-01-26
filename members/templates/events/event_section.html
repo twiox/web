@@ -1,3 +1,13 @@
+<style>
+    .polygon{
+        width: 60px;
+        height: 60px;
+        color: white;
+        background-color: #088eaa;
+        clip-path:polygon(0 0,100% 0%,100% 78%,0% 100%);
+    }
+</style>
+
 <section class="section" id="event_section">
     <div class="content">
         <h1 class="mdl-typography--display-4">Veranstaltungen</h1>
@@ -25,46 +35,28 @@
             </div>
         </section>
         {% endif %}
-        <section>
+        <div class="mdl-grid p-0 m-0" >
             {% for event in events %}
             {% if not event.is_past_due %}
-                <div class="padding_all_small col-4" id="container">
-                    <div>
-                        {% if event.hinweis %}
-                                <div id="info_position">
-                                    <p class="session_alert"> {{event.hinweis}} </p>
-                                </div>
-                        {% endif %}
-                        <div style="display:flex;" class="tertiary_bg">
-                            <div class="padding_all_big polygon primary">
-                                    <p class="strong">{{event.start_date|date:'M' }}</p>
-                            </div>
-                            <div class="second_section padding_all_big" id="container">
-                                <p> {% if event.multiple_days %}
-                                    {{event.start_date|date:'d.m' }} -
-                                    {% endif %}
-                                    {{event.end_date|date:'d.m.Y' }}
-                                    </p>
-                                <h4>{{event.title}}</h4>
-                                <p style="color:grey;"> {{event.place}}</p>
-                                {% if user in event.participant_users %}
-                                    <p style="color:green" >angemeldet</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="third_session tertiary_bg padding_all_med">
-                            {% if not event.deadline_reached or event.deadline_reached and user in event.participant_users or user.profile.privileged %}
-                            <a class="more_info_button" href="{% url 'event_detail' event.id %}#nav">weitere Informationen</a>
-                            {% else %}
-                            <span style="color:grey; font-size: 0.9rem;">Anmeldung vorbei</span>
-                            {% endif %}
-                        </div>
+            <div class="mdl-cell mdl-cell--4-col mdl-cell--8-col-tablet mdl-cell--12-col-phone">
+                <div class="mdl-card mdl-shadow--2dp my-2 relative">
+                    <div class="polygon top_left">
+                        <h4 class="m-1">{{event.start_date|date:'M' }}</h4>
+                    </div>
+                    <h4 class="m-0 p-1" style="padding-left: 70px">{{event.title}}</h4>
+                    <div class="mdl-card__supporting-text">
+                        <p class="p-0">{% if event.multiple_days %}{{event.start_date|date:'d.m' }} - {% endif %} {{event.end_date|date:'d.m.Y' }}</p>
+                        <p class="m-0"> {{event.place}}</p>
+                    </div>
+                    <div class="mdl-card__actions mdl-card--border">
+                        <a class="mdl-button mdl-button--colored mdl-js-button">Details</a>
                     </div>
                 </div>
+            </div>
             {% endif %}
             {% empty %}
-                <p> Leider gibt es im Moment keine Events für dich </p>
+            <p> Leider gibt es im Moment keine Events für dich </p>
             {% endfor %}
-        </section>
+        </div>
     </div>
 </section>

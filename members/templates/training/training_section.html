@@ -29,9 +29,15 @@
         </section>
         {% endif %}
         <div class="mdl-grid" >
+            <style>
+                .mdl-card{
+                    min-height: 100px !important;
+                }
+            </style>
+
             {% for short, day, order in session_days %}
             <!-- one column for the sessions of each day -->
-            <div class="mdl-cell mdl-cell--3-col">
+            <div class="mdl-cell mdl-cell--3-col mdl-cell--4-col-tablet mdl-cell--12-col-phone">
                 <div class="card-square my-2 mdl-shadow--2dp">
                     <div class="mdl-card__title p-0 secondary-bg">
                         <div class="mdl-grid">
@@ -41,11 +47,11 @@
                 </div>
                 {% for session in sessions|lookup:short %}
                 <!--session hinweise -->
-                <div class="demo-card-event mdl-card mdl-shadow--2dp my-2">
+                <div class=" mdl-card mdl-shadow--2dp my-2">
                     <div class="mdl-card__supporting-text">
                         <h4 class="m-0">{{session.spot.title}}</h4>
                         <p class="p-0">{{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
-                        <p >Alter: {{session.agegroup.lower }} - {{session.agegroup.upper }} Jahre</p>
+                        <p class="m-0">Alter: {{session.agegroup.lower }} - {{session.agegroup.upper }} Jahre</p>
                     </div>
                     <div class="mdl-card__menu">
                         <a href="https://www.google.de/maps/dir//{{session.spot.lat}},{{session.spot.long}}/@{{session.spot.lat}},{{session.spot.long}},17z"
