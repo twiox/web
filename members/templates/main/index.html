@@ -47,9 +47,10 @@
         position: relative;
     }
     </style>
-    {% include "members/news/news_section.html"%}
-
-    <!-- Say Hello -->
+    <section id="news-section-wrapper"
+        hx-get="{% url 'get_news_section' %}"
+        hx-trigger="load once">
+    </section>
     <!-- The container for the Sessions -->
     <style>
     #training_section {
@@ -66,6 +67,9 @@
         hx-trigger="load once">
     </section>
     <!-- Here the Container for the Events -->
-    {% include "members/events/event_section.html"%}
+    <section id="training-section-wrapper"
+        hx-get="{% url 'get_event_section' %}"
+        hx-trigger="load once">
+    </section>
     <!--Now include contacts-->
 </div>

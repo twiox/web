@@ -3,7 +3,10 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="member_index"),
-    path("get-sessions", views.get_training_section, name="get_training_section"),
+    path("training/", include("members.tools.training")),
+    path("veranstaltungen/", include("members.tools.events")),
+    path("news/", include("members.tools.news")),
+    # this is the old stuff...
     path(
         "veranstaltungen/<int:pk>/",
         views.EventDetailView.as_view(),

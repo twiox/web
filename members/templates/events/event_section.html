@@ -1,44 +1,32 @@
 <section class="section" id="event_section">
     <div class="content">
         <h1 class="mdl-typography--display-4">Veranstaltungen</h1>
-        <div class="trainer_ui">
-            {% if perms.members.add_event %}
-                <a href="{% url 'event_create' %}#nav" title="Veranstaltung hinzufügen"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
-            {% endif %}
-            {% if perms.members.add_message %}
-                <a href="{% url 'message_eve_create' %}#nav" title="Hinweis hinzufügen"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
-            {% endif %}
-        </div>
-    </div>
-    {% if event_messags %}
-    <section>
-        <div class="secondary padding_all_med"><h4 class="strong">Wichtige Hinweise</h4></div>
-        <div class="tertiary_bg padding_tb_small">
-        {% for msg in event_messags %}
-             <div class="padding_all_med" >
-                <div id="container">
-                    <span style="color:grey; font-size:0.9rem;padding:0px;">Von {{msg.author.first_name}} ({{msg.date |date:'d.m.Y'}})</span>
-                    <h5>{{msg.title}}</h5>
-                    <p>{{msg.message}}</p>
-                    <div class="trainer_ui">
-                        {% if perms.members.delete_message %}
-                        <a href="{% url 'message_delete' msg.id %}#nav" title="Löschen"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
-                        {% endif %}
-                        {% if perms.members.change_message %}
-                        <a href="{% url 'message_update' msg.id %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
-                        {% endif %}
+        {% if event_messags %}
+        <section>
+            <div class="secondary padding_all_med"><h4 class="strong">Wichtige Hinweise</h4></div>
+            <div class="tertiary_bg padding_tb_small">
+            {% for msg in event_messags %}
+                <div class="padding_all_med" >
+                    <div id="container">
+                        <span style="color:grey; font-size:0.9rem;padding:0px;">Von {{msg.author.first_name}} ({{msg.date |date:'d.m.Y'}})</span>
+                        <h5>{{msg.title}}</h5>
+                        <p>{{msg.message}}</p>
+                        <div class="trainer_ui">
+                            {% if perms.members.delete_message %}
+                            <a href="{% url 'message_delete' msg.id %}#nav" title="Löschen"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
+                            {% endif %}
+                            {% if perms.members.change_message %}
+                            <a href="{% url 'message_update' msg.id %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
+            {% endfor %}
             </div>
-        {% endfor %}
-        </div>
-    </section>
-    {% endif %}
-
-    {% if events %}
-    <section style="display:flex; flex-wrap:wrap; justify-content:left;">
-        {% for event in events %}
-        {# show events that are not over, with the deadline not reached unless you are participant! #}
+        </section>
+        {% endif %}
+        <section>
+            {% for event in events %}
             {% if not event.is_past_due %}
                 <div class="padding_all_small col-4" id="container">
                     <div>
@@ -74,11 +62,9 @@
                     </div>
                 </div>
             {% endif %}
-        {% empty %}
-            <p> Leider gibt es im Moment keine Events für dich </p>
-        {% endfor %}
-    </section>
-    {% else %}
-        <p> Leider sind im Moment keine Events geplant </p>
-    {% endif %}
+            {% empty %}
+                <p> Leider gibt es im Moment keine Events für dich </p>
+            {% endfor %}
+        </section>
+    </div>
 </section>
