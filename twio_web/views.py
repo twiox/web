@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 
 def landing(request):
-    return render(request, "main/main.html", {})
+    return render(request, "main/layout.html", {})
 
 
 def impressum(request):

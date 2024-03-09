@@ -5,7 +5,7 @@ from django.urls import path
 
 def get_section(request):
     sessions = Session.objects.all()
-    training_messags = Message.objects.filter(display="sessions").distinct()
+    training_messages = Message.objects.filter(display="sessions").distinct()
 
     session_days = sorted(
         list(set([(x.day, x.weekday, x.order) for x in sessions])), key=lambda x: x[2]
@@ -18,10 +18,10 @@ def get_section(request):
     context = {
         "sessions": grouped_sessions,
         "session_days": session_days,
-        "training_messages": training_messags,
+        "messages": training_messages,
     }
 
-    return render(request, "training/training_section.html", context)
+    return render(request, "sections/training_section.html", context)
 
 
 urlpatterns = [

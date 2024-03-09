@@ -10,7 +10,7 @@ def get_section(request):
         "posts": posts,
     }
 
-    return render(request, "news/news_section.html", context)
+    return render(request, "sections/news_section.html", context)
 
 
 urlpatterns = [

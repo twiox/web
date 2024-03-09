@@ -1,6 +1,9 @@
 {% load static %}
 
 <style>
+/*
+Style for the main page
+*/
 /* this is the first section of the page */
 #main_section {
     z-index: 5;
@@ -8,7 +11,9 @@
 #main_section .parallax__layer--base {
     background: #607d8b;
 }
-
+/*
+The main image
+*/
 @media (orientation: portrait){
     #main_image {
         background-image: url("{% static 'media/interested_portrait.jpg'%}");
@@ -72,4 +77,10 @@
         hx-trigger="load once">
     </section>
     <!--Now include contacts-->
+    <div class="mdl-grid footer p-2">
+        <div class="mdl-cell mdl-cell--12-col">
+            <a href="{%url 'impressum' %}">Impressum</a> ⋅ <a href="{%url 'dataprotection' %}">Datenschutz</a>
+        </div>
+    </div>
+
 </div>

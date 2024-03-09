@@ -4,34 +4,24 @@
     <div class="content">
         <h1 class="mdl-typography--display-4">Training</h1>
         <!-- Here the Messages -->
-        {% if training_messages %}
-        <section>
-            <div class="secondary padding_all_med"><h4 class="strong">Wichtige Hinweise</h4></div>
-            <div class="tertiary_bg padding_tb_small">
-                {% for msg in training_messags %}
-                <div class="padding_all_med" >
-                    <div id="container">
-                        <span style="color:grey; font-size:0.9rem;padding:0px;">Von {{msg.author.first_name}} ({{msg.date |date:'d.m.Y'}})</span>
-                        <h5>{{msg.title}}</h5>
-                        <p>{{msg.message}}</p>
-                        <div class="trainer_ui">
-                            {% if perms.members.delete_message %}
-                            <a href="{% url 'message_delete' msg.id %}#nav" title="Löschen"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
-                            {% endif %}
-                            {% if perms.members.change_message %}
-                            <a href="{% url 'message_update' msg.id %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
-                            {% endif %}
-                        </div>
-                    </div>
+        {% if messages %}
+        <div class="mdl-grid">
+            <div class="mdl-cell mdl-cell--12-col p-2 light-bg mdl-shadow--2dp">
+                <h4 class="m-0 mdl-button--accent">Wichtige Hinweise</h4>
+                {% for msg in messages %}
+                <div class="m-1">
+                    <span>[{{msg.author.first_name}}, {{msg.date |date:'d.m.Y'}}]: <strong>{{msg.title}}</strong> </span>
+                    <p>{{msg.message}}</p>
                 </div>
                 {% endfor %}
             </div>
-        </section>
+        </div>
         {% endif %}
         <div class="mdl-grid" >
             <style>
                 .mdl-card{
                     min-height: 100px !important;
+                    max-width: 100%;
                 }
             </style>
 
