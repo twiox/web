@@ -14,9 +14,12 @@
     <section>
         {% include 'snippets/events/event_header.html' with event=object %}
 
-
         <div id="description">
-        {% include 'snippets/editor/editor_body.html' with event=object description=event.description readonly=False %}
+            {% if request.user.member.permission_level > 1 %}
+            {% include 'snippets/editor/editor_body.html' with event=object description=event.description readonly=False %}
+            {% else %}
+            {% include 'snippets/editor/editor_body.html' with event=object description=event.description readonly=True %}
+            {% endif %}
         </div>
     </section>
 {% endblock %}

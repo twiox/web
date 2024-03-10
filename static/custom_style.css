@@ -128,6 +128,9 @@ Color
 .light-bg {
   background-color: #ffffff !important;
 }
+.passive {
+  background-color: #9AD1DC !important;
+}
 
 
 /* Start with the base page  */
