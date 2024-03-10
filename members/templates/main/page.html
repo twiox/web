@@ -6,6 +6,13 @@
 {% endblock %}
 
 {% block body %}
+<style>
+.bg-white{
+    background-color: white;
+}
+
+</style>
+
 <div class="mdl-layout mdl-js-layout">
     <header class="mdl-layout__header mdl-layout__header--scroll">
         <div class="mdl-layout__header-row">
@@ -18,13 +25,8 @@
         </div>
     </header>
     <main class="mdl-layout__content">
-        <div class="page-content content">{% block content %}{% endblock %}</div>
+        <div class="page-content content bg-white">{% block content %}{% endblock %}</div>
     </main>
 </div>
 
 {% endblock %}
-
-<!-- No header, and the drawer stays open on larger screens (fixed drawer). -->
-
-
-

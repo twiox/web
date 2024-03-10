@@ -12,10 +12,11 @@
 
 {% block content %}
     <section>
-        <h1>{{object.title}}</h1>
+        {% include 'snippets/events/event_header.html' with event=object %}
 
 
+        <div id="description">
         {% include 'snippets/editor/editor_body.html' with event=object description=event.description readonly=False %}
-
+        </div>
     </section>
 {% endblock %}

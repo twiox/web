@@ -1,0 +1,97 @@
+{% load custom_filters %}
+
+<style>
+    .date_format{
+        color: #f3f3f3;
+        font-size:200%;
+    }
+    .date_small{
+        color: #f3f3f3;
+        font-size:14px;
+        text-transform: uppercase;
+    }
+    .event-header{
+        width: 100%;
+    }
+</style>
+
+{% with participation=request.user.pk|isin:event.participant_users %}
+<div class="mdl-card mdl-shadow--2dp my-2 event-header">
+    <div class="mdl-grid m-0 p-0 nowrap">
+        <div class="mdl-cell mdl-cell--2-col mdl-cell--6-col--tablet mdl-cell--6-col--phone
+            m-0 center {% if participation %} secondary-bg {% else %} primary-bg {% endif%}">
+            <div>
+                <span class="date_format">{{event.start_date|date:'d' }}</span>
+                {% if not event.multiple_days or event.start_date|date:'m' != event.end_date|date:'m' %}
+                <br><span class="date_small">{{event.start_date|date:'b' }}</span>
+                {% endif %}
+                {% if event.multiple_days %}
+                <br><span class="date_format">-</span><br>
+                <span class="date_format">{{event.end_date|date:'d' }}</span><br>
+                <span class="date_small">{{event.end_date|date:'b' }}</span>
+                {% endif %}
+                <br><br><span class="date_format">{{event.start_date|date:'Y' }}</span>
+            </div>
+        </div>
+        <div class="mdl-cell mdl-cell--10-col mdl-cell--6-col--tablet mdl-cell--6-col--phone">
+            <div class="mdl-grid m-0 p-0">
+                <div class="mdl-cell mdl-cell--6-col">
+                    <h3 class="p-0 m-0">{{object.title}}</h3>
+                    <h6 class="p-1 m-0">{{event.place}}</h6>
+                    <span class="mdl-chip">
+                        <span class="mdl-chip__text">
+                            {% if event.public_event %}Öffentlich{% else %}Für Mitglieder{% endif %}
+                        </span>
+                    </span>
+                    <span class="mdl-chip {% if participation %}secondary-bg{% else %}primary-bg{% endif %}">
+                        <span class="mdl-chip__text">
+                            {% if participation %}Angemeldet{% else %}Nicht angemeldet{% endif %}
+                        </span>
+                    </span>
+                    <div class="mdl-card__supporting-text">
+                        <p class="m-0">{{event.short}}</p>
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--6-col">
+                    <div class="my-2">
+                        <h5 class="p-0">Anmelden</h5>
+                        Altersgruppe:
+                        <span class="primary">
+                            {% if event.min_age == 0 and event.max_age == 99 %}Keine Einschränkungen{% else %}
+                                {% if event.min_age > 0 and event.max_age < 99 %}Von {{event.min_age}}
+                                {% elif event.min_age > 0 and event.max_age == 99 %}Ab {{event.min_age}} {% endif %}
+                                {% if event.max_age < 99 and event.min_age == 0 %}Bis {{event.max_age}}
+                                {% elif event.max_age < 99 and event.min_age > 0 %}bis {{event.max_age}}
+                                {% endif %}
+                                Jahre
+                            {% endif %}
+                        </span><br>
+                        Kosten:
+                        <span class="primary">
+                            {% if event.costs == 0 %}Keine{% else %}{{event.costs}} €{% endif %}
+                        </span>
+                    </div>
+                    <div class="mdl-card__actions mdl-card--border">
+                        {% if not event.deadline_reached %}
+                            {% if participation %}
+                            <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent primary-bg" href="#">Abmelden</a>
+                            {% else %}
+                            <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="#">Anmelden</a>
+                            {% endif %}
+                            <br><br>
+                            <strong>
+                                {% if not participation %}Anmeldung{% else %}Abmeldung{% endif %} bis {{event.deadline|date:'d.m.Y' }} möglich
+                            </strong>
+                        {% else %}
+                            <strong>
+                                Der An- und Abmeldezeitraum ist vorbei
+                            </strong>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endwith %}
