@@ -6,12 +6,8 @@ urlpatterns = [
     path("training/", include("members.tools.training")),
     path("veranstaltungen/", include("members.tools.events")),
     path("news/", include("members.tools.news")),
+    path("editor/", include("members.tools.editor")),
     # this is the old stuff...
-    path(
-        "veranstaltungen/<int:pk>/",
-        views.EventDetailView.as_view(),
-        name="event_detail",
-    ),
     path("veranstaltungen/neu/", views.EventCreateView.as_view(), name="event_create"),
     path(
         "veranstaltungen/<int:pk>/ändern/",

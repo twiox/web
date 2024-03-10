@@ -27,6 +27,8 @@
     <link rel="stylesheet" href="{% static 'packages/material.blue_grey-pink.min.css' %}" />
     <script src="{% static 'packages/material.min.js' %}"></script>
 
+    {% block head %}{% endblock %}
+
 </head>
 <body>
         <!-- Snackbars -->
@@ -44,6 +46,7 @@
                 snackbarContainer.MaterialSnackbar.showSnackbar(data);
             </script>
         {% endfor %}
-    {% block content %}{% endblock %}
+
+    {% block body %}{% endblock %}
 </body>
 </html>

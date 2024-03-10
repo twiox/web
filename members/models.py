@@ -80,7 +80,7 @@ class Document(models.Model):
     )
     # foreign key relationships to where files can be saved
     member_participants = models.ForeignKey(
-        "MemberParticipant", on_delete=models.CASCADE, null=True, blank=True
+        "Participant", on_delete=models.CASCADE, null=True, blank=True
     )
     event_public = models.ForeignKey(
         "Event",
@@ -109,38 +109,67 @@ class Document(models.Model):
         self.save()
 
 
-class MemberParticipant(models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True
-    )  # set null, so that we still see the number of participants even after user is gone
+class Description(models.Model):
+    content = models.TextField("content", blank=True, null=True)
+    # to link the description to other models
+    event = models.OneToOneField(
+        "Event",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="description",
+    )
+
+
+class Participant(models.Model):
+    # of which event?
+    event = models.ForeignKey(
+        "Event", on_delete=models.CASCADE, related_name="participant"
+    )
+    # who is it?
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    # related to finances
     payed = models.BooleanField("Bezahlt", default=False)
-    notes = models.TextField("Notizen", blank=True, null=True)
-    event = models.ForeignKey("Event", on_delete=models.CASCADE)
     storno = models.BooleanField("Storno", default=False)
-    has_ticket = models.BooleanField("Deutschlandticket", default=False)
+    # now the additional fields
+    notes = models.TextField("Notizen", blank=True, null=True)
+    fields = models.TextField("Formfelder", blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
 
 
 class Event(models.Model):
+    # very basic information
+    info_only = models.BooleanField("Nur Ankündigung?", default=True)
+    public_event = models.BooleanField("Öffentliche Veranstaltung", default=False)
+    notes = models.CharField("Hinweis", blank=True, max_length=50)
+
+    # what kind of event?
     title = models.CharField("Event-name", max_length=100)
-    place = models.CharField(
-        "Veranstaltungsort", max_length=200, blank=True, default="Leipzig"
-    )
     short = models.TextField("Kurzbeschreibung", blank=True, null=True)
-    # keep them in for now - for legacy reasons
-    description = models.TextField("Beschreibung", blank=True)
-    description_rendered = models.TextField(blank=True, null=True)
+
+    # time and place
     deadline = models.DateTimeField("Anmeldung/Abmeldung bis", blank=True, null=True)
     start_date = models.DateTimeField("Datum Beginn", blank=True, null=True)
     end_date = models.DateTimeField("Datum Ende", blank=True, null=True)
-    hinweis = models.CharField("Hinweis", blank=True, max_length=50)
+    place = models.CharField(
+        "Veranstaltungsort", max_length=200, blank=True, default="Leipzig"
+    )
+
+    # what are the costs?
     costs = models.DecimalField(
         "Kosten", blank=True, null=True, max_digits=8, decimal_places=2
     )
-    info_only = models.BooleanField("Nur Ankündigung?", default=False)
 
+    # for participation?
+    min_age = models.IntegerField("Mindestalter", default=0)
+    max_age = models.IntegerField("Höchstalter", default=99)
+
+    # questions for the participants
+    fields = models.TextField("Formfelder", blank=True, null=True)
+
+    # documents, maybe find a better way?
     teilnahmebedingungen = models.FileField(
         "Teilnahmebedingungen", upload_to=f"Events/Docs/", null=True, blank=True
     )
@@ -151,8 +180,6 @@ class Event(models.Model):
         "Einverständnis", upload_to=f"Events/Docs/", null=True, blank=True
     )
 
-    participants = models.ManyToManyField(User)
-
     # if we query over events, we want the most recent one firsthand
     class Meta:
         ordering = ["start_date"]
@@ -161,10 +188,11 @@ class Event(models.Model):
     def get_absolute_url(self):
         return reverse("event_detail", kwargs={"pk": self.pk})
 
+    # this returns a list of pk of the users that are participants and are not marked
+    # as cancelled
     @property
     def participant_users(self):
-        q = MemberParticipant.objects.filter(Q(event=self) & Q(storno=False))
-        return list([part.user for part in q])
+        return self.participant.filter(storno=False).values_list("user", flat=True)
 
     @property
     def deadline_reached(self):

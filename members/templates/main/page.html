@@ -1,0 +1,30 @@
+{% extends 'main/base.html' %}
+
+{% block head %}
+    {% block extra_head %}
+    {% endblock %}
+{% endblock %}
+
+{% block body %}
+<div class="mdl-layout mdl-js-layout">
+    <header class="mdl-layout__header mdl-layout__header--scroll">
+        <div class="mdl-layout__header-row">
+            <!-- Title -->
+            <span class="mdl-layout-title">{% block title %}{% endblock %}</span>
+            <!-- Navigation -->
+            <nav class="mdl-navigation">
+                <a class="mdl-navigation__link" href="javascript:history.back()">ZURÜCK</a>
+            </nav>
+        </div>
+    </header>
+    <main class="mdl-layout__content">
+        <div class="page-content content">{% block content %}{% endblock %}</div>
+    </main>
+</div>
+
+{% endblock %}
+
+<!-- No header, and the drawer stays open on larger screens (fixed drawer). -->
+
+
+

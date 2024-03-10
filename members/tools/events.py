@@ -1,5 +1,7 @@
 from members.models import Event, Message
 from django.shortcuts import render
+from django.views.generic import DetailView
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import path
 import itertools
 import locale
@@ -32,6 +34,28 @@ def get_section(request):
     return render(request, "sections/event_section.html", context)
 
 
+#
+#
+# For the detail-view
+#
+#
+
+
+def event_test_func(request, event):
+    # members can see all events, otherwise if public event
+    return any([request.user.is_authenticated, event.public_event])
+
+
+class EventDetailView(UserPassesTestMixin, DetailView):
+    template_name = "pages/event_detail.html"
+    model = Event
+
+    def test_func(self):
+        event = self.get_object()
+        return event_test_func(self.request, event)
+
+
 urlpatterns = [
     path("get-section", get_section, name="get_event_section"),
+    path("<int:pk>", EventDetailView.as_view(), name="get_event_detail"),
 ]

@@ -23,7 +23,7 @@ from .models import (
     Image,
     Gallery,
     AgeGroup,
-    MemberParticipant,
+    Participant,
     Document,
 )
 from django.contrib.auth.decorators import login_required, permission_required
@@ -77,42 +77,12 @@ def index(request):
 """FOR THE EVENTS"""
 
 
-def event_test_func(request, event):
-    if bool(trainer_check(request) or chairman_check(request)):
-        return True
-    return event in Event.objects.filter(
-        allowed_agegroups__in=request.user.profile.agegroups
-    )
-
-
 class EventListView(LoginRequiredMixin, ListView, UserPassesTestMixin):
     model = Event
     template = "members/event_list.html"
 
     def test_func(self):
         return self.request.user.profile.privileged
-
-
-class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
-    # template: event_detail.html
-    model = Event
-
-    def get_context_data(self, **kwargs):
-        context = super(EventDetailView, self).get_context_data(**kwargs)
-        try:
-            tmp = {
-                "part": MemberParticipant.objects.get(
-                    event=self.object, user=self.request.user
-                )
-            }
-        except:
-            tmp = {}
-        context.update(tmp)
-        return context
-
-    def test_func(self):
-        event = self.get_object()
-        return event_test_func(self.request, event)
 
 
 class EventCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
@@ -170,7 +140,7 @@ class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         if form.is_valid():
             event = self.get_object()
             user = request.user
-            part, created = MemberParticipant.objects.get_or_create(
+            part, created = Participant.objects.get_or_create(
                 event=event,
                 user=user,
             )
@@ -209,7 +179,7 @@ class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
             event = self.get_object()
 
             try:  # the very edge-case that in a legacy event people unparticipate before being converted to new participants
-                part = MemberParticipant.objects.get(event=event, user=request.user)
+                part = Participant.objects.get(event=event, user=request.user)
                 part.storno = True
                 part.save()
             except:
@@ -247,7 +217,7 @@ class EventOrgaView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         check = set([x.user for x in participants])
         for user in self.object.participants.all():
             if user not in check:
-                tmp = MemberParticipant(user=user, event=self.object)
+                tmp = Participant(user=user, event=self.object)
                 tmp.save()
                 participants.append(tmp)
                 # remove from the legacy-list
@@ -288,7 +258,7 @@ def ajax_event_filehandle(request):
 
 ## Ajax Event Orga Stuff
 def update_memberparticipant(request):
-    part = MemberParticipant.objects.get(pk=request.POST.get("id"))
+    part = Participant.objects.get(pk=request.POST.get("id"))
     field = request.POST.get("field")
     check, text = request.POST.get("value").split(",", 1)
     if field in ["payed", "has_ticket"]:

@@ -1,0 +1,27 @@
+<div class="mdl-card mdl-shadow--2dp my-2 event-card">
+    <div class="mdl-grid m-0 p-0 nowrap">
+        <div class="mdl-cell mdl-cell--4-col m-0 center {% if request.user.pk in event.participant_users %} secondary-bg {% else %} primary-bg {% endif%}">
+            <div>
+                <span class="date_format">{{event.start_date|date:'d' }}</span>
+                {% if not event.multiple_days or event.start_date|date:'m' != event.end_date|date:'m' %}
+                <br><span class="date_small">{{event.start_date|date:'b' }}</span>
+                {% endif %}
+                {% if event.multiple_days %}
+                <br><span class="date_format">-</span><br>
+                <span class="date_format">{{event.end_date|date:'d' }}</span><br>
+                <span class="date_small">{{event.end_date|date:'b' }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="mdl-cell mdl-cell--8-col">
+            <span class="primary">{{event.start_date|date:'H:i' }}{% if not event.multiple_days %} - {{event.end_date|date:'H:i' }}{% endif %} Uhr</span><br>
+            <strong>{{event.title}}</strong>
+            <div class="mdl-card__supporting-text">
+                <p class="m-0">{{event.short}}</p>
+            </div>
+            <div class="mdl-card__actions mdl-card--border">
+                <a class="mdl-button mdl-button--colored mdl-js-button" href="{% url 'get_event_detail' event.pk %}">Details</a>
+            </div>
+        </div>
+    </div>
+</div>
