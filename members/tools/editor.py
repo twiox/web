@@ -1,5 +1,5 @@
 from django.urls import path
-from members.models import Description, Event
+from members.models import Description, Event, DescriptionImage
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -29,7 +29,53 @@ def save_description(request):
     return JsonResponse({})
 
 
+@csrf_exempt
+def upload(request):
+    """
+    Upload entry point, should be called with 'file' or 'image' in request.FILES and
+    'type' in request.GET
+    """
+    type = request.GET.get("type", None)
+
+    # NO file, upload url
+    if type == "url":
+        url = json.loads(request.body).get("url")
+        return JsonResponse(
+            {
+                "success": 1,
+                "file": {
+                    "url": url,
+                },
+            }
+        )
+
+    if type == "image":
+        # now get the file
+        image = request.FILES.get("image")
+        img = DescriptionImage(image=image)
+        img.save()
+        img.refresh_from_db()
+
+        if img.pk:
+            success = 1
+            url = img.image.url
+
+        else:
+            success = 0
+            url = ""
+
+        return JsonResponse(
+            {
+                "success": success,
+                "file": {
+                    "url": url,
+                },
+            }
+        )
+
+
 urlpatterns = [
     path("get", get_description, name="get-description"),
     path("save", save_description, name="save-description"),
+    path("upload", upload, name="editor_upload"),
 ]

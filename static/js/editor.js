@@ -20,9 +20,6 @@ $.getJSON({
             holder: 'editorjs',
             minHeight : 30,
             tools: {
-                footnotes: {
-                    class: FootnotesTune,
-                },
                 header: {
                     class: Header,
                     inlineToolbar: true,
@@ -42,8 +39,17 @@ $.getJSON({
                     class: Table,
                     inlineToolbar: true,
                 },
+                image: {
+                    class: ImageTool,
+                    config: {
+                      endpoints: {
+                        byFile: $('#guide').attr('data-url'),
+                        byUrl: $('#guideurl').attr('data-url'),
+                      },
+                    }
+                },
             },
-            tunes: ['footnotes'],
+            tunes: [],
             data: response,
         });
         // if not readonly, add save-function

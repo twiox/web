@@ -13,11 +13,16 @@
       color:grey !important;
     }
     .image-tool__image{margin-bottom: 0px !important;}
+    .image-tool--withBackground .image-tool__image{
+        background: inherit !important;
+    }
 </style>
 
-
+<!-- required for js and backend -->
 <div id="editorjs" data-url="{% url 'get-description' %}?id={{description.pk}}&event={{event.pk}}"></div>
 <p id="readonly" style="display:none;">{{readonly}}</p>
+<div id="guide" data-url="{% url 'editor_upload' %}?type=image"></div> <!--guide is used for image upload, to save the file to the right place-->
+<div id="guideurl" data-url="{% url 'editor_upload' %}?type=url"> </div><!--guide is used for image upload, to save the file to the right place-->
 
 {% if readonly == False %}
 <div class="center" id="saveButton">

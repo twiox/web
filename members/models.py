@@ -109,6 +109,10 @@ class Document(models.Model):
         self.save()
 
 
+class DescriptionImage(models.Model):
+    image = models.ImageField("Foto", upload_to=f"description_images/")
+
+
 class Description(models.Model):
     content = models.TextField("content", blank=True, null=True)
     # to link the description to other models
