@@ -27,7 +27,16 @@ class SpotForm(forms.ModelForm):
 class SessionForm(forms.ModelForm):
     class Meta:
         model = Session
-        fields = ["title", "day", "start_time", "end_time", "hinweis", "spot", "trainer", "agegroup"]
+        fields = [
+            "title",
+            "day",
+            "start_time",
+            "end_time",
+            "hinweis",
+            "spot",
+            "trainer",
+            "agegroup",
+        ]
         widgets = {
             "trainer": forms.CheckboxSelectMultiple,
         }
@@ -46,14 +55,10 @@ class EventForm(forms.ModelForm):
             "deadline",
             "hinweis",
             "description",
-            "allowed_agegroups",
             "teilnahmebedingungen",
             "datenschutz",
             "einverstaendnis",
         ]
-        widgets = {
-            "allowed_agegroups": forms.CheckboxSelectMultiple,
-        }
 
 
 class EventUpdateParticipantForm(forms.ModelForm):

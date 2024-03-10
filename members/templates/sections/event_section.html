@@ -2,12 +2,18 @@
 
 
 <style>
-    .polygon{
-        width: 60px;
-        height: 60px;
-        color: white;
-        background-color: #088eaa;
-        clip-path:polygon(0 0,100% 0%,100% 78%,0% 100%);
+    .date_format{
+        color: #f3f3f3;
+        font-size:200%;
+    }
+    .date_small{
+        color: #f3f3f3;
+        font-size:14px;
+        text-transform: uppercase;
+    }
+    .event-card{
+        min-width: 300px;
+        min-height: 150px !important;
     }
 </style>
 
@@ -27,38 +33,49 @@
             </div>
         </div>
         {% endif %}
-        {% for year in events %}
-            <h3 class="m-1">{{year}}</h3>
-            <div class="mdl-grid p-0 m-0" >
-
+            <div class="mdl-grid p-0 m-0 nowrap--scroll" >
+                {% for year in events %}
                 {% for month in events|lookup:year %}
-                <!-- one column for the sessions of each day -->
                 <div class="mdl-cell mdl-cell--4-col mdl-cell--4-col-tablet mdl-cell--12-col-phone">
-                    <div class="card-square my-2 mdl-shadow--2dp">
-                        <div class="mdl-card__title p-0 primary-bg">
-                            <div class="mdl-grid">
-                                <div class="mdl-cell mdl-cell--12-col"><h4 class="m-0">{{ month }}</h4></div>
-                            </div>
-                        </div>
-                    </div>
+
+                    <h4 class="m-0">{{ month }} {{year}}</h4>
+
                     {% for event in events|lookup:year|lookup:month %}
-                    <div class="mdl-card mdl-shadow--2dp my-2 relative">
-                        <h4 class="m-0 p-1">{{event.title}}</h4>
-                        <div class="mdl-card__supporting-text">
-                            <p class="p-0">{% if event.multiple_days %}{{event.start_date|date:'d.m' }} - {% endif %} {{event.end_date|date:'d.m.Y' }}</p>
-                            <p class="m-0"> {{event.place}}</p>
-                        </div>
-                        <div class="mdl-card__actions mdl-card--border">
-                            <a class="mdl-button mdl-button--colored mdl-js-button">Details</a>
+                    <div class="mdl-card mdl-shadow--2dp my-2 event-card">
+                        <div class="mdl-grid m-0 p-0 nowrap">
+                            <div class="mdl-cell mdl-cell--4-col m-0 center {% if request.user in event.participants.all %} secondary-bg {% else %} primary-bg {% endif%}">
+                                <div>
+                                    <span class="date_format">{{event.start_date|date:'d' }}</span>
+                                    {% if not event.multiple_days or event.start_date|date:'m' != event.end_date|date:'m' %}
+                                    <br><span class="date_small">{{event.start_date|date:'b' }}</span>
+                                    {% endif %}
+                                    {% if event.multiple_days %}
+                                    <br><span class="date_format">-</span><br>
+                                    <span class="date_format">{{event.end_date|date:'d' }}</span><br>
+                                    <span class="date_small">{{event.end_date|date:'b' }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="mdl-cell mdl-cell--8-col">
+                                <span class="primary">{{event.start_date|date:'H:i' }}{% if not event.multiple_days %} - {{event.end_date|date:'H:i' }}{% endif %} Uhr</span><br>
+                                <strong>{{event.title}}</strong>
+                                <div class="mdl-card__supporting-text">
+                                    <p class="m-0">{{event.short}}</p>
+                                </div>
+                                <div class="mdl-card__actions mdl-card--border">
+                                    <a class="mdl-button mdl-button--colored mdl-js-button">Details</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
                 {% endfor %}
+                {% empty %}
+                    <h4>Aktuell sind keine Events geplant</h4>
+                {% endfor %}
             </div>
-        {% empty %}
-            <h4>Aktuell sind keine Events geplant</h4>
-        {% endfor %}
+
         </div>
     </div>
 </section>
