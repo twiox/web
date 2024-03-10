@@ -66,9 +66,13 @@
                                 Jahre
                             {% endif %}
                         </span><br>
-                        Kosten:
+                        Kosten{% if request.user.is_authenticated == False %} (Nichtmitglieder){% endif %}:
                         <span class="primary">
-                            {% if event.costs == 0 %}Keine{% else %}{{event.costs}} €{% endif %}
+                            {% if request.user.is_authenticated %}
+                                {% if event.costs == 0 %}Keine{% else %}{{event.costs}} €{% endif %}
+                            {% else %}
+                                {% if event.external_costs == 0 %}Keine{% else %}{{event.external_costs}} €{% endif %}
+                            {% endif%}
                         </span>
                     </div>
                     <div class="mdl-card__actions mdl-card--border">

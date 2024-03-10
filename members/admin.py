@@ -5,8 +5,6 @@ from .models import *
 admin.site.register(Profile)
 admin.site.register(Session)
 admin.site.register(Spot)
-admin.site.register(Group)
-admin.site.register(AgeGroup)
 admin.site.register(Event)
 admin.site.register(Trainer)
 admin.site.register(Message)

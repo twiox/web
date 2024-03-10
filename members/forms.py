@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Event, Session, Group, Spot, Document
+from .models import Event, Session, Spot, Document
 
 
 class EventFileForm(forms.ModelForm):
@@ -35,7 +35,6 @@ class SessionForm(forms.ModelForm):
             "hinweis",
             "spot",
             "trainer",
-            "agegroup",
         ]
         widgets = {
             "trainer": forms.CheckboxSelectMultiple,

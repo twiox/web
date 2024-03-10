@@ -109,26 +109,6 @@
                     </label>
                 </div>
             </div>
-            <h5>Gruppen</h5>
-            <div style="display:flex; flex-wrap: wrap;">
-            {% for value, text in form.allowed_agegroups.field.choices %}
-            <div class="mdc-form-field padding_all_small">
-                <div class="mdc-checkbox">
-                  <input type="checkbox" class="mdc-checkbox__native-control" id="speicherung{{forloop.counter0}}" name="{{ form.allowed_agegroups.name }}"
-                  value="{{ value }}" {% if value in picked_groups %} checked="checked" {% endif %}>
-                  <div class="mdc-checkbox__background">
-                    <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
-                      <path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
-                    </svg>
-                    <div class="mdc-checkbox__mixedmark"></div>
-                  </div>
-                </div>
-                <label for="speicherung{{forloop.counter0}}">
-                    <div align="left">{{ text }}</div>
-                </label>
-            </div>
-            {% endfor %}
-            </div>
 
             <h5>Beschreibung</h5>
             <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">

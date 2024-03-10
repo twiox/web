@@ -2,7 +2,6 @@ from .forms import *
 from .tokens import account_activation_token
 from .permissions import trainer_permissions, chairman_permissions
 from members.models import (
-    Group,
     Chairman,
     Profile,
     AdditionalEmail,
@@ -353,13 +352,6 @@ class PasswordResetConfirmView(PasswordResetConfirmView):
         return reverse("index")
 
 
-def mailing_lists(request):
-    groups = Group.objects.all()
-    return render(
-        request, "user_handling/mailing-lists.html", context={"groups": groups}
-    )
-
-
 def trainer_or_chairman(user):
     if hasattr(user, "trainer"):
         return True
@@ -396,8 +388,7 @@ def get_all_emails(request):
         active_only = False
     emails = []
     try:  # non-id = status
-        group = Group.objects.get(pk=int(data["id"]))
-        for profile in Profile.objects.filter(group=group):
+        for profile in Profile.objects.all():
             status = profile.status
             if active_only and status != "Ordentliches Mitglied":
                 continue
@@ -430,7 +421,6 @@ def get_all_emails(request):
 @permission_required("auth.add_user", raise_exception=True)
 def member_detail_form(request, pk):
     user = User.objects.get(pk=int(pk))
-    groups = [(x.pk, f"Gruppe: {x.group_id}") for x in Group.objects.all()]
     membership_choices = user.profile.choices
     zahlungsart_choices = user.profile.choices2
     additional_emails = AdditionalEmail.objects.filter(user=user)
@@ -440,7 +430,6 @@ def member_detail_form(request, pk):
         "user_handling/ajax/member_detail.html",
         context={
             "user": user,
-            "group_choices": groups,
             "zahlungsart_choices": zahlungsart_choices,
             "membership_choices": membership_choices,
             "additional_emails": additional_emails,
@@ -466,7 +455,6 @@ def member_detail_update(request, pk):
     user.profile.parent_telnr = data["parent_telnr"]
     user.profile.status = data["status"]
     user.profile.member_num = data["member_num"]
-    # user.profile.group = Group.objects.get(pk=int(data['group']))
     user.profile.membership_start = data["membership_start"]
     user.profile.membership_end = (
         data["membership_end"] if data["membership_end"] != "" else None

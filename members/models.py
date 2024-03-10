@@ -29,47 +29,9 @@ class Spot(models.Model):
     title = models.CharField("Spotname", max_length=30)
     lat = models.CharField("Latitude", max_length=30, default="51.347127")
     long = models.CharField("Longitude", max_length=30, default="12.350504")
-    description = models.TextField(
-        "Beschreibung, Zusatzinformation", default="Lorem Ipsum"
-    )
-    description_rendered = models.TextField(blank=True, null=True)
-    picture = models.ImageField(
-        "Foto vom Spot", blank=True, null=True, upload_to="spot_pics/"
-    )
 
     def __str__(self):
         return f"Spot: {self.title}"
-
-    def get_absolute_url(self):
-        return reverse("spot_detail", kwargs={"pk": self.pk})
-
-
-class AgeGroup(models.Model):
-    lower = models.IntegerField("von", default=0)
-    upper = models.IntegerField("bis", default=99)
-
-    class Meta:
-        ordering = ["lower"]
-
-    def __str__(self):
-        return f"Altersgruppe: {self.lower} - {self.upper} Jahre"
-
-    def get_profiles(self):
-        profiles = Profile.objects.filter(birthday__isnull=False)
-        return [x for x in profiles if self in x.agegroups]
-
-    def get_absolute_url(self):
-        return reverse("agegroup_list")
-
-
-class Group(models.Model):
-    group_id = models.CharField("Gruppe (z.B 'A')", max_length=10)
-
-    def __str__(self):
-        return f"Gruppe: {self.group_id}" if self.group_id else "Gruppe ohne Id"
-
-    def get_absolute_url(self):
-        return reverse("group_list")
 
 
 ## Event related models
@@ -164,6 +126,9 @@ class Event(models.Model):
     # what are the costs?
     costs = models.DecimalField(
         "Kosten", blank=True, null=True, max_digits=8, decimal_places=2
+    )
+    external_costs = models.DecimalField(
+        "Externe Kosten", blank=True, null=True, max_digits=8, decimal_places=2
     )
 
     # for participation?
@@ -270,21 +235,6 @@ class Trainer(models.Model):
 
 
 class Session(models.Model):
-    group = models.ForeignKey(
-        Group,
-        on_delete=models.CASCADE,
-        verbose_name="Gruppe",
-        blank=True,
-        null=True,
-    )
-    agegroup = models.ForeignKey(
-        AgeGroup,
-        on_delete=models.SET_NULL,
-        verbose_name="Altersgruppe",
-        related_name="agegroup",
-        blank=True,
-        null=True,
-    )
     trainer = models.ManyToManyField(Trainer, blank=True, verbose_name="Trainer")
     spot = models.ForeignKey(
         Spot, blank=True, null=True, on_delete=models.SET_NULL, verbose_name="Spot"
@@ -300,7 +250,6 @@ class Session(models.Model):
 
     class Meta:
         ordering = ["start_time"]
-        permissions = [("see_group", "Can see members of the group")]
 
     @property
     def trainerlist(self):
@@ -359,17 +308,13 @@ class Session(models.Model):
 class Message(models.Model):
     choices = (("sessions", "Sessions"), ("events", "Events"))
     title = models.CharField("Titel", max_length=200)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     message = models.TextField(
         "Hinweis", default="Deine Nachricht hier", blank=True, null=True
     )
     date = models.DateTimeField(default=datetime(2020, 11, 14, 1, 54, 52, 799289))
     autodelete = models.DateTimeField("Automatisches Löschen", blank=True, null=True)
     display = models.CharField(max_length=20, choices=choices, blank=True)
-    groups = models.ManyToManyField(Group, verbose_name="Für die Gruppen", blank=True)
-    agegroup = models.ManyToManyField(
-        AgeGroup, verbose_name="Altersgruppen", related_name="message", blank=True
-    )
 
     def save(self, *args, **kwargs):
         self.date = datetime.today()
@@ -476,7 +421,6 @@ class Profile(models.Model):
         max_length=40, choices=choices, default="Ordentliches Mitglied"
     )
     member_num = models.CharField("Mitgliedsnummer", blank=True, max_length=30)
-    group = models.ForeignKey(Group, blank=True, null=True, on_delete=models.SET_NULL)
     membership_start = models.DateTimeField(
         "Beginn der Mitgliedschaft", null=True, blank=True
     )
@@ -504,10 +448,6 @@ class Profile(models.Model):
             or self.user.is_superuser
             or hasattr(self.user, "trainer")
         )
-
-    @property
-    def agegroups(self):
-        return AgeGroup.objects.filter(Q(upper__gte=self.age) & Q(lower__lte=self.age))
 
     @property
     def age(self):
