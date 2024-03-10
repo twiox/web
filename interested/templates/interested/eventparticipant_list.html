@@ -95,15 +95,5 @@
             }
         });
     });
-    $('.mail_click').on('click', function(){
-        $.ajax({
-            data: {'id':$(this).attr("id")},
-            url: '{% url "get_participants_emails" %}?type=public',
-            type: 'GET',
-            success: function (data){
-                navigator.clipboard.writeText(data['string']);
-            }
-        });
-    });
 </script>
 {% endblock %}
