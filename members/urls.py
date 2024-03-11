@@ -119,22 +119,8 @@ urlpatterns = [
     path(
         "beiträge/<int:pk>/löschen", views.NewsDeleteView.as_view(), name="news_delete"
     ),
-    path("shop", views.ShopItemListView.as_view(), name="shop"),
-    path(
-        "shop/ändere_item/<int:pk>",
-        views.ShopItemUpdateView.as_view(),
-        name="shopitem_update",
-    ),
-    path("shop/neues_item/", views.create_shopitem, name="shopitem_create"),
-    path(
-        "shop/entferne_item/<int:pk>",
-        views.ShopItemDeleteView.as_view(),
-        name="shopitem_delete",
-    ),
     path("ajax/get/bilder_daten", views.get_image_data, name="get_image_data"),
     path("ajax/set/bilder_daten", views.set_image_data, name="set_image_data"),
-    path("ajax/entferne/bild", views.delete_image, name="delete_image"),
-    path("ajax/hinzufügen/bild", views.add_image, name="upload_image_file"),
     path("ajax/weitere_email/neu", views.add_another_email, name="add_another_email"),
     path(
         "ajax/weitere_email/löschen",

@@ -28,7 +28,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "members.apps.MembersConfig",
     "interested.apps.InterestedConfig",
-    "organizers.apps.OrganizersConfig",
     "trainer.apps.TrainerConfig",
     "user_handling.apps.UserHandlingConfig",
     "six",

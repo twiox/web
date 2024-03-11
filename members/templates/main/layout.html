@@ -29,7 +29,6 @@
             {% if perms.auth.add_user %}
                 <a class="mdl-navigation__link" href="{% url 'chairman_index' %}">Vorstandsseite</a>
             {% endif %}
-            <a class="mdl-navigation__link" href="{% url 'shop' %}">Shop</a>
             <a class="mdl-navigation__link" href="{% url 'logout' %}">Logout</a>
             {% else %}
             <a class="mdl-navigation__link" href="{% url 'login' %}">Login</a>
