@@ -6,12 +6,17 @@ from .models import Event, Session, Spot, Document
 
 class EventForm(forms.ModelForm):
     start_date = forms.DateTimeField(
-        widget=forms.TextInput(attrs={"type": "datetime-local"})
+        widget=forms.TextInput(attrs={"type": "datetime-local"}),
+        input_formats=["%Y-%m-%dT%H:%M"],
     )
     end_date = forms.DateTimeField(
-        widget=forms.TextInput(attrs={"type": "datetime-local"})
+        widget=forms.TextInput(attrs={"type": "datetime-local"}),
+        input_formats=["%Y-%m-%dT%H:%M"],
     )
-    deadline = forms.DateField(widget=forms.TextInput(attrs={"type": "date"}))
+    deadline = forms.DateTimeField(
+        widget=forms.TextInput(attrs={"type": "datetime-local"}),
+        input_formats=["%Y-%m-%dT%H:%M"],
+    )
 
     class Meta:
         model = Event

@@ -3,7 +3,7 @@
 
 {% block content %}
     <section>
-        <h1>Neue Veranstaltung</h1>
+        <h1>{{object.title|default:"Neue Veranstaltung"}}</h1>
         <form class="uniForm" method="post">
         {% csrf_token %}
         {{form|crispy}}
