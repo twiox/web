@@ -22,11 +22,18 @@
     </main>
 </div>
 
-<!--This is for Crispy Forms-->
 <script type="text/javascript">
+    //This is for Crispy Forms
     $(function(){
       $('form.uniForm').uniform();
     });
+    //This is for MDL Forms
+    //see https://github.com/google/material-design-lite/issues/1502#issuecomment-211702642
+    $(window).on('load', function(){
+            $('input[data-required]').each(function(){
+                $(this).attr('required',true)
+            });
+    })
 </script>
 
 {% endblock %}

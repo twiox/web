@@ -1,0 +1,90 @@
+{% extends "main/page.html" %}
+
+{% block content %}
+    <section>
+        <h1 class="p-0 m-0">{{event.title}}</h1>
+        <p>{{event.short}}</p>
+        <h3 class="p-0 m-0">Anmeldung</h3>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <!--First, the user/person-->
+            {% if request.user.is_authenticated %}
+            <h6 class="p-0 m-0">Hallo {{request.user.first_name}}</h6>
+            <span class="primary">Schön, dass du dich anmelden möchtest</span>
+            {% else %}
+            <h6>Wer bist du?</h6>
+            <div class="mdl-grid">
+                <div class="mdl-cell--6-col mdl-cell--12-col--phone">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
+                        <input class="mdl-textfield__input" type="text" id="first_name" name="first_name" pattern=".*" data-required>
+                        <label class="mdl-textfield__label" for="first_name">Vorname</label>
+                    </div>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" id="last_name" name="last_name" pattern=".*" data-required>
+                        <label class="mdl-textfield__label" for="last_name">Nachname</label>
+                    </div>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" id="email" name="email" pattern=".*@.*\..*" data-required>
+                        <label class="mdl-textfield__label" for="email">Email-Adresse</label>
+                        <span class="mdl-textfield__error">Bitte gib eine Emailadresse an</span>
+                    </div>
+                </div>
+                <div class="mdl-cell--6-col mdl-cell--12-col--phone">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="date" id="birthday" name="birthday" data-required>
+                        <label class="mdl-textfield__label" for="birthday">Geburtsdatum</label>
+                    </div>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select">
+                        <input type="text" value="" class="mdl-textfield__input" id="sex" readonly>
+                        <input type="hidden" value="" name="sex" data-required>
+                        <i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>
+                        <label for="sex" class="mdl-textfield__label">Geschlecht</label>
+                        <ul for="sex" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
+                            <li class="mdl-menu__item" data-val="m">Männlich</li>
+                            <li class="mdl-menu__item" data-val="w">Weiblich</li>
+                            <li class="mdl-menu__item" data-val="d">Divers</li>
+                            <li class="mdl-menu__item" data-val="na">Keine Angabe</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            {% endif %}
+            <!--Second, the event-->
+            <input type="hidden" name="event" value="{{event.pk}}">
+            <!--Last, the additional formfields-->
+            {% if event.question_dict %}
+            <h3>Zusatzfragen</h3>
+            <span class="primary">Bitte fülle noch die folgenden Felder aus</span><br><br>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell--6-col mdl-cell--12-col--phone">
+                    {% for key,content in event.question_dict %}
+                    {% if content.1 == 'text' %}
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
+                        <input class="mdl-textfield__input" type="text" id="{{key}}" name="{{key}}">
+                        <label class="mdl-textfield__label" for="{{key}}">{{content.0}}</label>
+                    </div>
+                    {% elif content.1 == 'number' %}
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
+                        <input class="mdl-textfield__input" type="number" id="{{key}}" name="{{key}}" pattern="[0-9]+">
+                        <label class="mdl-textfield__label" for="{{key}}">{{content.0}}</label>
+                        <span class="mdl-textfield__error">Bitte gib eine Zahl an</span>
+                    </div>
+                    {% elif content.1 == 'checkbox' %}
+                    <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="{{key}}">
+                        <input type="checkbox" id="{{key}}" name="{{key}}" class="mdl-checkbox__input">
+                        <span class="mdl-checkbox__label">{{content.0}}</span>
+                    </label>
+                    {% endif %}
+                    {% endfor %}
+
+                </div>
+            </div>
+
+            {% endif %}
+
+            <button type="submit">Speichern</button>
+        </form>
+    </section>
+{% endblock %}

@@ -1,4 +1,4 @@
-from members.models import Event, Message
+from members.models import Event, Message, Participant
 from members.forms import EventForm
 from django.shortcuts import render
 from django.views.generic import DetailView, CreateView, UpdateView
@@ -147,6 +147,24 @@ def remove_question(request):
     )
 
 
+#
+#
+# Participant views
+#
+#
+
+
+class ParticipantCreateView(CreateView):
+    template_name = "pages/participant_form.html"
+    model = Participant
+    fields = "__all__"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["event"] = Event.objects.get(pk=int(self.kwargs["pk"]))
+        return super().get_context_data(**context)
+
+
 urlpatterns = [
     path("get-section", get_section, name="get_event_section"),
     path("<int:pk>", EventDetailView.as_view(), name="get_event_detail"),
@@ -155,4 +173,5 @@ urlpatterns = [
     path("<int:pk>/update", EventUpdateView.as_view(), name="event_update"),
     path("add-question", add_question, name="event_add_question"),
     path("remove-question", remove_question, name="event_remove_question"),
+    path("<int:pk>/anmelden", ParticipantCreateView.as_view(), name="event_register"),
 ]

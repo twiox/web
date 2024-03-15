@@ -110,7 +110,7 @@
                                 {% if participation %}
                                 <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent primary-bg" href="#">Abmelden</a>
                                 {% else %}
-                                <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="#">Anmelden</a>
+                                <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="{% url 'event_register' event.pk %}">Anmelden</a>
                                 {% endif %}
                                 <br><br>
                                 <strong>

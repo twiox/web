@@ -9,6 +9,19 @@ from PIL import Image as Img
 import json
 
 
+# thats the base-class for external people
+class Human(models.Model):
+    first_name = models.CharField("Vorname", max_length=200, blank=True, null=True)
+    last_name = models.CharField("Nachname", max_length=200, blank=True, null=True)
+    email = models.CharField("Emailadresse", max_length=200, blank=True, null=True)
+    sex = models.CharField("Geschlecht", max_length=200, blank=True, null=True)
+    birthday = models.DateTimeField("Geburtstag", null=True, blank=True)
+    telephone = models.CharField("Telephone", max_length=20, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+
 class News(models.Model):
     title = models.CharField("Titel", max_length=200)
     capture = models.TextField("Kurzbeschreibung", blank=True, null=True)
@@ -88,13 +101,14 @@ class Description(models.Model):
     )
 
 
-class Participant(models.Model):
+# Participant extends human. make sure to skip all the steps that are then not required for members
+class Participant(Human):
     # of which event?
     event = models.ForeignKey(
         "Event", on_delete=models.CASCADE, related_name="participant"
     )
     # who is it?
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     # related to finances
     payed = models.BooleanField("Bezahlt", default=False)
     storno = models.BooleanField("Storno", default=False)
@@ -102,8 +116,32 @@ class Participant(models.Model):
     notes = models.TextField("Notizen", blank=True, null=True)
     answers = models.TextField("Formfelder", blank=True, null=True)
 
+    @property
+    def get_first_name(self):
+        return self.user.first_name if self.user else self.first_name
+
+    @property
+    def get_last_name(self):
+        return self.user.last_name if self.user else self.last_name
+
+    @property
+    def get_email(self):
+        return self.user.email if self.user else self.email
+
+    @property
+    def get_sex(self):
+        return self.user.profile.sex if self.user else self.sex
+
+    @property
+    def get_birthday(self):
+        return self.user.profile.birthday if self.user else self.birthday
+
+    @property
+    def get_telephone(self):
+        return self.user.profile.telephone if self.user else self.telephone
+
     def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name}"
+        return f"{self.get_first_name} {self.get_last_name}"
 
 
 class Event(models.Model):

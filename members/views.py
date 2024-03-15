@@ -79,43 +79,6 @@ def index(request):
 """FOR THE EVENTS"""
 
 
-class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    template_name = "members/event_participate.html"
-    form_class = EventUpdateParticipantForm
-    model = Event
-
-    def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            event = self.get_object()
-            user = request.user
-            part, created = Participant.objects.get_or_create(
-                event=event,
-                user=user,
-            )
-            if form.cleaned_data.get("ticket", False):
-                part.has_ticket = True
-
-            if created == False:  # was storno before
-                part.storno = False
-
-            part.save()
-
-            messages.add_message(
-                request, messages.SUCCESS, "Du hast dich erfolgreich angemeldet"
-            )
-            return HttpResponseRedirect(
-                reverse("event_detail", kwargs={"pk": event.id})
-            )
-        return render(
-            request, self.template_name, {"form": form, "object": self.get_object()}
-        )
-
-    def test_func(self):
-        event = self.get_object()
-        return event_test_func(self.request, event)
-
-
 class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = "members/event_unparticipate.html"
     form_class = EventUpdateParticipantForm2
