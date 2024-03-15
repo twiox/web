@@ -4,7 +4,7 @@
 {% block content %}
     <section>
         <h1>{{object.title|default:"Neue Veranstaltung"}}</h1>
-        <form class="uniForm" method="post">
+        <form class="uniForm" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{form|crispy}}
         <button type="submit">Speichern</button>
