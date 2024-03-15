@@ -8,12 +8,6 @@ urlpatterns = [
     path("news/", include("members.tools.news")),
     path("editor/", include("members.tools.editor")),
     # this is the old stuff...
-    path("veranstaltungen/neu/", views.EventCreateView.as_view(), name="event_create"),
-    path(
-        "veranstaltungen/<int:pk>/ändern/",
-        views.EventUpdateView.as_view(),
-        name="event_update",
-    ),
     path(
         "veranstaltungen/<int:pk>/löschen/",
         views.EventDeleteView.as_view(),

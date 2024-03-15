@@ -4,6 +4,41 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import Event, Session, Spot, Document
 
 
+class EventForm(forms.ModelForm):
+    start_date = forms.DateTimeField(
+        widget=forms.TextInput(attrs={"type": "datetime-local"})
+    )
+    end_date = forms.DateTimeField(
+        widget=forms.TextInput(attrs={"type": "datetime-local"})
+    )
+    deadline = forms.DateField(widget=forms.TextInput(attrs={"type": "date"}))
+
+    class Meta:
+        model = Event
+        fields = [
+            "info_only",
+            "public_event",
+            "notes",
+            "title",
+            "short",
+            "start_date",
+            "end_date",
+            "deadline",
+            "place",
+            "costs",
+            "external_costs",
+            "min_age",
+            "max_age",
+        ]
+
+
+#
+#
+# The old stuff
+#
+#
+
+
 class EventFileForm(forms.ModelForm):
     orga = forms.BooleanField(required=False)
 
@@ -39,24 +74,6 @@ class SessionForm(forms.ModelForm):
         widgets = {
             "trainer": forms.CheckboxSelectMultiple,
         }
-
-
-class EventForm(forms.ModelForm):
-    class Meta:
-        model = Event
-        fields = [
-            "title",
-            "place",
-            "info_only",
-            "costs",
-            "start_date",
-            "end_date",
-            "deadline",
-            "notes",
-            "teilnahmebedingungen",
-            "datenschutz",
-            "einverstaendnis",
-        ]
 
 
 class EventUpdateParticipantForm(forms.ModelForm):

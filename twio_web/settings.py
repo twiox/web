@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "six",
     "multiselectfield",
     "compressor",
+    "crispy_forms",
 ]
 
 MIDDLEWARE = [
@@ -110,7 +111,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "de"
 TIME_ZONE = "Europe/Berlin"
-USE_I18N = True
 USE_L10N = True
 USE_TZ = False
 
@@ -142,3 +142,5 @@ DEFAULT_FROM_EMAIL = secrets.DEFAULT_FROM_EMAIL
 GOOGLE_API_KEY = secrets.GOOGLE_API_KEY
 
 AUTHENTICATION_BACKENDS = ["user_handling.backends.EmailBackend"]
+
+CRISPY_TEMPLATE_PACK = "uni_form"

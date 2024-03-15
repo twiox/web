@@ -87,33 +87,6 @@ class EventListView(LoginRequiredMixin, ListView, UserPassesTestMixin):
         return self.request.user.profile.privileged
 
 
-class EventCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    # template: event_detail.html
-    model = Event
-    form_class = EventForm
-    permission_required = "members.add_event"
-
-    def form_valid(self, form):
-        self.object = form.save()
-        self.object.description_rendered = markdown.markdown(self.object.description)
-        messages.add_message(self.request, messages.SUCCESS, "Veranstaltung erstellt")
-        return super().form_valid(form)
-
-
-class EventUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    # template: event_detail.html
-    model = Event
-    form_class = EventForm
-    # who can update the event?
-    permission_required = "members.change_event"
-
-    def form_valid(self, form):
-        self.object = form.save()
-        self.object.description_rendered = markdown.markdown(self.object.description)
-        messages.add_message(self.request, messages.SUCCESS, "Veranstaltung geändert")
-        return super().form_valid(form)
-
-
 class EventDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Event
     # success_url = "/mitglieder/#events"

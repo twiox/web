@@ -1,6 +1,7 @@
 from members.models import Event, Message
+from members.forms import EventForm
 from django.shortcuts import render
-from django.views.generic import DetailView
+from django.views.generic import DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import path
 import itertools
@@ -55,7 +56,41 @@ class EventDetailView(UserPassesTestMixin, DetailView):
         return event_test_func(self.request, event)
 
 
+#
+#
+# The Event Form
+#
+#
+
+
+class EventCreateView(UserPassesTestMixin, CreateView):
+    # template: event_detail.html
+    model = Event
+    form_class = EventForm
+    template_name = "pages/event_form.html"
+
+    def test_func(self):
+        try:
+            return self.request.user.profile.permission_level > 2
+        except AttributeError:
+            return False
+
+
+class EventUpdateView(UserPassesTestMixin, UpdateView):
+    model = Event
+    form_class = EventForm
+    template_name = "pages/event_form.html"
+
+    def test_func(self):
+        try:
+            return self.request.user.profile.permission_level > 2
+        except AttributeError:
+            return False
+
+
 urlpatterns = [
     path("get-section", get_section, name="get_event_section"),
     path("<int:pk>", EventDetailView.as_view(), name="get_event_detail"),
+    path("neu/", EventCreateView.as_view(), name="event_create"),
+    path("<int:pk>/update", EventUpdateView.as_view(), name="event_update"),
 ]

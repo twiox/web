@@ -99,7 +99,7 @@ class Participant(models.Model):
     storno = models.BooleanField("Storno", default=False)
     # now the additional fields
     notes = models.TextField("Notizen", blank=True, null=True)
-    fields = models.TextField("Formfelder", blank=True, null=True)
+    answers = models.TextField("Formfelder", blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
@@ -136,7 +136,7 @@ class Event(models.Model):
     max_age = models.IntegerField("Höchstalter", default=99)
 
     # questions for the participants
-    fields = models.TextField("Formfelder", blank=True, null=True)
+    questions = models.TextField("Formfelder", blank=True, null=True)
 
     # documents, maybe find a better way?
     teilnahmebedingungen = models.FileField(
@@ -155,7 +155,7 @@ class Event(models.Model):
 
     # This we need to return the url on creating a new event
     def get_absolute_url(self):
-        return reverse("event_detail", kwargs={"pk": self.pk})
+        return reverse("get_event_detail", kwargs={"pk": self.pk})
 
     # this returns a list of pk of the users that are participants and are not marked
     # as cancelled
@@ -437,6 +437,8 @@ class Profile(models.Model):
         "Notizen für den/die Trainer*in", null=True, blank=True
     )
     notes_chairman = models.TextField("Notizen für den Vorstand", null=True, blank=True)
+    # permission handling
+    permission_level = models.IntegerField("Permission Level", default=0)
 
     class Meta:
         ordering = ["member_num"]

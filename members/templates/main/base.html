@@ -19,13 +19,20 @@
 
     <!-- load jquery and htmx -->
     <script src="{% static 'packages/jquery-3.7.1.min.js' %}"></script>
-    <script src="{% static 'packages/htmx.min.js' %}">
-    </script>
+    <script src="{% static 'packages/htmx.min.js' %}"></script>
+    <script src="{% static 'js/uni-form.jquery.min.js' %}"></script>
+
+
 
     <!--load materials component web light-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="{% static 'packages/material.blue_grey-pink.min.css' %}" />
     <script src="{% static 'packages/material.min.js' %}"></script>
+
+
+    <!--Load Crispy Forms related static files-->
+    <link href="{% static 'css/uniform/uni-form.css' %}" media="all" rel="stylesheet"/>
+    <link href="{% static 'css/uniform/default.uni-form.css' %}" media="all" rel="stylesheet"/>
 
     {% block head %}{% endblock %}
 
