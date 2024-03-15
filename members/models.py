@@ -15,7 +15,7 @@ class News(models.Model):
     content = models.TextField("Beitrag", blank=True, null=True)
     content_rendered = models.TextField(blank=True, null=True)
     picture = models.ImageField(
-        "Stockphoto", blank=True, null=True, upload_to="beiträge/"
+        "Stockphoto", blank=True, null=True, upload_to="uploads/news/images"
     )
 
     def __str__(self):
@@ -39,7 +39,7 @@ class Spot(models.Model):
 class Document(models.Model):
     name = models.CharField("Name", max_length=200)
     file = models.FileField(
-        "File", upload_to=f"Events/Docs/etc/", null=True, blank=True
+        "File", upload_to=f"uploads/events/docs", null=True, blank=True
     )
     # foreign key relationships to where files can be saved
     member_participants = models.ForeignKey(
@@ -73,7 +73,7 @@ class Document(models.Model):
 
 
 class DescriptionImage(models.Model):
-    image = models.ImageField("Foto", upload_to=f"description_images/")
+    image = models.ImageField("Foto", upload_to=f"uploads/descriptions/images/")
 
 
 class Description(models.Model):
@@ -148,13 +148,16 @@ class Event(models.Model):
 
     # documents, maybe find a better way?
     teilnahmebedingungen = models.FileField(
-        "Teilnahmebedingungen", upload_to=f"Events/Docs/", null=True, blank=True
+        "Teilnahmebedingungen", upload_to=f"uploads/events/docs/", null=True, blank=True
     )
     datenschutz = models.FileField(
-        "Datenschutzerklärung", upload_to=f"Events/Docs/", null=True, blank=True
+        "Datenschutzerklärung", upload_to=f"uploads/events/docs", null=True, blank=True
     )
     einverstaendnis = models.FileField(
-        "Einverständniserklärung", upload_to=f"Events/Docs/", null=True, blank=True
+        "Einverständniserklärung",
+        upload_to=f"uploads/events/docs",
+        null=True,
+        blank=True,
     )
 
     # if we query over events, we want the most recent one firsthand
@@ -197,7 +200,7 @@ class Trainer(models.Model):
     trainer_email = models.CharField(
         "Öffentliche Email", max_length=150, blank=True, null=True
     )
-    image = models.ImageField("Profilbild", upload_to="profile_pics/")
+    image = models.ImageField("Profilbild", upload_to="uploads/trainer/profile_pics/")
     salary = models.CharField("Bezahlung", blank=True, null=True, max_length=5)
     license_level = models.CharField(
         "Lizenzstufe", max_length=100, blank=True, null=True
@@ -207,13 +210,13 @@ class Trainer(models.Model):
     )
     license_valid = models.DateTimeField("Gültigkeit", blank=True, null=True)
     license = models.FileField(
-        "Lizenz", upload_to="trainer_stuff", blank=True, null=True
+        "Lizenz", upload_to="uploads/trainer/docs", blank=True, null=True
     )
     contract = models.FileField(
-        "Vertrag", upload_to="trainer_stuff", blank=True, null=True
+        "Vertrag", upload_to="uploads/trainer/docs", blank=True, null=True
     )
     codex = models.FileField(
-        "Ehrencodex", upload_to="trainer_stuff", blank=True, null=True
+        "Ehrencodex", upload_to="uploads/trainer/docs", blank=True, null=True
     )
 
     def __str__(self):
@@ -362,7 +365,7 @@ class Chairman(models.Model):
         "Öffentliche Email", max_length=150, blank=True, null=True
     )
     competences = models.TextField("Zuständigkeiten (mit Komma getrennt)")
-    image = models.ImageField("Profilbild", upload_to="profile_pics/")
+    image = models.ImageField("Profilbild", upload_to="uploads/chairmen/profile_pics/")
     show = MultiSelectField(choices=choices, blank=True, max_length=300)
 
     def __str__(self):

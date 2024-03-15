@@ -40,7 +40,6 @@ urlpatterns = [
         interested_views.TesterListView.as_view(),
         name="tester_list",
     ),
-    path("verwaltung/events/", member_views.EventListView.as_view(), name="event_list"),
     path("ajax/kopiere-email-listen", views.get_all_emails, name="get_all_emails"),
     path(
         "ajax/mitglieder/detail_form/<int:pk>",

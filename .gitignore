@@ -2,16 +2,7 @@
 *.log
 *.pot
 *db.sqlite3
-media/documents/*
-media/profile_pics/*
-media/team_pictures/*
-media/trainer_stuff/
-media/trainer_tables/*.txt
-media/Events/*
-media/PublicEvents/*
-media/galleries/*
-media/contacts/*
-media/description_images/*
+media/uploads/*
 twio_web/secrets.py
 api_key.txt
 *static/CACHE/*

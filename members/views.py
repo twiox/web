@@ -79,24 +79,6 @@ def index(request):
 """FOR THE EVENTS"""
 
 
-class EventListView(LoginRequiredMixin, ListView, UserPassesTestMixin):
-    model = Event
-    template = "members/event_list.html"
-
-    def test_func(self):
-        return self.request.user.profile.privileged
-
-
-class EventDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
-    model = Event
-    # success_url = "/mitglieder/#events"
-    # who can delete the event?
-    permission_required = "members.delete_event"
-
-    def get_success_url(self, **kwargs):
-        return reverse("index") + "#events"
-
-
 class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = "members/event_participate.html"
     form_class = EventUpdateParticipantForm

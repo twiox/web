@@ -9,11 +9,6 @@ urlpatterns = [
     path("editor/", include("members.tools.editor")),
     # this is the old stuff...
     path(
-        "veranstaltungen/<int:pk>/löschen/",
-        views.EventDeleteView.as_view(),
-        name="event_delete",
-    ),
-    path(
         "veranstaltungen/<int:pk>/teilnehmen/",
         views.EventParticipateView.as_view(),
         name="event_participate",
