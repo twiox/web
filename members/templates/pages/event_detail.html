@@ -13,8 +13,13 @@
 {% block content %}
 
     <section>
+        <!-- The Header -->
         {% include 'snippets/events/event_header.html' with event=object %}
-
+        {% if request.user.profile.permission_level > 2 %}
+        <!-- The custom questions -->
+        {% include 'snippets/events/event_questions.html' with event=object %}
+        {% endif %}
+        <!-- The description -->
         <div id="description">
             {% if request.user.profile.permission_level > 1 %}
             {% include 'snippets/editor/editor_body.html' with event=object description=object.description readonly=False %}

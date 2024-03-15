@@ -6,6 +6,7 @@ from django.urls import reverse  # to get absolut_urls
 from datetime import datetime, timedelta
 from multiselectfield import MultiSelectField
 from PIL import Image as Img
+import json
 
 
 class News(models.Model):
@@ -179,6 +180,10 @@ class Event(models.Model):
     @property
     def multiple_days(self):
         return self.start_date.strftime("%d.%m") != self.end_date.strftime("%d.%m")
+
+    @property
+    def question_dict(self):
+        return json.loads(self.questions).items() if self.questions else []
 
     def __str__(self):
         return f"Event: {self.title}{' (deleted)' if self.deleted else ''}"

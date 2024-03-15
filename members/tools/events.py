@@ -10,6 +10,7 @@ import itertools
 import locale
 from datetime import datetime, timedelta
 from collections import defaultdict
+import json
 
 
 def permission_check_2(user):
@@ -105,10 +106,34 @@ class EventUpdateView(UserPassesTestMixin, UpdateView):
             return False
 
 
+def add_question(request):
+    object = Event.objects.get(pk=int(request.POST.get("id")))
+    questions = (
+        json.loads(object.questions) if object.questions else {}
+    )  # get the (empty) questions json
+    newkey = (
+        max([int(x) for x in questions.keys()]) + 1 if len(questions.keys()) > 0 else 1
+    )  # define a new key
+
+    questions[newkey] = (
+        request.POST.get("question"),
+        request.POST.get("question_type"),
+    )
+    object.questions = json.dumps(questions)
+    object.save()
+
+    return render(
+        request,
+        "snippets/events/event_questions.html",
+        {"event": object, "questions": questions},
+    )
+
+
 urlpatterns = [
     path("get-section", get_section, name="get_event_section"),
     path("<int:pk>", EventDetailView.as_view(), name="get_event_detail"),
     path("delete_toggle", toggle_delete, name="event_delete_toggle"),
     path("neu/", EventCreateView.as_view(), name="event_create"),
     path("<int:pk>/update", EventUpdateView.as_view(), name="event_update"),
+    path("add-question", add_question, name="event_add_question"),
 ]
