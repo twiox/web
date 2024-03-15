@@ -7,7 +7,17 @@
         <form class="uniForm" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{form|crispy}}
-        <button type="submit">Speichern</button>
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
+            Speichern
+        </button>
         </form>
+    </section>
+    <style>
+        #event_questions_section{
+            border:dashed grey 3px;
+        }
+    </style>
+    <section class="m-2" id="event_questions_section">
+        {% include 'snippets/events/event_questions.html' %}
     </section>
 {% endblock %}
