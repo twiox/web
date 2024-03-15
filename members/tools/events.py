@@ -106,6 +106,7 @@ class EventUpdateView(UserPassesTestMixin, UpdateView):
             return False
 
 
+@user_passes_test(permission_check_2)
 def add_question(request):
     object = Event.objects.get(pk=int(request.POST.get("id")))
     questions = (
@@ -125,7 +126,24 @@ def add_question(request):
     return render(
         request,
         "snippets/events/event_questions.html",
-        {"event": object, "questions": questions},
+        {"event": object},
+    )
+
+
+@user_passes_test(permission_check_2)
+def remove_question(request):
+    object = Event.objects.get(pk=int(request.POST.get("id")))
+    questions = json.loads(object.questions)
+
+    del questions[request.POST.get("removekey")]
+
+    object.questions = json.dumps(questions)
+    object.save()
+
+    return render(
+        request,
+        "snippets/events/event_questions.html",
+        {"event": object},
     )
 
 
@@ -136,4 +154,5 @@ urlpatterns = [
     path("neu/", EventCreateView.as_view(), name="event_create"),
     path("<int:pk>/update", EventUpdateView.as_view(), name="event_update"),
     path("add-question", add_question, name="event_add_question"),
+    path("remove-question", remove_question, name="event_remove_question"),
 ]

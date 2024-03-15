@@ -37,6 +37,9 @@ class EventForm(forms.ModelForm):
             "external_costs",
             "min_age",
             "max_age",
+            "teilnahmebedingungen",
+            "einverstaendnis",
+            "datenschutz",
         ]
 
 

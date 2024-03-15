@@ -17,13 +17,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for id,content in event.question_dict %}
+                    {% for key,content in event.question_dict %}
                     <tr>
                         <td class="mdl-data-table__cell--non-numeric">{{content.0}}</td>
                         <td class="mdl-data-table__cell--non-numeric">{{content.1}}</td>
-                        <td><button class="s-7 mdl-button mdl-js-button mdl-js-ripple-effect">
-                            Löschen
-                        </button>
+                        <td>
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" value="{{event.pk}}">
+                                <input type="hidden" name="removekey" value="{{key}}">
+                                <span
+                                    hx-post="{% url 'event_remove_question' %}"
+                                    hx-target="#event_questions"
+                                    class="mdl-button mdl-js-button mdl-button--icon mdl-button--mini-fab mdl-button--colored s-7">
+                                    <i class="material-icons">delete</i>
+                                </span>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}
