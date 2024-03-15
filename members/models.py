@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.shortcuts import redirect
 from django.urls import reverse  # to get absolut_urls
 from datetime import datetime, timedelta
 from multiselectfield import MultiSelectField
@@ -142,6 +143,9 @@ class Participant(Human):
 
     def __str__(self):
         return f"{self.get_first_name} {self.get_last_name}"
+
+    def get_absolute_url(self):
+        return self.event.get_absolute_url()
 
 
 class Event(models.Model):

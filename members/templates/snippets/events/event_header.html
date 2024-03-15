@@ -108,9 +108,24 @@
                         {% else %}
                             {% if not event.deadline_reached %}
                                 {% if participation %}
-                                <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent primary-bg" href="#">Abmelden</a>
+                                    <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent primary-bg" href="#">Abmelden</a>
                                 {% else %}
-                                <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="{% url 'event_register' event.pk %}">Anmelden</a>
+                                    {% if request.user.is_authenticated %}
+                                        {# check for age #}
+                                        {% if request.user.profile.age > event.max_age %}
+                                        <button class="mdl-button mdl-js-button mdl-button--raised" disabled>
+                                            Zu alt
+                                        </button>
+                                        {% elif request.user.profile.age < event.min_age %}
+                                        <button class="mdl-button mdl-js-button mdl-button--raised" disabled>
+                                            Zu jung
+                                        </button>
+                                        {% else %}
+                                        <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="{% url 'event_register' event.pk %}">Anmelden</a>
+                                        {%endif %}
+                                    {% else %}
+                                    <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="{% url 'event_register' event.pk %}">Anmelden</a>
+                                    {% endif %}
                                 {% endif %}
                                 <br><br>
                                 <strong>

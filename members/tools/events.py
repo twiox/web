@@ -164,6 +164,17 @@ class ParticipantCreateView(CreateView):
         context["event"] = Event.objects.get(pk=int(self.kwargs["pk"]))
         return super().get_context_data(**context)
 
+    def form_valid(self, form):
+        self.object = form.save()
+        answers = {
+            x: self.request.POST.get(x)
+            for x in self.request.POST
+            if x[0] in "0123456789"
+        }  # answers are purely
+        self.object.answers = json.dumps(answers)
+        self.object.save()
+        return super().form_valid(form)
+
 
 urlpatterns = [
     path("get-section", get_section, name="get_event_section"),
