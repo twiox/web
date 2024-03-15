@@ -1,8 +1,8 @@
 {% load custom_filters %}
 
 {% if request.user.profile.permission_level > 2 %}
-<div id="event_questions" class="relative">
-    <h3 class="m-0 p-0">Veranstaltungsfragen</h3>
+<div id="event_questions">
+    <h3 class="m-0 p-1">Veranstaltungsfragen</h3>
     <div class="mdl-grid">
         <div class="mdl-cell--col-6 m-2 mdl-cell--col-12--phone">
             <!--See entries-->
@@ -62,7 +62,7 @@
                         <li class="mdl-menu__item" data-val="checkbox">Checkbox</li>
                     </ul>
                 </div><br>
-                <span class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent"
+                <span class="mdl-button mdl-js-button mdl-button--colored"
                     hx-post="{% url 'event_add_question' %}"
                     hx-target="#event_questions"
                 >

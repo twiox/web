@@ -17,7 +17,14 @@
         {% include 'snippets/events/event_header.html' with event=object %}
         {% if request.user.profile.permission_level > 2 %}
         <!-- The custom questions -->
+        <style>
+            #event_questions_section{
+                border:dashed grey 3px;
+            }
+        </style>
+        <section id="event_questions_section">
         {% include 'snippets/events/event_questions.html' with event=object %}
+        </section>
         {% endif %}
         <!-- The description -->
         <div id="description">
