@@ -1,5 +1,6 @@
 {% load custom_filters %}
 
+<div id="event_header">
 <style>
     .date_format{
         color: #f3f3f3;
@@ -16,7 +17,31 @@
 </style>
 
 {% with participation=request.user.pk|isin:event.participant_users %}
-<div class="mdl-card mdl-shadow--2dp my-2 event-header">
+<div class="mdl-card mdl-shadow--2dp my-2 event-header relative
+{% if event.deleted %} deleted {% endif %}
+">
+    {% if request.user.profile.permission_level > 2 %}
+    <div class="button-group top_right mdl-grid s-7">
+        <div class="mdl-cell--6-col m-05 mdl-cell--12-col--phone">
+            <a href="{% url 'event_update' event.pk %}">
+                <button class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
+                    <i class="material-icons">edit</i>
+                </button>
+            </a>
+        </div>
+        <div class="mdl-cell--6-col m-05 mdl-cell--12-col--phone">
+            <a
+                hx-get="{% url 'event_delete_toggle' %}?id={{event.pk}}"
+                hx-target="#event_header"
+            >
+                <button class="mdl-button mdl-js-button mdl-button--icon
+                    {% if event.deleted %} mdl-button--accent {% else %} mdl-button--colored {% endif %}">
+                    <i class="material-icons">delete</i>
+                </button>
+            </a>
+        </div>
+    </div>
+    {% endif %}
     <div class="mdl-grid m-0 p-0 nowrap">
         <div class="mdl-cell mdl-cell--2-col mdl-cell--6-col--tablet mdl-cell--6-col--phone
             m-0 center {% if participation %} secondary-bg {% else %} primary-bg {% endif%}">
@@ -36,7 +61,7 @@
         <div class="mdl-cell mdl-cell--10-col mdl-cell--6-col--tablet mdl-cell--6-col--phone">
             <div class="mdl-grid m-0 p-0">
                 <div class="mdl-cell mdl-cell--6-col">
-                    <h3 class="p-0 m-0">{{object.title}}</h3>
+                    <h3 class="p-0 m-0">{{event.title}}</h3>
                     <h6 class="p-1 m-0">{{event.place}}</h6>
                     <span class="mdl-chip">
                         <span class="mdl-chip__text">
@@ -105,3 +130,5 @@
     </div>
 </div>
 {% endwith %}
+
+</div>

@@ -3,11 +3,20 @@ from members.forms import EventForm
 from django.shortcuts import render
 from django.views.generic import DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.decorators import user_passes_test
 from django.urls import path
+from django.db.models import Q
 import itertools
 import locale
 from datetime import datetime, timedelta
 from collections import defaultdict
+
+
+def permission_check_2(user):
+    try:
+        return user.profile.permission_level > 2
+    except AttributeError:  # anonymous user
+        return False
 
 
 def get_section(request):
@@ -15,7 +24,7 @@ def get_section(request):
     ddate = datetime.today() + timedelta(days=7)  # show older events for 1 more week
 
     # query for events that happen in the next year
-    q = Event.objects.filter(start_date__gte=ddate)
+    q = Event.objects.filter(Q(start_date__gte=ddate) & Q(deleted=False))
 
     nested_dict = lambda: defaultdict(nested_dict)
     events = nested_dict()
@@ -63,6 +72,14 @@ class EventDetailView(UserPassesTestMixin, DetailView):
 #
 
 
+@user_passes_test(permission_check_2)
+def toggle_delete(request):
+    object = Event.objects.get(pk=int(request.GET.get("id")))
+    object.deleted = object.deleted == False  # toggle the deletion
+    object.save()
+    return render(request, "snippets/events/event_header.html", {"event": object})
+
+
 class EventCreateView(UserPassesTestMixin, CreateView):
     # template: event_detail.html
     model = Event
@@ -91,6 +108,7 @@ class EventUpdateView(UserPassesTestMixin, UpdateView):
 urlpatterns = [
     path("get-section", get_section, name="get_event_section"),
     path("<int:pk>", EventDetailView.as_view(), name="get_event_detail"),
+    path("delete_toggle", toggle_delete, name="event_delete_toggle"),
     path("neu/", EventCreateView.as_view(), name="event_create"),
     path("<int:pk>/update", EventUpdateView.as_view(), name="event_update"),
 ]

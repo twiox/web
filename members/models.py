@@ -111,8 +111,11 @@ class Event(models.Model):
     public_event = models.BooleanField("Öffentliche Veranstaltung", default=False)
     notes = models.CharField("Hinweis", blank=True, max_length=50)
 
+    # for deletion
+    deleted = models.BooleanField("Gelöscht", default=False)
+
     # what kind of event?
-    title = models.CharField("Event-name", max_length=100)
+    title = models.CharField("Eventname", max_length=100)
     short = models.TextField("Kurzbeschreibung", blank=True, null=True)
 
     # time and place
@@ -125,10 +128,14 @@ class Event(models.Model):
 
     # what are the costs?
     costs = models.DecimalField(
-        "Kosten", blank=True, null=True, max_digits=8, decimal_places=2
+        "Kosten für Mitglieder", blank=True, null=True, max_digits=8, decimal_places=2
     )
     external_costs = models.DecimalField(
-        "Externe Kosten", blank=True, null=True, max_digits=8, decimal_places=2
+        "Kosten für Nichtmitglieder",
+        blank=True,
+        null=True,
+        max_digits=8,
+        decimal_places=2,
     )
 
     # for participation?
@@ -146,7 +153,7 @@ class Event(models.Model):
         "Datenschutzerklärung", upload_to=f"Events/Docs/", null=True, blank=True
     )
     einverstaendnis = models.FileField(
-        "Einverständnis", upload_to=f"Events/Docs/", null=True, blank=True
+        "Einverständniserklärung", upload_to=f"Events/Docs/", null=True, blank=True
     )
 
     # if we query over events, we want the most recent one firsthand
@@ -174,7 +181,7 @@ class Event(models.Model):
         return self.start_date.strftime("%d.%m") != self.end_date.strftime("%d.%m")
 
     def __str__(self):
-        return f"Event: {self.title}"
+        return f"Event: {self.title}{' (deleted)' if self.deleted else ''}"
 
 
 class Trainer(models.Model):

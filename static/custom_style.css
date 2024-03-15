@@ -22,6 +22,9 @@ Padding and Margin
 .m-0{
   margin:0px !important;
 }
+.m-05{
+  margin:5px !important;
+}
 .m-1{
   margin:10px;
 }
@@ -131,7 +134,17 @@ Color
 .passive {
   background-color: #9AD1DC !important;
 }
+.deleted{
+  background-color: lightgray !important;
+  opacity: 0.8 !important;
+  background: repeating-linear-gradient( -45deg, grey, grey 5px, #ffffff 5px, #ffffff 25px ) !important;
 
+}
+/* Size */
+
+.s-7{
+  transform: scale(.7);
+}
 
 /* Start with the base page  */
 

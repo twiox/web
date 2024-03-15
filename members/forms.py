@@ -6,14 +6,17 @@ from .models import Event, Session, Spot, Document
 
 class EventForm(forms.ModelForm):
     start_date = forms.DateTimeField(
+        label="Beginn der Veranstaltung",
         widget=forms.TextInput(attrs={"type": "datetime-local"}),
         input_formats=["%Y-%m-%dT%H:%M"],
     )
     end_date = forms.DateTimeField(
+        label="Ende der Veranstaltung",
         widget=forms.TextInput(attrs={"type": "datetime-local"}),
         input_formats=["%Y-%m-%dT%H:%M"],
     )
     deadline = forms.DateTimeField(
+        label="Anmeldungsdeadline",
         widget=forms.TextInput(attrs={"type": "datetime-local"}),
         input_formats=["%Y-%m-%dT%H:%M"],
     )
