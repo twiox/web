@@ -4,7 +4,7 @@
 <div class="mdl-card mdl-shadow--2dp my-2 event-card">
     <div class="mdl-grid m-0 p-0 nowrap">
         <div class="mdl-cell mdl-cell--4-col m-0 center
-            {% if participation %} secondary-bg
+            {% if participation and request.user.is_authenticated %} secondary-bg
             {% else %}
                 {% if event.public_event or request.user.is_authenticated %} primary-bg
                 {% else %} passive

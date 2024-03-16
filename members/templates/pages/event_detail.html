@@ -15,8 +15,28 @@
     <section>
         <!-- The Header -->
         {% include 'snippets/events/event_header.html' with event=object %}
-        {% if request.user.profile.permission_level > 2 %}
+        {% if event.teilnahmebedingungen %}
+        <span class="mdl-chip mdl-chip--deletable">
+            <span class="mdl-chip__text">Teilnahmebedingungen</span>
+            <a href="{{event.teilnahmebedingungen.url}}" class="mdl-chip__action"><i class="material-icons">download</i></a>
+        </span>
         {% endif %}
+
+        {% if event.datenschutz %}
+        <span class="mdl-chip mdl-chip--deletable">
+            <span class="mdl-chip__text">Datenschutzerklärung</span>
+            <a href="{{event.datenschutz.url}}" class="mdl-chip__action"><i class="material-icons">download</i></a>
+        </span>
+        {% endif %}
+
+        {% if event.einverstaendnis %}
+        <span class="mdl-chip mdl-chip--deletable">
+            <span class="mdl-chip__text">Einverständniserklärung</span>
+            <a href="{{event.einverstaendnis.url}}" class="mdl-chip__action"><i class="material-icons">download</i></a>
+        </span>
+        {% endif %}
+
+
         <!-- The description -->
         <div id="description">
             {% if request.user.profile.permission_level > 1 %}

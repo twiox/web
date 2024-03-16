@@ -10,7 +10,7 @@
             <!--First, the user/person-->
             {% if request.user.is_authenticated %}
             <input type="hidden" value="{{request.user.pk}}" name="user">
-            Als Vereinsmitglied haben wir deine Daten bereits :)
+            Als Vereinsmitglied haben wir deine Daten bereits hinterlegt :)
             {% else %}
             <div class="mdl-grid">
                 <div class="mdl-cell--6-col mdl-cell--12-col--phone">
@@ -53,8 +53,7 @@
             <input type="hidden" name="event" value="{{event.pk}}">
             <!--Last, the additional formfields-->
             {% if event.question_dict %}
-            <h6>Zusatzfragen</h6>
-            <span class="primary">Bitte fülle noch die folgenden Felder aus</span><br><br>
+            <h6 class="primary">Zusatzfragen</h6>
 
             <div class="mdl-grid">
                 <div class="mdl-cell--6-col mdl-cell--12-col--phone">
@@ -84,16 +83,28 @@
             {% endif %}
 
             <h6>Dokumente</h6>
+            <ul>
+            {% if event.teilnahmebedingungen %}
+            <li><a href="{{event.teilnahmebedingungen.url}}">Teilnahmebedingungen</a></li>
+            {% endif %}
+            {% if event.datenschutz %}
+            <li><a href="{{event.datenschutz.url}}">Datenschutzerklärung</a></li>
+            {% endif %}
+            {% if event.einverstaendnis %}
+            <li><a href="{{event.einverstaendnis.url}}">Einverständniserklärung</a></li>
+            {% endif %}
+            </ul>
+
             <p>Ich habe die Datenschutzerklärung und die Teilnahmebedingungen gelesen und akzeptiere sie.
             Ich willige ein, dass die von mir hinterlegten Daten für die Durchführung der Veranstaltung gespeichert und ggf. an die notwendigen Stellen übermittelt werden
             </p>
-                <strong>Beachte, dass wir von Minderjährigen das Einverständnis der Eltern benötigen!</strong>
+                <strong>Bei minderjährigen Teilnehmenden wird das Einverständnis der Eltern benötigen!</strong>
 
             <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="confirm">
                 <input type="checkbox" id="confirm" class="mdl-checkbox__input" data-required>
-                <span class="mdl-checkbox__label">Bestätige</span>
+                <span class="mdl-checkbox__label">Ich habe verstanden</span>
             </label>
-            <br><br><br><br><br>
+            <br> <br>
             <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit">
                 Speichern
             </button>

@@ -44,7 +44,7 @@
     {% endif %}
     <div class="mdl-grid m-0 p-0 nowrap">
         <div class="mdl-cell mdl-cell--2-col mdl-cell--6-col--tablet mdl-cell--6-col--phone
-            m-0 center {% if participation %} secondary-bg {% else %} primary-bg {% endif%}">
+            m-0 center {% if participation and request.user.is_authenticated %} secondary-bg {% else %} primary-bg {% endif%}">
             <div>
                 <span class="date_format">{{event.start_date|date:'d' }}</span>
                 {% if not event.multiple_days or event.start_date|date:'m' != event.end_date|date:'m' %}
@@ -68,11 +68,13 @@
                             {% if event.public_event %}Öffentlich{% else %}Für Mitglieder{% endif %}
                         </span>
                     </span>
-                    <span class="mdl-chip {% if participation %}secondary-bg{% else %}primary-bg{% endif %}">
+                    {% if request.user.is_authenticated %}
+                    <span class="mdl-chip {% if participation and request.user.is_authenticated %}secondary-bg{% else %}primary-bg{% endif %}">
                         <span class="mdl-chip__text">
                             {% if participation %}Angemeldet{% else %}Nicht angemeldet{% endif %}
                         </span>
                     </span>
+                    {% endif %}
                     <div class="mdl-card__supporting-text">
                         <p class="m-0">{{event.short}}</p>
                     </div>
@@ -107,7 +109,7 @@
                             </strong>
                         {% else %}
                             {% if not event.deadline_reached %}
-                                {% if participation %}
+                                {% if participation and request.user.is_authenticated %}
                                     <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent primary-bg" href="#">Abmelden</a>
                                 {% else %}
                                     {% if request.user.is_authenticated %}
@@ -129,7 +131,7 @@
                                 {% endif %}
                                 <br><br>
                                 <strong>
-                                    {% if not participation %}Anmeldung{% else %}Abmeldung{% endif %} bis {{event.deadline|date:'d.m.Y' }} möglich
+                                    {% if not participation or request.user.is_authenticated == False %}Anmeldung{% else %}Abmeldung{% endif %} bis {{event.deadline|date:'d.m.Y' }} möglich
                                 </strong>
                             {% else %}
                                 <strong>

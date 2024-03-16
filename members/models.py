@@ -10,6 +10,16 @@ from PIL import Image as Img
 import json
 
 
+def calculate_age(birth_date):
+    today = datetime.today()
+    age = (
+        today.year
+        - birth_date.year
+        - ((today.month, today.day) < (birth_date.month, birth_date.day))
+    )
+    return age
+
+
 # thats the base-class for external people
 class Human(models.Model):
     first_name = models.CharField("Vorname", max_length=200, blank=True, null=True)
@@ -21,6 +31,12 @@ class Human(models.Model):
 
     class Meta:
         abstract = True
+
+    @property
+    def age(self):
+        if self.birthday:
+            return calculate_age(self.birthday)
+        return None
 
 
 class News(models.Model):
@@ -433,16 +449,6 @@ class Chairman(models.Model):
             img = img.crop((0 + cut, 0, img.width - cut, img.height))
             img2 = img.resize((720, 720))
             img2.save(self.image.path)
-
-
-def calculate_age(birth_date):
-    today = datetime.today()
-    age = (
-        today.year
-        - birth_date.year
-        - ((today.month, today.day) < (birth_date.month, birth_date.day))
-    )
-    return age
 
 
 class Profile(models.Model):
