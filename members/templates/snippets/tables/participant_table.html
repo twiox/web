@@ -1,0 +1,72 @@
+<div id="example"></div>
+
+<div class="controls m-2">
+  <button id="export-file" class="mdl-button mdl-js-button mdl-button--colored  mdl-js-ripple-effect">
+    Download CSV
+  </button>
+</div>
+
+{{event.hot_data|json_script:'hot_data'}}
+
+<script>
+const hot_data  = JSON.parse(document.getElementById('hot_data').textContent)
+const container = document.querySelector('#example');
+
+//go through the columns
+var dynamicColumns = [];
+var n = 1
+for (head of Object.keys(hot_data[0])) {
+    var col = new Object();
+    col.data = head;
+    // define read-only
+    if( n<=6 || n >= 9 ){
+      col.readOnly = true
+    }
+    // define cell-types
+    if(['Bezahlt','Storno'].includes(head)){
+      col.type = 'checkbox'
+    }
+    col.title = head
+    dynamicColumns.push(col);
+    n++
+}
+
+// initialize the tables
+const hot = new Handsontable(container, {
+  data: hot_data,
+  rowHeaders: true,
+  colHeaders: true,
+  columnSorting: true,
+  minSpareRows: 1,
+  height: 'auto',
+  stretchH: 'all',
+  nestedHeaders: [
+    [
+      { label: 'Teilnehmer*in', colspan: 6 },
+      { label: 'Orga', colspan: 2 },
+      { label: 'Antworten', colspan: Object.keys(hot_data[0]).length - 8 },
+    ],
+    Object.keys(hot_data[0])
+  ],
+  licenseKey: 'non-commercial-and-evaluation', // for non-commercial use only
+  columns: dynamicColumns
+});
+
+// for the download of the data
+const exportPlugin = hot.getPlugin('exportFile');
+const button = $('#export-file');
+
+button.on('click', function(){
+  exportPlugin.downloadFile('csv', {
+    bom: false,
+    columnDelimiter: ',',
+    columnHeaders: true,
+    fileExtension: 'csv',
+    filename: 'TeilnehmerInnen_liste_[YYYY]-[MM]-[DD]',
+    mimeType: 'text/csv',
+    rowDelimiter: '\r\n',
+    rowHeaders: true
+  });
+});
+</script>
+

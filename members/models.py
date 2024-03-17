@@ -163,6 +163,31 @@ class Participant(Human):
     def get_absolute_url(self):
         return self.event.get_absolute_url()
 
+    @property
+    def answer_dict(self):
+        return json.loads(self.answers) if self.answers else {}
+
+    def to_json(self):
+        questions = {k: quest for k, (quest, type) in self.event.question_dict}
+        answers = self.answer_dict
+        tmp = {
+            "Vorname": self.get_first_name,
+            "Nachname": self.get_last_name,
+            "Email": self.get_email,
+            "Geschlecht": self.get_sex,
+            "Geburtstag": datetime.strftime(self.get_birthday, "%d.%m.%Y"),
+            "Telefonnummer": self.get_telephone,
+            "Bezahlt": self.payed,
+            "Notizen": self.notes,
+        }
+        tmp.update(
+            {
+                question: answers[q_key] if q_key in answers else "-"
+                for q_key, question in questions.items()
+            }
+        )
+        return tmp
+
 
 class Event(models.Model):
     # very basic information
@@ -231,6 +256,14 @@ class Event(models.Model):
     @property
     def participant_users(self):
         return self.participant.filter(storno=False).values_list("user", flat=True)
+
+    @property
+    def hot_data(self):
+        # return list of objects for the use in handsontables
+        data = []
+        for part in self.participant.all():
+            data.append(part.to_json())
+        return data
 
     @property
     def deadline_reached(self):

@@ -36,14 +36,28 @@
         </span>
         {% endif %}
 
-
-        <!-- The description -->
-        <div id="description">
+        <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+            <div class="mdl-tabs__tab-bar">
+                <a href="#starks-panel" class="mdl-tabs__tab is-active">Beschreibung</a>
+                {% if request.user.profile.permission_level > 1 %}
+                <a href="#lannisters-panel" class="mdl-tabs__tab">Teilnehmende</a>
+                {% endif %}
+            </div>
+            <div class="mdl-tabs__panel is-active" id="starks-panel">
+                <!-- The description -->
+                <div id="description">
+                    {% if request.user.profile.permission_level > 1 %}
+                    {% include 'snippets/editor/editor_body.html' with event=object description=object.description readonly=False %}
+                    {% else %}
+                    {% include 'snippets/editor/editor_body.html' with event=object description=object.description readonly=True %}
+                    {% endif %}
+                </div>
+            </div>
             {% if request.user.profile.permission_level > 1 %}
-            {% include 'snippets/editor/editor_body.html' with event=object description=object.description readonly=False %}
-            {% else %}
-            {% include 'snippets/editor/editor_body.html' with event=object description=object.description readonly=True %}
+            <div class="mdl-tabs__panel" id="lannisters-panel">
+                {% include 'snippets/tables/participant_table.html' %}
+            </div>
             {% endif %}
-        </div>
+          </div>
     </section>
 {% endblock %}
