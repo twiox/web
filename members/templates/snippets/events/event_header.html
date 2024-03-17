@@ -110,7 +110,16 @@
                         {% else %}
                             {% if not event.deadline_reached %}
                                 {% if participation and request.user.is_authenticated %}
-                                    <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent primary-bg" href="#">Abmelden</a>
+                                    <form>
+                                        {% csrf_token %}
+                                        <span class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent primary-bg"
+                                            hx-post="{% url 'event_deregister' event.pk %}"
+                                            hx-target="#event_header"
+                                            hx-confirm="Bist du dir sicher?"
+                                            >
+                                        Abmelden
+                                        </span>
+                                    </form>
                                 {% else %}
                                     {% if request.user.is_authenticated %}
                                         {# check for age #}

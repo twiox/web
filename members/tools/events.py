@@ -176,6 +176,15 @@ class ParticipantCreateView(CreateView):
         return super().form_valid(form)
 
 
+#
+def participant_delete(request, pk):
+    event = Event.objects.get(pk=int(pk))
+    user = request.user
+    part = Participant.objects.filter(user=user, event=event).first()
+    part.delete()
+    return render(request, "snippets/events/event_header.html", {"event": event})
+
+
 urlpatterns = [
     path("get-section", get_section, name="get_event_section"),
     path("<int:pk>", EventDetailView.as_view(), name="get_event_detail"),
@@ -185,4 +194,5 @@ urlpatterns = [
     path("add-question", add_question, name="event_add_question"),
     path("remove-question", remove_question, name="event_remove_question"),
     path("<int:pk>/anmelden", ParticipantCreateView.as_view(), name="event_register"),
+    path("<int:pk>/abmelden", participant_delete, name="event_deregister"),
 ]

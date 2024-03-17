@@ -2,22 +2,36 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <section>
-        <h1>{{object.title|default:"Neue Veranstaltung"}}</h1>
-        <form class="uniForm" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{form|crispy}}
-        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
-            Speichern
-        </button>
-        </form>
-    </section>
-    <style>
-        #event_questions_section{
-            border:dashed grey 3px;
-        }
-    </style>
-    <section class="m-2" id="event_questions_section">
-        {% include 'snippets/events/event_questions.html' %}
-    </section>
+<div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+    <div class="mdl-tabs__tab-bar">
+        <a href="#starks-panel" class="mdl-tabs__tab is-active">Formular</a>
+        <a href="#lannisters-panel" class="mdl-tabs__tab">Fragen</a>
+    </div>
+    <div class="mdl-tabs__panel is-active" id="starks-panel">
+        <section>
+            <h1>{{object.title|default:"Neue Veranstaltung"}}</h1>
+            <form class="uniForm" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{form|crispy}}
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
+                Speichern
+            </button>
+            </form>
+        </section>
+    </div>
+    <div class="mdl-tabs__panel" id="lannisters-panel">
+        <style>
+            #event_questions_section{
+                border:dashed grey 3px;
+            }
+        </style>
+        {% if object %}
+        <section class="m-2" id="event_questions_section">
+            {% include 'snippets/events/event_questions.html' %}
+        </section>
+        {% else%}
+        <p class="primary">Bitte speichern und neuladen um Fragen für die Teilnehmenden hinzuzufügen</p>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
