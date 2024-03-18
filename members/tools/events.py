@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.views.generic import DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib import messages
 from django.urls import path
 from django.db.models import Q
 import itertools
@@ -179,6 +180,11 @@ class ParticipantCreateView(CreateView):
 
         # send the email
         emails.send_participant_email(self.object)
+
+        # send message
+        messages.add_message(
+            self.request, messages.SUCCESS, "Du hast dich erfolgreich angemeldet"
+        )
 
         return super().form_valid(form)
 
