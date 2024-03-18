@@ -10,14 +10,15 @@ Ende: {{event.end_date|date:'d.m.Y (H:i)'}}
 Wir haben von Dir die folgenden Daten übermittelt bekommen:
 Name: {{participant.get_first_name}} {{participant.get_last_name}}
 Geburtsdatum: {{participant.get_birthday|date:'d.m.Y'}}
-E-Mail: {{participant.email}}
-Telefon: {{participant.telephone}}
-
-{% if participant.user %}
-Gesamtkosten: {{event.costs|floatformat:2}} €
-{% else %}
-Gesamtkosten: {{event.external_costs|floatformat:2}} €
+E-Mail: {{participant.get_email}}
+{% if participant.get_telefon %}
+Telefon: {{participant.get_telephone}}
 {% endif %}
+
+{% if participant.get_costs == 0 %}
+Die Veranstaltung ist kostenlos
+{% else %}
+Gesamtkosten: {{participant.get_costs|floatformat:2}} €
 
 Bitte überweise das Geld innerhalb der nächsten 14 Tage auf unser Vereinskonto bei:
 
@@ -25,7 +26,7 @@ Deutsche Skatbank
 IBAN: DE67 8306 5408 0004 9710 60
 BIC: GENODEF1SLR
 Verwendungszweck: {{event.title}}/{{participant.get_first_name}} {{participant.get_last_name}}
-
+{% endif %}
 
 Sollte etwas nicht stimmen oder Fragen/Probleme auftreten,
 dann melde dich gerne bei uns

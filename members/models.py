@@ -157,6 +157,12 @@ class Participant(Human):
     def get_telephone(self):
         return self.user.profile.telephone if self.user else self.telephone
 
+    @property
+    def get_costs(self):
+        if self.user:
+            return self.event.costs
+        return self.event.external_costs
+
     def __str__(self):
         return f"{self.get_first_name} {self.get_last_name}"
 
