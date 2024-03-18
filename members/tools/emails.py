@@ -19,5 +19,5 @@ def send_participant_email(participant):
             "event": participant.event,
         },
     )
-    to = participant.email
+    to = participant.get_email
     return send_email(subject, message, to)

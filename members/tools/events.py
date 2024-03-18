@@ -189,7 +189,6 @@ class ParticipantCreateView(CreateView):
         return super().form_valid(form)
 
 
-#
 def participant_delete(request, pk):
     event = Event.objects.get(pk=int(pk))
     user = request.user
