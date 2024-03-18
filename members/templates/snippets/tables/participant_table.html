@@ -7,6 +7,9 @@
   </button>
 </div>
 
+<div id="participant_update" data-url="{% url 'participant_update' event.pk %}"></div>
+{% csrf_token %}
+
 {{event.hot_data|json_script:'hot_data'}}
 
 <script>
@@ -15,12 +18,17 @@ const container = document.querySelector('#participants-hot');
 
 //go through the columns
 var dynamicColumns = [];
+var headers = []
 var n = 1
 for (head of Object.keys(hot_data[0])) {
+  if(n==1){
+    n++
+    continue
+  } else {
     var col = new Object();
     col.data = head;
     // define read-only
-    if( n<=6 || n >= 9 ){
+    if( n<=8 || n >= 11 ){
       col.readOnly = true
     }
     // define cell-types
@@ -28,8 +36,10 @@ for (head of Object.keys(hot_data[0])) {
       col.type = 'checkbox'
     }
     col.title = head
+    headers.push(col.title)
     dynamicColumns.push(col);
     n++
+  }
 }
 
 // initialize the tables
@@ -43,14 +53,29 @@ const hot = new Handsontable(container, {
   stretchH: 'all',
   nestedHeaders: [
     [
-      { label: 'Teilnehmer*in', colspan: 6 },
+      { label: 'Teilnehmer*in', colspan: 7 },
       { label: 'Orga', colspan: 2 },
       { label: 'Antworten', colspan: Object.keys(hot_data[0]).length - 8 },
     ],
-    Object.keys(hot_data[0])
+    headers
   ],
   licenseKey: 'non-commercial-and-evaluation', // for non-commercial use only
-  columns: dynamicColumns
+  columns: dynamicColumns,
+  afterChange: function (change, source) {
+    if(source=='loadData'){
+      return
+    }
+    var formdata = new FormData();
+    formdata.append('csrfmiddlewaretoken',$('[name=csrfmiddlewaretoken]').val())
+    formdata.append('data',change);
+    $.ajax({
+        type: "POST",
+        url: $('#participant_update').attr('data-url'),
+        processData: false,
+        contentType: false,
+        data: formdata
+    })
+  }
 });
 
 // for the download of the data

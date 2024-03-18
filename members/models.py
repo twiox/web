@@ -177,10 +177,12 @@ class Participant(Human):
         questions = {k: quest for k, (quest, type) in self.event.question_dict}
         answers = self.answer_dict
         tmp = {
+            "id": self.pk,
             "Vorname": self.get_first_name,
             "Nachname": self.get_last_name,
             "Email": self.get_email,
             "Geschlecht": self.get_sex,
+            "Geburtstag": self.get_birthday.strftime("%d.%m.%Y"),
             "Alter": calculate_age(self.get_birthday),
             "Telefonnummer": self.get_telephone,
             "Bezahlt": self.payed,

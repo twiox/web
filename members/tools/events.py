@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from django.urls import path
 from django.db.models import Q
+from django.http import JsonResponse
 import itertools
 import locale
 from datetime import datetime, timedelta
@@ -197,6 +198,20 @@ def participant_delete(request, pk):
     return render(request, "snippets/events/event_header.html", {"event": event})
 
 
+def participant_update(request, pk):
+    index, header, old, new = request.POST.get("data").split(",", 3)
+    event = Event.objects.get(pk=int(pk))
+
+    part = list(Participant.objects.filter(event=event))[int(index)]
+    if header == "Bezahlt":
+        part.payed = new == "true"
+    if header == "Notizen":
+        part.notes = new
+    part.save()
+
+    return JsonResponse({})
+
+
 urlpatterns = [
     path("get-section", get_section, name="get_event_section"),
     path("<int:pk>", EventDetailView.as_view(), name="get_event_detail"),
@@ -207,4 +222,5 @@ urlpatterns = [
     path("remove-question", remove_question, name="event_remove_question"),
     path("<int:pk>/anmelden", ParticipantCreateView.as_view(), name="event_register"),
     path("<int:pk>/abmelden", participant_delete, name="event_deregister"),
+    path("<int:pk>/participant_update", participant_update, name="participant_update"),
 ]
