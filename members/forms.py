@@ -25,6 +25,7 @@ class EventForm(forms.ModelForm):
         model = Event
         fields = [
             "info_only",
+            "trainer_only",
             "public_event",
             "notes",
             "title",

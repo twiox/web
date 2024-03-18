@@ -200,6 +200,7 @@ class Participant(Human):
 class Event(models.Model):
     # very basic information
     info_only = models.BooleanField("Nur Ankündigung?", default=True)
+    trainer_only = models.BooleanField("Nur für Trainer", default=False)
     public_event = models.BooleanField("Öffentliche Veranstaltung", default=False)
     notes = models.CharField("Hinweis", blank=True, max_length=50)
 

@@ -27,8 +27,11 @@ def get_section(request):
     locale.setlocale(locale.LC_TIME, "de_DE")
     ddate = datetime.today() + timedelta(days=7)  # show older events for 1 more week
 
-    # query for events that happen in the next year
+    # query for events
     q = Event.objects.filter(Q(start_date__gte=ddate) & Q(deleted=False))
+
+    if hasattr(request.user, "trainer") == False:
+        q = q.filter(Q(trainer_only=False))
 
     nested_dict = lambda: defaultdict(nested_dict)
     events = nested_dict()
@@ -198,6 +201,7 @@ def participant_delete(request, pk):
     return render(request, "snippets/events/event_header.html", {"event": event})
 
 
+@user_passes_test(permission_check_2)
 def participant_update(request, pk):
     index, header, old, new = request.POST.get("data").split(",", 3)
     event = Event.objects.get(pk=int(pk))
