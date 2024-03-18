@@ -1,5 +1,6 @@
 from members.models import Event, Message, Participant
 from members.forms import EventForm
+from members.tools import emails
 from django.shortcuts import render
 from django.views.generic import DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -170,9 +171,15 @@ class ParticipantCreateView(CreateView):
             x: self.request.POST.get(x)
             for x in self.request.POST
             if x[0] in "0123456789"
-        }  # answers are purely
+        }
+        # translate the checkbox 'on' to 'Ja'
+        answers = {k: "Ja" if v == "on" else v for k, v in answers.items()}
         self.object.answers = json.dumps(answers)
         self.object.save()
+
+        # send the email
+        emails.send_participant_email(self.object)
+
         return super().form_valid(form)
 
 

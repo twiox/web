@@ -175,7 +175,7 @@ class Participant(Human):
             "Nachname": self.get_last_name,
             "Email": self.get_email,
             "Geschlecht": self.get_sex,
-            "Geburtstag": datetime.strftime(self.get_birthday, "%d.%m.%Y"),
+            "Alter": calculate_age(self.get_birthday),
             "Telefonnummer": self.get_telephone,
             "Bezahlt": self.payed,
             "Notizen": self.notes,

@@ -1,4 +1,5 @@
-<div id="example"></div>
+{% if event.participant_users %}
+<div id="participants-hot"></div>
 
 <div class="controls m-2">
   <button id="export-file" class="mdl-button mdl-js-button mdl-button--colored  mdl-js-ripple-effect">
@@ -10,7 +11,7 @@
 
 <script>
 const hot_data  = JSON.parse(document.getElementById('hot_data').textContent)
-const container = document.querySelector('#example');
+const container = document.querySelector('#participants-hot');
 
 //go through the columns
 var dynamicColumns = [];
@@ -23,7 +24,7 @@ for (head of Object.keys(hot_data[0])) {
       col.readOnly = true
     }
     // define cell-types
-    if(['Bezahlt','Storno'].includes(head)){
+    if(['Bezahlt'].includes(head)){
       col.type = 'checkbox'
     }
     col.title = head
@@ -69,4 +70,8 @@ button.on('click', function(){
   });
 });
 </script>
+{% else %}
+
+<p class="primary center">Noch keine Anmeldungen</p>
+{% endif %}
 
