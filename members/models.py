@@ -158,6 +158,10 @@ class Participant(Human):
         return self.user.profile.telephone if self.user else self.telephone
 
     @property
+    def get_mtglnr(self):
+        return self.user.profile.member_num if self.user else "Extern"
+
+    @property
     def get_costs(self):
         if self.user:
             return self.event.costs
@@ -177,7 +181,7 @@ class Participant(Human):
         questions = {k: quest for k, (quest, type) in self.event.question_dict}
         answers = self.answer_dict
         tmp = {
-            "id": self.pk,
+            "Mitgl.Nr": self.get_mtglnr,
             "Vorname": self.get_first_name,
             "Nachname": self.get_last_name,
             "Email": self.get_email,

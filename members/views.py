@@ -30,14 +30,11 @@ from django.contrib.auth.mixins import (
     PermissionRequiredMixin,
 )
 from .forms import (
-    EventUpdateParticipantForm,
-    EventUpdateParticipantForm2,
     SessionForm,
     EventForm,
     UpdateMemberInformationForm,
     UpdateMemberEmailForm,
     SpotForm,
-    EventFileForm,
 )
 from django.contrib import messages
 from datetime import datetime
@@ -74,114 +71,6 @@ def index(request):
 # Generic functions
 #
 #
-
-
-"""FOR THE EVENTS"""
-
-
-class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    template_name = "members/event_unparticipate.html"
-    form_class = EventUpdateParticipantForm2
-    model = Event
-
-    def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            user = request.user
-            event = self.get_object()
-
-            try:  # the very edge-case that in a legacy event people unparticipate before being converted to new participants
-                part = Participant.objects.get(event=event, user=request.user)
-                part.storno = True
-                part.save()
-            except:
-                pass
-
-            # because of legacy reasons
-            if user in event.participants.all():
-                event.participants.remove(user)
-                event.save()
-
-            messages.add_message(
-                request, messages.SUCCESS, "Du hast dich erfolgreich abgemeldet"
-            )
-            return HttpResponseRedirect(
-                reverse("event_detail", kwargs={"pk": event.id})
-            )
-        return render(request, self.template_name, {"form": form})
-
-    def test_func(self):
-        event = self.get_object()
-        return event_test_func(self.request, event)
-
-
-class EventOrgaView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
-    model = Event
-    template_name = "members/event_organisation.html"
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        context = self.get_context_data(object=self.object)
-
-        # get a list of event participants
-        participants = list(MemberParticipant.objects.filter(event=self.object))
-        # for older events - convert participants to MemberParticipants
-        check = set([x.user for x in participants])
-        for user in self.object.participants.all():
-            if user not in check:
-                tmp = Participant(user=user, event=self.object)
-                tmp.save()
-                participants.append(tmp)
-                # remove from the legacy-list
-                self.object.participants.remove(user)
-
-        # update context
-        context.update(
-            {
-                "participants": sorted(participants, key=lambda x: x.user.first_name),
-                "form": EventFileForm(request.POST, request.FILES),
-            }
-        )
-        return self.render_to_response(context)
-
-    def post(self, request, *args, **kwargs):
-        event = self.get_object()
-        file = request.FILES.get("file")
-        name = request.POST.get("name")
-        if private := request.POST.get("orga") == "private":
-            tmp = Document(file=file, event_orga=event, name=name)
-        else:
-            tmp = Document(file=file, event_public=event, name=name)
-        tmp.save()
-        return redirect(request.META["HTTP_REFERER"])
-
-    def test_func(self):
-        return trainer_check(self.request) or chairman_check(self.request)
-
-
-def ajax_event_filehandle(request):
-    doc = Document.objects.get(pk=int(request.POST.get("id")))
-    if request.POST.get("type") == "toggle":
-        doc.event_toggle()
-    if request.POST.get("type") == "delete":
-        doc.delete()
-    return JsonResponse({"success": True})
-
-
-## Ajax Event Orga Stuff
-def update_memberparticipant(request):
-    part = Participant.objects.get(pk=request.POST.get("id"))
-    field = request.POST.get("field")
-    check, text = request.POST.get("value").split(",", 1)
-    if field in ["payed", "has_ticket"]:
-        val = check == "true"
-    else:
-        val = text
-
-    setattr(part, field, val)
-    part.save()
-
-    return JsonResponse({"success": True})
 
 
 """FOR THE SESSIONS"""

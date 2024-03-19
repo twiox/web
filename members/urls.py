@@ -9,26 +9,6 @@ urlpatterns = [
     path("editor/", include("members.tools.editor")),
     # this is the old stuff...
     path(
-        "veranstaltungen/<int:pk>/orga/",
-        views.EventOrgaView.as_view(),
-        name="event_participants",
-    ),
-    path(
-        "veranstaltungen/<int:pk>/stornieren/",
-        views.EventUnParticipateView.as_view(),
-        name="event_unparticipate",
-    ),
-    path(
-        "veranstaltungen/ajax/update_participant/",
-        views.update_memberparticipant,
-        name="ajax_update_memberparticipant",
-    ),
-    path(
-        "veranstaltungen/ajax/update_file/",
-        views.ajax_event_filehandle,
-        name="ajax_event_filehandle",
-    ),
-    path(
         "trainingseinheit/<int:pk>/",
         views.SessionDetailView.as_view(),
         name="session_detail",

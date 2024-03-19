@@ -51,14 +51,6 @@ class EventForm(forms.ModelForm):
 #
 
 
-class EventFileForm(forms.ModelForm):
-    orga = forms.BooleanField(required=False)
-
-    class Meta:
-        model = Document
-        fields = ["name", "file", "orga"]
-
-
 class SpotForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(SpotForm, self).__init__(*args, **kwargs)
@@ -86,21 +78,6 @@ class SessionForm(forms.ModelForm):
         widgets = {
             "trainer": forms.CheckboxSelectMultiple,
         }
-
-
-class EventUpdateParticipantForm(forms.ModelForm):
-    confirm = forms.BooleanField()
-    ticket = forms.BooleanField(required=False)
-
-    class Meta:
-        model = Event
-        fields = ["confirm", "ticket"]
-
-
-class EventUpdateParticipantForm2(forms.ModelForm):
-    class Meta:
-        model = Event
-        fields = []
 
 
 class UpdateMemberInformationForm(forms.ModelForm):
