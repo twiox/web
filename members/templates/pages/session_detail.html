@@ -18,15 +18,18 @@
             <div class="mdl-cell--2-col">
                 <div class="avatar p-2">
                     <div class ="member">
-                        <div class="square"><a href="#"><img src="{{ trainer.image.url }}" alt="Avatar" /></a></div>
+                        <div class="square">
+                            <a href="#">
+                                <img src="{{ trainer.image.url }}" alt="Avatar"/>
+                            </a>
+                        </div>
                         <p>{{trainer.name}}</p>
                         <p>{{trainer.trainer_telnr}}</p>
                     </div>
                 </div>
             </div>
             {% endfor%}
-            <div class="mdl-cell--{{ n_trainer|multiply:-2|add:12 }}-col ">
-
+            <div class="mdl-cell--{{ n_trainer|multiply:-2|add:12 }}-col">
                 <div class="p-2">
                     <p>{{object.short|default:"Yesterday you said tomorrow"}}</p>
                     <div class="mdl-card__actions mdl-card--border">
@@ -35,14 +38,28 @@
                             <button class="mdl-button mdl-button--raised mdl-button--accent mdl-js-button primary-bg">Abmelden</button>
                         </a>
                         {% else %}
+                        {% if request.user.profile.age >= object.min_age and request.user.profile.age <= object.max_age %}
                         <a href="{% url 'session_participation_toggle' object.pk %}">
                             <button class="mdl-button mdl-button--raised mdl-button--accent mdl-js-button">Anmelden</button>
                         </a>
+                        {% else %}
+                        <i>Mit deinem Alter kannst du dich nicht anmelden</i>
                         {% endif %}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
             {% endwith %}
         </div>
+        {% if object.participants.all|length > 5 %}
+        <h6>Statistiken</h6>
+        <div class="mdl-grid">
+            <div class="mdl-cell--4-col">
+                <img src="data:image/png;base64,{{object.age_hist}}" alt="A histogram of the ages of session participants" width="100%" height="auto"/>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
             <div class="mdl-tabs__tab-bar">
                 <a href="#starks-panel" class="mdl-tabs__tab is-active">Angemeldet</a>

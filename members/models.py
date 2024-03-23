@@ -388,6 +388,12 @@ class Session(models.Model):
     def get_absolute_url(self):
         return reverse("session_detail", args=[self.pk])
 
+    @property
+    def age_hist(self):
+        from members.tools.training import get_session_age_hist
+
+        return get_session_age_hist(self)
+
     def __str__(self):
         return f"Session: {self.title}_{self.day}"
 

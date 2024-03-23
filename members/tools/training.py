@@ -7,6 +7,43 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 
+# Helper function
+def get_session_age_hist(session):
+    """
+    Calculate a histogram of the ages of session participants on the fly
+    """
+    import matplotlib
+    import matplotlib.pyplot as plt
+    from members.models import calculate_age
+    import base64
+    from io import BytesIO
+
+    matplotlib.use("Agg")
+
+    x = [
+        calculate_age(x)
+        for x in session.participants.all().values_list("profile__birthday", flat=True)
+    ]
+    fig = plt.figure(figsize=(4, 3))
+    ax = fig.add_subplot(111)
+
+    plt.hist(x, color="#088eaa", bins=5)
+    ax.set_title("Altersverteilung")
+    ax.set_ylabel("Anzahl")
+    ax.set_xlabel("Alter")
+
+    # Be sure to only pick integer tick locations.
+    plt.locator_params(axis="both", integer=True, tight=True)
+
+    plt.tight_layout()
+
+    stream = BytesIO()
+    plt.savefig(stream, format="png")
+    plt.close()
+
+    return base64.b64encode(stream.getvalue()).decode()
+
+
 def get_section(request):
     sessions = Session.objects.all()
     training_messages = Message.objects.filter(display="sessions").distinct()
