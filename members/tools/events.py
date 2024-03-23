@@ -1,7 +1,7 @@
 from members.models import Event, Message, Participant
 from members.forms import EventForm
 from members.tools import emails
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.decorators import user_passes_test
@@ -196,9 +196,12 @@ class ParticipantCreateView(CreateView):
 def participant_delete(request, pk):
     event = Event.objects.get(pk=int(pk))
     user = request.user
-    part = Participant.objects.filter(user=user, event=event).first()
-    part.delete()
-    return render(request, "snippets/events/event_header.html", {"event": event})
+    # delete self
+    Participant.objects.filter(user=user, event=event).delete()
+    messages.add_message(
+        request, messages.SUCCESS, "Du hast dich erfolgreich abgemeldet"
+    )
+    return redirect(event)
 
 
 @user_passes_test(permission_check_2)
