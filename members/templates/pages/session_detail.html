@@ -3,8 +3,8 @@
 
 {% block content %}
     <section>
-        <h1>{% if object.spot.outdoor %}Outdoortraining{% else %}Hallentraining{% endif %}</h1>
-        <h3>{{object.weekday}} ({{object.spot}})</h3>
+        <h1>{% if object.spot.outdoor %}Outdoor{% else %}In der Halle{% endif %}</h1>
+        <h3>{{object.spot}}</h3>
         <div class="mdl-card__menu">
             <a href="{% url 'session_update' object.pk %}"
                 class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
@@ -60,6 +60,7 @@
         </div>
         {% endif %}
 
+        {% if request.user in object.participants.all %}
         <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
             <div class="mdl-tabs__tab-bar">
                 <a href="#starks-panel" class="mdl-tabs__tab is-active">Angemeldet</a>
@@ -69,7 +70,24 @@
             </div>
             <div class="mdl-tabs__panel is-active" id="starks-panel">
                 <div class="p-2">
-                    <span>Hier die öffentliche Liste</span>
+                    <table class="mdl-data-table mdl-js-data-table fullwidth">
+                        <thead>
+                          <tr>
+                            <th class="mdl-data-table__cell--non-numeric">Name</th>
+                            <th></th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        {% for participant in object.participants.all %}
+                          <tr>
+                            <td class="mdl-data-table__cell--non-numeric">{{participant.first_name}}</td>
+                            <td></td>
+                            <td></td>
+                          </tr>
+                        {% endfor %}
+                        </tbody>
+                      </table>
                 </div>
             </div>
             {% if request.user.trainer %}
@@ -80,6 +98,7 @@
             </div>
             {%endif%}
           </div>
+          {% endif %}
 
     </section>
 {% endblock %}

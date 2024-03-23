@@ -145,6 +145,9 @@ Color
 .s-7{
   transform: scale(.7);
 }
+.fullwidth{
+  width: 100% !important;
+}
 
 /* Start with the base page  */
 
