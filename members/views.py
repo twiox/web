@@ -73,66 +73,6 @@ def index(request):
 #
 
 
-"""FOR THE SESSIONS"""
-
-
-class SessionDetailView(LoginRequiredMixin, DetailView):
-    # template: session_detail.html
-    model = Session
-
-    def get_context_data(self, **kwargs):
-        context = {"api_key": settings.GOOGLE_API_KEY}
-        if self.object:
-            context["object"] = self.object
-            context_object_name = self.get_context_object_name(self.object)
-            if context_object_name:
-                context[context_object_name] = self.object
-        context.update(kwargs)
-        return super().get_context_data(**context)
-
-
-class SessionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    # template: event_form.html
-    model = Session
-    form_class = SessionForm
-    permission_required = "members.add_session"
-
-    def form_valid(self, form):
-        key = {"Mo": 1, "Di": 2, "Mi": 3, "Do": 4, "Fr": 5, "Sa": 6, "So": 7}
-        self.object = form.save()
-        if self.object.day in key:
-            self.object.day_key = key[self.object.day]
-        messages.add_message(self.request, messages.SUCCESS, "Einheit erstellt")
-        return super().form_valid(form)
-
-
-class SessionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    # template: event_form.html
-    model = Session
-    form_class = SessionForm
-    permission_required = "members.change_session"
-
-    def form_valid(self, form):
-        key = {"Mo": 1, "Di": 2, "Mi": 3, "Do": 4, "Fr": 5, "Sa": 6, "So": 7}
-        self.object = form.save()
-        if self.object.day in key:
-            self.object.day_key = key[self.object.day]
-        messages.add_message(self.request, messages.SUCCESS, "Einheit geändert")
-        return super().form_valid(form)
-
-
-class SessionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
-    model = Session
-    permission_required = "members.delete_session"
-
-    def post(self, request, *args, **kwargs):
-        messages.add_message(request, messages.SUCCESS, "Einheit gelöscht")
-        return self.delete(request, *args, **kwargs)
-
-    def get_success_url(self, **kwargs):
-        return reverse("index") + "#training"
-
-
 """FOR THE SPOTS"""
 
 

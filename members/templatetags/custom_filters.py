@@ -11,3 +11,13 @@ def lookup(dictionary, key):
 @register.filter
 def isin(item, collection):
     return item in collection
+
+
+@register.filter
+def multiply(value, factor):
+    return value * factor
+
+
+@register.filter
+def substract(val1, val2):
+    return val1 - val2

@@ -60,9 +60,10 @@ class Spot(models.Model):
     title = models.CharField("Spotname", max_length=30)
     lat = models.CharField("Latitude", max_length=30, default="51.347127")
     long = models.CharField("Longitude", max_length=30, default="12.350504")
+    outdoor = models.BooleanField("Outdoor", default=True)
 
     def __str__(self):
-        return f"Spot: {self.title}"
+        return f"{self.title}"
 
 
 ## Event related models
@@ -329,19 +330,9 @@ class Trainer(models.Model):
     def get_absolute_url(self):
         return reverse("trainer_list")
 
-    def save(self):
-        super().save()
-        img = Img.open(self.image.path)
-        if img.height > img.width:
-            cut = int((img.height - img.width) / 2)
-            img = img.crop((0, 0 + cut, img.width, img.height - cut))
-            img2 = img.resize((720, 720))
-            img2.save(self.image.path)
-        elif img.width > img.height:
-            cut = int((img.width - img.height) / 2)
-            img = img.crop((0 + cut, 0, img.width - cut, img.height))
-            img2 = img.resize((720, 720))
-            img2.save(self.image.path)
+    @property
+    def name(self):
+        return self.user.first_name
 
     def trainer_info(self):
         info = [f"Trainer:\t{self.user.first_name} {self.user.last_name}"]
@@ -354,49 +345,29 @@ class Trainer(models.Model):
 
 
 class Session(models.Model):
-    trainer = models.ManyToManyField(Trainer, blank=True, verbose_name="Trainer")
+    trainer = models.ManyToManyField(
+        Trainer, blank=True, verbose_name="Trainer", related_name="session"
+    )
+    participants = models.ManyToManyField(User, blank=True, related_name="session")
     spot = models.ForeignKey(
-        Spot, blank=True, null=True, on_delete=models.SET_NULL, verbose_name="Spot"
+        Spot,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name="Spot",
+        related_name="session",
     )
 
     title = models.CharField("Titel", max_length=50, default="Hallentraining")
+    short = models.TextField("Kurzbeschreibung", blank=True, null=True)
     day = models.CharField("Tag", max_length=2, default="Mo")
-    day_key = models.IntegerField("Key", default=1)
+
+    min_age = models.IntegerField("Mindestalter", default=0)
+    max_age = models.IntegerField("Höchstalter", default=99)
 
     start_time = models.TimeField("Beginn", default="17:00")
     end_time = models.TimeField("Ende", default="19:00")
     hinweis = models.CharField("Hinweis", blank=True, max_length=50)
-
-    class Meta:
-        ordering = ["start_time"]
-
-    @property
-    def trainerlist(self):
-        return ",".join([x.user.first_name for x in self.trainer.all()])
-
-    @property
-    def format_start_time(self):
-        return self.start_time.strftime("%H:%M")
-
-    @property
-    def format_end_time(self):
-        return self.end_time.strftime("%H:%M")
-
-    @property
-    def order(self):
-        tag = {
-            "Mo": 1,
-            "Di": 2,
-            "Mi": 3,
-            "Do": 4,
-            "Fr": 5,
-            "Sa": 6,
-            "So": 7,
-        }
-        if self.day in tag:
-            return tag[self.day]
-        else:
-            return 8
 
     @property
     def weekday(self):
@@ -415,13 +386,10 @@ class Session(models.Model):
             return "Irgendwann"
 
     def get_absolute_url(self):
-        return reverse("index")
+        return reverse("session_detail", args=[self.pk])
 
     def __str__(self):
         return f"Session: {self.title}_{self.day}"
-
-    class Meta:
-        ordering = ["day_key"]
 
 
 class Message(models.Model):

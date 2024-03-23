@@ -1,0 +1,27 @@
+<div class=" mdl-card mdl-shadow--2dp my-2">
+    <div class="mdl-card__supporting-text">
+        <h4 class="m-0">{{session.spot.title}}</h4>
+        <p class="p-0 primary">{{session.start_time|date:'H:i'}} - {{session.end_time|date:'H:i'}} Uhr</p>
+        <p class="m-0">Altersgruppe:</p>
+            <span class="primary">
+                {% if session.min_age == 0 and session.max_age == 99 %}Keine Einschränkungen{% else %}
+                    {% if session.min_age > 0 and session.max_age < 99 %}Von {{session.min_age}}
+                    {% elif session.min_age > 0 and session.max_age == 99 %}Ab {{session.min_age}} {% endif %}
+                    {% if session.max_age < 99 and session.min_age == 0 %}Bis {{session.max_age}}
+                    {% elif session.max_age < 99 and session.min_age > 0 %}bis {{session.max_age}}
+                    {% endif %}
+                    Jahre
+                {% endif %}
+            </span><br>
+    </div>
+    <div class="mdl-card__menu">
+        <a href="https://www.google.de/maps/dir//{{session.spot.lat}},{{session.spot.long}}/@{{session.spot.lat}},{{session.spot.long}},17z"
+            target="_blank"
+            class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
+            <i class="material-icons">pin_drop</i>
+        </a>
+    </div>
+    <div class="mdl-card__actions mdl-card--border">
+      <a class="mdl-button mdl-button--colored mdl-js-button" href="{% url 'session_detail' session.pk%}">Details</a>
+    </div>
+</div>

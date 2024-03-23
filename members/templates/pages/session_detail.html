@@ -1,0 +1,68 @@
+{% extends "main/page.html" %}
+{% load custom_filters %}
+
+{% block content %}
+    <section>
+        <h1>{% if object.spot.outdoor %}Outdoortraining{% else %}Hallentraining{% endif %}</h1>
+        <h3>{{object.weekday}} ({{object.spot}})</h3>
+        <div class="mdl-card__menu">
+            <a href="{% url 'session_update' object.pk %}"
+                class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
+                <i class="material-icons">edit</i>
+            </a>
+        </div>
+        <div class="mdl-grid">
+            <!--Adjust the cell-sizes by the number of trainers-->
+            {% with n_trainer=object.trainer.all|length %}
+            {% for trainer in object.trainer.all %}
+            <div class="mdl-cell--2-col">
+                <div class="avatar p-2">
+                    <div class ="member">
+                        <div class="square"><a href="#"><img src="{{ trainer.image.url }}" alt="Avatar" /></a></div>
+                        <p>{{trainer.name}}</p>
+                        <p>{{trainer.trainer_telnr}}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor%}
+            <div class="mdl-cell--{{ n_trainer|multiply:-2|add:12 }}-col ">
+
+                <div class="p-2">
+                    <p>{{object.short|default:"Yesterday you said tomorrow"}}</p>
+                    <div class="mdl-card__actions mdl-card--border">
+                        {% if request.user in object.participants.all %}
+                        <a href="{% url 'session_participation_toggle' object.pk %}">
+                            <button class="mdl-button mdl-button--raised mdl-button--accent mdl-js-button primary-bg">Abmelden</button>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'session_participation_toggle' object.pk %}">
+                            <button class="mdl-button mdl-button--raised mdl-button--accent mdl-js-button">Anmelden</button>
+                        </a>
+                        {% endif %}
+                </div>
+            </div>
+            {% endwith %}
+        </div>
+        <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+            <div class="mdl-tabs__tab-bar">
+                <a href="#starks-panel" class="mdl-tabs__tab is-active">Angemeldet</a>
+                {% if request.user.trainer %}
+                <a href="#participation-panel" class="mdl-tabs__tab">Anwesenheit</a>
+                {% endif %}
+            </div>
+            <div class="mdl-tabs__panel is-active" id="starks-panel">
+                <div class="p-2">
+                    <span>Hier die öffentliche Liste</span>
+                </div>
+            </div>
+            {% if request.user.trainer %}
+            <div class="mdl-tabs__panel" id="participation-panel">
+                <div class="p-2">
+                    <span>Irgendwer fehlt immer</span>
+                </div>
+            </div>
+            {%endif%}
+          </div>
+
+    </section>
+{% endblock %}

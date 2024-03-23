@@ -1,0 +1,49 @@
+/*
+Member style modified from
+https://github.com/sedadna/sedadna.github.io/blob/main/assets/css/main.scss
+*/
+.member {
+    width: 8rem;
+    text-align: left;
+  }
+
+  .square {
+    display: inline-block;
+    width: 8rem;
+    height: 8rem;
+    margin: auto;
+  }
+  .square img{
+    opacity: 1;
+    -webkit-transition: .3s ease-in-out;
+    transition: .3s ease-in-out;
+  }
+  .square:hover img{
+    opacity: .5;
+  }
+  .avatar {
+    display: flex;
+    flex-wrap:wrap;
+    justify-content: space-evenly;
+  }
+  .avatar img{
+    border-radius: 50%;
+    width: 8rem;
+    height: 8rem;
+    object-fit: cover;
+    display: block;
+    margin: auto;
+  }
+  .member p {
+    text-align: center;
+    margin-bottom: 0;
+    font-size: 0.8rem;
+    display: block;
+  }
+  .member p:first-of-type {
+    font-size: 1rem;
+    font-weight: bold;
+  }
+  /*
+  Member style end
+  */

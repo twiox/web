@@ -8,26 +8,6 @@ urlpatterns = [
     path("news/", include("members.tools.news")),
     path("editor/", include("members.tools.editor")),
     # this is the old stuff...
-    path(
-        "trainingseinheit/<int:pk>/",
-        views.SessionDetailView.as_view(),
-        name="session_detail",
-    ),
-    path(
-        "trainingseinheit/neu/",
-        views.SessionCreateView.as_view(),
-        name="session_create",
-    ),
-    path(
-        "trainingseinheit/<int:pk>/ändern/",
-        views.SessionUpdateView.as_view(),
-        name="session_update",
-    ),
-    path(
-        "trainingseinheit/<int:pk>/löschen/",
-        views.SessionDeleteView.as_view(),
-        name="session_delete",
-    ),
     path("spots/", views.SpotListView.as_view(), name="spot_list"),
     path("spots/<int:pk>/", views.SpotDetailView.as_view(), name="spot_detail"),
     path("spots/neu/", views.SpotCreateView.as_view(), name="spot_create"),
