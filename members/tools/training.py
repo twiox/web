@@ -98,7 +98,7 @@ class SessionUpdateView(LoginRequiredMixin, UpdateView):
 class TesterCreateView(CreateView):
     model = Tester
     form_class = TrialForm
-    template_name = "pages/training/trial_form.html"
+    template_name = "pages/trial_form.html"
 
 
 urlpatterns = [

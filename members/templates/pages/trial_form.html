@@ -1,0 +1,23 @@
+{% extends "main/page.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h1>Probetraining</h1>
+
+<div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+    <div class="mdl-tabs__tab-bar">
+        <a href="#starks-panel" class="mdl-tabs__tab is-active">Formular</a>
+    </div>
+    <div class="mdl-tabs__panel is-active" id="starks-panel">
+        <section>
+            <form class="uniForm" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{form|crispy}}
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
+                Speichern
+            </button>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}
