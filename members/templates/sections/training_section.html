@@ -1,41 +1,49 @@
+{% load static %}
 {% load custom_filters %}
 
 <section class="section" id="training_section">
     <div class="content">
-        <h1>Training</h1>
-        <!-- Here the Messages -->
-        {% if messages %}
         <div class="mdl-grid">
-            <div class="mdl-cell mdl-cell--12-col p-2 light-bg mdl-shadow--2dp">
-                <h4 class="m-0 mdl-button--accent">Wichtige Hinweise</h4>
+            <div class="mdl-cell mdl-cell--12-col center">
+                <h1 class="light">Training</h1>
+            </div>
+        </div>
+        <!-- Here the Messages -->
+        {% if request.user.is_authenticated %}
+        {% if messages %}
+        <div class="mdl-grid my-2">
+            <div class="mdl-cell mdl-cell--12-col m-2 p-2 secondary-bg">
                 {% for msg in messages %}
                 <div class="m-1">
-                    <span>[{{msg.author.first_name}}, {{msg.date |date:'d.m.Y'}}]: <strong>{{msg.title}}</strong> </span>
-                    <p>{{msg.message}}</p>
+                    <span class="light">[{{msg.author.first_name}}, {{msg.date |date:'d.m.Y'}}]: <strong>{{msg.title}}</strong> </span>
+                    <p class="light">{{msg.message}}</p>
                 </div>
                 {% endfor %}
             </div>
         </div>
         {% endif %}
+        {% endif %}
         <style>
             .mdl-card{
-                max-width:100% !important
+                max-width:100% !important;
+                background: #F0F4FA;
             }
         </style>
         <div class="mdl-grid">
             {% for short, day in session_days %}
-
             <!-- one column for the sessions of each day -->
             <div class="mdl-cell mdl-cell--3-col mdl-cell--4-col-tablet mdl-cell--12-col-phone">
-                <h3 class="m-0">{{ day }}</h3>
                 {% for session in sessions|lookup:short %}
-                <!--session hinweise -->
                 {% include 'snippets/training/session_card.html' %}
                 {% endfor %}
             </div>
             {% endfor %}
-
-
         </div>
     </div>
+    {% if not request.user.is_authenticated %}
+    <section class="content hero">
+    <!--Probetraining-->
+    {% include 'snippets/training/trial_card.html' %}
+    </section>
+    {% endif %}
 </section>

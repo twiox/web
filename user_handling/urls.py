@@ -35,11 +35,6 @@ urlpatterns = [
         name="trainer_update_form",
     ),
     path("trainer/neu/", trainer_views.register_trainer, name="register_trainer"),
-    path(
-        "verwaltung/probetraining/",
-        interested_views.TesterListView.as_view(),
-        name="tester_list",
-    ),
     path("ajax/kopiere-email-listen", views.get_all_emails, name="get_all_emails"),
     path(
         "ajax/mitglieder/detail_form/<int:pk>",

@@ -2,24 +2,19 @@
 Very general custom css
 */
 
-:root {
-  font-family: Inter, sans-serif !important;
-  font-feature-settings: 'liga' 1, 'calt' 1 !important; /* fix for Chrome */
-}
-@supports (font-variation-settings: normal) {
-  :root { font-family: InterVariable, sans-serif; }
-}
-
 body{
-  background-color: #f3f3f3;
+  background-color: #D4D8F0;
+  font-family: Inter, sans-serif !important;
+  font-feature-settings: 'liga' 1, 'calt' 1 !important;
 }
 .content{
-  max-width:960px;
+  max-width:1080px;
   margin:0 auto;
   padding:40px;
   position:relative;
 }
 h1,h2,h3,h4{
+  font-family: Inter, sans-serif !important;
   font-weight: 300 !important;
 }
 
@@ -65,12 +60,15 @@ Padding and Margin
   padding-left: 20px;
   padding-right: 20px;
 }
+.hero{
+  margin-top: 80px;
+  margin-bottom: 80px;
+}
 
 
 /*
 Positions
 */
-
 .center{
   display: flex;
   align-items: center;
@@ -103,7 +101,7 @@ Positions
 
 .section{
   padding-top: 30px;
-  padding-bottom: 50px;
+  padding-bottom: 80px;
 }
 
 .image_wrapper {
@@ -151,6 +149,12 @@ Color
 .light-bg {
   background-color: #ffffff !important;
 }
+.dark {
+  color: #191919 !important;
+}
+.dark-bg {
+  background-color: #191919 !important;
+}
 /*Change that to opacity to make it generic*/
 .passive {
   background-color: #9AD1DC !important;
@@ -175,6 +179,9 @@ Color
 }
 .fullwidth{
   width: 100% !important;
+}
+.rem1-5{
+  font-size: 1.5rem;
 }
 
 /* Start with the base page  */
@@ -230,4 +237,14 @@ Color
   -webkit-transform: translateZ(-300px) scale(2);
   transform: translateZ(-300px) scale(2);
   z-index: 3;
+}
+
+/*
+Flex
+*/
+
+.flex_row{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }

@@ -1,8 +1,9 @@
-from members.models import Session, Message
+from members.models import Session, Message, Tester
+from members.forms import TrialForm
 from django.shortcuts import render, redirect
 from django.urls import path
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import DetailView, UpdateView
+from django.views.generic import DetailView, UpdateView, CreateView
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
@@ -94,9 +95,16 @@ class SessionUpdateView(LoginRequiredMixin, UpdateView):
     fields = "__all__"
 
 
+class TesterCreateView(CreateView):
+    model = Tester
+    form_class = TrialForm
+    template_name = "pages/training/trial_form.html"
+
+
 urlpatterns = [
     path("get-section", get_section, name="get_training_section"),
     path("<int:pk>", SessionDetailView.as_view(), name="session_detail"),
     path("<int:pk>/edit", SessionUpdateView.as_view(), name="session_update"),
     path("<int:pk>/toggle", toggle_participation, name="session_participation_toggle"),
+    path("probetraining", TesterCreateView.as_view(), name="trial_form"),
 ]

@@ -27,7 +27,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "members.apps.MembersConfig",
-    "interested.apps.InterestedConfig",
     "trainer.apps.TrainerConfig",
     "user_handling.apps.UserHandlingConfig",
     "six",

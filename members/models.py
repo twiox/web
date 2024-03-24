@@ -551,3 +551,17 @@ class AdditionalEmail(models.Model):
     title = models.CharField("Titel", max_length=200, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     email = models.CharField("Emailadresse", max_length=200, blank=True, null=True)
+
+
+#
+#
+# Probetraining
+#
+#
+
+
+class Tester(Human):
+    notes = models.TextField("Anmerkungen", blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"

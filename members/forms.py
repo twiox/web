@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Event, Session, Spot, Document
+from .models import Event, Session, Spot, Document, Tester
 
 
 class EventForm(forms.ModelForm):
@@ -41,6 +41,23 @@ class EventForm(forms.ModelForm):
             "teilnahmebedingungen",
             "einverstaendnis",
             "datenschutz",
+        ]
+
+
+class TrialForm(forms.ModelForm):
+    confirm = forms.BooleanField()
+
+    class Meta:
+        model = Tester
+        fields = [
+            "first_name",
+            "last_name",
+            "birthday",
+            "email",
+            "telephone",
+            "notes",
+            "confirm",
+            "sex",
         ]
 
 

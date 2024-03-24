@@ -18,9 +18,7 @@ from django.contrib import messages
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.conf import settings
-from .forms import ProbetrainingForm
-from members.models import Chairman
-from .models import Tester
+from members.models import Chairman, Tester
 from members.views import chairman_check, trainer_check
 
 
@@ -121,10 +119,3 @@ def interested_offers(request):
 
 def interested_philosophy(request):
     return render(request, "interested/interested_philosophy.html", {})
-
-
-class TesterListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-    model = Tester
-
-    def test_func(self):
-        return chairman_check(self.request)

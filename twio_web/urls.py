@@ -12,7 +12,6 @@ urlpatterns = [
     path("impressum", views.impressum, name="impressum"),
     path("datenschutzerklärung", views.dataprotection, name="dataprotection"),
     path("mitglieder/", include("members.urls")),
-    path("interessierte/", include("interested.urls")),
     path("trainer/", include("trainer.urls")),
     path("vorstand/", include("user_handling.urls")),
     path(

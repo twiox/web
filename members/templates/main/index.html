@@ -12,14 +12,13 @@ Style for the main page
     filter: contrast(100%) brightness(100%);
     background:
         /*needs opacity otherwise the noise is not visible*/
-        linear-gradient(0deg, rgba(255, 255, 255, 0), rgba(17, 131, 146, 0.1)),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(255, 255, 255, 0.0)),
         url("data:image/svg+xml,%3Csvg viewBox='0 0 214 214' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.48' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     }
 #main_section .parallax__layer--base-background {
     background: #D4D8F0;
 /* resulting css */
 }
-
 
 /*
 The main image
@@ -61,7 +60,7 @@ The main image
     /* this is the News section of the page */
     #news_section {
         z-index: 5;
-        background: white;
+        background: #D4D8F0;
         position: relative;
     }
     </style>
@@ -73,11 +72,14 @@ The main image
     <style>
     #training_section {
         z-index: 5;
-        background-color: #607d8b;
+        background-color: #044755;
         position: relative;
     }
     #training_section > .content > h1,h3 {
         color: white;
+    }
+    #event_section{
+        background: #D4D8F0;
     }
     </style>
     <section id="training-section-wrapper"
@@ -85,7 +87,7 @@ The main image
         hx-trigger="load once">
     </section>
     <!-- Here the Container for the Events -->
-    <section id="training-section-wrapper"
+    <section id="event-section-wrapper"
         hx-get="{% url 'get_event_section' %}"
         hx-trigger="load once">
     </section>
