@@ -1,5 +1,7 @@
 {% extends "main/page.html" %}
 
+{% load custom_filters %}
+
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script><!-- Header -->
@@ -8,6 +10,18 @@
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script><!-- Table -->
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/link@latest"></script><!-- Link -->
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/marker@latest"></script><!-- Marker -->
+{% endblock %}
+
+{% block pre_content_class %}
+{% if request.user.pk|isin:event.participant_users %}
+primary-bg light
+{% else %}
+primary2-bg light
+{% endif %}
+{% endblock %}
+
+{% block pre_content %}
+<h1>{{object.title}}</h1>
 {% endblock %}
 
 {% block content %}

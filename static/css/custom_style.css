@@ -15,6 +15,7 @@ h1,h2,h3,h4{
   font-weight: 300 !important;
 }
 
+
 /*
 Padding and Margin
 */
@@ -118,19 +119,31 @@ Positions
 Color
 */
 
-
+.secondary {
+  color: #ff4081 !important;
+}
 .secondary-bg {
   background-color: #ff4081 !important;
-}
-.primary-bg {
-  background-color: #088eaa !important;
 }
 .primary {
   color: #088eaa !important;
 }
+.primary-bg {
+  background-color: #088eaa !important;
+}
+.primary2{
+  color: #607d8b;
+}
+.primary2-bg{
+  background-color:#607d8b ;
+}
+.light {
+  color: #ffffff !important;
+}
 .light-bg {
   background-color: #ffffff !important;
 }
+/*Change that to opacity to make it generic*/
 .passive {
   background-color: #9AD1DC !important;
 }
@@ -138,8 +151,15 @@ Color
   background-color: lightgray !important;
   opacity: 0.8 !important;
   background: repeating-linear-gradient( -45deg, grey, grey 5px, #ffffff 5px, #ffffff 25px ) !important;
-
 }
+/*Probably only for the messages*/
+.success{
+  background-color: #08aa74 !important;
+}
+.fail{
+  background-color: #aa2308 !important;
+}
+
 /* Size */
 
 .s-7{

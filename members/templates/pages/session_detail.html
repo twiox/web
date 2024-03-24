@@ -1,21 +1,34 @@
 {% extends "main/page.html" %}
 {% load custom_filters %}
 
+{% block pre_content_class %}
+{% if request.user in object.participants.all %}
+primary-bg light
+{% else %}
+primary2-bg light
+{% endif %}
+{% endblock %}
+
+{% block pre_content %}
+<h1>{% if object.spot.outdoor %}Outdoor{% else %}In der Halle{% endif %}</h1>
+{% endblock %}
+
 {% block content %}
     <section>
-        <h1>{% if object.spot.outdoor %}Outdoor{% else %}In der Halle{% endif %}</h1>
         <h3>{{object.spot}}</h3>
+
+
         <div class="mdl-card__menu">
             <a href="{% url 'session_update' object.pk %}"
                 class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
                 <i class="material-icons">edit</i>
             </a>
         </div>
-        <div class="mdl-grid">
+        <div class="mdl-grid mdl-shadow--2dp">
             <!--Adjust the cell-sizes by the number of trainers-->
             {% with n_trainer=object.trainer.all|length %}
             {% for trainer in object.trainer.all %}
-            <div class="mdl-cell--2-col">
+            <div class="mdl-cell mdl-cell--2-col mdl-cell--4-col-tablet">
                 <div class="avatar p-2">
                     <div class ="member">
                         <div class="square">
@@ -29,18 +42,18 @@
                 </div>
             </div>
             {% endfor%}
-            <div class="mdl-cell--{{ n_trainer|multiply:-2|add:12 }}-col">
+            <div class="mdl-cell mdl-cell--{{ n_trainer|multiply:-2|add:12 }}-col mdl-cell--12-col-tablet">
                 <div class="p-2">
                     <p>{{object.short|default:"Yesterday you said tomorrow"}}</p>
-                    <div class="mdl-card__actions mdl-card--border">
+                    <div class="mdl-card__actions mdl-card--border center">
                         {% if request.user in object.participants.all %}
-                        <a href="{% url 'session_participation_toggle' object.pk %}">
+                        <a href="{% url 'session_participation_toggle' object.pk %}" class="m-2">
                             <button class="mdl-button mdl-button--raised mdl-button--accent mdl-js-button primary-bg">Abmelden</button>
                         </a>
                         {% else %}
                         {% if request.user.profile.age >= object.min_age and request.user.profile.age <= object.max_age %}
-                        <a href="{% url 'session_participation_toggle' object.pk %}">
-                            <button class="mdl-button mdl-button--raised mdl-button--accent mdl-js-button">Anmelden</button>
+                        <a href="{% url 'session_participation_toggle' object.pk %}" class="m-2">
+                            <button class="mdl-button mdl-button--raised mdl-button--accent mdl-js-button primary-bg">Anmelden</button>
                         </a>
                         {% else %}
                         <i>Mit deinem Alter kannst du dich nicht anmelden</i>
@@ -52,10 +65,11 @@
             {% endwith %}
         </div>
         {% if object.participants.all|length > 0 %}
-        <h6>Statistiken</h6>
-        <div class="mdl-grid">
-            <div class="mdl-cell--4-col">
-                <img src="data:image/png;base64,{{object.age_hist}}" alt="A histogram of the ages of session participants" width="100%" height="auto"/>
+        <div class="p-2">
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col-phone">
+                    <img src="data:image/png;base64,{{object.age_hist}}" alt="A histogram of the ages of session participants" width="100%" height="auto"/>
+                </div>
             </div>
         </div>
         {% endif %}

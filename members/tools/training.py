@@ -38,7 +38,7 @@ def get_session_age_hist(session):
     plt.tight_layout()
 
     stream = BytesIO()
-    plt.savefig(stream, format="png")
+    plt.savefig(stream, format="png", transparent=True)
     plt.close()
 
     return base64.b64encode(stream.getvalue()).decode()

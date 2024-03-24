@@ -31,8 +31,6 @@ INSTALLED_APPS = [
     "trainer.apps.TrainerConfig",
     "user_handling.apps.UserHandlingConfig",
     "six",
-    "multiselectfield",
-    "compressor",
     "crispy_forms",
 ]
 

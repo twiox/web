@@ -18,7 +18,12 @@
         </div>
     </header>
     <main class="mdl-layout__content" >
-        <div class="page-content content light-bg" style="min-height: 100vh;">{% block content %}{% endblock %}</div>
+        <div class="page-content" style="min-height: 100vh;">
+            <div class="content {% block pre_content_class %}{% endblock %}">{% block pre_content %}{% endblock %}</div>
+            <div class="light-bg content">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
     </main>
 </div>
 

@@ -61,13 +61,7 @@
         <div class="mdl-cell mdl-cell--10-col mdl-cell--6-col--tablet mdl-cell--6-col--phone">
             <div class="mdl-grid m-0 p-0">
                 <div class="mdl-cell mdl-cell--6-col">
-                    <h3 class="p-0 m-0">{{event.title}}</h3>
-                    <h6 class="p-1 m-0">{{event.place}}</h6>
-                    <span class="mdl-chip">
-                        <span class="mdl-chip__text">
-                            {% if event.public_event %}Öffentlich{% else %}Für Mitglieder{% endif %}
-                        </span>
-                    </span>
+                    <h3 class="p-0 m-0">{{event.place}}</h3>
                     {% if request.user.is_authenticated %}
                     <span class="mdl-chip {% if participation and request.user.is_authenticated %}secondary-bg{% else %}primary-bg{% endif %}">
                         <span class="mdl-chip__text">

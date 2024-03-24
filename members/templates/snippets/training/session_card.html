@@ -1,4 +1,4 @@
-<div class=" mdl-card mdl-shadow--2dp my-2">
+<div class="mdl-card mdl-shadow--2dp my-2">
     <div class="mdl-card__supporting-text">
         <h4 class="m-0">{{session.spot.title}}</h4>
         <p class="p-0 primary">{{session.start_time|date:'H:i'}} - {{session.end_time|date:'H:i'}} Uhr</p>
@@ -17,7 +17,7 @@
     <div class="mdl-card__menu">
         <a href="https://www.google.de/maps/dir//{{session.spot.lat}},{{session.spot.long}}/@{{session.spot.lat}},{{session.spot.long}},17z"
             target="_blank"
-            class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
+            class="mdl-button mdl-js-button mdl-button--icon mdl-button--accent">
             <i class="material-icons">pin_drop</i>
         </a>
     </div>

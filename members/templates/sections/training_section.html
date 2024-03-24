@@ -2,7 +2,7 @@
 
 <section class="section" id="training_section">
     <div class="content">
-        <h1 class="mdl-typography--display-4">Training</h1>
+        <h1>Training</h1>
         <!-- Here the Messages -->
         {% if messages %}
         <div class="mdl-grid">
@@ -17,30 +17,25 @@
             </div>
         </div>
         {% endif %}
+        <style>
+            .mdl-card{
+                max-width:100% !important
+            }
+        </style>
         <div class="mdl-grid">
-            <style>
-                .mdl-card{
-                    min-height: 100px !important;
-                    max-width: 100%;
-                }
-            </style>
-
             {% for short, day in session_days %}
+
             <!-- one column for the sessions of each day -->
             <div class="mdl-cell mdl-cell--3-col mdl-cell--4-col-tablet mdl-cell--12-col-phone">
-                <div class="card-square my-2 mdl-shadow--2dp">
-                    <div class="mdl-card__title p-0 secondary-bg">
-                        <div class="mdl-grid">
-                            <div class="mdl-cell mdl-cell--12-col"><h4 class="m-0">{{ day }}</h4></div>
-                          </div>
-                    </div>
-                </div>
+                <h3 class="m-0">{{ day }}</h3>
                 {% for session in sessions|lookup:short %}
                 <!--session hinweise -->
                 {% include 'snippets/training/session_card.html' %}
                 {% endfor %}
             </div>
             {% endfor %}
+
+
         </div>
     </div>
 </section>
