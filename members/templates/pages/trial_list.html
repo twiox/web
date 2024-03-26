@@ -1,0 +1,18 @@
+{% extends "main/page.html" %}
+{% load static %}
+
+{% block content %}
+    <section>
+        <h1 class="p-0 m-0">Anfragenverwaltung</h1>
+        <div class="mdl-grid">
+            <div class="mdl-cell mdl-cell--4-col">
+                {% for tester in object_list %}
+                    {% include 'snippets/training/tester_card.html' with object=tester %}
+                {% endfor %}
+            </div>
+            <div class="mdl-cell mdl-cell--stretch">
+
+            </div>
+        </div>
+    </section>
+{% endblock %}

@@ -115,7 +115,7 @@ class TesterCreateView(CreateView):
 
 class TesterListView(ListView):
     model = Tester
-    template_name = "pages/tester_list.html"
+    template_name = "pages/trial_list.html"
 
 
 urlpatterns = [

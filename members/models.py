@@ -562,6 +562,7 @@ class AdditionalEmail(models.Model):
 
 class Tester(Human):
     notes = models.TextField("Anmerkungen", blank=True, null=True)
+    progress = models.TextField("Workflow", default="{'Antwort':'0'}")
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
