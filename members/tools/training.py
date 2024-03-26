@@ -1,5 +1,6 @@
 from members.models import Session, Message, Tester
 from members.forms import TrialForm
+from members.tools import emails
 from django.shortcuts import render, redirect
 from django.urls import path
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -99,6 +100,17 @@ class TesterCreateView(CreateView):
     model = Tester
     form_class = TrialForm
     template_name = "pages/trial_form.html"
+
+    def form_valid(self, form):
+        self.object = form.save()
+
+        # send the email
+        emails.send_trial_email(self.object)
+        # send message
+        messages.add_message(
+            self.request, messages.SUCCESS, "Du hast dich erfolgreich angemeldet"
+        )
+        return super().form_valid(form)
 
 
 urlpatterns = [

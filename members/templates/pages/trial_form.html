@@ -1,23 +1,79 @@
 {% extends "main/page.html" %}
-{% load crispy_forms_tags %}
+{% load static %}
 
 {% block content %}
-<h1>Probetraining</h1>
+    <section>
+        <h1 class="p-0 m-0">Probetraining</h1>
+        <p>Nachdem Du das unten stehende Formular ausgefüllt hast, erhältst Du von uns zeitnah eine Antwort per E-Mail, in welcher Du deine Probetrainings-Termine bekommst. Mit dem Trainer besprichst Du im Anschluss an das Training den weiteren Ablauf. Nach vier absolvierten Trainings kannst Du eine Mitgliedschaft beantragen.
 
-<div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
-    <div class="mdl-tabs__tab-bar">
-        <a href="#starks-panel" class="mdl-tabs__tab is-active">Formular</a>
-    </div>
-    <div class="mdl-tabs__panel is-active" id="starks-panel">
-        <section>
-            <form class="uniForm" method="post" enctype="multipart/form-data">
+            Wenn Du unter 18 Jahre alt bist, sende uns bitte mit Deiner Anfrage auch die nachfolgende, von deinen Eltern ausgefüllte, Einverständniserklärung.</p>
+        <h6>Persönliche Informationen</h6>
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            {{form|crispy}}
-            <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
-                Speichern
+            <!--First, the user/person-->
+            <div class="mdl-grid">
+                <div class="mdl-cell--6-col mdl-cell--12-col--phone">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
+                        <input class="mdl-textfield__input" type="text" id="first_name" name="first_name" pattern=".*" data-required>
+                        <label class="mdl-textfield__label" for="first_name">Vorname</label>
+                    </div>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" id="last_name" name="last_name" pattern=".*" data-required>
+                        <label class="mdl-textfield__label" for="last_name">Nachname</label>
+                    </div>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" id="email" name="email" pattern=".*@.*\..*" data-required>
+                        <label class="mdl-textfield__label" for="email">Email-Adresse</label>
+                        <span class="mdl-textfield__error">Bitte gib eine Emailadresse an</span>
+                    </div>
+                </div>
+                <div class="mdl-cell--6-col mdl-cell--12-col--phone">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="date" id="birthday" name="birthday" data-required>
+                        <label class="mdl-textfield__label" for="birthday">Geburtsdatum</label>
+                    </div>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" id="telephone" name="telephone" pattern="\+[0-9]+.*">
+                        <label class="mdl-textfield__label" for="telephone">Telefonnummer</label>
+                        <span class="mdl-textfield__error">Bitte die Telefonnummer im Format +49 123 456 789 angeben</span>
+                    </div>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select">
+                        <input type="text" value="" class="mdl-textfield__input" id="sex" readonly>
+                        <input type="hidden" value="" name="sex" data-required>
+                        <i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>
+                        <label for="sex" class="mdl-textfield__label">Geschlecht</label>
+                        <ul for="sex" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
+                            <li class="mdl-menu__item" data-val="m">Männlich</li>
+                            <li class="mdl-menu__item" data-val="w">Weiblich</li>
+                            <li class="mdl-menu__item" data-val="d">Divers</li>
+                            <li class="mdl-menu__item" data-val="na">Keine Angabe</li>
+                        </ul>
+                    </div>
+                    <div class="mdl-textfield mdl-js-textfield">
+                        <textarea class="mdl-textfield__input" type="text" rows= "3" id="notes" name="notes"></textarea>
+                        <label class="mdl-textfield__label" for="notes">Anmerkungen</label>
+                    </div>
+                </div>
+            </div>
+
+            <h6>Dokumente</h6>
+            <ul>
+                <li><a href="{% static 'docs/Einverstaendniserklaerung_TwioX.pdf' %}">Teilnahmebedingungen</a></li>
+            </ul>
+
+            <p>Ich habe die <a href="{% url 'dataprotection' %}">Datenschutzerklärung</a> gelesen und akzeptiere sie.
+            Ich willige ein, dass die von mir hinterlegten Daten für die Planung und Durchführung des Probetrainings gespeichert und ggf. an die Trainerinnen und Trainer übermittelt werden
+            </p>
+                <strong>Bei minderjährigen Teilnehmenden wird das Einverständnis der Eltern benötigen!</strong>
+
+            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="confirm">
+                <input type="checkbox" id="confirm" class="mdl-checkbox__input" data-required>
+                <span class="mdl-checkbox__label">Ich habe verstanden</span>
+            </label>
+            <br> <br>
+            <button id="form_submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit">
+                Absenden
             </button>
-            </form>
-        </section>
-    </div>
-</div>
+        </form>
+    </section>
 {% endblock %}

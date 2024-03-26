@@ -10,8 +10,15 @@ def send_email(subject, message, to):
     return True
 
 
+#
+#
+# Event registration
+#
+#
+
+
 def send_participant_email(participant):
-    subject = f"Anmeldung Veranstaltung"
+    subject = f"Anmeldung Veranstaltung: {participant.get_first_name} {participant.get_last_name}"
     message = render_to_string(
         "emails/participation_email.html",
         {
@@ -20,4 +27,23 @@ def send_participant_email(participant):
         },
     )
     to = participant.get_email
+    return send_email(subject, message, to)
+
+
+#
+#
+# Probetraining
+#
+#
+
+
+def send_trial_email(tester):
+    subject = f"Anmeldung Probetraining: {tester.first_name} {tester.last_name}"
+    message = render_to_string(
+        "emails/trial_registration_email.html",
+        {
+            "tester": tester,
+        },
+    )
+    to = tester.email
     return send_email(subject, message, to)

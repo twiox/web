@@ -45,7 +45,6 @@ class EventForm(forms.ModelForm):
 
 
 class TrialForm(forms.ModelForm):
-    confirm = forms.BooleanField()
 
     class Meta:
         model = Tester
@@ -56,7 +55,6 @@ class TrialForm(forms.ModelForm):
             "email",
             "telephone",
             "notes",
-            "confirm",
             "sex",
         ]
 

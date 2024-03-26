@@ -1,12 +1,4 @@
-{% load compress %}
 {% load static %}
-{% compress css %}
-    <link type="text/x-scss" href="{% static 'style.scss' %}" rel="stylesheet" media="screen">
-    <link type="text/x-scss" rel="stylesheet" media="only screen and (min-width: 600px)" href="{% static 'tablet_style.scss' %}">
-    <link type="text/x-scss" rel="stylesheet" media="only screen and (min-width: 1000px)" href="{% static 'desktop_style.scss' %}">
-    <link type="text/css" rel="stylesheet" href="{% static 'material.css' %}">
-{% endcompress %}
-
 <!doctype html>
 <html lang="en", style="padding-bottom:0px;">
     <head>
@@ -35,9 +27,9 @@
             </header>
             <nav class="sticky" id="nav">
                 <div class="three_grid">
-                    <a href="{% url 'index' %}">MITGLIEDER</a>
-                    <a href="{% url 'interested_index' %}">INTERESSIERTE</a>
-                    <a href="{% url 'organizers_index' %}">VERANSTALTER</a>
+                    <a href="">MITGLIEDER</a>
+                    <a href="">INTERESSIERTE</a>
+                    <a href="">VERANSTALTER</a>
                 </div>
             </nav>
 
