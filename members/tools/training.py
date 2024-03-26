@@ -4,7 +4,7 @@ from members.tools import emails
 from django.shortcuts import render, redirect
 from django.urls import path
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import DetailView, UpdateView, CreateView
+from django.views.generic import DetailView, UpdateView, CreateView, ListView
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
@@ -113,10 +113,16 @@ class TesterCreateView(CreateView):
         return super().form_valid(form)
 
 
+class TesterListView(ListView):
+    model = Tester
+    template_name = "pages/tester_list.html"
+
+
 urlpatterns = [
     path("get-section", get_section, name="get_training_section"),
     path("<int:pk>", SessionDetailView.as_view(), name="session_detail"),
     path("<int:pk>/edit", SessionUpdateView.as_view(), name="session_update"),
     path("<int:pk>/toggle", toggle_participation, name="session_participation_toggle"),
     path("probetraining", TesterCreateView.as_view(), name="trial_form"),
+    path("probetrainingsverwaltung", TesterListView.as_view(), name="tester_list"),
 ]

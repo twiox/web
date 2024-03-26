@@ -568,3 +568,11 @@ class Tester(Human):
 
     def get_absolute_url(self):
         return reverse("trial_form")
+
+
+class TrialBatch(models.Model):
+    name = models.CharField("Namen", max_length=200)
+    tester = models.ManyToManyField(Tester, related_name="batch")
+
+    def __str__(self):
+        return self.name

@@ -1,8 +1,11 @@
 from django.shortcuts import render
+from members.models import Tester
 
 
 def landing(request):
-    return render(request, "main/layout.html", {})
+    # get new Tester requests
+    new_tester = Tester.objects.filter(batch=None)
+    return render(request, "main/layout.html", {"new_tester": new_tester})
 
 
 def impressum(request):

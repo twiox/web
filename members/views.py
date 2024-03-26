@@ -61,11 +61,6 @@ def trainer_check():
     return True
 
 
-def index(request):
-    """This is the View for the Members homepage"""
-    return render(request, "main/index.html", {})
-
-
 #
 #
 # Generic functions
