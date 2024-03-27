@@ -561,6 +561,7 @@ class AdditionalEmail(models.Model):
 
 
 class Tester(Human):
+    date = models.DateTimeField("Anfragedatum", blank=True, null=True)
     notes = models.TextField("Anmerkungen", blank=True, null=True)
     progress = models.TextField("Workflow", default="{'Antwort':'0'}")
 

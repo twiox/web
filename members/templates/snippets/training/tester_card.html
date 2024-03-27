@@ -1,8 +1,17 @@
-<div class="mdl-card mdl-shadow--2dp my-2">
-    <div class="flex_row">
-        <div>
-            <h6>{{object.first_name}} {{object.last_name}}</h6>
-            <p>{{object.sex}}, {{object.birthday}}</p>
-        </div>
+<style>
+    .mdl-card{
+        min-height: 0px !important;
+    }
+</style>
+<div class="mdl-card mdl-shadow--2dp my-2 p-1">
+    <span class="top_right p-1">{{object.date|date:'d.m.Y'}}</span>
+    <div>
+        <h6 class="m-0 p-0 primary">{{object.first_name}} {{object.last_name}} ({{object.sex}})</h6>
+        <p class="m-0 p-0">{{object.birthday|date:'d.m.Y'}} ({{object.age}} Jahre)</p>
     </div>
+    {% if object.notes %}
+    <p class="my-1">
+        {{object.notes}}
+    </p>
+    {% endif %}
 </div>

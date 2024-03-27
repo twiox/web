@@ -7,6 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import DetailView, UpdateView, CreateView, ListView
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from datetime import datetime
 
 
 # Helper function
@@ -103,6 +104,8 @@ class TesterCreateView(CreateView):
 
     def form_valid(self, form):
         self.object = form.save()
+        self.object.date = datetime.now()
+        self.object.save()
 
         # send the email
         emails.send_trial_email(self.object)
