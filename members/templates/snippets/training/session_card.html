@@ -8,7 +8,7 @@
                 {% if session.hinweis %}
                 <div class="secondary">{{session.hinweis}}</div>
                 {% endif %}
-                <h4 class="my-1 dark">{{session.spot.title}}</h4>
+                <h4 class="my-1 dark" style="margin-top:0px;">{{session.spot.title}}</h4>
                 <span>{{session.start_time|date:'H:i'}} - {{session.end_time|date:'H:i'}}<span><br>
                 <span>
                     {% if session.min_age == 0 and session.max_age == 99 %}Alle Altersgruppen{% else %}
