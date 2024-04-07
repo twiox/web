@@ -33,15 +33,6 @@ urlpatterns = [
         views.PasswordChangeView.as_view(),
         name="profile_update_pw",
     ),
-    path("beiträge/", views.NewsListView.as_view(), name="news_list"),
-    path("beiträge/<int:pk>/", views.NewsDetailView.as_view(), name="news_detail"),
-    path("beiträge/neu/", views.NewsCreateView.as_view(), name="news_create"),
-    path(
-        "beiträge/<int:pk>/ändern", views.NewsUpdateView.as_view(), name="news_update"
-    ),
-    path(
-        "beiträge/<int:pk>/löschen", views.NewsDeleteView.as_view(), name="news_delete"
-    ),
     path("ajax/get/bilder_daten", views.get_image_data, name="get_image_data"),
     path("ajax/set/bilder_daten", views.set_image_data, name="set_image_data"),
     path("ajax/weitere_email/neu", views.add_another_email, name="add_another_email"),

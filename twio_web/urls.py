@@ -9,9 +9,9 @@ from . import views
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", views.landing, name="landing"),
+    path("", include("members.urls")),
     path("impressum", views.impressum, name="impressum"),
     path("datenschutzerklärung", views.dataprotection, name="dataprotection"),
-    path("mitglieder/", include("members.urls")),
     path("trainer/", include("trainer.urls")),
     path("vorstand/", include("user_handling.urls")),
     path(
