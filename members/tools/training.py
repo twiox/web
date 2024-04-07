@@ -93,8 +93,26 @@ class SessionDetailView(LoginRequiredMixin, DetailView):
 
 class SessionUpdateView(LoginRequiredMixin, UpdateView):
     model = Session
-    template_name = "pages/session_detail.html"
-    fields = "__all__"
+    template_name = "pages/session_form.html"
+    fields = [
+        "title",
+        "short",
+        "hinweis",
+        "trainer",
+        "day",
+        "min_age",
+        "max_age",
+        "start_time",
+        "end_time",
+        "spot",
+    ]
+
+
+def session_delete(request, pk):
+    if request.user.profile.permission_level > 1:
+        session = Session.objects.get(pk=pk)
+        session.delete()
+    return redirect("landing")
 
 
 class TesterCreateView(CreateView):
@@ -125,6 +143,7 @@ urlpatterns = [
     path("get-section", get_section, name="get_training_section"),
     path("<int:pk>", SessionDetailView.as_view(), name="session_detail"),
     path("<int:pk>/edit", SessionUpdateView.as_view(), name="session_update"),
+    path("<int:pk>/delete", session_delete, name="session_delete"),
     path("<int:pk>/toggle", toggle_participation, name="session_participation_toggle"),
     path("probetraining", TesterCreateView.as_view(), name="trial_form"),
     path("probetrainingsverwaltung", TesterListView.as_view(), name="tester_list"),

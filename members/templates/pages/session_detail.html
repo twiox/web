@@ -17,13 +17,20 @@ primary2-bg light
     <section>
         <h3>{{object.spot}}</h3>
 
-
+        {% if request.user.profile.permission_level > 1 %}
         <div class="mdl-card__menu">
             <a href="{% url 'session_update' object.pk %}"
                 class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
                 <i class="material-icons">edit</i>
             </a>
+            <form action="{% url 'session_delete' object.pk %}">
+                <button type="submit"
+                    class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
+                    <i class="material-icons">delete</i>
+            </button>
+            </form>
         </div>
+        {% endif  %}
         <div class="mdl-grid mdl-shadow--2dp">
             <!--Adjust the cell-sizes by the number of trainers-->
             {% with n_trainer=object.trainer.all|length %}
