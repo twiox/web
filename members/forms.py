@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Event, Session, Spot, Document, Tester
+from .models import Event, Spot, Document, Tester, Message
 
 
 class EventForm(forms.ModelForm):
@@ -59,6 +59,18 @@ class TrialForm(forms.ModelForm):
         ]
 
 
+class MessageForm(forms.ModelForm):
+    autodelete = forms.DateTimeField(
+        label="Zeitpunkt der Löschung",
+        widget=forms.TextInput(attrs={"type": "datetime-local"}),
+        input_formats=["%Y-%m-%dT%H:%M"],
+    )
+
+    class Meta:
+        model = Message
+        fields = ["title", "message", "autodelete"]
+
+
 #
 #
 # The old stuff
@@ -76,23 +88,6 @@ class SpotForm(forms.ModelForm):
     class Meta:
         model = Spot
         fields = ["title", "lat", "long", "description"]
-
-
-class SessionForm(forms.ModelForm):
-    class Meta:
-        model = Session
-        fields = [
-            "title",
-            "day",
-            "start_time",
-            "end_time",
-            "hinweis",
-            "spot",
-            "trainer",
-        ]
-        widgets = {
-            "trainer": forms.CheckboxSelectMultiple,
-        }
 
 
 class UpdateMemberInformationForm(forms.ModelForm):

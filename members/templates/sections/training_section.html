@@ -13,7 +13,7 @@
             {% if request.user.profile.permission_level > 1 %}
             <div class="center">
                 <div >
-                    <a class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
+                    <a href="{% url 'message_create' %}?display=sessions" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
                         <div id="tt1" class="material-icons">campaign</div>
                     </a>
                 </div>
@@ -23,9 +23,24 @@
         <div class="mdl-grid my-2">
             <div class="mdl-cell mdl-cell--12-col m-2 p-2 secondary-bg">
                 {% for msg in messages %}
-                <div class="m-1">
-                    <span class="light">[{{msg.author.first_name}}, {{msg.date |date:'d.m.Y'}}]: <strong>{{msg.title}}</strong> </span>
-                    <p class="light">{{msg.message}}</p>
+                <div class="m-1 flex_row">
+                    <div>
+                        <span class="light">[{{msg.author.first_name}}, {{msg.date |date:'d.m.Y'}}]: <strong>{{msg.title}}</strong> </span>
+                        <p class="light">{{msg.message}}</p>
+                    </div>
+                    <div>
+                        {% if request.user.profile.permission_level > 1 %}
+                        <form>
+                            {% csrf_token %}
+                            <a hx-post="{% url 'message_delete' msg.pk %}?display=sessions"
+                                hx-confirm="Hinweis löschen?"
+                                hx-target="#training_section"
+                                class="mdl-button mdl-js-button mdl-button--icon">
+                                <i class="material-icons light">delete</i>
+                            </a>
+                        </form>
+                        {% endif %}
+                    </div>
                 </div>
                 {% endfor %}
             </div>

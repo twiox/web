@@ -30,7 +30,6 @@ from django.contrib.auth.mixins import (
     PermissionRequiredMixin,
 )
 from .forms import (
-    SessionForm,
     EventForm,
     UpdateMemberInformationForm,
     UpdateMemberEmailForm,
@@ -177,32 +176,6 @@ class NewsDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
 
 """For The Messages"""
-
-
-class MessageEveCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    model = Message
-    fields = ["title", "message", "autodelete"]
-    permission_required = "members.add_message"
-
-    def form_valid(self, form):
-        message = form.save()
-        message.author = self.request.user
-        message.display = "events"
-        message.save()
-        return super(MessageEveCreateView, self).form_valid(form)
-
-
-class MessageSessCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    model = Message
-    fields = ["title", "message", "autodelete"]
-    permission_required = "members.add_message"
-
-    def form_valid(self, form):
-        message = form.save()
-        message.author = self.request.user
-        message.display = "sessions"
-        message.save()
-        return super(MessageSessCreateView, self).form_valid(form)
 
 
 class MessageDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):

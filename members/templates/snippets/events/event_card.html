@@ -24,7 +24,7 @@
         </div>
         <div class="mdl-cell mdl-cell--8-col">
             <span class="primary">{{event.start_date|date:'H:i' }}{% if not event.multiple_days %} - {{event.end_date|date:'H:i' }}{% endif %} Uhr</span><br>
-            <strong>{{event.title}}</strong>
+            <h4 class="my-1 dark">{{event.title}}</h4>
             <div class="mdl-card__supporting-text">
                 <p class="m-0">{{event.short}}</p>
             </div>

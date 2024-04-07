@@ -399,33 +399,22 @@ class Session(models.Model):
 
 
 class Message(models.Model):
-    choices = (("sessions", "Sessions"), ("events", "Events"))
     title = models.CharField("Titel", max_length=200)
     author = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
-    message = models.TextField(
-        "Hinweis", default="Deine Nachricht hier", blank=True, null=True
-    )
-    date = models.DateTimeField(default=datetime(2020, 11, 14, 1, 54, 52, 799289))
+    message = models.TextField("Hinweis", blank=True, null=True)
+    date = models.DateTimeField(auto_now_add=True)
     autodelete = models.DateTimeField("Automatisches Löschen", blank=True, null=True)
-    display = models.CharField(max_length=20, choices=choices, blank=True)
+    display = models.CharField(max_length=20, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         self.date = datetime.today()
         super().save(*args, **kwargs)
 
-    @property
-    def delme(self):
-        if not self.autodelete:
-            return False
-        return datetime.now().replace(tzinfo=None) > self.autodelete.replace(
-            tzinfo=None
-        ) + timedelta(days=1)
-
     def __str__(self):
-        return f"Message: {self.title}"
+        return self.title
 
     def get_absolute_url(self):
-        return reverse("index")
+        return reverse("landing")
 
 
 class Chairman(models.Model):

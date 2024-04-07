@@ -1,5 +1,5 @@
-from members.models import Session, Message, Tester
-from members.forms import TrialForm
+from members.models import Session, Message, Tester, Message
+from members.forms import TrialForm, MessageForm
 from members.tools import emails
 from django.shortcuts import render, redirect
 from django.urls import path
@@ -7,7 +7,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import DetailView, UpdateView, CreateView, ListView
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import Q
 from datetime import datetime
+import locale
 
 
 # Helper function
@@ -49,6 +51,12 @@ def get_session_age_hist(session):
 
 def get_section(request):
     sessions = Session.objects.all()
+
+    locale.setlocale(locale.LC_TIME, "de_DE")
+
+    # Remove old messages
+    Message.objects.filter(Q(autodelete__lte=datetime.now())).delete()
+
     training_messages = Message.objects.filter(display="sessions").distinct()
 
     session_days = sorted(
@@ -156,6 +164,31 @@ class TesterListView(ListView):
     template_name = "pages/trial_list.html"
 
 
+class MessageCreateView(LoginRequiredMixin, CreateView):
+    model = Message
+    form_class = MessageForm
+    template_name = "pages/message_form.html"
+
+    def form_valid(self, form):
+        message = form.save()
+        message.author = self.request.user
+        message.display = self.request.GET.get("display")
+        message.save()
+        messages.add_message(self.request, messages.SUCCESS, "Hinweis erstellt")
+        return super(MessageCreateView, self).form_valid(form)
+
+
+def message_delete(request, pk):
+    display = None
+    if request.user.profile.permission_level > 1:
+        msg = Message.objects.get(pk=pk)
+        display = msg.display
+        msg.delete()
+
+    if display == "sessions":
+        return get_section(request)
+
+
 urlpatterns = [
     path("get-section", get_section, name="get_training_section"),
     path("<int:pk>", SessionDetailView.as_view(), name="session_detail"),
@@ -165,4 +198,6 @@ urlpatterns = [
     path("<int:pk>/toggle", toggle_participation, name="session_participation_toggle"),
     path("probetraining", TesterCreateView.as_view(), name="trial_form"),
     path("probetrainingsverwaltung", TesterListView.as_view(), name="tester_list"),
+    path("hinweis/neu", MessageCreateView.as_view(), name="message_create"),
+    path("hinweis/löschen/<int:pk>", message_delete, name="message_delete"),
 ]

@@ -12,26 +12,6 @@ urlpatterns = [
     path("spots/neu/", views.SpotCreateView.as_view(), name="spot_create"),
     path("spots/<int:pk>/ändern/", views.SpotUpdateView.as_view(), name="spot_update"),
     path("spots/<int:pk>/löschen/", views.SpotDeleteView.as_view(), name="spot_delete"),
-    path(
-        "hinweis/neu/veranstaltung/",
-        views.MessageEveCreateView.as_view(),
-        name="message_eve_create",
-    ),
-    path(
-        "hinweis/neu/trainingseinheit/",
-        views.MessageSessCreateView.as_view(),
-        name="message_sess_create",
-    ),
-    path(
-        "hinweis/<int:pk>/löschen/",
-        views.MessageDeleteView.as_view(),
-        name="message_delete",
-    ),
-    path(
-        "hinweis/<int:pk>/ändern/",
-        views.MessageUpdateView.as_view(),
-        name="message_update",
-    ),
     path("profil/", views.UserDetailView.as_view(), name="profile_detail"),
     path(
         "profil/ändere_email/",
