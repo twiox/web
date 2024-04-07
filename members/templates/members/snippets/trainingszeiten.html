@@ -95,12 +95,14 @@
                                 class="third_session tertiary_bg prim_hover email_copy" style="display:none; cursor: pointer; width:50%">
                                 <i class="far fa-envelope padding_all_small"><p>Emails</p></i>
                             </div>
+                            {% if session.agegroup %}
                             <a href="{% url 'agegroup_detail' session.agegroup.pk %}" style="width:50%;padding:0px;">
                                 <div id="userlist_{{session.pk}}"
                                     class="third_session tertiary_bg prim_hover" style="display:none; cursor: pointer">
                                     <i class="far fa-user padding_all_small"><p>Liste</p></i>
                                 </div>
                             </a>
+                            {% endif %}
                         </div>
                         {% endif %}
                         <div id="trainerchip_{{session.pk}}" class="third_session tertiary_bg padding_all_small" style="text-align: left; display:none;">

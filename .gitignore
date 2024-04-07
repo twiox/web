@@ -11,6 +11,7 @@ media/Events/*
 media/PublicEvents/*
 media/galleries/*
 media/contacts/*
+media/uploads/
 twio_web/secrets.py
 api_key.txt
 *static/CACHE/*
