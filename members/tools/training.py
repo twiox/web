@@ -108,6 +108,23 @@ class SessionUpdateView(LoginRequiredMixin, UpdateView):
     ]
 
 
+class SessionCreateView(LoginRequiredMixin, CreateView):
+    model = Session
+    template_name = "pages/session_form.html"
+    fields = [
+        "title",
+        "short",
+        "hinweis",
+        "trainer",
+        "day",
+        "min_age",
+        "max_age",
+        "start_time",
+        "end_time",
+        "spot",
+    ]
+
+
 def session_delete(request, pk):
     if request.user.profile.permission_level > 1:
         session = Session.objects.get(pk=pk)
@@ -143,6 +160,7 @@ urlpatterns = [
     path("get-section", get_section, name="get_training_section"),
     path("<int:pk>", SessionDetailView.as_view(), name="session_detail"),
     path("<int:pk>/edit", SessionUpdateView.as_view(), name="session_update"),
+    path("neu", SessionCreateView.as_view(), name="session_create"),
     path("<int:pk>/delete", session_delete, name="session_delete"),
     path("<int:pk>/toggle", toggle_participation, name="session_participation_toggle"),
     path("probetraining", TesterCreateView.as_view(), name="trial_form"),

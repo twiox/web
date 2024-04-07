@@ -5,7 +5,10 @@
                 <h4 class="light m-1 p-0">{{session.day}}</h4>
             </div>
             <div class="p-1">
-                <h4 class="m-0 dark">{{session.spot.title}}</h4>
+                {% if session.hinweis %}
+                <div class="secondary">{{session.hinweis}}</div>
+                {% endif %}
+                <h4 class="my-1 dark">{{session.spot.title}}</h4>
                 <span>{{session.start_time|date:'H:i'}} - {{session.end_time|date:'H:i'}}<span><br>
                 <span>
                     {% if session.min_age == 0 and session.max_age == 99 %}Alle Altersgruppen{% else %}
@@ -20,10 +23,9 @@
             </div>
         </div>
         {% if request.user.is_authenticated %}
-        <div class="center">
-            <a class="dark"  href="{% url 'session_detail' session.pk%}">
-                <i class="material-icons">chevron_right</i></a>
-        </div>
+        <a class="dark center"  href="{% url 'session_detail' session.pk%}" style="min-height: 100% !important;text-decoration: none;">
+            <i class="material-icons">chevron_right</i>
+         </a>
         {% else %}
         <div></div>
         {% endif %}
