@@ -188,6 +188,10 @@ def message_delete(request, pk):
     if display == "sessions":
         return get_section(request)
 
+    from members.tools.events import get_section as get_event_section
+
+    return get_event_section(request)
+
 
 urlpatterns = [
     path("get-section", get_section, name="get_training_section"),
