@@ -3,7 +3,6 @@ from django.urls import path, include
 from . import views
 from trainer import views as trainer_views
 from members import views as member_views
-from interested import views as interested_views
 
 urlpatterns = [
     path("", views.index, name="chairman_index"),
