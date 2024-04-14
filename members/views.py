@@ -67,65 +67,6 @@ def trainer_check():
 #
 
 
-"""FOR THE SPOTS"""
-
-
-class SpotListView(LoginRequiredMixin, ListView):
-    model = Spot
-
-
-class SpotDetailView(LoginRequiredMixin, DetailView):
-    model = Spot
-
-    def get_context_data(self, **kwargs):
-        context = {"api_key": settings.GOOGLE_API_KEY}
-        if self.object:
-            context["object"] = self.object
-            context_object_name = self.get_context_object_name(self.object)
-            if context_object_name:
-                context[context_object_name] = self.object
-        context.update(kwargs)
-        return super().get_context_data(**context)
-
-
-class SpotCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    # template: event_form.html
-    model = Spot
-    form_class = SpotForm
-    permission_required = "members.add_spot"
-
-    def form_valid(self, form):
-        self.object = form.save()
-        self.object.description_rendered = markdown.markdown(self.object.description)
-        messages.add_message(self.request, messages.SUCCESS, "Spot geändert")
-        return super().form_valid(form)
-
-
-class SpotUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    # template: event_form.html
-    model = Spot
-    form_class = SpotForm
-    permission_required = "members.change_spot"
-
-    def form_valid(self, form):
-        self.object = form.save()
-        self.object.description_rendered = markdown.markdown(self.object.description)
-        messages.add_message(self.request, messages.SUCCESS, "Spot geändert")
-        return super().form_valid(form)
-
-
-class SpotDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
-    model = Spot
-    permission_required = "members.delete_spot"
-
-    def post(self, request, *args, **kwargs):
-        messages.add_message(request, messages.SUCCESS, "Spot gelöscht")
-        return self.delete(request, *args, **kwargs)
-
-    def get_success_url(self, **kwargs):
-        return reverse("spot_list")
-
-
 """USER STUFF"""
 
 

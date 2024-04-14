@@ -1,0 +1,13 @@
+{% extends "main/page.html" %}
+{% load static %}
+
+{% block content %}
+    <section>
+        <h1 class="p-0 m-0">Spots in Leipzig</h1>
+        <ul>
+        {% for spot in object_list %}
+        <li>{{spot}}</li>
+        {% endfor %}
+        </ul>
+    </section>
+{% endblock %}

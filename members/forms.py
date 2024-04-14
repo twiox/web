@@ -71,23 +71,17 @@ class MessageForm(forms.ModelForm):
         fields = ["title", "message", "autodelete"]
 
 
-#
-#
-# The old stuff
-#
-#
-
-
 class SpotForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(SpotForm, self).__init__(*args, **kwargs)
-        self.fields["description"].strip = False
-
-    description = forms.CharField(widget=forms.Textarea)
-
     class Meta:
         model = Spot
-        fields = ["title", "lat", "long", "description"]
+        fields = ["title", "lat", "long", "outdoor"]
+
+
+#
+#
+### WIP
+#
+#
 
 
 class UpdateMemberInformationForm(forms.ModelForm):

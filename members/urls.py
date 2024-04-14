@@ -6,12 +6,8 @@ urlpatterns = [
     path("veranstaltungen/", include("members.tools.events")),
     path("news/", include("members.tools.news")),
     path("editor/", include("members.tools.editor")),
+    path("spots/", include("members.tools.spots")),
     # this is the old stuff...
-    path("spots/", views.SpotListView.as_view(), name="spot_list"),
-    path("spots/<int:pk>/", views.SpotDetailView.as_view(), name="spot_detail"),
-    path("spots/neu/", views.SpotCreateView.as_view(), name="spot_create"),
-    path("spots/<int:pk>/ändern/", views.SpotUpdateView.as_view(), name="spot_update"),
-    path("spots/<int:pk>/löschen/", views.SpotDeleteView.as_view(), name="spot_delete"),
     path("profil/", views.UserDetailView.as_view(), name="profile_detail"),
     path(
         "profil/ändere_email/",
