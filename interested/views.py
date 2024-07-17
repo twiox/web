@@ -258,9 +258,9 @@ class PublicEventView(DetailView):
         event = self.get_object()
         self.object = event
         context = super(PublicEventView, self).get_context_data(**kwargs)
-        merch = merch = EventMerch.objects.filter(event=event).first()
 
         if form.is_valid():
+
             participant = EventParticipant(
                 event=event,
                 first_name=form.cleaned_data.get("first_name"),
@@ -289,8 +289,8 @@ class PublicEventView(DetailView):
                     "start_date": event.start_date,
                     "end_date": event.end_date,
                     "contact": participant.contact,
-                    "merch": True if participant.merch_wanted else False,
-                    "merch_title": merch.title if merch else None,
+                    "merch_wanted": True if participant.merch_wanted else False,
+                    "merch_title": None,
                     "merch_size": participant.merch_size,
                     "costs": participant.invoice,
                     "id": participant.id,

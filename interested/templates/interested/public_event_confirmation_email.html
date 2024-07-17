@@ -13,10 +13,10 @@ Geburtsdatum: {{birthdate}}
 E-Mail: {{email}}
 Telefon: {{telnr}}
 Kontakt via: {{contact}}
-{% if merch %}
-Zusatzbestellung: {{merch_title}}
+
+Am T-shirt interessiert: {{merch_wanted|yesno:'Ja,Nein'}}
 Größe: {{merch_size}}
-{% endif %}
+
 Gesamtkosten: {{costs|floatformat:2}} €
 
 Bitte überweise das Geld innerhalb der nächsten 14 Tage auf unser Vereinskonto bei:

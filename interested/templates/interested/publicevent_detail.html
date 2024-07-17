@@ -21,28 +21,7 @@
         });
     </script>
 </div>
-    <!--
-<div class="image_wrapper2 grey_cover2 pic1cont" id="container">
-    
 
-    <img src="{{object.header_picture.url}}" id="home_view">
-    <script type="text/javascript">
-        $("document").ready(function(){
-            var ele = document.getElementsByClassName("pic1cont")[0].getBoundingClientRect()
-            var pic = window.pageYOffset + ele.top
-            var win = window.pageYOffset
-            document.getElementById("home_view").style.top =(pic-win)*-0.15+"px";
-        });
-        window.addEventListener('scroll',function(){
-            var ele = document.getElementsByClassName("pic1cont")[0].getBoundingClientRect()
-            var pic = window.pageYOffset + ele.top
-            var win = window.pageYOffset
-            document.getElementById("home_view").style.top =(pic-win)*-0.15+"px";
-        });
-    </script>
-
-</div>
-    -->
 {% endblock %}
 {% block content %}
 <section>
@@ -91,6 +70,7 @@
                 {{object.description_rendered|safe}}
             </div>
             <form  id="event_form" method="POST">
+            <!-- THIS BREAKS THE MECH FUNCTION AND SHOULD BE FIXED AFTER XDREAM2024
             {% if merch %}
             <div class="padding_all_small">
                 <br>
@@ -145,6 +125,7 @@
                 </div>
             </div>
             {% endif %}
+            -->
             {% if not event.info_only %}
             <div class="padding_tb_big">
                     <h1 id="anmeldung"> Anmeldung </h1>
@@ -219,22 +200,40 @@
                                 <span class="mdc-line-ripple"></span>
                             </label>
                         </div>
-                        <div class="chair_col-5">
-                            <label class="mdc-text-field mdc-text-field--filled contact">
-                                <i class="mdc-select__dropdown-icon"></i>
-                                <span class="mdc-text-field__ripple"></span>
-                                <select id="select-contact" class="mdc-text-field__input" style="background-color:inherit;" name="contact">
-                                    <option value=""></option>
-                                    <option value="Telegram" {% if form.data.contact == "Telegram" %} selected {% endif %}>Telegram</option>
-                                    <option value="Whatsapp" {% if form.data.contact == "Whatsapp" %} selected {% endif %}>WhatsApp</option>
-                                    <option value="SMS" {% if form.data.contact == "SMS" %} selected {% endif %}>SMS</option>
-                                </select>
-                                <span class="mdc-floating-label" id="contact-label">Kontakt während der Veranstaltung</span>
-                                <span class="mdc-line-ripple"></span>
+                    </div>
+                    <div class="padding_all_small">
+                        <div class="mdc-form-field">
+                            <div class="mdc-checkbox">
+                            <input type="checkbox" class="mdc-checkbox__native-control" id="merch_yes" name="merch_wanted">
+                            <div class="mdc-checkbox__background">
+                                <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                                <path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+                                </svg>
+                                <div class="mdc-checkbox__mixedmark"></div>
+                            </div>
+                            </div>
+                            <label for="merch_yes" >
+                                <div>Ich bin am Jam T-Shirt interessiert (Muss auf der Jam gekauft werden)</div>
                             </label>
                         </div>
+                            <div id="merch_sizes" hidden>
+                                <label class="mdc-text-field mdc-text-field--filled merch_size">
+                                    <i class="mdc-select__dropdown-icon"></i>
+                                    <span class="mdc-text-field__ripple"></span>
+                                    <select id="select-merch_size" class="mdc-text-field__input" style="background-color:inherit;" name="merch_size">
+                                        <option value="" style="background-color:inherit;"></option>
+                                            <option value='S' style="background-color:inherit;">S</option>
+                                            <option value='M' style="background-color:inherit;">M</option>
+                                            <option value='L' style="background-color:inherit;">L</option>
+                                            <option value='XL' style="background-color:inherit;">XL</option>
+                                    </select>
+                                    <span class="mdc-floating-label" id="merch_size-label">Größe</span>
+                                    <span class="mdc-line-ripple"></span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
-                    
+
                     <input id="real_costs" type="text" hidden name="costs">
                     <div class="padding_all_small" style="padding-top:40px;">
                         <div class="flex_center_vertical tertiary_bg ">
@@ -311,7 +310,7 @@
                     </div>
                 </form>
             </div>
-            {% else %} 
+            {% else %}
             <p>Anmeldung nicht geöffnet</p>
             {% endif %}
         </div>
@@ -327,20 +326,14 @@
         if(document.getElementById('merch_yes').checked){
             $("#merch_sizes").attr("hidden", false)
             $("#select-merch_size").attr("required", "")
-            $("#kosten").html((parseFloat("{{event.base_costs|floatformat:2}}".replace(',', '.'))+parseFloat("{{merch.price}}".replace(',', '.'))).toFixed(2).replace(".",","))
-            $("#real_costs").attr("value", (parseFloat("{{event.base_costs|floatformat:2}}".replace(',', '.'))+parseFloat("{{merch.price}}".replace(',', '.'))).toFixed(2))
         }
         $("#merch_yes").change(function(){
             $("#merch_sizes").toggle(3);
             if(document.getElementById('merch_yes').checked){
                 $("#select-merch_size").attr("required", '')
-                $("#kosten").html((parseFloat("{{event.base_costs}}".replace(',', '.'))+parseFloat("{{merch.price}}".replace(',', '.'))).toFixed(2).replace(".",","))
-                $("#real_costs").attr("value", (parseFloat("{{event.base_costs}}".replace(',', '.'))+parseFloat("{{merch.price}}".replace(',', '.'))).toFixed(2))
             }
             else{
                 $("#select-merch_size").removeAttr("required")
-                $("#kosten").html("{{event.base_costs|floatformat:2}}")
-                $("#real_costs").attr("value", (parseFloat("{{event.base_costs}}".replace(',', '.'))).toFixed(2))
             }
         });
     });
