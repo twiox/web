@@ -8,17 +8,6 @@ Style for the main page
 #main_section {
     z-index: 5;
 }
-#main_section .parallax__layer--base {
-    filter: contrast(100%) brightness(100%);
-    background:
-        /*needs opacity otherwise the noise is not visible*/
-        linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(255, 255, 255, 0.0)),
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 214 214' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.48' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    }
-#main_section .parallax__layer--base-background {
-    background: #D4D8F0;
-/* resulting css */
-}
 
 /*
 The main image
@@ -38,21 +27,14 @@ The main image
 }
 </style>
 <div class="parallax">
-    <div id="main_section" class="parallax__group">
-        <div class="parallax__layer parallax__layer--base-background">
-        </div>
-
-        <div class="parallax__layer parallax__layer--base">
-            <div class="bottom_right m-2">
-                <a href="#training_section" id="to_training_button" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
-                    <i class="material-icons">south</i>
-                </a>
-            </div>
-        </div>
-    </div>
     <div class="parallax__group">
         <div class="parallax__layer parallax__layer--back">
             <div id="main_image" class="image_wrapper"></div>
+        </div>
+        <div class="parallax__layer parallax__layer--base">
+            <div style="text-align: center;">
+                <p class="light" style="font-size: 10vw; margin-top: 40vh ;">Parkour in Leipzig</p>
+            </div>
         </div>
     </div>
 
