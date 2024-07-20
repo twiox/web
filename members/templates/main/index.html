@@ -33,7 +33,7 @@ The main image
         </div>
         <div class="parallax__layer parallax__layer--base">
             <div style="text-align: center;">
-                <p class="light" style="font-size: 10vw; margin-top: 40vh ;">Parkour in Leipzig</p>
+                <p style="font-size: 10vw; margin-top: 40vh; color: #FF4181 ;">Parkour in Leipzig</p>
             </div>
         </div>
     </div>
@@ -46,10 +46,12 @@ The main image
         position: relative;
     }
     </style>
+    <!--
     <section id="news-section-wrapper"
         hx-get="{% url 'get_news_section' %}"
         hx-trigger="load once">
     </section>
+    -->
     <!-- The container for the Sessions -->
     <style>
     #training_section {
@@ -74,10 +76,13 @@ The main image
         hx-trigger="load once">
     </section>
     <!--Now include contacts-->
-    <div class="mdl-grid footer p-2">
-        <div class="mdl-cell mdl-cell--12-col">
-            <a href="{%url 'impressum' %}">Impressum</a> ⋅ <a href="{%url 'dataprotection' %}">Datenschutz</a>
+    <div class="footer">
+        <div class="center">
         </div>
     </div>
-
+    <footer class="mdl-mini-footer footer center">
+        <div>
+          <a class="p-2" href="{%url 'impressum' %}">Impressum</a><span>⋅</span><a class="p-2" href="{%url 'dataprotection' %}">Datenschutz</a>
+        </div>
+    </footer>
 </div>

@@ -3,7 +3,7 @@ Very general custom css
 */
 
 body{
-  background-color: #9b28a5;
+  background-color: #044755;
   font-family: Inter, sans-serif !important;
   font-feature-settings: 'liga' 1, 'calt' 1 !important;
 }
@@ -141,6 +141,7 @@ Color
 .primary-bg {
   background-color: #088eaa !important;
 }
+
 .primary2{
   color: #607d8b;
 }
@@ -159,6 +160,7 @@ Color
 .dark-bg {
   background-color: #191919 !important;
 }
+
 /*Change that to opacity to make it generic*/
 .passive {
   background-color: #9AD1DC !important;
