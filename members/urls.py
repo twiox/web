@@ -7,6 +7,7 @@ urlpatterns = [
     path("news/", include("members.tools.news")),
     path("editor/", include("members.tools.editor")),
     path("spots/", include("members.tools.spots")),
+    path("modal", views.get_modal, name="get_modal"),
     # this is the old stuff...
     path("profil/", views.UserDetailView.as_view(), name="profile_detail"),
     path(

@@ -397,6 +397,10 @@ class Session(models.Model):
     def __str__(self):
         return f"Session: {self.title}_{self.day}"
 
+    @property
+    def model(self):
+        return "session"
+
 
 class Message(models.Model):
     title = models.CharField("Titel", max_length=200)
@@ -567,3 +571,6 @@ class TrialBatch(models.Model):
 
     def __str__(self):
         return self.name
+
+
+models = {"session": Session}

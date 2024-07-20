@@ -44,6 +44,7 @@ from django.contrib.auth.views import PasswordChangeView
 from django.conf import settings
 import markdown
 import os
+from .models import models
 
 #
 #
@@ -52,12 +53,28 @@ import os
 #
 
 
+def get_instance_from_string(string):
+    # Get the primary key of the model from the data
+    # return the instance
+    model, pk = string.split("_")
+    return models[model].objects.get(pk=int(pk))
+
+
 def chairman_check():
     return True
 
 
 def trainer_check():
     return True
+
+
+def get_modal(request):
+    obj_string = request.GET.get("object")
+    object = get_instance_from_string(obj_string)
+    model = object.model
+    # get additional context
+    context = {"object": object}
+    return render(request, f"modals/{model}_modal.html", context)
 
 
 #
