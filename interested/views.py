@@ -249,7 +249,9 @@ class PublicEventView(DetailView):
         else:
             context["sizes"] = []
         context["merch"] = merch
-        context["chairman"] = chairman_check(self.request)
+        context["chairmen"] = Chairman.objects.filter(
+            show__contains="interested_xdream"
+        )
 
         return context
 

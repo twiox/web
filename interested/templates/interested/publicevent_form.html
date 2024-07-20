@@ -1,6 +1,6 @@
 {% extends "members/base.html" %}
 
-{% block navbar2 %} 
+{% block navbar2 %}
 {% if object.title %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'interested_index' %}#events">
@@ -75,7 +75,7 @@
                             <div align="left">Nur Ankündigung</div>
                         </label>
                     </div>
-                    
+
                 </div>
                 <div class="col-5">
                     <label class="mdc-text-field mdc-text-field--filled start_date">
@@ -110,7 +110,7 @@
             </div>
             <h5>Beschreibung</h5>
             <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
-              <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="description" id="id_comment" 
+              <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="description" id="id_comment"
               name="description" >{% if form.instance.description %} {{form.instance.description}} {% else %} {{form.data.description}} {% endif %}</textarea>
               <span class="mdc-notched-outline">
                 <span class="mdc-notched-outline__leading"></span>
@@ -119,7 +119,7 @@
             </label>
             <h6>Kurzbeschreibung</h6>
             <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
-              <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="capture" id="id_comment" 
+              <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="capture" id="id_comment"
               name="capture" >{% if form.instance.capture %} {{form.instance.capture}} {% else %} {{form.data.capture}} {% endif %}</textarea>
               <span class="mdc-notched-outline">
                 <span class="mdc-notched-outline__leading"></span>
@@ -131,7 +131,7 @@
             <div style="display:flex; margin-bottom:5px;">
                 <label class="upload">
                     <span style="display:flex;justify-content:center;"><i class="fas fa-file-upload"></i></span>
-                    <input type="file" id="thumbnail_long" style="display: none" name="thumbnail_long" 
+                    <input type="file" id="thumbnail_long" style="display: none" name="thumbnail_long"
                     {%if form.instance.thumbnail_long %} "" {% else %} required {% endif %}>
                 </label>
                 <p class="padding_rl_small" id="thumbnail_long">{%if form.instance.thumbnail_long %} {{form.instance.thumbnail_long}} {% else %} Landscape Thumbnail hochladen* {% endif %}</p>
@@ -149,7 +149,7 @@
             <div style="display:flex; margin-bottom:5px;">
                 <label class="upload">
                     <span style="display:flex;justify-content:center;"><i class="fas fa-file-upload"></i></span>
-                    <input type="file" id="thumbnail_high" style="display: none" name="thumbnail_high" 
+                    <input type="file" id="thumbnail_high" style="display: none" name="thumbnail_high"
                     {%if form.instance.thumbnail_high %} "" {% else %} required {% endif %}>
                 </label>
                 <p class="padding_rl_small" id="thumbnail_high">{%if form.instance.thumbnail_high %} {{form.instance.thumbnail_high}} {% else %} Portrait Thumbnail hochladen* {% endif %}</p>
@@ -168,7 +168,7 @@
             <div style="display:flex; margin-bottom:5px;">
                 <label class="upload">
                     <span style="display:flex;justify-content:center;"><i class="fas fa-file-upload"></i></span>
-                    <input type="file" id="header" style="display: none" name="header_picture" 
+                    <input type="file" id="header" style="display: none" name="header_picture"
                     {%if form.instance.header_picture %} "" {% else %} required {% endif %}>
                 </label>
                 <p class="padding_rl_small" id="header">{%if form.instance.header_picture %} {{form.instance.header_picture}} {% else %} Header Bild hochladen* {% endif %}</p>
@@ -197,7 +197,7 @@
                 $("#fileText1").html(fileName).show();
                     });
             </script>
-            
+
             <div style="display:flex; margin-bottom:5px;">
                 <label class="upload">
                     <span style="display:flex;justify-content:center;"><i class="fas fa-file-upload"></i></span>
@@ -211,7 +211,7 @@
                 $("#fileText2").html(fileName).show();
                     });
             </script>
-            
+
             <div style="display:flex; margin-bottom:5px;">
                 <label class="upload">
                     <span style="display:flex;justify-content:center;"><i class="fas fa-file-upload"></i></span>
@@ -240,8 +240,8 @@
                     <a href="{% url 'eventmerch_create' %}" target="_blank" class="more_info_button"> Merch hinzufügen </a>
                 {% endif %}
             {% endif %}
-        
-        
+
+
             <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
                 <span >OK</span>
             </button>

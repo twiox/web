@@ -13,7 +13,9 @@ class News(models.Model):
     capture = models.TextField("Kurzbeschreibung", blank=True, null=True)
     content = models.TextField("Beitrag", blank=True, null=True)
     content_rendered = models.TextField(blank=True, null=True)
-    picture = models.ImageField("Stockphoto", blank=True, null=True, upload_to="beiträge/")
+    picture = models.ImageField(
+        "Stockphoto", blank=True, null=True, upload_to="beiträge/"
+    )
 
     def __str__(self):
         return f"Beitrag: {self.title}"
@@ -27,9 +29,13 @@ class Spot(models.Model):
     title = models.CharField("Spotname", max_length=30)
     lat = models.CharField("Latitude", max_length=30, default="51.347127")
     long = models.CharField("Longitude", max_length=30, default="12.350504")
-    description = models.TextField("Beschreibung, Zusatzinformation", default="Lorem Ipsum")
+    description = models.TextField(
+        "Beschreibung, Zusatzinformation", default="Lorem Ipsum"
+    )
     description_rendered = models.TextField(blank=True, null=True)
-    picture = models.ImageField("Foto vom Spot", blank=True, null=True, upload_to="spot_pics/")
+    picture = models.ImageField(
+        "Foto vom Spot", blank=True, null=True, upload_to="spot_pics/"
+    )
 
     def __str__(self):
         return f"Spot: {self.title}"
@@ -69,9 +75,13 @@ class Group(models.Model):
 ## Event related models
 class Document(models.Model):
     name = models.CharField("Name", max_length=200)
-    file = models.FileField("File", upload_to=f"Events/Docs/etc/", null=True, blank=True)
+    file = models.FileField(
+        "File", upload_to=f"Events/Docs/etc/", null=True, blank=True
+    )
     # foreign key relationships to where files can be saved
-    member_participants = models.ForeignKey("MemberParticipant", on_delete=models.CASCADE, null=True, blank=True)
+    member_participants = models.ForeignKey(
+        "MemberParticipant", on_delete=models.CASCADE, null=True, blank=True
+    )
     event_public = models.ForeignKey(
         "Event",
         on_delete=models.CASCADE,
@@ -114,25 +124,37 @@ class MemberParticipant(models.Model):
 
 
 class Event(models.Model):
-    allowed_groups = models.ManyToManyField(Group, verbose_name="Für die Gruppen", blank=True)
+    allowed_groups = models.ManyToManyField(
+        Group, verbose_name="Für die Gruppen", blank=True
+    )
     allowed_agegroups = models.ManyToManyField(
         AgeGroup, verbose_name="Altersgruppen", related_name="event", blank=True
     )
 
     title = models.CharField("Event-name", max_length=100)
-    place = models.CharField("Veranstaltungsort", max_length=200, blank=True, default="Leipzig")
+    place = models.CharField(
+        "Veranstaltungsort", max_length=200, blank=True, default="Leipzig"
+    )
     description = models.TextField("Beschreibung", blank=True)
     description_rendered = models.TextField(blank=True, null=True)
     deadline = models.DateTimeField("Anmeldung/Abmeldung bis", blank=True, null=True)
     start_date = models.DateTimeField("Datum Beginn", blank=True, null=True)
     end_date = models.DateTimeField("Datum Ende", blank=True, null=True)
     hinweis = models.CharField("Hinweis", blank=True, max_length=50)
-    costs = models.DecimalField("Kosten", blank=True, null=True, max_digits=8, decimal_places=2)
+    costs = models.DecimalField(
+        "Kosten", blank=True, null=True, max_digits=8, decimal_places=2
+    )
     info_only = models.BooleanField("Nur Ankündigung?", default=False)
 
-    teilnahmebedingungen = models.FileField("Teilnahmebedingungen", upload_to=f"Events/Docs/", null=True, blank=True)
-    datenschutz = models.FileField("Datenschutzerklärung", upload_to=f"Events/Docs/", null=True, blank=True)
-    einverstaendnis = models.FileField("Einverständnis", upload_to=f"Events/Docs/", null=True, blank=True)
+    teilnahmebedingungen = models.FileField(
+        "Teilnahmebedingungen", upload_to=f"Events/Docs/", null=True, blank=True
+    )
+    datenschutz = models.FileField(
+        "Datenschutzerklärung", upload_to=f"Events/Docs/", null=True, blank=True
+    )
+    einverstaendnis = models.FileField(
+        "Einverständnis", upload_to=f"Events/Docs/", null=True, blank=True
+    )
 
     participants = models.ManyToManyField(User)
 
@@ -151,11 +173,15 @@ class Event(models.Model):
 
     @property
     def is_past_due(self):
-        return datetime.now().replace(tzinfo=None) > self.end_date.replace(tzinfo=None) + timedelta(days=3)
+        return datetime.now().replace(tzinfo=None) > self.end_date.replace(
+            tzinfo=None
+        ) + timedelta(days=3)
 
     @property
     def deadline_reached(self):
-        return datetime.now().replace(tzinfo=None) > self.deadline.replace(tzinfo=None) + timedelta(days=1)
+        return datetime.now().replace(tzinfo=None) > self.deadline.replace(
+            tzinfo=None
+        ) + timedelta(days=1)
 
     @property
     def multiple_days(self):
@@ -169,16 +195,30 @@ class Event(models.Model):
 
 class Trainer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    trainer_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, blank=True, null=True)
-    trainer_email = models.CharField("Öffentliche Email", max_length=150, blank=True, null=True)
+    trainer_telnr = models.CharField(
+        "Öffentliche Telefonnummer", max_length=100, blank=True, null=True
+    )
+    trainer_email = models.CharField(
+        "Öffentliche Email", max_length=150, blank=True, null=True
+    )
     image = models.ImageField("Profilbild", upload_to="profile_pics/")
     salary = models.CharField("Bezahlung", blank=True, null=True, max_length=5)
-    license_level = models.CharField("Lizenzstufe", max_length=100, blank=True, null=True)
-    license_number = models.CharField("Lizenznummer", max_length=100, blank=True, null=True)
+    license_level = models.CharField(
+        "Lizenzstufe", max_length=100, blank=True, null=True
+    )
+    license_number = models.CharField(
+        "Lizenznummer", max_length=100, blank=True, null=True
+    )
     license_valid = models.DateTimeField("Gültigkeit", blank=True, null=True)
-    license = models.FileField("Lizenz", upload_to="trainer_stuff", blank=True, null=True)
-    contract = models.FileField("Vertrag", upload_to="trainer_stuff", blank=True, null=True)
-    codex = models.FileField("Ehrencodex", upload_to="trainer_stuff", blank=True, null=True)
+    license = models.FileField(
+        "Lizenz", upload_to="trainer_stuff", blank=True, null=True
+    )
+    contract = models.FileField(
+        "Vertrag", upload_to="trainer_stuff", blank=True, null=True
+    )
+    codex = models.FileField(
+        "Ehrencodex", upload_to="trainer_stuff", blank=True, null=True
+    )
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} ({self.user.profile.member_num})"
@@ -227,7 +267,9 @@ class Session(models.Model):
         null=True,
     )
     trainer = models.ManyToManyField(Trainer, blank=True, verbose_name="Trainer")
-    spot = models.ForeignKey(Spot, blank=True, null=True, on_delete=models.SET_NULL, verbose_name="Spot")
+    spot = models.ForeignKey(
+        Spot, blank=True, null=True, on_delete=models.SET_NULL, verbose_name="Spot"
+    )
 
     title = models.CharField("Titel", max_length=50, default="Hallentraining")
     day = models.CharField("Tag", max_length=2, default="Mo")
@@ -299,12 +341,16 @@ class Message(models.Model):
     choices = (("sessions", "Sessions"), ("events", "Events"))
     title = models.CharField("Titel", max_length=200)
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    message = models.TextField("Hinweis", default="Deine Nachricht hier", blank=True, null=True)
+    message = models.TextField(
+        "Hinweis", default="Deine Nachricht hier", blank=True, null=True
+    )
     date = models.DateTimeField(default=datetime(2020, 11, 14, 1, 54, 52, 799289))
     autodelete = models.DateTimeField("Automatisches Löschen", blank=True, null=True)
     display = models.CharField(max_length=20, choices=choices, blank=True)
     groups = models.ManyToManyField(Group, verbose_name="Für die Gruppen", blank=True)
-    agegroup = models.ManyToManyField(AgeGroup, verbose_name="Altersgruppen", related_name="message", blank=True)
+    agegroup = models.ManyToManyField(
+        AgeGroup, verbose_name="Altersgruppen", related_name="message", blank=True
+    )
 
     def save(self, *args, **kwargs):
         self.date = datetime.today()
@@ -314,7 +360,9 @@ class Message(models.Model):
     def delme(self):
         if not self.autodelete:
             return False
-        return datetime.now().replace(tzinfo=None) > self.autodelete.replace(tzinfo=None) + timedelta(days=1)
+        return datetime.now().replace(tzinfo=None) > self.autodelete.replace(
+            tzinfo=None
+        ) + timedelta(days=1)
 
     def __str__(self):
         return f"Message: {self.title}"
@@ -328,11 +376,16 @@ class Chairman(models.Model):
         ("member_site", "Anzeige Mitglieder"),
         ("interested_site", "Anzeige Interessierte"),
         ("event_site", "Anzeige Veranstalter"),
+        ("interested_xdream", "Anzeige XDream"),
     )
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    public_telnr = models.CharField("Öffentliche Telefonnummer", max_length=100, blank=True, null=True)
-    public_email = models.CharField("Öffentliche Email", max_length=150, blank=True, null=True)
+    public_telnr = models.CharField(
+        "Öffentliche Telefonnummer", max_length=100, blank=True, null=True
+    )
+    public_email = models.CharField(
+        "Öffentliche Email", max_length=150, blank=True, null=True
+    )
     competences = models.TextField("Zuständigkeiten (mit Komma getrennt)")
     image = models.ImageField("Profilbild", upload_to="profile_pics/")
     show = MultiSelectField(choices=choices, blank=True, max_length=300)
@@ -364,7 +417,11 @@ class Chairman(models.Model):
 
 def calculate_age(birth_date):
     today = datetime.today()
-    age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+    age = (
+        today.year
+        - birth_date.year
+        - ((today.month, today.day) < (birth_date.month, birth_date.day))
+    )
     return age
 
 
@@ -375,7 +432,11 @@ class Profile(models.Model):
         ("Pausiertes Mitglied", "Pausiertes Mitglied"),
         ("Kündigung", "Kündigung"),
     )
-    choices2 = (("SEPA", "SEPA"), ("Dauerauftrag", "Dauerauftrag"), ("Überweisung", "Überweisung"))
+    choices2 = (
+        ("SEPA", "SEPA"),
+        ("Dauerauftrag", "Dauerauftrag"),
+        ("Überweisung", "Überweisung"),
+    )
 
     # peronal data
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -385,20 +446,34 @@ class Profile(models.Model):
     sex = models.CharField("Geschlecht", max_length=1)
 
     # for u18
-    parent = models.CharField("Ansprechpartner*in", max_length=100, null=True, blank=True)
-    parent_telnr = models.CharField("Notfallnummer", max_length=100, null=True, blank=True)
+    parent = models.CharField(
+        "Ansprechpartner*in", max_length=100, null=True, blank=True
+    )
+    parent_telnr = models.CharField(
+        "Notfallnummer", max_length=100, null=True, blank=True
+    )
 
     # club data
-    status = models.CharField(max_length=40, choices=choices, default="Ordentliches Mitglied")
+    status = models.CharField(
+        max_length=40, choices=choices, default="Ordentliches Mitglied"
+    )
     member_num = models.CharField("Mitgliedsnummer", blank=True, max_length=30)
     group = models.ForeignKey(Group, blank=True, null=True, on_delete=models.SET_NULL)
-    membership_start = models.DateTimeField("Beginn der Mitgliedschaft", null=True, blank=True)
+    membership_start = models.DateTimeField(
+        "Beginn der Mitgliedschaft", null=True, blank=True
+    )
     membership_end = models.DateTimeField("Kündigung zum", null=True, blank=True)
     ermaessigt = models.BooleanField("Ermäßigt?", default=False)
-    mandatsref = models.CharField("Mandatsreferenz", max_length=40, null=True, blank=True)
-    zahlungsart = models.CharField("Zahlungsart", choices=choices2, max_length=30, default="SEPA")
+    mandatsref = models.CharField(
+        "Mandatsreferenz", max_length=40, null=True, blank=True
+    )
+    zahlungsart = models.CharField(
+        "Zahlungsart", choices=choices2, max_length=30, default="SEPA"
+    )
     beitrag = models.IntegerField("Beitragshöhe", default=20)
-    notes_trainer = models.TextField("Notizen für den/die Trainer*in", null=True, blank=True)
+    notes_trainer = models.TextField(
+        "Notizen für den/die Trainer*in", null=True, blank=True
+    )
     notes_chairman = models.TextField("Notizen für den Vorstand", null=True, blank=True)
 
     class Meta:
@@ -406,7 +481,11 @@ class Profile(models.Model):
 
     @property
     def privileged(self):
-        return hasattr(self.user, "chairman") or self.user.is_superuser or hasattr(self.user, "trainer")
+        return (
+            hasattr(self.user, "chairman")
+            or self.user.is_superuser
+            or hasattr(self.user, "trainer")
+        )
 
     @property
     def agegroups(self):
