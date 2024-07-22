@@ -12,18 +12,21 @@
         {% if request.user.is_authenticated %}
             {% if request.user.profile.permission_level > 1 %}
             <div class="center m-2">
-                <div >
-                    <a href="{% url 'message_create' %}?display=sessions" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
+                <div>
+                    <button
+                        hx-get="{% url 'main_message_create' %}?display=sessions"
+                        hx-target="#modal-blank"
+                            class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored modal_open">
                         <div id="tt1" class="material-icons">campaign</div>
-                    </a>
+                    </button>
                 </div>
             </div>
             {% endif %}
         {% if messages %}
-        <div class="mdl-grid my-2">
-            <div class="mdl-cell mdl-cell--12-col m-2 p-2 secondary-bg">
+        <div class="mdl-grid">
+            <div class="mdl-cell mdl-cell--12-col-tablet mdl-cell--10-col mdl-cell--1-offset-desktop p-1 secondary-bg" >
                 {% for msg in messages %}
-                <div class="m-1 flex_row">
+                <div class="flex_row">
                     <div>
                         <span class="light">[{{msg.author.first_name}}, {{msg.date |date:'d.m.Y'}}]: <strong>{{msg.title}}</strong> </span>
                         <p class="light">{{msg.message}}</p>
@@ -56,7 +59,7 @@
         <div class="mdl-grid">
             {% for short, day in session_days %}
             <!-- one column for the sessions of each day -->
-            <div class="mdl-cell mdl-cell--3-col mdl-cell--4-col-tablet mdl-cell--12-col-phone">
+            <div class="mdl-cell mdl-cell--3-col mdl-cell--4-col-tablet">
                 {% for session in sessions|lookup:short %}
                 {% include 'snippets/training/session_card.html' %}
                 {% endfor %}

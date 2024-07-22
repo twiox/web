@@ -163,18 +163,29 @@ class TesterListView(ListView):
     template_name = "pages/trial_list.html"
 
 
-class MessageCreateView(LoginRequiredMixin, CreateView):
-    model = Message
-    form_class = MessageForm
-    template_name = "pages/message_form.html"
+@login_required
+def main_message_create(request):
 
-    def form_valid(self, form):
-        message = form.save()
-        message.author = self.request.user
-        message.display = self.request.GET.get("display")
-        message.save()
-        messages.add_message(self.request, messages.SUCCESS, "Hinweis erstellt")
-        return super(MessageCreateView, self).form_valid(form)
+    from members.forms import MessageForm
+
+    context = {
+        "object": None,
+        "type": "form",
+        "form": MessageForm(),
+        "display": request.GET.get("display"),
+    }
+
+    if request.method == "POST":
+        form = MessageForm(request.POST)
+
+        if form.is_valid():
+            object = form.save(commit=False)
+            object.display = request.GET.get("display")
+            object.author = request.user
+            object.save()
+            context.update({"object": object, "type": "success"})
+
+    return render(request, f"modals/message_modal.html", context)
 
 
 def message_delete(request, pk):
@@ -200,6 +211,6 @@ urlpatterns = [
     path("<int:pk>/toggle", toggle_participation, name="session_participation_toggle"),
     path("probetraining", TesterCreateView.as_view(), name="trial_form"),
     path("probetrainingsverwaltung", TesterListView.as_view(), name="tester_list"),
-    path("hinweis/neu", MessageCreateView.as_view(), name="message_create"),
+    path("hinweis/neu", main_message_create, name="main_message_create"),
     path("hinweis/löschen/<int:pk>", message_delete, name="message_delete"),
 ]

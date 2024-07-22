@@ -17,12 +17,20 @@ The main image
         background-image: url("{% static 'media/interested_portrait.jpg'%}");
         background-position: top right;
     }
+    .hero-text{
+        font-size: 8rem;
+        line-height: 0.8;
+    }
 }
 
 @media (orientation: landscape){
     #main_image {
         background-image: url("{% static 'media/interested.jpg'%}");
         background-position: top;
+    }
+    .hero-text{
+        font-size: 12rem;
+        line-height: 0.8;
     }
 }
 </style>
@@ -32,8 +40,8 @@ The main image
             <div id="main_image" class="image_wrapper"></div>
         </div>
         <div class="parallax__layer parallax__layer--base">
-            <div style="text-align: center;">
-                <p style="font-size: 10vw; margin-top: 40vh; color: #FF4181 ;">Parkour in Leipzig</p>
+            <div class="center" style="height: 100%;">
+                <p class="hero-text secondary">Parkour in Leipzig</p>
             </div>
         </div>
     </div>

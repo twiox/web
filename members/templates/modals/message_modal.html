@@ -1,0 +1,57 @@
+{% load custom_filters %}
+{% load crispy_forms_tags %}
+
+{% if display == 'sessions' %}
+<div
+    hx-get="{% url 'get_training_section' %}"
+    hx-trigger="load once"
+    hx-target="#training-section-wrapper"
+></div>
+{% else %}
+<div
+    hx-get="{% url 'get_event_section' %}"
+    hx-trigger="load once"
+    hx-target="#event-section-wrapper"
+></div>
+{% endif %}
+
+<h4 class="mdl-dialog__title">{{object.title}}</h4>
+
+{% if type == 'form' %}
+
+{#                   #}
+{# MODAL EDIT FORM   #}
+{#                   #}
+
+<form>
+    {% csrf_token %}
+
+    <div class="mdl-dialog__content">
+            {{form|crispy}}
+    </div>
+
+    <div class="mdl-dialog__actions">
+        <button type="button" class="mdl-button modal_close">Schließen</button>
+        <button
+            hx-post="{% url 'main_message_create' %}?display={{display}}"
+            hx-target="#modal-blank"
+            type="button" class="mdl-button primary-bg">Speichern
+        </button>
+    </div>
+</form>
+
+{% elif type == 'success' %}
+
+{#                   #}
+{# MODAL EDIT FORM   #}
+{#                   #}
+
+<div class="mdl-dialog__content">
+        Hinweis erfolgreich erstellt!
+</div>
+
+<div class="mdl-dialog__actions">
+    <button type="button" class="mdl-button modal_close">Schließen</button>
+</div>
+
+{% endif %}

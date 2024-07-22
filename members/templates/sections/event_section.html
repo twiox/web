@@ -26,9 +26,12 @@
         {% if request.user.profile.permission_level > 1 %}
         <div class="center m-2">
             <div>
-                <a href="{% url 'message_create' %}?display=events" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
-                    <div id="tt1" class="material-icons">campaign</div>
-                </a>
+                <button
+                        hx-get="{% url 'main_message_create' %}?display=events"
+                        hx-target="#modal-blank"
+                            class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored modal_open">
+                        <div id="tt1" class="material-icons">campaign</div>
+                    </button>
             </div>
         </div>
         {% endif %}
