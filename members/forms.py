@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import Event, Spot, Document, Tester, Message, Session
+from datetime import datetime
 
 
 class EventForm(forms.ModelForm):
@@ -62,8 +63,8 @@ class TrialForm(forms.ModelForm):
 class MessageForm(forms.ModelForm):
     autodelete = forms.DateTimeField(
         label="Zeitpunkt der Löschung",
-        widget=forms.TextInput(attrs={"type": "datetime-local"}),
-        input_formats=["%Y-%m-%dT%H:%M"],
+        widget=forms.TextInput(attrs={"type": "date"}),
+        input_formats=["%Y-%m-%d"],
     )
 
     class Meta:
