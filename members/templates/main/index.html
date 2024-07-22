@@ -34,6 +34,7 @@ The main image
     }
 }
 </style>
+
 <div class="parallax">
     <div class="parallax__group">
         <div class="parallax__layer parallax__layer--back">
@@ -67,19 +68,13 @@ The main image
         background-color: #044755;
         position: relative;
     }
-    #training_section > .content > h1,h3 {
-        color: white;
-    }
-    #event_section{
-        background: #D4D8F0;
-    }
     </style>
-    <section id="training-section-wrapper"
+    <section id="training-section-wrapper" style="min-height: 100vh;"
         hx-get="{% url 'get_training_section' %}"
         hx-trigger="load once">
     </section>
     <!-- Here the Container for the Events -->
-    <section id="event-section-wrapper"
+    <section id="event-section-wrapper" style="min-height: 100vh;" class="light-bg"
         hx-get="{% url 'get_event_section' %}"
         hx-trigger="load once">
     </section>
@@ -94,3 +89,10 @@ The main image
         </div>
     </footer>
 </div>
+
+<script>
+$(document).ready(function() {
+    var hash = $(location).attr('hash');
+    $(hash)[0].scrollIntoView({block: 'center', behavior: 'smooth'})
+});
+</script>

@@ -3,11 +3,7 @@
 
 <section class="section" id="training_section">
     <div class="content">
-        <div class="mdl-grid">
-            <div class="mdl-cell mdl-cell--12-col center">
-                <h1 class="light">Training</h1>
-            </div>
-        </div>
+        <h1 class="white center">Training</h1>
         <!-- Here the Messages -->
         {% if request.user.is_authenticated %}
             {% if request.user.profile.permission_level > 1 %}
@@ -59,7 +55,7 @@
         <div class="mdl-grid">
             {% for short, day in session_days %}
             <!-- one column for the sessions of each day -->
-            <div class="mdl-cell mdl-cell--3-col mdl-cell--4-col-tablet">
+            <div class="mdl-cell mdl-cell--3-col mdl-cell--4-col-tablet mdl-cell--12-col-phone">
                 {% for session in sessions|lookup:short %}
                 {% include 'snippets/training/session_card.html' %}
                 {% endfor %}

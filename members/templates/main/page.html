@@ -13,14 +13,14 @@
             <span class="mdl-layout-title">{% block title %}{% endblock %}</span>
             <!-- Navigation -->
             <nav class="mdl-navigation">
-                <a class="mdl-navigation__link" href="javascript:history.back()">ZURÜCK</a>
+                {% block navigation%}{% endblock %}
             </nav>
         </div>
     </header>
     <main class="mdl-layout__content" >
         <div class="page-content" style="min-height: 100vh;">
-            <div class="content {% block pre_content_class %}{% endblock %}">{% block pre_content %}{% endblock %}</div>
-            <div class="light-bg content" style="min-height: 100vh;">
+            {% block pre_content %}{% endblock %}
+            <div class="content" style="min-height: 100vh;">
                 {% block content %}{% endblock %}
             </div>
         </div>

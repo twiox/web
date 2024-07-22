@@ -134,32 +134,44 @@ Color
 }
 .secondary-bg {
   background-color: #ff4081 !important;
+  color: white;
 }
 .primary {
   color: #088eaa !important;
 }
 .primary-bg {
   background-color: #088eaa !important;
+  color: white;
 }
 
-.primary2{
-  color: #607d8b;
-}
-.primary2-bg{
-  background-color:#607d8b ;
-}
 .light {
-  color: #ffffff !important;
+  color: #d4d8f0 !important;
 }
 .light-bg {
-  background-color: #ffffff !important;
+  background-color: #d4d8f0 !important;
+  color: #044755 !important;
 }
 .dark {
-  color: #191919 !important;
+  color: #044755 !important;
 }
 .dark-bg {
-  background-color: #191919 !important;
+  background-color: #044755 !important;
+  color: #d4d8f0 !important;
 }
+.white{
+  color: white !important;
+}
+.white-bg{
+  background-color: white !important;
+  color: #044755 !important;
+}
+.black{
+  color: black !important;
+}
+.black-bg{
+  background-color: black !important;
+}
+
 
 /*Change that to opacity to make it generic*/
 .passive {

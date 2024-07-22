@@ -1,18 +1,31 @@
 {% extends "main/page.html" %}
 {% load static %}
 
-{% block content %}
-    <section>
-        <h1 class="p-0 m-0">Probetraining</h1>
-        <p>Nachdem Du das unten stehende Formular ausgefüllt hast, erhältst Du von uns zeitnah eine Antwort per E-Mail, in welcher Du deine Probetrainings-Termine bekommst. Mit dem Trainer besprichst Du im Anschluss an das Training den weiteren Ablauf. Nach vier absolvierten Trainings kannst Du eine Mitgliedschaft beantragen.
+{% block navigation %}
+<a class="mdl-navigation__link" href="{% url 'landing' %}#training-section-wrapper">ZURÜCK</a>
+{% endblock %}
 
-            Wenn Du unter 18 Jahre alt bist, sende uns bitte mit Deiner Anfrage auch die nachfolgende, von deinen Eltern ausgefüllte, Einverständniserklärung.</p>
-        <h6>Persönliche Informationen</h6>
+{% block content %}
+<style>
+    .mdl-textfield{
+        width:100% !important;
+    }
+</style>
+
+<section class="light">
+    <h1 class="center secondary">Probetraining</h1>
+    <p style="font-size: 1.5rem;">Schön, dass du das Training im Verein ausprobieren willst!</p>
+    <p>Nachdem Du das unten stehende Formular ausgefüllt hast, erhältst Du von uns zeitnah eine Antwort per E-Mail,
+        in welcher Du deine Probetrainings-Termine bekommst. Mit dem Trainer besprichst Du im Anschluss an das Training den weiteren Ablauf.
+        Nach vier absolvierten Trainings kannst Du eine Mitgliedschaft beantragen
+    </p>
+    <div class="light-bg p-2">
+        <h4 class="secondary">Persönliche Informationen</h4>
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <!--First, the user/person-->
             <div class="mdl-grid">
-                <div class="mdl-cell--6-col mdl-cell--12-col--phone">
+                <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col--tablet">
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
                         <input class="mdl-textfield__input" type="text" id="first_name" name="first_name" pattern=".*" data-required>
                         <label class="mdl-textfield__label" for="first_name">Vorname</label>
@@ -27,9 +40,9 @@
                         <span class="mdl-textfield__error">Bitte gib eine Emailadresse an</span>
                     </div>
                 </div>
-                <div class="mdl-cell--6-col mdl-cell--12-col--phone">
+                <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col--tablet">
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                        <input class="mdl-textfield__input" type="date" id="birthday" name="birthday" data-required>
+                        <input class="mdl-textfield__input" type="date" id="birthday" name="birthday" data-required placeholder="1">
                         <label class="mdl-textfield__label" for="birthday">Geburtsdatum</label>
                     </div>
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
@@ -56,24 +69,20 @@
                 </div>
             </div>
 
-            <h6>Dokumente</h6>
-            <ul>
-                <li><a href="{% static 'docs/Einverstaendniserklaerung_TwioX.pdf' %}">Teilnahmebedingungen</a></li>
-            </ul>
-
             <p>Ich habe die <a href="{% url 'dataprotection' %}">Datenschutzerklärung</a> gelesen und akzeptiere sie.
             Ich willige ein, dass die von mir hinterlegten Daten für die Planung und Durchführung des Probetrainings gespeichert und ggf. an die Trainerinnen und Trainer übermittelt werden
             </p>
-                <strong>Bei minderjährigen Teilnehmenden wird das Einverständnis der Eltern benötigen!</strong>
-
             <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="confirm">
                 <input type="checkbox" id="confirm" class="mdl-checkbox__input" data-required>
                 <span class="mdl-checkbox__label">Ich habe verstanden</span>
             </label>
-            <br> <br>
+
+            <p><strong>Bei Minderjährigen wird das <a href="{% static 'media/docs/Einverstaendniserklaerung_TwioX.pdf' %}" target="_blank">Einverständnis</a> der Eltern benötigt!</strong></p>
+
             <button id="form_submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit">
                 Absenden
             </button>
         </form>
-    </section>
+    </div>
+</section>
 {% endblock %}

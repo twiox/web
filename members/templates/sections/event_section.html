@@ -20,72 +20,70 @@
     }
 </style>
 
-<section class="section" id="event_section">
-    <div class="content">
-        <h1 class="center">Termine</h1>
-        {% if request.user.profile.permission_level > 1 %}
-        <div class="center m-2">
-            <div>
-                <button
-                        hx-get="{% url 'main_message_create' %}?display=events"
-                        hx-target="#modal-blank"
-                            class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored modal_open">
-                        <div id="tt1" class="material-icons">campaign</div>
-                    </button>
-            </div>
-        </div>
-        {% endif %}
-        {% if messages and request.user.is_authenticated %}
-        <div class="mdl-grid">
-            <div class="mdl-cell mdl-cell--12-col p-2 light-bg mdl-shadow--2dp">
-                {% for msg in messages %}
-                <div class="m-1 flex_row">
-                    <div>
-                        <span>[{{msg.author.first_name}}, {{msg.date |date:'d.m.Y'}}]: <strong>{{msg.title}}</strong> </span>
-                        <p>{{msg.message}}</p>
-                    </div>
-                    <div>
-                        {% if request.user.profile.permission_level > 1 %}
-                        <form>
-                            {% csrf_token %}
-                            <a hx-post="{% url 'message_delete' msg.pk %}"
-                                hx-confirm="Hinweis löschen?"
-                                hx-target="#event_section"
-                                class="mdl-button mdl-js-button mdl-button--icon">
-                                <i class="material-icons">delete</i>
-                            </a>
-                        </form>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-        <div class="mdl-grid p-0 m-0" >
-            {% for year in events %}
-                {% for month in events|lookup:year %}
-                    <div class="mdl-cell mdl-cell--6-col mdl-cell--6-col-tablet mdl-cell--12-col-phone">
-
-                        <h4 class="m-0">{{ month }} {{year}}</h4>
-
-                        {% for event in events|lookup:year|lookup:month %}
-                        {% include 'snippets/events/event_card.html' %}
-                        {% endfor %}
-                    </div>
-                {% endfor %}
-            {% empty %}
-                <h4>Aktuell sind keine Events geplant</h4>
-            {% endfor %}
-        </div>
-    </div>
+<div class="content">
+    <h1 class="center dark">Termine</h1>
     {% if request.user.profile.permission_level > 1 %}
-    <div class="center">
+    <div class="center m-2">
         <div>
-            <a href="{% url 'event_create'%}" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
-                <i class="material-icons">add</i>
-            </a>
+            <button
+                    hx-get="{% url 'main_message_create' %}?display=events"
+                    hx-target="#modal-blank"
+                        class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored modal_open">
+                    <div id="tt1" class="material-icons">campaign</div>
+                </button>
         </div>
     </div>
     {% endif %}
-</section>
+    {% if messages and request.user.is_authenticated %}
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col p-2 light-bg mdl-shadow--2dp">
+            {% for msg in messages %}
+            <div class="m-1 flex_row">
+                <div>
+                    <span>[{{msg.author.first_name}}, {{msg.date |date:'d.m.Y'}}]: <strong>{{msg.title}}</strong> </span>
+                    <p>{{msg.message}}</p>
+                </div>
+                <div>
+                    {% if request.user.profile.permission_level > 1 %}
+                    <form>
+                        {% csrf_token %}
+                        <a hx-post="{% url 'message_delete' msg.pk %}"
+                            hx-confirm="Hinweis löschen?"
+                            hx-target="#event_section"
+                            class="mdl-button mdl-js-button mdl-button--icon">
+                            <i class="material-icons">delete</i>
+                        </a>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    <div class="mdl-grid p-0 m-0" >
+        {% for year in events %}
+            {% for month in events|lookup:year %}
+                <div class="mdl-cell mdl-cell--6-col mdl-cell--6-col-tablet mdl-cell--12-col-phone">
+
+                    <h4 class="m-0 dark">{{ month }} {{year}}</h4>
+
+                    {% for event in events|lookup:year|lookup:month %}
+                    {% include 'snippets/events/event_card.html' %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% empty %}
+            <h4>Aktuell sind keine Events geplant</h4>
+        {% endfor %}
+    </div>
+</div>
+{% if request.user.profile.permission_level > 1 %}
+<div class="center">
+    <div>
+        <a href="{% url 'event_create'%}" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
+            <i class="material-icons">add</i>
+        </a>
+    </div>
+</div>
+{% endif %}
