@@ -77,6 +77,12 @@ def get_section(request):
     return render(request, "sections/training_section.html", context)
 
 
+#
+# Session handling
+#
+#
+
+
 @login_required
 def toggle_participation(request, pk):
     session = Session.objects.get(pk=pk)
@@ -91,7 +97,7 @@ def toggle_participation(request, pk):
         messages.add_message(
             request, messages.SUCCESS, "Du hast dich erfolgreich angemeldet"
         )
-    context = {"object": session}
+    context = {"object": session, "type": "default"}
     return render(request, f"modals/session_modal.html", context)
 
 
@@ -107,26 +113,21 @@ def session_update(request, pk):
     return render(request, f"modals/session_modal.html", context)
 
 
-class SessionDetailView(LoginRequiredMixin, DetailView):
-    model = Session
-    template_name = "pages/session_detail.html"
+@login_required
+def main_session_create(request):
 
+    from members.forms import SessionForm
 
-class SessionCreateView(LoginRequiredMixin, CreateView):
-    model = Session
-    template_name = "pages/session_form.html"
-    fields = [
-        "title",
-        "short",
-        "hinweis",
-        "trainer",
-        "day",
-        "min_age",
-        "max_age",
-        "start_time",
-        "end_time",
-        "spot",
-    ]
+    context = {"object": None, "type": "form", "form": SessionForm()}
+
+    if request.method == "POST":
+        form = SessionForm(request.POST)
+
+        if form.is_valid():
+            object = form.save()
+            context.update({"object": object, "type": "default"})
+
+    return render(request, f"modals/session_modal.html", context)
 
 
 @login_required
@@ -193,9 +194,8 @@ def message_delete(request, pk):
 
 urlpatterns = [
     path("get-section", get_section, name="get_training_section"),
-    path("<int:pk>", SessionDetailView.as_view(), name="session_detail"),
     path("<int:pk>/edit", session_update, name="main_session_update"),
-    path("neu", SessionCreateView.as_view(), name="session_create"),
+    path("neu", main_session_create, name="main_session_create"),
     path("<int:pk>/delete", session_delete, name="session_delete"),
     path("<int:pk>/toggle", toggle_participation, name="session_participation_toggle"),
     path("probetraining", TesterCreateView.as_view(), name="trial_form"),

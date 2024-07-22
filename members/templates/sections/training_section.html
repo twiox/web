@@ -73,9 +73,12 @@
     {% if request.user.profile.permission_level > 1 %}
     <div class="center">
         <div>
-            <a href="{% url 'session_create'%}" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
+            <button
+                hx-get="{% url 'main_session_create' %}"
+                hx-target="#modal-blank"
+                class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored modal_open">
                 <i class="material-icons">add</i>
-            </a>
+            </button>
         </div>
     </div>
     {% endif %}

@@ -113,11 +113,19 @@
 
     <div class="mdl-dialog__actions">
         <button type="button" class="mdl-button modal_close">Schließen</button>
+        {% if object %}
         <button
             hx-post="{% url 'main_session_update' object.pk %}"
             hx-target="#modal-blank"
             type="button" class="mdl-button primary-bg">Speichern
         </button>
+        {% else %}
+        <button
+            hx-post="{% url 'main_session_create' %}"
+            hx-target="#modal-blank"
+            type="button" class="mdl-button primary-bg">Speichern
+        </button>
+        {% endif %}
     </div>
 </form>
 
