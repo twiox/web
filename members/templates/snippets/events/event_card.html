@@ -52,6 +52,9 @@
         </div>
         <div class="mdl-cell mdl-cell--7-col">
             {% if event.square %}
+            {% if participation and request.user.is_authenticated %}
+            <span class="top_right secondary-bg p-1">Angemeldet</span>
+            {% endif %}
             <div>
                 <span class="primary">{{event.start_date|date:'d' }}.</span>
                 {% if not event.multiple_days or event.start_date|date:'m' != event.end_date|date:'m' %}
