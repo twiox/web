@@ -16,6 +16,9 @@
     .image-tool--withBackground .image-tool__image{
         background: inherit !important;
     }
+    .ce-header:first-of-type{
+        padding-top: 0px !important;
+    }
 </style>
 
 <!-- required for js and backend -->
@@ -25,10 +28,10 @@
 <div id="guideurl" data-url="{% url 'editor_upload' %}?type=url"> </div><!--guide is used for image upload, to save the file to the right place-->
 
 {% if readonly == False %}
-<div class="center" id="saveButton">
-    <button id="description-save" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+<div id="saveButton">
+    <button id="description-save" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect"
     data-url="{% url 'save-description' %}?id={{description.pk}}">
-        Speichern
+        Beschreibung Speichern
     </button>
 </div>
 {% endif %}

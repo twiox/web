@@ -54,80 +54,67 @@
 <h1 class="dark center">{{object.title}}</h1>
 {% endif %}
 {% endblock %}
-
 {% block content %}
 {% if request.user.profile.permission_level > 2 %}
-    <div class="button-group top_right mdl-grid s-7">
-        <div class="mdl-cell--6-col m-05 mdl-cell--12-col--phone">
-            <a href="{% url 'event_update' event.pk %}">
-                <button class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
-                    <i class="material-icons">edit</i>
-                </button>
-            </a>
-        </div>
-        <div class="mdl-cell--6-col m-05 mdl-cell--12-col--phone">
-            <a
-                hx-get="{% url 'event_delete_toggle' %}?id={{event.pk}}"
-                hx-target="#event_header"
-            >
-                <button class="mdl-button mdl-js-button mdl-button--icon
-                    {% if event.deleted %} mdl-button--accent {% else %} mdl-button--colored {% endif %}">
-                    <i class="material-icons">delete</i>
-                </button>
-            </a>
+<div class="button-group top_right mdl-grid">
+    <div class="mdl-cell mdl-cell--6-col m-05 mdl-cell--12-col--phone">
+        <a href="{% url 'event_update' event.pk %}">
+            <button class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
+                <i class="material-icons">edit</i>
+            </button>
+        </a>
+    </div>
+    <div class="mdl-cell mdl-cell--6-col m-05 mdl-cell--12-col--phone">
+        <a
+            hx-get="{% url 'event_delete_toggle' %}?id={{event.pk}}"
+            hx-target="#event_header"
+        >
+            <button class="mdl-button mdl-js-button mdl-button--icon
+                {% if event.deleted %} mdl-button--accent {% else %} mdl-button--colored {% endif %}">
+                <i class="material-icons">delete</i>
+            </button>
+        </a>
+    </div>
+</div>
+{% endif %}
+<section class="mdl-grid">
+    <div class="mdl-cell mdl-cell--3-col mdl-cell--12-col-tablet">
+        {% include 'snippets/events/event_header.html' with event=object %}
+        {% if event.teilnahmebedingungen %}
+        <span class="mdl-chip mdl-chip--deletable">
+            <span class="mdl-chip__text">Teilnahmebedingungen</span>
+            <a href="{{event.teilnahmebedingungen.url}}" class="mdl-chip__action"><i class="material-icons">download</i></a>
+        </span>
+        {% endif %}
+
+        {% if event.datenschutz %}
+        <span class="mdl-chip mdl-chip--deletable">
+            <span class="mdl-chip__text">Datenschutzerklärung</span>
+            <a href="{{event.datenschutz.url}}" class="mdl-chip__action"><i class="material-icons">download</i></a>
+        </span>
+        {% endif %}
+
+        {% if event.einverstaendnis %}
+        <span class="mdl-chip mdl-chip--deletable">
+            <span class="mdl-chip__text">Einverständniserklärung</span>
+            <a href="{{event.einverstaendnis.url}}" class="mdl-chip__action"><i class="material-icons">download</i></a>
+        </span>
+        {% endif %}
+    </div>
+    <div class="mdl-cell mdl-cell--9-col mdl-cell--12-col-tablet">
+        <div id="description">
+            {% if request.user.profile.permission_level > 1 %}
+            {% include 'snippets/editor/editor_body.html' with event=object description=object.description readonly=False %}
+            {% else %}
+            {% include 'snippets/editor/editor_body.html' with event=object description=object.description readonly=True %}
+            {% endif %}
         </div>
     </div>
-    {% endif %}
-    <section class="mdl-grid">
-
-        <div class="mdl-cell mdl-cell--3-col">
-            {% include 'snippets/events/event_header.html' with event=object %}
-            {% if event.teilnahmebedingungen %}
-            <span class="mdl-chip mdl-chip--deletable">
-                <span class="mdl-chip__text">Teilnahmebedingungen</span>
-                <a href="{{event.teilnahmebedingungen.url}}" class="mdl-chip__action"><i class="material-icons">download</i></a>
-            </span>
-            {% endif %}
-
-            {% if event.datenschutz %}
-            <span class="mdl-chip mdl-chip--deletable">
-                <span class="mdl-chip__text">Datenschutzerklärung</span>
-                <a href="{{event.datenschutz.url}}" class="mdl-chip__action"><i class="material-icons">download</i></a>
-            </span>
-            {% endif %}
-
-            {% if event.einverstaendnis %}
-            <span class="mdl-chip mdl-chip--deletable">
-                <span class="mdl-chip__text">Einverständniserklärung</span>
-                <a href="{{event.einverstaendnis.url}}" class="mdl-chip__action"><i class="material-icons">download</i></a>
-            </span>
-            {% endif %}
-
-        </div>
-        <div class="mdl-cell mdl-cell--9-col">
-            <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
-                <div class="mdl-tabs__tab-bar">
-                    <a href="#starks-panel" class="mdl-tabs__tab is-active">Beschreibung</a>
-                    {% if request.user.profile.permission_level > 1 %}
-                    <a href="#lannisters-panel" class="mdl-tabs__tab">Teilnehmende</a>
-                    {% endif %}
-                </div>
-                <div class="mdl-tabs__panel is-active" id="starks-panel">
-                    <!-- The description -->
-                    <div id="description">
-                        {% if request.user.profile.permission_level > 1 %}
-                        {% include 'snippets/editor/editor_body.html' with event=object description=object.description readonly=False %}
-                        {% else %}
-                        {% include 'snippets/editor/editor_body.html' with event=object description=object.description readonly=True %}
-                        {% endif %}
-                    </div>
-                </div>
-                {% if request.user.profile.permission_level > 1 %}
-                <div class="mdl-tabs__panel" id="lannisters-panel">
-                    {% include 'snippets/tables/participant_table.html' %}
-                </div>
-                {% endif %}
-              </div>
-        </div>
-    </section>
+</section>
+{% if request.user.profile.permission_level > 1 %}
+<h3>Teilnehmende</h3>
+<div>
+    {% include 'snippets/tables/participant_table.html' %}
+</div>
+{% endif %}
 {% endblock %}

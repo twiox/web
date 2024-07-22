@@ -1,22 +1,7 @@
 {% load custom_filters %}
 
-<style>
-    .date_format{
-        color: #f3f3f3;
-        font-size:200%;
-    }
-    .date_small{
-        color: #f3f3f3;
-        font-size:14px;
-        text-transform: uppercase;
-    }
-    .event-header{
-        width: 100%;
-    }
-</style>
-
 {% with participation=request.user.pk|isin:event.participant_users %}
-<div class="event-header p-1 relative {% if event.deleted %} deleted {% endif %} {% if participation %} secondary-bg {% else %} primary-bg {% endif %}">
+<div class="p-1 relative {% if event.deleted %} deleted {% endif %} {% if participation %} secondary-bg {% else %} primary-bg {% endif %}">
     <h3 class="m-0 p-0">Eckdaten</h3>
     <div class="p-2">
         <table>
@@ -78,7 +63,8 @@
                 <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="{% url 'event_register' event.pk %}">Anmelden</a>
                 {% endif %}
             {% endif %}
-            <p> {% if not participation or request.user.is_authenticated == False %}Anmeldung{% else %}Abmeldung{% endif %} bis {{event.deadline|date:'d.m.Y' }} möglich
+            <p>
+                Deadline: {{event.deadline|date:'d.m.Y' }}
             </p>
     {% else %}
     <p>Der An- und Abmeldezeitraum ist vorbei</p>
