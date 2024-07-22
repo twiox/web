@@ -1,6 +1,5 @@
 {% load custom_filters %}
 
-<div id="event_header">
 <style>
     .date_format{
         color: #f3f3f3;
@@ -17,133 +16,74 @@
 </style>
 
 {% with participation=request.user.pk|isin:event.participant_users %}
-<div class="mdl-card mdl-shadow--2dp my-2 event-header relative
-{% if event.deleted %} deleted {% endif %}
-">
-    {% if request.user.profile.permission_level > 2 %}
-    <div class="button-group top_right mdl-grid s-7">
-        <div class="mdl-cell--6-col m-05 mdl-cell--12-col--phone">
-            <a href="{% url 'event_update' event.pk %}">
-                <button class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
-                    <i class="material-icons">edit</i>
-                </button>
-            </a>
-        </div>
-        <div class="mdl-cell--6-col m-05 mdl-cell--12-col--phone">
-            <a
-                hx-get="{% url 'event_delete_toggle' %}?id={{event.pk}}"
-                hx-target="#event_header"
-            >
-                <button class="mdl-button mdl-js-button mdl-button--icon
-                    {% if event.deleted %} mdl-button--accent {% else %} mdl-button--colored {% endif %}">
-                    <i class="material-icons">delete</i>
-                </button>
-            </a>
-        </div>
-    </div>
-    {% endif %}
-    <div class="mdl-grid m-0 p-0 nowrap">
-        <div class="mdl-cell mdl-cell--2-col mdl-cell--6-col--tablet mdl-cell--6-col--phone
-            m-0 center {% if participation and request.user.is_authenticated %} secondary-bg {% else %} primary-bg {% endif%}">
-            <div>
-                <span class="date_format">{{event.start_date|date:'d' }}</span>
-                {% if not event.multiple_days or event.start_date|date:'m' != event.end_date|date:'m' %}
-                <br><span class="date_small">{{event.start_date|date:'b' }}</span>
-                {% endif %}
-                {% if event.multiple_days %}
-                <br><span class="date_format">-</span><br>
-                <span class="date_format">{{event.end_date|date:'d' }}</span><br>
-                <span class="date_small">{{event.end_date|date:'b' }}</span>
-                {% endif %}
-                <br><br><span class="date_format">{{event.start_date|date:'Y' }}</span>
-            </div>
-        </div>
-        <div class="mdl-cell mdl-cell--10-col mdl-cell--6-col--tablet mdl-cell--6-col--phone">
-            <div class="mdl-grid m-0 p-0">
-                <div class="mdl-cell mdl-cell--6-col">
-                    <h3 class="p-0 m-0">{{event.place}}</h3>
-                    {% if request.user.is_authenticated %}
-                    <span class="mdl-chip {% if participation and request.user.is_authenticated %}secondary-bg{% else %}primary-bg{% endif %}">
-                        <span class="mdl-chip__text">
-                            {% if participation %}Angemeldet{% else %}Nicht angemeldet{% endif %}
-                        </span>
-                    </span>
+<div class="event-header p-1 relative {% if event.deleted %} deleted {% endif %} {% if participation %} secondary-bg {% else %} primary-bg {% endif %}">
+    <h3 class="m-0 p-0">Eckdaten</h3>
+    <div class="p-2">
+        <table>
+            <tr><td><i class="material-icons">location_on</i></td>
+                <td>{{event.place}}</td></tr>
+            <tr><td><i class="material-icons">event</i></td><td>
+                <div>
+                    {% if not event.multiple_days %}
+                    <span>{{event.start_date|date:'d.m.Y' }}</span>
+                    {% else %}
+                    <span>{{event.start_date|date:'d' }}. - {{event.end_date|date:'d.m.Y' }}</span>
                     {% endif %}
-                    <div class="mdl-card__supporting-text">
-                        <p class="m-0">{{event.short}}</p>
-                    </div>
                 </div>
-                <div class="mdl-cell mdl-cell--6-col">
-                    <div class="my-2">
-                        <h5 class="p-0">Anmelden</h5>
-                        Altersgruppe:
-                        <span class="primary">
-                            {% if event.min_age == 0 and event.max_age == 99 %}Keine Einschränkungen{% else %}
-                                {% if event.min_age > 0 and event.max_age < 99 %}Von {{event.min_age}}
-                                {% elif event.min_age > 0 and event.max_age == 99 %}Ab {{event.min_age}} {% endif %}
-                                {% if event.max_age < 99 and event.min_age == 0 %}Bis {{event.max_age}}
-                                {% elif event.max_age < 99 and event.min_age > 0 %}bis {{event.max_age}}
-                                {% endif %}
-                                Jahre
-                            {% endif %}
-                        </span><br>
-                        Kosten{% if request.user.is_authenticated == False %} (Nichtmitglieder){% endif %}:
-                        <span class="primary">
-                            {% if request.user.is_authenticated %}
-                                {% if event.costs == 0 %}Keine{% else %}{{event.costs}} €{% endif %}
-                            {% else %}
-                                {% if event.external_costs == 0 %}Keine{% else %}{{event.external_costs}} €{% endif %}
-                            {% endif%}
-                        </span>
-                    </div>
-                    <div class="mdl-card__actions mdl-card--border">
-                        {% if event.info_only %}
-                            <strong>
-                                Aktuell (noch) keine Anmeldung möglich
-                            </strong>
-                        {% else %}
-                            {% if not event.deadline_reached %}
-                                {% if participation and request.user.is_authenticated %}
-                                    <a href="{% url 'event_deregister' event.pk %}">
-                                        <span class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent primary-bg">
-                                        Abmelden
-                                        </span>
-                                    </a>
-                                {% else %}
-                                    {% if request.user.is_authenticated %}
-                                        {# check for age #}
-                                        {% if request.user.profile.age > event.max_age %}
-                                        <button class="mdl-button mdl-js-button mdl-button--raised" disabled>
-                                            Zu alt
-                                        </button>
-                                        {% elif request.user.profile.age < event.min_age %}
-                                        <button class="mdl-button mdl-js-button mdl-button--raised" disabled>
-                                            Zu jung
-                                        </button>
-                                        {% else %}
-                                        <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="{% url 'event_register' event.pk %}">Anmelden</a>
-                                        {%endif %}
-                                    {% else %}
-                                    <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="{% url 'event_register' event.pk %}">Anmelden</a>
-                                    {% endif %}
-                                {% endif %}
-                                <br><br>
-                                <strong>
-                                    {% if not participation or request.user.is_authenticated == False %}Anmeldung{% else %}Abmeldung{% endif %} bis {{event.deadline|date:'d.m.Y' }} möglich
-                                </strong>
-                            {% else %}
-                                <strong>
-                                    Der An- und Abmeldezeitraum ist vorbei
-                                </strong>
-                            {% endif %}
-                        {% endif %}
-                    </div>
-
-                </div>
-            </div>
-        </div>
+            </td></tr>
+            <tr><td><i class="material-icons">sell</i></td><td>
+                <span>
+                    {% if request.user.is_authenticated %}
+                        {% if event.costs == 0 %}Keine{% else %}{{event.costs}} €{% endif %}
+                    {% else %}
+                        {% if event.external_costs == 0 %}Keine{% else %}{{event.external_costs}} €{% endif %}
+                    {% endif%}
+                </span>
+            </td></tr>
+            <tr><td><i class="material-icons">face</i></td><td>
+                {% if event.min_age == 0 and event.max_age == 99 %}Alle Altersgruppen{% else %}
+                    {% if event.min_age > 0 and event.max_age < 99 %}Von {{event.min_age}}
+                    {% elif event.min_age > 0 and event.max_age == 99 %}Ab {{event.min_age}} {% endif %}
+                    {% if event.max_age < 99 and event.min_age == 0 %}Bis {{event.max_age}}
+                    {% elif event.max_age < 99 and event.min_age > 0 %}bis {{event.max_age}}
+                    {% endif %}
+                    Jahre
+                {% endif %}
+            </td></tr>
+        </table>
     </div>
 </div>
-{% endwith %}
+{% if event.info_only %}
+<p>Aktuell noch keine Anmeldung möglich</p>
+{% else %}
 
+<div class="my-2">
+    {% if not event.deadline_reached %}
+        {% if participation %}
+            <a href="{% url 'event_deregister' event.pk %}">
+                <span class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent primary-bg">
+                Abmelden
+                </span>
+            </a>
+        {% else %}
+            {% if request.user.is_authenticated %}
+                {% if request.user.profile.age > event.max_age or request.user.profile.age < event.min_age %}
+                <button class="mdl-button mdl-js-button mdl-button--raised" disabled>
+                    Anmeldung nicht möglich
+                </button>
+                {% else %}
+                <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="{% url 'event_register' event.pk %}">Anmelden</a>
+                {%endif %}
+            {% else %}
+                <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="{% url 'event_register' event.pk %}">Anmelden</a>
+                {% endif %}
+            {% endif %}
+            <p> {% if not participation or request.user.is_authenticated == False %}Anmeldung{% else %}Abmeldung{% endif %} bis {{event.deadline|date:'d.m.Y' }} möglich
+            </p>
+    {% else %}
+    <p>Der An- und Abmeldezeitraum ist vorbei</p>
+    {% endif %}
 </div>
+
+{% endif %}
+{% endwith %}
