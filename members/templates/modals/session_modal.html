@@ -20,11 +20,15 @@
             class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
             <i class="material-icons">edit</i>
         </div>
-        <form action="{% url 'session_delete' object.pk %}">
-            <button type="submit"
+        <form>
+            {% csrf_token %}
+            <div
+                hx-post="{% url 'session_delete' object.pk %}?"
+                hx-confirm="Willst du die Trainingszeit wirklich löschen??"
+                hx-target="#modal-blank"
                 class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
                 <i class="material-icons">delete</i>
-        </button>
+            </div>
         </form>
     </div>
     {% endif  %}
@@ -116,5 +120,19 @@
         </button>
     </div>
 </form>
+
+{% elif type == 'deleted' %}
+
+{#                   #}
+{# SESSION EDIT FORM #}
+{#                   #}
+
+<div class="mdl-dialog__content">
+        Trainingszeit erfolgreich gelöscht!
+</div>
+
+<div class="mdl-dialog__actions">
+    <button type="button" class="mdl-button modal_close">Schließen</button>
+</div>
 
 {% endif %}

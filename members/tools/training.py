@@ -95,11 +95,7 @@ def toggle_participation(request, pk):
     return render(request, f"modals/session_modal.html", context)
 
 
-class SessionDetailView(LoginRequiredMixin, DetailView):
-    model = Session
-    template_name = "pages/session_detail.html"
-
-
+@login_required
 def session_update(request, pk):
     object = Session.objects.get(pk=int(pk))
     from members.forms import SessionForm
@@ -109,6 +105,11 @@ def session_update(request, pk):
 
     context = {"object": object, "type": "default"}
     return render(request, f"modals/session_modal.html", context)
+
+
+class SessionDetailView(LoginRequiredMixin, DetailView):
+    model = Session
+    template_name = "pages/session_detail.html"
 
 
 class SessionCreateView(LoginRequiredMixin, CreateView):
@@ -128,11 +129,13 @@ class SessionCreateView(LoginRequiredMixin, CreateView):
     ]
 
 
+@login_required
 def session_delete(request, pk):
     if request.user.profile.permission_level > 1:
         session = Session.objects.get(pk=pk)
         session.delete()
-    return redirect("landing")
+    context = {"object": object, "type": "deleted"}
+    return render(request, f"modals/session_modal.html", context)
 
 
 class TesterCreateView(CreateView):
