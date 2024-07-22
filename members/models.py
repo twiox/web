@@ -401,6 +401,16 @@ class Session(models.Model):
     def model(self):
         return "session"
 
+    @property
+    def requirement_string(self):
+        if self.min_age == 0 and self.max_age == 99:
+            return "Alle Altersgruppen"
+        if self.min_age > 0 and self.max_age == 99:
+            return f"Ab {self.min_age} Jahre"
+        if self.max_age < 99 and self.min_age == 0:
+            return f"Bis {self.max_age} Jahre"
+        return f"Von {self.min_age} bis {self.max_age} Jahre"
+
 
 class Message(models.Model):
     title = models.CharField("Titel", max_length=200)

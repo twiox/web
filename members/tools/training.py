@@ -91,7 +91,8 @@ def toggle_participation(request, pk):
         messages.add_message(
             request, messages.SUCCESS, "Du hast dich erfolgreich angemeldet"
         )
-    return redirect(session)
+    context = {"object": session}
+    return render(request, f"modals/session_modal.html", context)
 
 
 class SessionDetailView(LoginRequiredMixin, DetailView):

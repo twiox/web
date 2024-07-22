@@ -18,16 +18,12 @@ https://github.com/sedadna/sedadna.github.io/blob/main/assets/css/main.scss
     -webkit-transition: .3s ease-in-out;
     transition: .3s ease-in-out;
   }
-  .square:hover img{
-    opacity: .5;
-  }
   .avatar {
     display: flex;
     flex-wrap:wrap;
-    justify-content: space-evenly;
+    justify-content: space-around;
   }
   .avatar img{
-    border-radius: 50%;
     width: 8rem;
     height: 8rem;
     object-fit: cover;

@@ -8,7 +8,13 @@
     {% endif %}>
     <div class="flex_row">
         <div class="flex_row">
-            <div class="primary-bg center" style="margin: 1px; width:50px">
+            <div
+            {% if request.user in session.participants.all %}
+            class="secondary-bg center"
+            {% else %}
+            class="primary-bg center"
+            {% endif %}
+            style="margin: 1px; width:50px">
                 <h4 class="light m-1 p-0">{{session.day}}</h4>
             </div>
             <div class="p-1" style="word-break: break-word;">
@@ -17,27 +23,8 @@
                 {% endif %}
                 <h4 class="my-1 dark" style="margin-top:0px;">{{session.spot.title}}</h4>
                 <span>{{session.start_time|date:'H:i'}} - {{session.end_time|date:'H:i'}}<span><br>
-                <span>
-                    {% if session.min_age == 0 and session.max_age == 99 %}Alle Altersgruppen{% else %}
-                        {% if session.min_age > 0 and session.max_age < 99 %}Von {{session.min_age}}
-                        {% elif session.min_age > 0 and session.max_age == 99 %}Ab {{session.min_age}} {% endif %}
-                        {% if session.max_age < 99 and session.min_age == 0 %}Bis {{session.max_age}}
-                        {% elif session.max_age < 99 and session.min_age > 0 %}bis {{session.max_age}}
-                        {% endif %}
-                        Jahre
-                    {% endif %}
-                </span>
+                <span>{{session.requirement_string}}</span>
             </div>
         </div>
-        <!--
-        {% if request.user.is_authenticated %}
-        <a class="dark center"  href="{% url 'session_detail' session.pk%}" style="min-height: 100% !important;text-decoration: none;">
-            <i class="material-icons">chevron_right</i>
-         </a>
-        {% else %}
-
-        <div></div>
-        {% endif %}
-        -->
     </div>
 </div>
