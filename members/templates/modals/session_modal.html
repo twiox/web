@@ -1,87 +1,120 @@
 {% load custom_filters %}
+{% load crispy_forms_tags %}
+
+<div
+    hx-get="{% url 'get_training_section' %}"
+    hx-trigger="load once"
+    hx-target="#training-section-wrapper"
+></div>
+
 <h4 class="mdl-dialog__title">{{object.title}}</h4>
-    <div class="mdl-dialog__content">
-        {% if request.user.profile.permission_level > 1 %}
-        <div class="mdl-card__menu">
-            <a href="{% url 'session_update' object.pk %}"
-                class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
-                <i class="material-icons">edit</i>
-            </a>
-            <form action="{% url 'session_delete' object.pk %}">
-                <button type="submit"
-                    class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
-                    <i class="material-icons">delete</i>
-            </button>
-            </form>
-        </div>
-        {% endif  %}
-        <div class="mdl-grid">
-            <!--Left/Upper Cell-->
-            <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col-tablet">
-                <div class="avatar p-2">
-                {% for trainer in object.trainer.all %}
-                    <div class ="member">
-                        <p>{{trainer.name}}</p>
-                        <div class="square">
-                            <img src="{{ trainer.image.url }}" alt="Avatar"/>
-                        </div>
-                        {% if trainer.trainer_telnr != "-" %}
-                        <p>{{trainer.trainer_telnr}}</p>
-                        {% endif %}
-                        {% if trainer.trainer_email != "-" %}
-                        <p><a href="mailto:{{trainer.trainer_email}}">Email</a></p>
-                        {% endif %}
-                    </div>
-                {% endfor%}
-                </div>
-            </div>
-            <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col-tablet">
-                <div class="p-2">
-                    <table>
-                        <tr>
-                            <td><i class="material-icons">face</i></td>
-                            <td>{{object.requirement_string}}</td>
-                        </tr>
-                        <tr>
-                            <td><i class="material-icons">location_on</i></td>
-                            <td>
-                                <a target="_blank"
-                                    href="https://www.google.de/maps/dir//{{object.spot.lat}},{{object.spot.long}}/@{{object.spot.lat}},{{object.spot.long}},17z">
-                                    {{object.spot}}
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><i class="material-icons">description</i></td>
-                            <td>{{object.short|default:"Yesterday you said tomorrow"}}</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-      <div class="mdl-dialog__actions">
-        <button type="button" class="mdl-button modal_close">Schließen</button>
-        {% if request.user.profile.age >= object.min_age and request.user.profile.age <= object.max_age %}
-        <form>
-            {% csrf_token %}
-            <button id="session_toggle"
-                hx-post="{% url 'session_participation_toggle' object.pk %}"
-                hx-target="#modal-blank"
-                type="button"
-                {% if request.user in object.participants.all %}
-                class="mdl-button secondary-bg">Abmelden
-                {% else %}
-                class="mdl-button primary-bg">Anmelden
-                {% endif %}
-            </button>
-        </form>
+
+{% if type == 'default' %}
+
+<div class="mdl-dialog__content">
+    {% if request.user.profile.permission_level > 1 %}
+    <div class="mdl-card__menu">
         <div
-            hx-get="{% url 'get_training_section' %}"
-            hx-trigger="load once"
-            hx-target="#training-section-wrapper"
-        ></div>
-        {% else %}
-                <i>Dein Alter passt nicht für dieses Training</i>
-        {% endif %}
-      </div>
+            hx-get="{% url 'get_modal' %}?object=session_{{object.pk}}&type=form"
+            hx-target="#modal-blank"
+            class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
+            <i class="material-icons">edit</i>
+        </div>
+        <form action="{% url 'session_delete' object.pk %}">
+            <button type="submit"
+                class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
+                <i class="material-icons">delete</i>
+        </button>
+        </form>
     </div>
+    {% endif  %}
+    <div class="mdl-grid">
+        <!--Left/Upper Cell-->
+        <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col-tablet">
+            <div class="avatar p-2">
+            {% for trainer in object.trainer.all %}
+                <div class ="member">
+                    <p>{{trainer.name}}</p>
+                    <div class="square">
+                        <img src="{{ trainer.image.url }}" alt="Avatar"/>
+                    </div>
+                    {% if trainer.trainer_telnr != "-" %}
+                    <p>{{trainer.trainer_telnr}}</p>
+                    {% endif %}
+                    {% if trainer.trainer_email != "-" %}
+                    <p><a href="mailto:{{trainer.trainer_email}}">Email</a></p>
+                    {% endif %}
+                </div>
+            {% endfor%}
+            </div>
+        </div>
+        <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col-tablet">
+            <div class="p-2">
+                <table>
+                    <tr>
+                        <td><i class="material-icons">face</i></td>
+                        <td>{{object.requirement_string}}</td>
+                    </tr>
+                    <tr>
+                        <td><i class="material-icons">location_on</i></td>
+                        <td>
+                            <a target="_blank"
+                                href="https://www.google.de/maps/dir//{{object.spot.lat}},{{object.spot.long}}/@{{object.spot.lat}},{{object.spot.long}},17z">
+                                {{object.spot}}
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><i class="material-icons">description</i></td>
+                        <td>{{object.short|default:"Yesterday you said tomorrow"}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mdl-dialog__actions">
+<button type="button" class="mdl-button modal_close">Schließen</button>
+{% if request.user.profile.age >= object.min_age and request.user.profile.age <= object.max_age %}
+<form>
+    {% csrf_token %}
+    <button id="session_toggle"
+        hx-post="{% url 'session_participation_toggle' object.pk %}"
+        hx-target="#modal-blank"
+        type="button"
+        {% if request.user in object.participants.all %}
+        class="mdl-button secondary-bg">Abmelden
+        {% else %}
+        class="mdl-button primary-bg">Anmelden
+        {% endif %}
+    </button>
+</form>
+{% else %}
+        <i>Dein Alter passt nicht für dieses Training</i>
+{% endif %}
+</div>
+
+{% elif type == 'form' %}
+
+{#                   #}
+{# SESSION EDIT FORM #}
+{#                   #}
+
+<form>
+    {% csrf_token %}
+
+    <div class="mdl-dialog__content">
+            {{form|crispy}}
+    </div>
+
+    <div class="mdl-dialog__actions">
+        <button type="button" class="mdl-button modal_close">Schließen</button>
+        <button
+            hx-post="{% url 'main_session_update' object.pk %}"
+            hx-target="#modal-blank"
+            type="button" class="mdl-button primary-bg">Speichern
+        </button>
+    </div>
+</form>
+
+{% endif %}

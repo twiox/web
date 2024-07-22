@@ -100,21 +100,15 @@ class SessionDetailView(LoginRequiredMixin, DetailView):
     template_name = "pages/session_detail.html"
 
 
-class SessionUpdateView(LoginRequiredMixin, UpdateView):
-    model = Session
-    template_name = "pages/session_form.html"
-    fields = [
-        "title",
-        "short",
-        "hinweis",
-        "trainer",
-        "day",
-        "min_age",
-        "max_age",
-        "start_time",
-        "end_time",
-        "spot",
-    ]
+def session_update(request, pk):
+    object = Session.objects.get(pk=int(pk))
+    from members.forms import SessionForm
+
+    form = SessionForm(request.POST, instance=object)
+    form.save()
+
+    context = {"object": object, "type": "default"}
+    return render(request, f"modals/session_modal.html", context)
 
 
 class SessionCreateView(LoginRequiredMixin, CreateView):
@@ -197,7 +191,7 @@ def message_delete(request, pk):
 urlpatterns = [
     path("get-section", get_section, name="get_training_section"),
     path("<int:pk>", SessionDetailView.as_view(), name="session_detail"),
-    path("<int:pk>/edit", SessionUpdateView.as_view(), name="session_update"),
+    path("<int:pk>/edit", session_update, name="main_session_update"),
     path("neu", SessionCreateView.as_view(), name="session_create"),
     path("<int:pk>/delete", session_delete, name="session_delete"),
     path("<int:pk>/toggle", toggle_participation, name="session_participation_toggle"),

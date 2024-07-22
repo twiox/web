@@ -21,7 +21,7 @@ https://github.com/sedadna/sedadna.github.io/blob/main/assets/css/main.scss
   .avatar {
     display: flex;
     flex-wrap:wrap;
-    justify-content: space-around;
+    justify-content: space-evenly;
   }
   .avatar img{
     width: 8rem;

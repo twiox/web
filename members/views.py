@@ -68,12 +68,25 @@ def trainer_check():
     return True
 
 
+def get_modal_context(context):
+    if context["object"].model == "session":
+        if context["type"] == "form":
+            from .forms import SessionForm
+
+            context.update({"form": SessionForm(instance=context["object"])})
+
+    return context
+
+
 def get_modal(request):
     obj_string = request.GET.get("object")
+    type = request.GET.get("type", "default")
     object = get_instance_from_string(obj_string)
     model = object.model
     # get additional context
-    context = {"object": object}
+    context = {"object": object, "type": type}
+    context = get_modal_context(context)
+
     return render(request, f"modals/{model}_modal.html", context)
 
 

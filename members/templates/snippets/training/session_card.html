@@ -1,7 +1,7 @@
 <div
     {% if request.user.is_authenticated %}
     class="mdl-card mdl-shadow--2dp my-2 modal_open"
-    hx-get="{% url 'get_modal' %}?object=session_{{session.pk}}"
+    hx-get="{% url 'get_modal' %}?object=session_{{session.pk}}&type=default"
     hx-target="#modal-blank"
     {% else %}
     class="mdl-card mdl-shadow--2dp my-2"

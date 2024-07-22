@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Event, Spot, Document, Tester, Message
+from .models import Event, Spot, Document, Tester, Message, Session
 
 
 class EventForm(forms.ModelForm):
@@ -75,6 +75,23 @@ class SpotForm(forms.ModelForm):
     class Meta:
         model = Spot
         fields = ["title", "lat", "long", "outdoor"]
+
+
+class SessionForm(forms.ModelForm):
+    class Meta:
+        model = Session
+        fields = [
+            "title",
+            "short",
+            "hinweis",
+            "trainer",
+            "day",
+            "min_age",
+            "max_age",
+            "start_time",
+            "end_time",
+            "spot",
+        ]
 
 
 #
