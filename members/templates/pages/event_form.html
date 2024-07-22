@@ -19,19 +19,5 @@
             </form>
         </section>
     </div>
-    <div class="mdl-tabs__panel" id="lannisters-panel">
-        <style>
-            #event_questions_section{
-                border:dashed grey 3px;
-            }
-        </style>
-        {% if object %}
-        <section class="m-2" id="event_questions_section">
-            {% include 'snippets/events/event_questions.html' %}
-        </section>
-        {% else%}
-        <p class="primary">Bitte speichern und neuladen um Fragen für die Teilnehmenden hinzuzufügen</p>
-        {% endif %}
-    </div>
 </div>
 {% endblock %}

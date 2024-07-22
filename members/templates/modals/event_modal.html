@@ -1,0 +1,75 @@
+{% load custom_filters %}
+{% load crispy_forms_tags %}
+
+<h4 class="mdl-dialog__title">{{object.name}}</h4>
+
+{% if type == 'questions' %}
+
+<div class="mdl-dialog__content">
+    <h3 class="m-0 p-0 dark">Zusatzfragen</h3>
+    <!--See entries-->
+    {% if object.question_dict %}
+    <div class="p-2">
+        <h5>Aktuell</h5>
+        <table class="mdl-data-table mdl-js-data-table">
+            <thead>
+                <tr>
+                    <th class="mdl-data-table__cell--non-numeric">Frage</th>
+                    <th class="mdl-data-table__cell--non-numeric">Typ</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for key,content in object.question_dict %}
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">{{content.0}}</td>
+                    <td class="mdl-data-table__cell--non-numeric">{{content.1}}</td>
+                    <td>
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{object.pk}}">
+                            <input type="hidden" name="removekey" value="{{key}}">
+                            <span
+                                hx-post="{% url 'event_remove_question' %}"
+                                hx-target="#modal-blank"
+                                class="mdl-button mdl-js-button mdl-button--icon mdl-button--mini-fab mdl-button--colored">
+                                <i class="material-icons">delete</i>
+                            </span>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    <!--New entry-->
+    <div class="p-2">
+        <h5>Neue Frage</h5>
+        <form type="post">
+            {% csrf_token %}
+            <input name="id" type="hidden" value="{{object.pk}}"/>
+
+            <input type="text" name="question" placeholder="Frage"><br>
+
+            <!-- Simple Select with arrow and floating label-->
+            <label for="question_type">Form Typ</label>
+
+            <select name="question_type" id="question_type">
+              <option value="text">Text</option>
+              <option value="number">Nummer</option>
+              <option value="checkbox">Checkbox</option>
+            </select>
+
+            <span class="mdl-button mdl-js-button mdl-button--colored"
+                hx-post="{% url 'event_add_question' %}"
+                hx-target="#modal-blank"
+            >Hinzufügen</span>
+        </form>
+    </div>
+</div>
+<div class="mdl-dialog__actions">
+    <button type="button" class="mdl-button modal_close">Schließen</button>
+</div>
+
+{% endif %}

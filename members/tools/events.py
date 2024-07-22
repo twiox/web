@@ -129,11 +129,9 @@ def add_question(request):
     object.questions = json.dumps(questions)
     object.save()
 
-    return render(
-        request,
-        "snippets/events/event_questions.html",
-        {"event": object},
-    )
+    context = {"object": object, "type": "questions"}
+
+    return render(request, f"modals/event_modal.html", context)
 
 
 @user_passes_test(permission_check_2)
@@ -146,11 +144,9 @@ def remove_question(request):
     object.questions = json.dumps(questions)
     object.save()
 
-    return render(
-        request,
-        "snippets/events/event_questions.html",
-        {"event": object},
-    )
+    context = {"object": object, "type": "questions"}
+
+    return render(request, f"modals/event_modal.html", context)
 
 
 #

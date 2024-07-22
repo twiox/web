@@ -302,6 +302,10 @@ class Event(models.Model):
     def question_dict(self):
         return json.loads(self.questions).items() if self.questions else []
 
+    @property
+    def model(self):
+        return "event"
+
     def __str__(self):
         return f"Event: {self.title}{' (deleted)' if self.deleted else ''}"
 
@@ -592,4 +596,4 @@ class TrialBatch(models.Model):
         return self.name
 
 
-models = {"session": Session}
+models = {"session": Session, "event": Event}

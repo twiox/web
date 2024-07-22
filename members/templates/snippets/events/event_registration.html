@@ -1,0 +1,156 @@
+{% load custom_filters %}
+
+<style>
+    .mdl-textfield{
+        width:100% !important;
+    }
+</style>
+
+{% with participation=request.user.pk|isin:event.participant_users %}
+    {% if event.info_only %}
+        <p>Aktuell noch keine Anmeldung möglich</p>
+    {% else %}
+        {% if event.deadline_reached %}
+            {% if participation %}
+            <h3 class="secondary">Du bist angemeldet</h3>
+            {% endif %}
+        <p class="secondary">Deadline für An- und Abmeldung bereits erreicht</p>
+        {% else %}
+            {% if participation and request.user.is_authenticated %}
+            <h3 class="secondary">Du bist angemeldet</h3>
+                <a href="{% url 'event_deregister' event.pk %}">
+                    <span class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent primary-bg">
+                    Stornieren
+                    </span>
+                </a>
+            {% else %}
+            <div class="white-bg p-2">
+                <h2 class="primary m-0">Anmelden</h2>
+                {% if not request.user.is_authenticated or request.user.profile.age <= event.max_age and request.user.profile.age >= event.min_age %}
+                <form method="post" enctype="multipart/form-data" action="{% url 'event_register' event.pk %}">
+                    {% csrf_token %}
+                    <!--First, the user/person-->
+                    {% if request.user.is_authenticated %}
+                    <input type="hidden" value="{{request.user.pk}}" name="user">
+                    {% else %}
+                    <h4 class="primary">Persönliche Daten</h4>
+                    <div class="mdl-grid">
+                        <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col--phone">
+                            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
+                                <input class="mdl-textfield__input" type="text" id="first_name" name="first_name" pattern=".*" data-required>
+                                <label class="mdl-textfield__label" for="first_name">Vorname</label>
+                            </div>
+                            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                <input class="mdl-textfield__input" type="text" id="last_name" name="last_name" pattern=".*" data-required>
+                                <label class="mdl-textfield__label" for="last_name">Nachname</label>
+                            </div>
+                            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                <input class="mdl-textfield__input" type="text" id="email" name="email" pattern=".*@.*\..*" data-required>
+                                <label class="mdl-textfield__label" for="email">Email-Adresse</label>
+                                <span class="mdl-textfield__error">Bitte gib eine Emailadresse an</span>
+                            </div>
+                        </div>
+                        <div class=" mdl-cell mdl-cell--6-col mdl-cell--12-col--phone">
+                            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                <input class="mdl-textfield__input" type="date" id="birthday" name="birthday" placeholder="1" data-required>
+                                <label class="mdl-textfield__label" for="birthday">Geburtsdatum</label>
+                                <span id="invalid_date" class="mdl-textfield__error">Mit dem Geburtsdatum kannst du dich nicht anmelden</span>
+                            </div>
+                            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select">
+                                <input type="text" value="" class="mdl-textfield__input" id="sex" readonly>
+                                <input type="hidden" value="" name="sex" data-required>
+                                <i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>
+                                <label for="sex" class="mdl-textfield__label">Geschlecht</label>
+                                <ul for="sex" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
+                                    <li class="mdl-menu__item" data-val="m">Männlich</li>
+                                    <li class="mdl-menu__item" data-val="w">Weiblich</li>
+                                    <li class="mdl-menu__item" data-val="d">Divers</li>
+                                    <li class="mdl-menu__item" data-val="na">Keine Angabe</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <!--Second, the event-->
+                    <input type="hidden" name="event" value="{{event.pk}}">
+                    <!--Last, the additional formfields-->
+                    {% if event.question_dict or request.user.profile.permission_level > 2 %}
+                    <div class="relative">
+                        <h4 class="primary">Zusatzfragen</h4>
+                        {% if request.user.profile.permission_level > 2 %}
+                        <span class="top_right p-2 modal_open secondary"
+                            hx-get="{% url 'get_modal' %}?object=event_{{event.pk}}&type=questions"
+                            hx-target="#modal-blank"
+                            style="cursor: pointer;"
+                        >Fragen managen</span>
+                        {% endif %}
+                        <div class="mdl-grid">
+                            <div class="mdl-cell mdl-cell--12-col">
+                                {% for key,content in event.question_dict %}
+                                {% if content.1 == 'text' %}
+                                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
+                                    <input class="mdl-textfield__input" type="text" id="{{key}}" name="{{key}}">
+                                    <label class="mdl-textfield__label" for="{{key}}">{{content.0}}</label>
+                                </div>
+                                {% elif content.1 == 'number' %}
+                                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
+                                    <input class="mdl-textfield__input" type="number" id="{{key}}" name="{{key}}" pattern="[0-9]+">
+                                    <label class="mdl-textfield__label" for="{{key}}">{{content.0}}</label>
+                                    <span class="mdl-textfield__error">Bitte gib eine Zahl an</span>
+                                </div>
+                                {% elif content.1 == 'checkbox' %}
+                                <style>
+                                    .mdl-checkbox{
+                                        vertical-align: inherit !important;
+                                    }
+                                </style>
+                                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="{{key}}">
+                                    <input type="checkbox" id="{{key}}" name="{{key}}" class="mdl-checkbox__input">
+                                    <span class="mdl-checkbox__label">{{content.0}}</span>
+                                </label>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <h4 class="primary">Wichtig</h4>
+                    <p>Ich habe die
+                        {% if event.datenschutz %}
+                            <a href="{{event.datenschutz.url}}" target="_blank">Datenschutzerklärung</a>
+                        {% else %}
+                            Datenschutzerklärung
+                        {% endif %} und die
+                        {% if event.teilnahmebedingungen %}
+                            <a href="{{event.teilnahmebedingungen.url}}" target="_blank">Teilnahmebedingungen</a>
+                        {% else %}
+                            Teilnahmebedingungen
+                        {% endif %} gelesen und akzeptiere sie.
+                    Ich willige ein, dass die von mir hinterlegten Daten für die Durchführung der Veranstaltung gespeichert und verwendet werden.
+                    <strong>Bei Minderjährigen wird das
+                    {% if event.einverstaendnis %}
+                        <a href="{{event.einverstaendnis.url}}" target="_blank">Einverständnis</a>
+                    {% else %}
+                    Einverständnis
+                    {% endif %} der Eltern benötigt!</strong>
+                    </p>
+
+                    <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="confirm">
+                        <input type="checkbox" id="confirm" class="mdl-checkbox__input" data-required>
+                        <span class="mdl-checkbox__label">Ich habe verstanden</span>
+                    </label>
+                    <br> <br>
+                    <button id="form_submit" class="center mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit">
+                        Registrieren
+                    </button>
+                </form>
+                {% else %}
+                <button class="mdl-button mdl-js-button mdl-button--raised" disabled>
+                    Anmeldung nicht möglich (Alter)
+                </button>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endwith %}

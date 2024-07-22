@@ -89,151 +89,10 @@
             {% include 'snippets/editor/editor_body.html' with event=object description=object.description readonly=True %}
             {% endif %}
         </div>
-        {% with participation=request.user.pk|isin:event.participant_users %}
         <div id="registration">
-            {% if event.info_only %}
-                <p>Aktuell noch keine Anmeldung möglich</p>
-            {% else %}
-                {% if event.deadline_reached %}
-                    {% if participation %}
-                    <h3 class="secondary">Du bist angemeldet</h3>
-                    {% endif %}
-                <p class="secondary">Deadline für An- und Abmeldung bereits erreicht</p>
-                {% else %}
-                    {% if participation %}
-                    <h3 class="secondary">Du bist angemeldet</h3>
-                        <a href="{% url 'event_deregister' event.pk %}">
-                            <span class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent primary-bg">
-                            Stornieren
-                            </span>
-                        </a>
-                    {% else %}
-                    <div class="white-bg p-2">
-                        <h2 class="primary">Anmelden</h2>
-                        {% if not request.user.is_authenticated or request.user.profile.age <= event.max_age and request.user.profile.age >= event.min_age %}
-                        <form method="post" enctype="multipart/form-data" action="{% url 'event_register' event.pk %}">
-                            <h4 class="primary">Persönliche Daten</h4>
-
-                            {% csrf_token %}
-                            <!--First, the user/person-->
-                            {% if request.user.is_authenticated %}
-                            <input type="hidden" value="{{request.user.pk}}" name="user">
-                            Als Vereinsmitglied haben wir deine Daten bereits hinterlegt :)
-                            {% else %}
-                            <div class="mdl-grid">
-                                <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col--phone">
-                                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
-                                        <input class="mdl-textfield__input" type="text" id="first_name" name="first_name" pattern=".*" data-required>
-                                        <label class="mdl-textfield__label" for="first_name">Vorname</label>
-                                    </div>
-                                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                        <input class="mdl-textfield__input" type="text" id="last_name" name="last_name" pattern=".*" data-required>
-                                        <label class="mdl-textfield__label" for="last_name">Nachname</label>
-                                    </div>
-                                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                        <input class="mdl-textfield__input" type="text" id="email" name="email" pattern=".*@.*\..*" data-required>
-                                        <label class="mdl-textfield__label" for="email">Email-Adresse</label>
-                                        <span class="mdl-textfield__error">Bitte gib eine Emailadresse an</span>
-                                    </div>
-                                </div>
-                                <div class=" mdl-cell mdl-cell--6-col mdl-cell--12-col--phone">
-                                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                        <input class="mdl-textfield__input" type="date" id="birthday" name="birthday" placeholder="1" data-required>
-                                        <label class="mdl-textfield__label" for="birthday">Geburtsdatum</label>
-                                        <span id="invalid_date" class="mdl-textfield__error">Mit dem Geburtsdatum kannst du dich nicht anmelden</span>
-                                    </div>
-                                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select">
-                                        <input type="text" value="" class="mdl-textfield__input" id="sex" readonly>
-                                        <input type="hidden" value="" name="sex" data-required>
-                                        <i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>
-                                        <label for="sex" class="mdl-textfield__label">Geschlecht</label>
-                                        <ul for="sex" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
-                                            <li class="mdl-menu__item" data-val="m">Männlich</li>
-                                            <li class="mdl-menu__item" data-val="w">Weiblich</li>
-                                            <li class="mdl-menu__item" data-val="d">Divers</li>
-                                            <li class="mdl-menu__item" data-val="na">Keine Angabe</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %}
-                            <!--Second, the event-->
-                            <input type="hidden" name="event" value="{{event.pk}}">
-                            <!--Last, the additional formfields-->
-                            {% if event.question_dict %}
-                            <h4 class="primary">Zusatzfragen</h4>
-
-                            <div class="mdl-grid">
-                                <div class="mdl-cell mdl-cell--12-col">
-                                    {% for key,content in event.question_dict %}
-                                    {% if content.1 == 'text' %}
-                                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
-                                        <input class="mdl-textfield__input" type="text" id="{{key}}" name="{{key}}">
-                                        <label class="mdl-textfield__label" for="{{key}}">{{content.0}}</label>
-                                    </div>
-                                    {% elif content.1 == 'number' %}
-                                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
-                                        <input class="mdl-textfield__input" type="number" id="{{key}}" name="{{key}}" pattern="[0-9]+">
-                                        <label class="mdl-textfield__label" for="{{key}}">{{content.0}}</label>
-                                        <span class="mdl-textfield__error">Bitte gib eine Zahl an</span>
-                                    </div>
-                                    {% elif content.1 == 'checkbox' %}
-                                    <style>
-                                        .mdl-checkbox{
-                                            vertical-align: inherit !important;
-                                        }
-                                    </style>
-                                    <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="{{key}}">
-                                        <input type="checkbox" id="{{key}}" name="{{key}}" class="mdl-checkbox__input">
-                                        <span class="mdl-checkbox__label">{{content.0}}</span>
-                                    </label>
-                                    {% endif %}
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            <p>Ich habe die
-                                {% if event.datenschutz %}
-                                    <a href="{{event.datenschutz.url}}" target="_blank">Datenschutzerklärung</a>
-                                {% else %}
-                                    Datenschutzerklärung
-                                {% endif %} und die
-                                {% if event.teilnahmebedingungen %}
-                                    <a href="{{event.teilnahmebedingungen.url}}" target="_blank">Teilnahmebedingungen</a>
-                                {% else %}
-                                    Teilnahmebedingungen
-                                {% endif %} gelesen und akzeptiere sie.
-                            Ich willige ein, dass die von mir hinterlegten Daten für die Durchführung der Veranstaltung gespeichert und verwendet werden.
-                            <strong>Bei Minderjährigen wird das
-                            {% if event.einverstaendnis %}
-                                <a href="{{event.einverstaendnis.url}}" target="_blank">Einverständnis</a>
-                            {% else %}
-                            Einverständnis
-                            {% endif %} der Eltern benötigt!</strong>
-                            </p>
-
-                            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="confirm">
-                                <input type="checkbox" id="confirm" class="mdl-checkbox__input" data-required>
-                                <span class="mdl-checkbox__label">Ich habe verstanden</span>
-                            </label>
-                            <br> <br>
-                            <button id="form_submit" class="center mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit">
-                                Registrieren
-                            </button>
-                        </form>
-                        {% else %}
-                        <button class="mdl-button mdl-js-button mdl-button--raised" disabled>
-                            Anmeldung nicht möglich (Alter)
-                        </button>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                {% endif %}
-            {% endif %}
+            {% include 'snippets/events/event_registration.html' %}
         </div>
-        {% endwith %}
-
+    </div>
 </section>
 
 
@@ -251,7 +110,6 @@
         }
     })
 </script>
-
 
 {% if request.user.profile.permission_level > 1 %}
 <h3>Teilnehmende</h3>
