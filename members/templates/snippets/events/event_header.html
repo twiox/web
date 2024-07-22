@@ -38,38 +38,4 @@
         </table>
     </div>
 </div>
-{% if event.info_only %}
-<p>Aktuell noch keine Anmeldung möglich</p>
-{% else %}
-
-<div class="my-2">
-    {% if not event.deadline_reached %}
-        {% if participation %}
-            <a href="{% url 'event_deregister' event.pk %}">
-                <span class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent primary-bg">
-                Abmelden
-                </span>
-            </a>
-        {% else %}
-            {% if request.user.is_authenticated %}
-                {% if request.user.profile.age > event.max_age or request.user.profile.age < event.min_age %}
-                <button class="mdl-button mdl-js-button mdl-button--raised" disabled>
-                    Anmeldung nicht möglich
-                </button>
-                {% else %}
-                <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="{% url 'event_register' event.pk %}">Anmelden</a>
-                {%endif %}
-            {% else %}
-                <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="{% url 'event_register' event.pk %}">Anmelden</a>
-                {% endif %}
-            {% endif %}
-            <p>
-                Deadline: {{event.deadline|date:'d.m.Y' }}
-            </p>
-    {% else %}
-    <p>Der An- und Abmeldezeitraum ist vorbei</p>
-    {% endif %}
-</div>
-
-{% endif %}
 {% endwith %}
