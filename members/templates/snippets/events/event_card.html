@@ -1,15 +1,42 @@
 {% load custom_filters %}
 {% with participation=request.user.pk|isin:event.participant_users %}
 
-<div class="mdl-card mdl-shadow--2dp my-2 event-card">
+{% if event.square %}
+<style>
+    .thumbnail__{{event.pk}}{
+        background-image:url("{{event.square.url}}");
+        background-size: cover;
+        background-repeat: no-repeat;
+        position:relative;
+    }
+    .color_overlay{
+        position: absolute;
+        top:0;
+        left:0;
+        width: 100%;
+        height: 100%;
+        opacity:0;
+        transition: 0.3s;
+    }
+    .color_overlay:hover{
+        opacity:0.7;
+    }
+</style>
+{% endif %}
+
+<div class="mdl-card mdl-shadow--2dp my-2 event-card white-bg">
     <div class="mdl-grid m-0 p-0 nowrap">
-        <div class="mdl-cell mdl-cell--4-col m-0 center
-            {% if participation and request.user.is_authenticated %} secondary-bg
+        <div class="mdl-cell mdl-cell--5-col m-0 center thumbnail__{{event.pk}}
+            {% if participation and request.user.is_authenticated %}
+                secondary-bg
             {% else %}
-                {% if event.public_event or request.user.is_authenticated %} primary-bg
-                {% else %} passive
+                {% if event.public_event or request.user.is_authenticated %}
+                    primary-bg
+                {% else %}
+                    passive
                 {% endif %}
             {% endif%}">
+            {% if not event.square %}
             <div>
                 <span class="date_format">{{event.start_date|date:'d' }}</span>
                 {% if not event.multiple_days or event.start_date|date:'m' != event.end_date|date:'m' %}
@@ -21,11 +48,27 @@
                 <span class="date_small">{{event.end_date|date:'b' }}</span>
                 {% endif %}
             </div>
+            {% endif %}
         </div>
-        <div class="mdl-cell mdl-cell--8-col">
-            <span class="primary">{{event.start_date|date:'H:i' }}{% if not event.multiple_days %} - {{event.end_date|date:'H:i' }}{% endif %} Uhr</span><br>
+        <div class="mdl-cell mdl-cell--7-col">
+            {% if event.square %}
+            <div>
+                <span class="primary">{{event.start_date|date:'d' }}.</span>
+                {% if not event.multiple_days or event.start_date|date:'m' != event.end_date|date:'m' %}
+                <span class="primary date_small">{{event.start_date|date:'b' }}</span>
+                {% endif %}
+                {% if event.multiple_days %}
+                <span class="primary"> - </span>
+                <span class="primary">{{event.end_date|date:'d' }}.</span>
+                <span class="primary date_small">{{event.end_date|date:'b' }}</span>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% if event.start_date|date:'H' != '00' %}
+            <span class="primary">{{event.start_date|date:'H:i' }} Uhr</span><br>
+            {% endif %}
             <h4 class="my-1 dark">{{event.title}}</h4>
-            <div class="mdl-card__supporting-text">
+            <div class="mdl-card__supporting-text" style="padding-left: 0px;">
                 <p class="m-0">{{event.short}}</p>
             </div>
             <div class="mdl-card__actions mdl-card--border">

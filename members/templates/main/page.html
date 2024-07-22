@@ -17,8 +17,8 @@
             </nav>
         </div>
     </header>
-    <main class="mdl-layout__content" >
-        <div class="page-content" style="min-height: 100vh;">
+    <main class="mdl-layout__content {% block theme %}{% endblock %}">
+        <div style="min-height: 100vh;" class="page-content">
             {% block pre_content %}{% endblock %}
             <div class="content" style="min-height: 100vh;">
                 {% block content %}{% endblock %}

@@ -1,5 +1,4 @@
 {% extends "main/page.html" %}
-
 {% load custom_filters %}
 
 {% block extra_head %}
@@ -12,8 +11,48 @@
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/marker@latest"></script><!-- Marker -->
 {% endblock %}
 
+{% block navigation%}
+<a class="mdl-navigation__link" href="{% url 'landing' %}#event-section-wrapper">ZURÜCK</a>
+{% endblock %}
+
+{% block theme %}light-bg{% endblock %}
+
 {% block pre_content %}
-<h1>{{object.title}}</h1>
+{% if object.header %}
+<style>
+    .header{
+        width:100%;
+        height: 40vh;
+        background-image:url("{{object.header.url}}");
+        background-size: cover;
+        background-position: bottom;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        opacity: 0.9;
+    }
+    @media (orientation: portrait){
+        .hero-text{
+            font-size: 5rem;
+            line-height: 0.8;
+            opacity:1;
+        }
+    }
+
+    @media (orientation: landscape){
+        .hero-text{
+            font-size: 8rem;
+            line-height: 0.8;
+            opacity: 1;
+        }
+    }
+</style>
+
+<div class="header center">
+    <h1 class="white hero-text">{{object.title}}</h1>
+</div>
+{% else %}
+<h1 class="dark center">{{object.title}}</h1>
+{% endif %}
 {% endblock %}
 
 {% block content %}

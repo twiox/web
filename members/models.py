@@ -208,6 +208,12 @@ class Event(models.Model):
     trainer_only = models.BooleanField("Nur für Trainer", default=False)
     public_event = models.BooleanField("Öffentliche Veranstaltung", default=False)
     notes = models.CharField("Hinweis", blank=True, max_length=50)
+    header = models.ImageField(
+        "Header", blank=True, null=True, upload_to=f"uploads/events/img/"
+    )
+    square = models.ImageField(
+        "Thumbnail", blank=True, null=True, upload_to=f"uploads/events/img/"
+    )
 
     # for deletion
     deleted = models.BooleanField("Gelöscht", default=False)
@@ -234,6 +240,9 @@ class Event(models.Model):
         null=True,
         max_digits=8,
         decimal_places=2,
+    )
+    external_spots = models.IntegerField(
+        "Anzahl Plätze für Nichtmitglieder", null=True, blank=True
     )
 
     # for participation?

@@ -36,7 +36,7 @@
     {% endif %}
     {% if messages and request.user.is_authenticated %}
     <div class="mdl-grid">
-        <div class="mdl-cell mdl-cell--12-col p-2 light-bg mdl-shadow--2dp">
+        <div class="mdl-cell mdl-cell--10-col p-2 white-bg mdl-shadow--2dp mdl-cell--1-offset-desktop mdl-cell--12-col-tablet">
             {% for msg in messages %}
             <div class="m-1 flex_row">
                 <div>
@@ -47,12 +47,13 @@
                     {% if request.user.profile.permission_level > 1 %}
                     <form>
                         {% csrf_token %}
-                        <a hx-post="{% url 'message_delete' msg.pk %}"
+                        <button
+                            hx-post="{% url 'message_delete' msg.pk %}"
                             hx-confirm="Hinweis löschen?"
-                            hx-target="#event_section"
+                            hx-target="#event-section-wrapper"
                             class="mdl-button mdl-js-button mdl-button--icon">
                             <i class="material-icons">delete</i>
-                        </a>
+                        </button>
                     </form>
                     {% endif %}
                 </div>
