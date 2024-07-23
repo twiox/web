@@ -62,11 +62,10 @@
         </div>
     </div>
     {% endif %}
-    <div class="mdl-grid p-0 m-0" >
+    <div class="mdl-grid" >
         {% for year in events %}
             {% for month in events|lookup:year %}
-                <div class="mdl-cell mdl-cell--6-col mdl-cell--6-col-tablet mdl-cell--12-col-phone">
-
+                <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col-tablet">
                     <h4 class="m-0 dark">{{ month }} {{year}}</h4>
 
                     {% for event in events|lookup:year|lookup:month %}
@@ -81,7 +80,7 @@
 </div>
 {% if request.user.profile.permission_level > 1 %}
 <div class="center">
-    <div>
+    <div class="m-2">
         <a href="{% url 'event_create'%}" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
             <i class="material-icons">add</i>
         </a>

@@ -25,18 +25,21 @@ class EventForm(forms.ModelForm):
     class Meta:
         model = Event
         fields = [
+            "header",
             "info_only",
             "trainer_only",
             "public_event",
             "notes",
             "title",
             "short",
+            "square",
             "start_date",
             "end_date",
             "deadline",
             "place",
             "costs",
             "external_costs",
+            "external_spots",
             "min_age",
             "max_age",
             "teilnahmebedingungen",
