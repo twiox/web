@@ -65,6 +65,14 @@ class Spot(models.Model):
     def __str__(self):
         return f"{self.title}"
 
+    def get_location_features(self):
+        sgeo = {
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [self.long, self.lat]},
+            "properties": {"popupContent": f"<strong>{self.title}</strong>"},
+        }
+        return sgeo
+
 
 ## Event related models
 class Document(models.Model):

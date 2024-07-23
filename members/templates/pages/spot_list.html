@@ -1,13 +1,94 @@
 {% extends "main/page.html" %}
 {% load static %}
 
-{% block content %}
-    <section>
-        <h1 class="p-0 m-0">Spots in Leipzig</h1>
-        <ul>
-        {% for spot in object_list %}
-        <li>{{spot}}</li>
-        {% endfor %}
-        </ul>
-    </section>
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 {% endblock %}
+
+{% block navigation%}
+<a class="mdl-navigation__link" href="{% url 'landing' %}">ZURÜCK</a>
+{% endblock %}
+
+
+{% block content %}
+<section>
+    <h1 class="p-0 m-0 light">Spots in Leipzig</h1>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--12-col-tablet">
+            <div style="height: 80vh;" id="map"></div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--12-col-tablet">
+            <div style="max-height: 80vh; overflow: scroll;">
+                <table class="mdl-data-table light-bg fullwidth">
+                    <tbody>
+                        {% for spot in object_list %}
+                        <tr>
+                            <td class="mdl-data-table__cell--non-numeric">{{spot.title}}</td>
+                            <td class="mdl-data-table__cell--non-numeric">LINK</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<script >
+    var map = L.map('map',{
+        scrollWheelZoom: true
+    }).setView([51.3, 12], 5);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 17,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    var drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    function onEachFeature(feature, layer){
+        if (feature.properties && feature.properties.popupContent) {
+            layer.bindPopup(feature.properties.popupContent);
+        }
+        if (feature.properties && feature.properties.id) {
+            layer.options.id = feature.properties.id;
+        }
+        drawnItems.addLayer(layer)
+    }
+
+    function drawJson(json){
+        L.geoJSON(json, {
+            onEachFeature: onEachFeature
+        });
+    }
+    function fitBounds(){
+        map.fitBounds(drawnItems.getBounds());
+    }
+    function openPopup(id){
+        drawnItems.eachLayer(function (layer) {
+            if (layer.options.id == id){
+                layer.togglePopup()
+            }
+        });
+    }
+        // get the data
+    $.ajax({
+        url: "{% url 'get_location_data' %}",
+        type: 'GET',
+        success: function(data) {
+            // Process the data and add features to your Leaflet map
+            for (let feature of data) {
+                drawJson(feature);
+            }
+            fitBounds();
+        }
+    });
+</script>
+
+{% endblock %}
+
+
