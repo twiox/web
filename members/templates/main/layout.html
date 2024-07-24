@@ -21,9 +21,9 @@
     <div class="mdl-layout__drawer">
         <span class="mdl-layout-title">Navigation</span>
         <nav class="mdl-navigation">
+            <a class="mdl-navigation__link" href="{% url 'spot_list'%}">Spots in Leipzig</a>
             {% if user.is_authenticated %}
             <a class="mdl-navigation__link" href="{% url 'profile_detail' %}">Profil</a>
-            <a class="mdl-navigation__link" href="{% url 'spot_list'%}">Spots in Leipzig</a>
             {% if user.trainer %}
             <span class="p-2">Trainer</span>
                 <a class="mdl-navigation__link" href="{% url 'trainer_index' %}">Trainerseite</a>
