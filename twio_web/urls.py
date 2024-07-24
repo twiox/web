@@ -12,13 +12,9 @@ urlpatterns = [
     path("", include("members.urls")),
     path("impressum", views.impressum, name="impressum"),
     path("datenschutzerklärung", views.dataprotection, name="dataprotection"),
+    # WIP #
     path("trainer/", include("trainer.urls")),
     path("vorstand/", include("user_handling.urls")),
-    path(
-        "login/",
-        auth_views.LoginView.as_view(template_name="user_handling/login.html"),
-        name="login",
-    ),
     path(
         "logout/",
         user_views.LogoutView.as_view(template_name="user_handling/logout.html"),

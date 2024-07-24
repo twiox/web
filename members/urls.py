@@ -1,4 +1,6 @@
 from django.urls import path, include
+from django.contrib.auth import views as auth_views
+
 from . import views
 
 urlpatterns = [
@@ -8,6 +10,11 @@ urlpatterns = [
     path("editor/", include("members.tools.editor")),
     path("spots/", include("members.tools.spots")),
     path("modal", views.get_modal, name="get_modal"),
+    path(
+        "login/",
+        auth_views.LoginView.as_view(template_name="pages/login.html"),
+        name="login",
+    ),
     # this is the old stuff...
     path("profil/", views.UserDetailView.as_view(), name="profile_detail"),
     path(

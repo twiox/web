@@ -1,0 +1,40 @@
+{% extends "main/page.html" %}
+{% load static %}
+
+{% block navigation %}
+<a class="mdl-navigation__link" href="{% url 'landing' %}">ZURÜCK</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .mdl-textfield{
+        width:100% !important;
+    }
+</style>
+
+<h1 class="center secondary">Login</h1>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <!--First, the user/person-->
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--6-col mdl-cell--3-offset-desktop mdl-cell--12-col-tablet light-bg p-2">
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label dark">
+                <input class="mdl-textfield__input" type="text" id="username" name="username" data-required>
+                <label class="mdl-textfield__label" for="username">Email-Adresse / Nutzername</label>
+                <span class="mdl-textfield__error">Bitte gib deine Emailadresse oder Nutzername an</span>
+            </div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label dark">
+                <input class="mdl-textfield__input" type="password" id="password" name="password" data-required>
+                <label class="mdl-textfield__label" for="password">Passwort</label>
+                <span class="mdl-textfield__error">Bitte gib dein Passwort ein</span>
+            </div>
+        </div>
+    </div>
+    <div class="fullwidth center">
+        <button id="form_submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit">
+            Login
+        </button>
+        <a class="px-2" href="{% url 'password_reset' %}">Passwort zurücksetzen</a>
+    </div>
+</form>
+{% endblock %}
