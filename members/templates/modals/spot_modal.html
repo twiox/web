@@ -1,0 +1,73 @@
+{% load crispy_forms_tags %}
+
+<h4 class="mdl-dialog__title">{{object.title|default:"Neuer Spot"}}</h4>
+
+{#         #}
+{# SUCCESS #}
+{#         #}
+
+
+{% if type == 'success' %}
+
+<div class="mdl-dialog__content">
+    <section>
+        {{message}}
+    </section>
+</div>
+
+<div class="mdl-dialog__actions">
+    <button type="button" class="mdl-button modal_close" onclick="location.reload()">Schließen</button>
+</div>
+
+{#      #}
+{# FORM #}
+{#      #}
+
+{% elif type == 'form' %}
+
+<form method="post" enctype="multipart/form-data">
+    <div class="mdl-dialog__content">
+        <div class="mdl-grid">
+            <div class="mdl-cell mdl-cell--6-col">
+                {% csrf_token %}
+                {{form|crispy}}
+            </div>
+            <div class="mdl-cell mdl-cell--6-col">
+                {% if request.user.profile.permission_level > 1 and object %}
+                <div class="mdl-card__menu">
+                    <form>
+                        {% csrf_token %}
+                        <div
+                            hx-post="{% url 'main_spot_delete' object.pk %}?"
+                            hx-confirm="Willst du den Spot wirklich löschen??"
+                            hx-target="#modal-blank"
+                            class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
+                            <i class="material-icons">delete</i>
+                        </div>
+                    </form>
+                </div>
+                {% endif  %}
+            </div>
+        </div>
+    </div>
+
+    <div class="mdl-dialog__actions">
+        <button type="button" class="mdl-button modal_close">Schließen</button>
+        {% if object %}
+        <button
+            hx-post="{% url 'main_spot_update' object.pk %}"
+            hx-target="#modal-blank"
+            type="button" class="mdl-button primary-bg">Speichern
+        </button>
+        {% else %}
+        <button
+            hx-post="{% url 'main_spot_create' %}"
+            hx-target="#modal-blank"
+            type="button" class="mdl-button primary-bg">Speichern
+        </button>
+        {% endif %}
+    </div>
+</form>
+
+{% endif %}
+

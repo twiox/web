@@ -62,6 +62,9 @@ class Spot(models.Model):
     long = models.CharField("Longitude", max_length=30, default="12.350504")
     outdoor = models.BooleanField("Outdoor", default=True)
 
+    class Meta:
+        ordering = ["title"]
+
     def __str__(self):
         return f"{self.title}"
 
@@ -72,6 +75,10 @@ class Spot(models.Model):
             "properties": {"popupContent": f"<strong>{self.title}</strong>"},
         }
         return sgeo
+
+    @property
+    def model(self):
+        return "spot"
 
 
 ## Event related models
@@ -374,7 +381,7 @@ class Session(models.Model):
         Spot,
         blank=True,
         null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         verbose_name="Spot",
         related_name="session",
     )
@@ -604,4 +611,4 @@ class TrialBatch(models.Model):
         return self.name
 
 
-models = {"session": Session, "event": Event}
+models = {"session": Session, "event": Event, "spot": Spot}

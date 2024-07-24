@@ -25,8 +25,22 @@
                     <tbody>
                         {% for spot in object_list %}
                         <tr>
-                            <td class="mdl-data-table__cell--non-numeric">{{spot.title}}</td>
-                            <td class="mdl-data-table__cell--non-numeric">LINK</td>
+                            <td
+                            {% if request.user.profile.permission_level > 1 %}
+                            hx-get={% url 'get_modal' %}?object=spot_{{spot.pk}}&type=form
+                            hx-target="#modal-blank"
+                            class="mdl-data-table__cell--non-numeric modal_open"
+                            {% else %}
+                            class="mdl-data-table__cell--non-numeric"
+                            {% endif %}>
+                                {{spot.title}}
+                            </td>
+                            <td class="mdl-data-table__cell--non-numeric">
+                                <a target="_blank"
+                                href="https://www.google.de/maps/dir//{{spot.lat}},{{spot.long}}/@{{spot.lat}},{{spot.long}},17z">
+                                    <i class="material-icons">map</i>
+                                </a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -34,6 +48,19 @@
             </div>
         </div>
     </div>
+
+    {% if request.user.profile.permission_level > 1 %}
+    <div class="center">
+        <div>
+            <button
+                hx-get="{% url 'main_spot_create' %}"
+                hx-target="#modal-blank"
+                class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored modal_open">
+                <i class="material-icons">add</i>
+            </button>
+        </div>
+    </div>
+    {% endif %}
 
 </section>
 

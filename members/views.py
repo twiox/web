@@ -75,6 +75,12 @@ def get_modal_context(context):
 
             context.update({"form": SessionForm(instance=context["object"])})
 
+    if context["object"].model == "spot":
+        if context["type"] == "form":
+            from .forms import SpotForm
+
+            context.update({"form": SpotForm(instance=context["object"])})
+
     return context
 
 
