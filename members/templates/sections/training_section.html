@@ -24,8 +24,8 @@
                 {% for msg in messages %}
                 <div class="flex_row">
                     <div>
-                        <span class="light">[{{msg.author.first_name}}, {{msg.date |date:'d.m.Y'}}]: <strong>{{msg.title}}</strong> </span>
-                        <p class="light">{{msg.message}}</p>
+                        <span class="white">[{{msg.author.first_name}}, {{msg.date |date:'d.m.Y'}}]: <strong>{{msg.title}}</strong> </span>
+                        <p class="white">{{msg.message}}</p>
                     </div>
                     <div>
                         {% if request.user.profile.permission_level > 1 %}
@@ -35,7 +35,7 @@
                                 hx-confirm="Hinweis löschen?"
                                 hx-target="#training_section"
                                 class="mdl-button mdl-js-button mdl-button--icon">
-                                <i class="material-icons light">delete</i>
+                                <i class="material-icons white">delete</i>
                             </a>
                         </form>
                         {% endif %}
