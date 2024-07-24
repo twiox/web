@@ -66,6 +66,7 @@
         {% for year in events %}
             {% for month in events|lookup:year %}
                 <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col-tablet">
+
                     <h4 class="m-0 dark">{{ month }} {{year}}</h4>
 
                     {% for event in events|lookup:year|lookup:month %}
