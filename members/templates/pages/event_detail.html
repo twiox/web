@@ -78,10 +78,10 @@
 </div>
 {% endif %}
 <section class="mdl-grid">
-    <div class="mdl-cell mdl-cell--3-col mdl-cell--12-col-tablet">
+    <div class="mdl-cell mdl-cell--3-col mdl-cell--8-col-tablet">
         {% include 'snippets/events/event_header.html' with event=object %}
     </div>
-    <div class="mdl-cell mdl-cell--9-col mdl-cell--12-col-tablet">
+    <div class="mdl-cell mdl-cell--9-col mdl-cell--8-col-tablet">
         <div id="description">
             {% if request.user.profile.permission_level > 1 %}
             {% include 'snippets/editor/editor_body.html' with event=object description=object.description readonly=False %}

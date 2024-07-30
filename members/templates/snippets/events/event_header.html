@@ -19,9 +19,9 @@
             <tr><td><i class="material-icons">sell</i></td><td>
                 <span>
                     {% if request.user.is_authenticated %}
-                        {% if event.costs == 0 %}Keine{% else %}{{event.costs}} €{% endif %}
+                        {% if event.costs == 0 %}Kostenlos{% else %}{{event.costs}} €{% endif %}
                     {% else %}
-                        {% if event.external_costs == 0 %}Keine{% else %}{{event.external_costs}} €{% endif %}
+                        {% if event.external_costs == 0 %}Kostenlos{% else %}{{event.external_costs}} €{% endif %}
                     {% endif%}
                 </span>
             </td></tr>

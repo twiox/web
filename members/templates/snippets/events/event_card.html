@@ -8,14 +8,20 @@
         background-size: cover;
         background-repeat: no-repeat;
         position:relative;
+        min-height:200px;
+    }
+    @media (max-width: 479px) {
+        .mdl-cell{
+            box-sizing: content-box !important;
+        }
     }
 </style>
 {% endif %}
 
 <div class="mdl-card mdl-shadow--2dp my-1 event-card white-bg">
-    <div class="mdl-grid m-0 p-0 nowrap">
+    <div class="mdl-grid m-0 p-0">
         <div
-            class="mdl-cell mdl-cell--5-col mdl-cell--4-col-tablet m-0 thumbnail__{{event.pk}} center
+            class="mdl-cell mdl-cell--5-col mdl-cell--3-col-tablet mdl-cell--4-col-phone m-0 p-2 thumbnail__{{event.pk}} center
             {% if participation and request.user.is_authenticated %}
                 secondary-bg
             {% else %}
@@ -39,7 +45,7 @@
             </div>
             {% endif %}
         </div>
-        <div class="mdl-cell mdl-cell--7-col mdl-cell--8-col-tablet">
+        <div class="mdl-cell mdl-cell--7-col mdl-cell--5-col-tablet mdl-cell--4-col-phone">
             {% if event.square %}
             {% if participation and request.user.is_authenticated %}
             <span class="top_right secondary-bg p-1">Angemeldet</span>
