@@ -269,13 +269,16 @@ class PublicEventView(DetailView):
                 last_name=form.cleaned_data.get("last_name"),
                 birthday=form.cleaned_data.get("birthday"),
                 email=form.cleaned_data.get("email"),
-                phone=form.cleaned_data.get("phone"),
-                contact=form.cleaned_data.get("contact"),
-                invoice=float(form.cleaned_data.get("costs")),
-                merch_wanted=form.cleaned_data.get("merch_wanted"),
-                merch_size=form.cleaned_data.get("merch_size"),
+                phone=form.cleaned_data.get("phone", ""),
+                contact=form.cleaned_data.get("contact", ""),
+                invoice=float(event.base_costs),
+                merch_wanted=form.cleaned_data.get("merch_wanted", False),
+                merch_size=form.cleaned_data.get("merch_size", ""),
                 notes="",
             )
+
+            print(form.cleaned_data)
+
             participant.save()
             mail_subject = f"Twio X e.V. | {event.title}: Anmeldebestätigung"
             mail_subject2 = f"Anmeldung: {event.title}: {participant.first_name} {participant.last_name}"
