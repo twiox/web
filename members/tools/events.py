@@ -24,7 +24,7 @@ def permission_check_2(user):
 
 
 def get_section(request):
-    locale.setlocale(locale.LC_TIME, "de_DE")
+    locale.setlocale(locale.LC_TIME, "de_DE.utf8")
     ddate = datetime.today() + timedelta(days=7)  # show older events for 1 more week
 
     # query for events

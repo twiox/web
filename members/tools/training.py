@@ -52,7 +52,7 @@ def get_session_age_hist(session):
 def get_section(request):
     sessions = Session.objects.all()
 
-    locale.setlocale(locale.LC_TIME, "de_DE")
+    locale.setlocale(locale.LC_TIME, "de_DE.utf8")
 
     # Remove old messages
     Message.objects.filter(Q(autodelete__lte=datetime.now())).delete()
