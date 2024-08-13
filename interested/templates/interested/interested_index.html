@@ -137,53 +137,6 @@
             </script>
         </section>
         {% endif %}
-        <!-- This is hardcoded at the moment ... #TODO: write a model for this -->
-        <div class="padding_all_small tertiary_bg">
-            <h3>Training für Ukrainer*innen</h3>
-            <p style="font-size:11pt;color:grey;margin-top: -7px;">12.04.2022</p>
-            <div class="padding_all_small">
-                <p>Для громадян, які рятуються від війни в Україні, ми пропонуємо додаткові безкоштовні тренування в <strong>неділю з
-                    10.00 – 12.00</strong>.  Брати участь у тренуваннях можуть <strong>діти з 9 років</strong>.  Діти старшого віку та дорослі мають можливість також брати участь у
-                    звичайних тренуваннях у будні дні.  Наші тренери розмовляють англійською, російською та німецькою мовами. Якщо ви зацікавлені,
-                    напишіть нам на електронну адресу <a class="more_info_button" style="padding:0px" href="mailto:parkour@twio-x.de">parkour@twio-x.de</a>. та залиште контакти для зв’язку, або зателефонуйте нам:
-                <br> <br>
-                <ul>
-                    <li>Тел.:<strong> +49 177 211 9322</strong></li>
-                    <li>Телеграм.:<strong> +49 177 211 9322</strong></li>
-                </ul>
-                <br>
-                На сторінці <a class="more_info_button" style="padding:0px;" target="_blank" href="https://www.ssb-leipzig.de/leistungen/vereinsberatung/integration-durch-sport/">ssb-leipzig.de</a> ви знайдете інформацію про інші курси та спортивні гуртки в м. Лейпцигу.
-                </p>
-            </div>
-        </div>
-
-    </div>
-    {% endblock %}
-    {% block picture3 %}
-    <div class="image_wrapper grey_cover pic3cont" id="container">
-        <img src="{{ STATIC_URL }}/static/media/interested_01.jpg" id='extreme'>
-        <script type="text/javascript">
-            $("document").ready(function(){
-                var ele = document.getElementsByClassName("pic3cont")[0].getBoundingClientRect()
-                var pic = window.pageYOffset + ele.top
-                var win = window.pageYOffset
-                document.getElementById("extreme").style.top =(pic-win)*-0.15+"px";
-            });
-            window.addEventListener('scroll',function(){
-                var ele = document.getElementsByClassName("pic3cont")[0].getBoundingClientRect()
-                var pic = window.pageYOffset + ele.top
-                var win = window.pageYOffset
-                document.getElementById("extreme").style.top =(pic-win)*-0.15+"px";
-            });
-        </script>
-        <div class="flex_center_vertical">
-            <div class="flex_center" style="z-index:5;">
-                <h1>"Das X steht für extrem"</h1>
-            </div>
-            <div class="flex_center" style="z-index:5;">
-                <h3>Vincent Mayer, 2016</h3>
-            </div>
-        </div>
     </div>
     {% endblock %}
     {% block content3 %}
@@ -415,7 +368,7 @@
     {% block content4 %}
     <div class="frame">
         <h1>Unsere Partner</h1>
-        <a href="https://parkour-erfurt.de/index.html" target="_blank">
+        <a href="https://parkour-erfurt.de" target="_blank">
             <div class="padding_all_big tertiary_bg col-3">
                 <img width="100%" src="{{ STATIC_URL }}/static/media/partners/pkef.png">
                 <p style="font-size: 23pt;color: white;">Parkour Erfurt e.V.</p>
