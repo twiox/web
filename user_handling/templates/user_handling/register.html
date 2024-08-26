@@ -58,6 +58,8 @@
                         <span class="mdc-floating-label" id="last_name-label">Nachname</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
+                    <input type="hidden" name="password1" required="False" value="das-ist-ein-temporäres-passwort-5678">
+                    <input type="hidden" name="password2" required="False" value="das-ist-ein-temporäres-passwort-5678">
 
                     {% if form.address.errors %}
                         {% for error in form.address.errors %}
@@ -214,23 +216,6 @@
                         <span class="mdc-floating-label" id="member_num-label">Mitgliedsnummer</span>
                         <span class="mdc-line-ripple"></span>
                     </label>
-                    <!--
-                    <label class="mdc-text-field mdc-text-field--filled group">
-                        <i class="mdc-select__dropdown-icon"></i>
-                        <span class="mdc-text-field__ripple"></span>
-                        <select id="select-group" class="mdc-text-field__input" style="background-color:#333333;" name="group">
-                            <option value={% if form2.instance.group %} "{{form2.instance.group.id}}" {% else %} "{{form2.data.group.id}}" {% endif %}>
-                            {% if form2.instance.group %} {{form2.instance.group}} {% else %} {{form2.data.group}} {% endif %}</option>
-                                {% for id, name in form2.group.field.choices %}
-                                {% if name != "---------" %}
-                                <option value="{{id}}">{{name}}</option>
-                                {% endif %}
-                                {% endfor %}
-                        </select>
-                        <span class="mdc-floating-label" id="group-label">Gruppe</span>
-                        <span class="mdc-line-ripple"></span>
-                    </label>
-                    -->
 
                 </div>
                 <div class="col-5 padding_all_small">

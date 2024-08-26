@@ -489,7 +489,11 @@ class Profile(models.Model):
 
     @property
     def agegroups(self):
-        return AgeGroup.objects.filter(Q(upper__gte=self.age) & Q(lower__lte=self.age))
+        if self.birthday:
+            return AgeGroup.objects.filter(
+                Q(upper__gte=self.age) & Q(lower__lte=self.age)
+            )
+        return None
 
     @property
     def age(self):

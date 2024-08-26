@@ -1,7 +1,13 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import HttpResponseRedirect, JsonResponse
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import (
+    ListView,
+    DetailView,
+    CreateView,
+    UpdateView,
+    DeleteView,
+)
 from .models import (
     Group,
     Event,
@@ -23,7 +29,11 @@ from .models import (
 from django.contrib.auth.decorators import login_required, permission_required
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import (
+    LoginRequiredMixin,
+    UserPassesTestMixin,
+    PermissionRequiredMixin,
+)
 from .forms import (
     EventUpdateParticipantForm,
     EventUpdateParticipantForm2,
@@ -69,10 +79,24 @@ def index(request):
     # now the actual view
     agegroups = request.user.profile.agegroups
     sessions = Session.objects.all()
-    events = Event.objects.filter(allowed_agegroups__in=agegroups)
+    if agegroups:
+        events = Event.objects.filter(allowed_agegroups__in=agegroups).distinct()
+        training_messags = (
+            Message.objects.filter(agegroup__in=agegroups)
+            .filter(display="sessions")
+            .distinct()
+        )
+        event_messags = (
+            Message.objects.filter(agegroup__in=agegroups)
+            .filter(display="events")
+            .distinct()
+        )
+    else:
+        events = []
+        training_messags = []
+        event_messags = []
     chairmen = Chairman.objects.filter(show__contains="member_site")
-    training_messags = Message.objects.filter(agegroup__in=agegroups).filter(display="sessions").distinct()
-    event_messags = Message.objects.filter(agegroup__in=agegroups).filter(display="events").distinct()
+
     posts = News.objects.all().order_by("-id")
     if len(posts) > 3:
         posts = posts[:3]
@@ -93,11 +117,15 @@ def index(request):
         training_messags = Message.objects.all().filter(display="sessions")
         event_messags = Message.objects.all().filter(display="events")
 
-    session_days = sorted(list(set([(x.day, x.weekday, x.order) for x in sessions])), key=lambda x: x[2])
+    session_days = sorted(
+        list(set([(x.day, x.weekday, x.order) for x in sessions])), key=lambda x: x[2]
+    )
     # group sessions by day and pack into dict
     grouped_sessions = {}
     for short, day, order in session_days:
-        grouped_sessions[short] = Session.objects.filter(day=short).order_by("start_time")
+        grouped_sessions[short] = Session.objects.filter(day=short).order_by(
+            "start_time"
+        )
 
     return render(
         request,
@@ -106,7 +134,7 @@ def index(request):
             "chairmen": chairmen,
             "sessions": grouped_sessions,
             "session_days": session_days,
-            "events": events.distinct(),
+            "events": events,
             "training_messags": training_messags,
             "event_messags": event_messags,
             "chairman": hasattr(request.user, "chairman"),
@@ -122,7 +150,9 @@ def index(request):
 def event_test_func(request, event):
     if bool(trainer_check(request) or chairman_check(request)):
         return True
-    return event in Event.objects.filter(allowed_agegroups__in=request.user.profile.agegroups)
+    return event in Event.objects.filter(
+        allowed_agegroups__in=request.user.profile.agegroups
+    )
 
 
 class EventListView(LoginRequiredMixin, ListView, UserPassesTestMixin):
@@ -140,7 +170,11 @@ class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(EventDetailView, self).get_context_data(**kwargs)
         try:
-            tmp = {"part": MemberParticipant.objects.get(event=self.object, user=self.request.user)}
+            tmp = {
+                "part": MemberParticipant.objects.get(
+                    event=self.object, user=self.request.user
+                )
+            }
         except:
             tmp = {}
         context.update(tmp)
@@ -172,7 +206,9 @@ class EventUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     permission_required = "members.change_event"
 
     def get_context_data(self, **kwargs):
-        context = {"picked_groups": [x[0] for x in self.object.allowed_agegroups.values_list()]}
+        context = {
+            "picked_groups": [x[0] for x in self.object.allowed_agegroups.values_list()]
+        }
         context["object"] = self.request.user
         context.update(kwargs)
         return super().get_context_data(**context)
@@ -216,9 +252,15 @@ class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
             part.save()
 
-            messages.add_message(request, messages.SUCCESS, "Du hast dich erfolgreich angemeldet")
-            return HttpResponseRedirect(reverse("event_detail", kwargs={"pk": event.id}))
-        return render(request, self.template_name, {"form": form, "object": self.get_object()})
+            messages.add_message(
+                request, messages.SUCCESS, "Du hast dich erfolgreich angemeldet"
+            )
+            return HttpResponseRedirect(
+                reverse("event_detail", kwargs={"pk": event.id})
+            )
+        return render(
+            request, self.template_name, {"form": form, "object": self.get_object()}
+        )
 
     def test_func(self):
         event = self.get_object()
@@ -248,8 +290,12 @@ class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
                 event.participants.remove(user)
                 event.save()
 
-            messages.add_message(request, messages.SUCCESS, "Du hast dich erfolgreich abgemeldet")
-            return HttpResponseRedirect(reverse("event_detail", kwargs={"pk": event.id}))
+            messages.add_message(
+                request, messages.SUCCESS, "Du hast dich erfolgreich abgemeldet"
+            )
+            return HttpResponseRedirect(
+                reverse("event_detail", kwargs={"pk": event.id})
+            )
         return render(request, self.template_name, {"form": form})
 
     def test_func(self):
@@ -338,7 +384,9 @@ class SessionDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         if bool(trainer_check(self.request) or chairman_check(self.request)):
             return True
         # The trainers and the members
-        return session in Session.objects.filter(agegroup__in=self.request.user.profile.agegroups)
+        return session in Session.objects.filter(
+            agegroup__in=self.request.user.profile.agegroups
+        )
 
     def get_context_data(self, **kwargs):
         context = {"api_key": settings.GOOGLE_API_KEY}
@@ -533,8 +581,12 @@ class GroupDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
             return HttpResponseRedirect(success_url)
 
         else:
-            messages.add_message(request, messages.ERROR, "Fehler. Die Gruppe ist nicht leer")
-            return HttpResponseRedirect(reverse("group_delete", kwargs={"pk": self.object.id}))
+            messages.add_message(
+                request, messages.ERROR, "Fehler. Die Gruppe ist nicht leer"
+            )
+            return HttpResponseRedirect(
+                reverse("group_delete", kwargs={"pk": self.object.id})
+            )
 
     def get_success_url(self, **kwargs):
         return reverse("group_list")
@@ -720,16 +772,22 @@ class UserDetailView(LoginRequiredMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():
-            mail_subject = f"Mitteilung von {request.user.first_name} {request.user.last_name}"
+            mail_subject = (
+                f"Mitteilung von {request.user.first_name} {request.user.last_name}"
+            )
             message = form.cleaned_data.get("comment")
             to_email = settings.TO_EMAIL
-            email = EmailMessage(mail_subject, message, to=[to_email], cc=[request.user.email])
+            email = EmailMessage(
+                mail_subject, message, to=[to_email], cc=[request.user.email]
+            )
             if request.FILES.get("attachment"):
                 document = request.FILES.get("attachment")
                 self.handle_uploaded_file(document, str(document))
                 email.attach_file("media/user_uploads/" + str(document))
             email.send()
-            messages.add_message(request, messages.SUCCESS, "Nachricht erfolgreich versendet")
+            messages.add_message(
+                request, messages.SUCCESS, "Nachricht erfolgreich versendet"
+            )
             return HttpResponseRedirect(reverse("profile_detail"))
         return render(request, self.template_name, {"form": form})
 
@@ -752,13 +810,21 @@ class EmailUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                 if form.cleaned_data.get("email1") == form.cleaned_data.get("email2"):
                     request.user.email = form.cleaned_data.get("email1")
                     request.user.save()
-                    messages.add_message(request, messages.SUCCESS, "E-Mail erfolgreich geändert")
+                    messages.add_message(
+                        request, messages.SUCCESS, "E-Mail erfolgreich geändert"
+                    )
                     return HttpResponseRedirect(reverse("profile_detail"))
                 form.add_error("email1", "Die E-Mails stimmen nicht überein")
-                return render(request, self.template_name, {"form": form, "object": request.user})
+                return render(
+                    request, self.template_name, {"form": form, "object": request.user}
+                )
             form.add_error("password", "Das Passwort stimmt nicht")
-            return render(request, self.template_name, {"form": form, "object": request.user})
-        return render(request, self.template_name, {"form": form, "object": request.user})
+            return render(
+                request, self.template_name, {"form": form, "object": request.user}
+            )
+        return render(
+            request, self.template_name, {"form": form, "object": request.user}
+        )
 
     def test_func(self):
         user = self.request.user
@@ -789,7 +855,9 @@ class PasswordChangeView(LoginRequiredMixin, PasswordChangeView):
         return super().get_context_data(**context)
 
     def form_valid(self, form):
-        messages.add_message(self.request, messages.SUCCESS, "Passwort erfolgreich geändert")
+        messages.add_message(
+            self.request, messages.SUCCESS, "Passwort erfolgreich geändert"
+        )
         return HttpResponseRedirect(reverse("profile_detail"))
 
 
@@ -803,7 +871,9 @@ class UsernameUpdateView(LoginRequiredMixin, UpdateView):
         return obj
 
     def get_success_url(self):
-        messages.add_message(self.request, messages.SUCCESS, "Nutzername erfolgreich geändert")
+        messages.add_message(
+            self.request, messages.SUCCESS, "Nutzername erfolgreich geändert"
+        )
         return reverse("profile_detail")
 
 
@@ -882,7 +952,9 @@ class ShopItemUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 def get_image_data(request):
     data = {x: v[0] for (x, v) in dict(request.GET).items()}
     image = Image.objects.get(pk=data["id"])
-    return JsonResponse({"data": {"title": image.title, "alt": image.alt, "priority": image.priority}})
+    return JsonResponse(
+        {"data": {"title": image.title, "alt": image.alt, "priority": image.priority}}
+    )
 
 
 @login_required
@@ -894,7 +966,15 @@ def set_image_data(request):
         image.priority = data["prio"]
         image.title = data["title"]
         image.save()
-        return JsonResponse({"data": {"title": image.title, "alt": image.alt, "priority": image.priority}})
+        return JsonResponse(
+            {
+                "data": {
+                    "title": image.title,
+                    "alt": image.alt,
+                    "priority": image.priority,
+                }
+            }
+        )
     else:
         return JsonResponse({"data": False})
 
@@ -927,7 +1007,9 @@ def add_another_email(request):
     data = request.POST
     user = request.user
     data = {k: v[0] for (k, v) in dict(request.POST).items()}
-    email = AdditionalEmail.objects.create(user=user, title=data["title"], email=data["email"])
+    email = AdditionalEmail.objects.create(
+        user=user, title=data["title"], email=data["email"]
+    )
     email.save()
     return JsonResponse({"data": data})
 
