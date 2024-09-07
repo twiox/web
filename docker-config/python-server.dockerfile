@@ -13,13 +13,22 @@ RUN apt update && \
       default-libmysqlclient-dev \
       pkg-config
 
-# copy code
-COPY . /opt/twio_web
+COPY docker-config/start-server.sh /start.sh
 
+# Install dependencies
+COPY django.yml manage.py .
 RUN conda config --add channels conda-forge
 RUN conda env create -f django.yml
 RUN pip install gunicorn
+# copy code and prepare build
+COPY interested interested
+COPY media media
+COPY members members
+COPY organizers organizers
+COPY static static
+COPY trainer trainer
+COPY twio_web twio_web
+COPY user_handling user_handling
 RUN source activate django && python manage.py compress --force
 
-COPY docker-config/start-server.sh /start.sh
 CMD "/start.sh"
