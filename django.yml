@@ -8,7 +8,7 @@ dependencies:
   - bzip2=1.0.8
   - ca-certificates=2024.7.2
   - expat=2.6.2
-  - ld_impl_linux-64=2.38
+  - ld_impl_linux-64=2.39
   - libffi=3.4.4
   - libgcc-ng=11.2.0
   - libgomp=11.2.0
