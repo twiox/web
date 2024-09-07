@@ -1,25 +1,28 @@
-version: "3.3"
 services:
-
   twio-python:
-    container_name: twio-${ENV}-python
-    image: twio-python-server:${TAG}
     build:
       context: ./
       dockerfile: docker-config/python-server.dockerfile
+      args:
+        - DEBUG=${DEBUG}
+        - TO_EMAIL=${TO_EMAIL}
+        - EMAIL_HOST=${EMAIL_HOST}
+        - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+        - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+        - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+        - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+        - DB_NAME=${DB_NAME}
+        - DB_USER=${DB_USER}
+        - DB_PW=${DB_PW}
+        - DB_HOST=db
     links:
       - db:db
     volumes:
       - file-volume:/opt/twio_web/media
       - cache-volume:/opt/static
-    networks:
-      - outside
-    logging:
-      driver: syslog
     restart: always
 
   twio-nginx:
-    image: twio-nginx-server
     build:
       context: ./
       dockerfile: docker-config/nginx-server.dockerfile
@@ -28,43 +31,20 @@ services:
     volumes:
       - file-volume:/opt/media
       - cache-volume:/opt/static
-    ports:
-      - 8000:80
-    networks:
-      - outside
-    logging:
-      driver: syslog
     restart: always
 
   db:
-    image: mysql
-    container_name: twio-${ENV}-db
-    command: --default-authentication-plugin=mysql_native_password
+    image: mariadb:lts
     environment:
-      MYSQL_RANDOM_ROOT_PASSWORD: doit
-      MYSQL_DATABASE: twio
-      MYSQL_USER: twio
-      MYSQL_PASSWORD: twio
+       - MARIADB_RANDOM_ROOT_PASSWORD=1
+       - MARIADB_USER=${DB_USER}
+       - MARIADB_PASSWORD=${DB_PW}
+       - MARIADB_DATABASE=${DB_NAME}
     volumes:
       - db-volume:/var/lib/mysql
-    networks:
-      - outside
-    logging:
-      driver: syslog
     restart: always
 
 volumes:
   db-volume:
-    external:
-      name: twio-${ENV}-db
   file-volume:
-    external:
-      name: twio-${ENV}-file
   cache-volume:
-    external:
-      name: twio-${ENV}-cache
-
-networks:
-  outside:
-    external:
-      name: twio-${ENV}
