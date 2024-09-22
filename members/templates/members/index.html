@@ -12,7 +12,10 @@
     {% block navbar2 %}
     {% if user.is_authenticated %}
     <div class="navbar primary_bg">
-        <a class="float_right" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt" style="font-size:20px;"><p>Logout</p></i></a>
+        <form  id="logout-form" method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="float_right"><i class="fas fa-sign-out-alt" style="font-size:20px;"><p>Logout</p></i></button>
+        </form>
         <a class="float_left" href="{% url 'profile_detail' %} "><i class="fas fa-user-circle" style="font-size:20px;"><p>Profil</p></i></a>
         {% if user.trainer %}
         <a class= "float_left" href="{% url 'trainer_index' %}#nav"><i class="fas fa-user-cog" style="font-size:20px;"><p>Trainer</p></i></a>

@@ -880,3 +880,15 @@ footer{
   right: 0;
   bottom: 0;
 }
+
+/* logout button replaces link */
+#logout-form {
+    display: inline;
+
+    button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 10px;
+    }
+}
