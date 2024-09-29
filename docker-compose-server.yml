@@ -32,6 +32,11 @@ services:
       - file-volume:/opt/media
       - cache-volume:/opt/static
     restart: always
+    labels:
+      - traefik.http.middlewares.www-to-non-www.redirectregex.permanent=true
+      - traefik.http.middlewares.www-to-non-www.redirectregex.regex=^(http|https)://www\.(.+)
+      - traefik.http.middlewares.www-to-non-www.redirectregex.replacement=$${1}://$${2}
+
 
   db:
     image: mariadb:lts
