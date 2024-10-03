@@ -1,0 +1,17 @@
+[project]
+name = "twiox-website"
+version = "0.1.0"
+description = "Django website for Twio X e.V."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "django-libsass>=0.9",
+    "django-multiselectfield>=0.1.13",
+    "django>=4.2.16",
+    "markdown>=3.7",
+    "mysqlclient>=2.2.4",
+    "pillow>=10.4.0",
+    "rcssmin>=1.1.2",
+    "rjsmin>=1.2.2",
+    "six>=1.16.0",
+]
