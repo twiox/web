@@ -1,24 +1,16 @@
-version: "3.3"
 services:
-
-  twio-python:
-    container_name: twio-python
-    image: twio-python
-    build:
-      context: ./docker-config
-      dockerfile: python.dockerfile
-    ports:
-      - 127.0.0.1:8000:8000
-    links:
-      - db:db
-    volumes:
-      - ./:/opt/twio_web
-
-  db:
-    image: mysql
+  twio-dev-db:
+    image: mariadb:lts
     command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - 3306:3306
     environment:
-      MYSQL_RANDOM_ROOT_PASSWORD: doit
-      MYSQL_DATABASE: twio
-      MYSQL_USER: twio
-      MYSQL_PASSWORD: twio
+       - MARIADB_RANDOM_ROOT_PASSWORD=1
+       - MARIADB_USER=twio
+       - MARIADB_PASSWORD=twio
+       - MARIADB_DATABASE=twio
+    volumes:
+      - dev-db-volume:/var/lib/mysql
+
+volumes:
+  dev-db-volume:
