@@ -1,4 +1,5 @@
 {% extends "members/base.html" %}
+    {% load static %}
     {% block picture %}
     <div class="image_wrapper">
         <img src="{{ STATIC_URL }}/static/media/home.jpg" id='home_view'>
@@ -40,6 +41,7 @@
     {% if chairmen %}
     <section style="margin-bottom:150px;">
         <h1>Deine Ansprechpartner*innen</h1>
+        <h2 style="text-align: center;">Für den Vorstand</h2>
         <div class="flex_left">
         {% for object in chairmen.all %}
             <div class="col-5 padding_all_small">
@@ -70,6 +72,36 @@
                 </div>
             </div>
              {% endfor %}
+        </div>
+        <h2 style="text-align: center;">Beauftragte</h2>
+        <div class="flex_left">
+            <div class="col-5 padding_all_small">
+                <div style="height:100%;">
+                    <div class="flex_left">
+                        <div class="chair_col-5 flex_center_vertical">
+                            <div class="flex_center">
+                                <img class="padding_all_small round_profile_pic_chairman" src="{% static 'media/people/Annika.jpg' %}">
+                            </div>
+                        </div>
+                        <div class="chair_col-5 flex_center">
+                            <div class="flex_center_vertical_even padding_all_small">
+                                <div>
+                                    <h3>Kinderschutz</h3>
+                                    <h4>Annika Cleff</h4>
+                                </div>
+                                <div class="padding_all_big">
+                                    <ul class="competences padding_rl_big">
+                                        Annika ist Eure Ansprechpartnerin für alle Belange des Kinderschutzes. Wenn ihr Fragen oder Probleme habt, dann meldet euch immer gerne bei ihr!
+                                    </ul>
+                                </div>
+                                <div>
+                                    <p>Kinderschutz@twio-x.de</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
     {% endif %}
