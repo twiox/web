@@ -51,7 +51,7 @@ def interested_index(request):
                     "object": test,
                 },
             )
-            email = EmailMessage(mail_subject, message, to=[settings.TO_EMAIL])
+            email = EmailMessage(mail_subject, message, to=[settings.TO_EMAIL_PROBETRAINING])
             email.send()
             # And the message to the interested
             message2 = render_to_string(

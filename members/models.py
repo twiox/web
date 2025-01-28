@@ -16,6 +16,9 @@ class News(models.Model):
     picture = models.ImageField(
         "Stockphoto", blank=True, null=True, upload_to="beiträge/"
     )
+    data = models.JSONField("data", blank=True, null=True)
+    public = models.BooleanField("Öffentlich", default=False)
+    intern = models.BooleanField("Intern", default=True)
 
     def __str__(self):
         return f"Beitrag: {self.title}"

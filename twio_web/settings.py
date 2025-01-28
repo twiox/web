@@ -133,6 +133,7 @@ LOGIN_REDIRECT_URL = "index"
 LOGIN_URL = "login"
 
 TO_EMAIL = secrets.TO_EMAIL  # Emails from the user-site are send there
+TO_EMAIL_PROBETRAINING = secrets.TO_EMAIL_PROBETRAINING  # Emails for probetraining
 EMAIL_USE_TLS = secrets.EMAIL_USE_TLS
 EMAIL_HOST = secrets.EMAIL_HOST
 EMAIL_HOST_PASSWORD = secrets.EMAIL_HOST_PASSWORD
