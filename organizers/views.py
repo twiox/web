@@ -13,6 +13,12 @@ def organizers_index(request):
         form = OrganizerForm(request.POST) #if no files
         if form.is_valid():
             #get Form data
+            captcha = form.cleaned_data.get('captcha')
+
+            if captcha != 'parkour':
+                form = OrganizerForm() 
+                return render(request, "organizers/organizers_index.html", {"form":form,"chairmen":chairmen})
+
             first_name = form.cleaned_data.get('first_name')
             last_name = form.cleaned_data.get('last_name')
             int_email = form.cleaned_data.get('email')

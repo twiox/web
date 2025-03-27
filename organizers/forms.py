@@ -7,6 +7,7 @@ class OrganizerForm(forms.Form):
     telephone = forms.CharField()
     notes = forms.CharField(required=False)
     confirm = forms.BooleanField()
+    captcha = forms.CharField()
     
     class Meta:
-        fields = ["first_name", "last_name", "email", "telephone", "notes", "confirm"]
+        fields = ["first_name", "last_name", "email", "telephone", "notes", "confirm", 'captcha']
