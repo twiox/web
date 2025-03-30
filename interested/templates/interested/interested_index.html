@@ -15,7 +15,7 @@
             });
         </script>
     </div>
-    {% endblock %}
+    {% endblock %}Unsere Partner
     {% block content %}
     <section id="The_Club">
         <h1>Unser Verein </h1>
@@ -29,42 +29,49 @@
                 Für unsere Mitglieder bieten wir regelmäßiges, angeleitetes und freies Training an.
                 </p>
             </div>
-        <div style="display:flex;flex-wrap: wrap;">
+        </div>
+        <div style="display:flex;flex-wrap: wrap;margin-top: 30px;">
             <div class="col-4">
-                <a href="{% url 'offers' %}">
-                    <div class="tertiary_bg padding_all_big prim_hover flex_center_vertical" style="height:250px;">
-                        <div class="flex_center">
-                            <div style="width:30%;" >
-                                <img style="width:100%;" src="{{ STATIC_URL }}/static/icons/offers.svg">
+                <div class="padding_all_small">
+                    <a href="{% url 'offers' %}" style="padding: 0px;">
+                        <div class="tertiary_bg padding_all_big prim_hover flex_center_vertical">
+                            <div class="flex_center">
+                                <div style="width:30%;" >
+                                    <img style="width:100%;" src="{{ STATIC_URL }}/static/icons/offers.svg">
+                                </div>
                             </div>
+                            <p>Unser Angebot</p>
                         </div>
-                        <p>Unser Angebot</p>
-                    </div>
-                </a>
+                    </a>
+                </div>
             </div>
             <div class="col-4">
-                <a href="{% url 'philosophy' %}">
-                    <div class="tertiary_bg padding_all_big prim_hover flex_center_vertical" style="height:250px;">
-                        <div class="flex_center">
-                            <div style="width:30%;" >
-                                <img style="width:100%;" src="{{ STATIC_URL }}/static/icons/philosophie.svg">
+                <div class="padding_all_small">
+                    <a href="{% url 'philosophy' %}" style="padding: 0px;">
+                        <div class="tertiary_bg padding_all_big prim_hover flex_center_vertical">
+                            <div class="flex_center">
+                                <div style="width:30%;" >
+                                    <img style="width:100%;" src="{{ STATIC_URL }}/static/icons/philosophie.svg">
+                                </div>
                             </div>
+                            <p>Philosophie</p>
                         </div>
-                        <p>Philosophie</p>
-                    </div>
-                </a>
+                    </a>
+                </div>
             </div>
             <div class="col-4">
-                <a href="{% url 'team' %}">
-                    <div class="tertiary_bg padding_all_big prim_hover flex_center_vertical" style="height:250px;">
-                        <div class="flex_center">
-                            <div style="width:30%;" >
-                                <img style="width:100%;" src="{{ STATIC_URL }}/static/icons/team.svg">
+                <div class="padding_all_small">
+                    <a href="{% url 'team' %}" style="padding: 0px;">
+                        <div class="tertiary_bg padding_all_big prim_hover flex_center_vertical">
+                            <div class="flex_center">
+                                <div style="width:30%;" >
+                                    <img style="width:100%;" src="{{ STATIC_URL }}/static/icons/team.svg">
+                                </div>
                             </div>
+                            <p>Das Team</p>
                         </div>
-                        <p>Das Team</p>
-                    </div>
-                </a>
+                    </a>
+                </div>
             </div>
         </div>
     </section>
