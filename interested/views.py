@@ -131,7 +131,7 @@ def interested_philosophy(request):
 
 
 def interested_team(request):
-    leipzig_people = Teamer.objects.filter(city__contains="leipzig")
+    leipzig_people = Teamer.objects.all()
     return render(
         request,
         "interested/interested_team.html",

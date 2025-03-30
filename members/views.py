@@ -104,9 +104,6 @@ def index(request):
     trainer_sessions = None
     trainer_groups = None
     if hasattr(request.user, "trainer"):
-        # TODO: Trainer need to see all the sessions
-        # if(group.group_id != "T"):
-        #    sessions = Session.objects.filter(group__group_id__in=["T",group.group_id])
         events = Event.objects.all()
         training_messags = Message.objects.all().filter(display="sessions")
         event_messags = Message.objects.all().filter(display="events")
