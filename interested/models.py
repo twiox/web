@@ -17,54 +17,14 @@ class Tester(models.Model):
     sex = models.CharField('Geschlecht', max_length=30)
     notes = models.TextField('Anmerkungen', blank=True, null=True)
     einverstaendnis = models.FileField('Einverständniserklärung',upload_to=f"Probetrainings/Einverständnis/",null=True,blank=True)
-    batch = models.ForeignKey('TesterBatch', on_delete=models.CASCADE, null=True, blank=True )
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
-
-class TesterBatch(models.Model):
-    name = models.CharField('Batchname', max_length=300)
-    unique_ident = models.CharField('Identifier', max_length=300, blank=True, null=True)
-
-    def __str__(self):
-        return self.name if self.name else 'Unbenannter Batch'
-
-class TestSession(models.Model):
-    batch = models.ForeignKey(TesterBatch, on_delete=models.CASCADE)
-    session = models.ForeignKey(Session, on_delete=models.SET_NULL, null=True, blank=True)
-    date = models.DateTimeField('Datum')
-    testers = models.ManyToManyField(Tester, blank=True, verbose_name='Anwesende Probetrainingsmenschen')
-
-    def __str__(self):
-        return f"{self.batch}:{self.date}"
-
-
-class ContactPerson(models.Model):
-    tag = models.CharField('Nach diesem Schlagwort wird gefiltert (z.B. Twiju)', max_length=300)
-    picture = models.ImageField("Foto", upload_to="contacts/")
-    name = models.CharField("Name", max_length=100, default="Jon Doe")
-    public_telnr = models.CharField("Telefonnummer", max_length=100, blank=True, null=True)
-    public_email = models.CharField("Email", max_length=150, blank=True, null=True)
-
-    def save(self):
-        super().save()
-        img = Image.open(self.picture.path)
-        if(img.height > img.width):
-            cut = int((img.height-img.width)/2)
-            img = img.crop((0, 0+cut, img.width, img.height-cut))
-            img2 = img.resize((720,720))
-            img2.save(self.picture.path)
-        elif(img.width > img.height):
-            cut = int((img.width-img.height)/2)
-            img = img.crop((0+cut, 0, img.width-cut, img.height))
-            img2 = img.resize((720,720))
-            img2.save(self.picture.path)
 
 
 class Teamer(models.Model):
     choices =(
         ("leipzig","Leipzig"),
-        ("jena","Jena")
     )
     priority = models.IntegerField()
     city = models.CharField("Stadt",max_length=30,choices=choices,blank=True)

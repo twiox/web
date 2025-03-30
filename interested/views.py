@@ -25,7 +25,6 @@ from .models import (
     PublicEvent,
     EventParticipant,
     EventMerch,
-    ContactPerson,
     Tester,
 )
 from members.views import chairman_check, trainer_check
@@ -46,7 +45,7 @@ def interested_index(request):
                 f"Anfrage Probetraining von {test.first_name} {test.last_name}"
             )
             message = render_to_string(
-                "interested/probe_email.html",
+                "interested/emails/probe_email.html",
                 {
                     "object": test,
                 },
@@ -55,7 +54,7 @@ def interested_index(request):
             email.send()
             # And the message to the interested
             message2 = render_to_string(
-                "interested/probe_email_answer.html",
+                "interested/emails/probe_email_answer.html",
                 {
                     "object": test,
                 },
@@ -98,7 +97,7 @@ def interested_offers(request):
 
             mail_subject = f"Anfrage Workshop von {first_name} {last_name}"
             message = render_to_string(
-                "interested/workshop_email.html",
+                "interested/emails/workshop_email.html",
                 {
                     "first_name": first_name,
                     "last_name": last_name,
@@ -113,7 +112,7 @@ def interested_offers(request):
             email.send()
             # And the message to the interested
             message2 = render_to_string(
-                "interested/workshop_email_answer.html",
+                "interested/emails/workshop_email_answer.html",
                 {"first_name": first_name, "last_name": last_name},
             )
             EmailMessage(
@@ -132,12 +131,11 @@ def interested_philosophy(request):
 
 
 def interested_team(request):
-    jena_people = Teamer.objects.filter(city__contains="jena")
     leipzig_people = Teamer.objects.filter(city__contains="leipzig")
     return render(
         request,
         "interested/interested_team.html",
-        {"leipzig_people": leipzig_people, "jena_people": jena_people},
+        {"leipzig_people": leipzig_people},
     )
 
 
@@ -169,29 +167,6 @@ class TeamerLeipzigCreateView(LoginRequiredMixin, PermissionRequiredMixin, Creat
             self.request, messages.SUCCESS, "Neues Teammitglied erstellt"
         )
         return super(TeamerLeipzigCreateView, self).form_valid(form)
-
-
-class TeamerJenaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    model = Teamer
-    fields = [
-        "priority",
-        "picture",
-        "name",
-        "position",
-        "notes",
-        "public_telnr",
-        "public_email",
-    ]
-    permission_required = "interested.add_teamer"
-
-    def form_valid(self, form):
-        teamer = form.save()
-        teamer.city = "jena"
-        teamer.save()
-        messages.add_message(
-            self.request, messages.SUCCESS, "Neues Teammitglied erstellt"
-        )
-        return super(TeamerJenaCreateView, self).form_valid(form)
 
 
 class TeamerUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):

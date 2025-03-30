@@ -12,11 +12,6 @@ urlpatterns = [
         name="teamer_leipzig_create",
     ),
     path(
-        "team/neu/jena/",
-        views.TeamerJenaCreateView.as_view(),
-        name="teamer_jena_create",
-    ),
-    path(
         "team/<int:pk>/ändern/", views.TeamerUpdateView.as_view(), name="teamer_update"
     ),
     path(
