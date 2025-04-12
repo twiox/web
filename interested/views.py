@@ -428,3 +428,7 @@ class EventMerchDeleteView(UserPassesTestMixin, DeleteView):
             self.request, messages.SUCCESS, "Merch erfolgreich gelöscht"
         )
         return reverse("public_event_change", kwargs={"pk": event_pk})
+
+
+def fsj_view(request):
+    return render(request,'interested/fsj.html')

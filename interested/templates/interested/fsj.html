@@ -1,0 +1,122 @@
+{% extends "members/base.html" %}
+    {% block navbar1 %}
+    <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+        <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'interested_index' %}#The_Club">
+            Interessierte </a>
+        <a class="float_left"> > </a>
+        <a class="float_left strong" style="font-size: 1.1rem; color:white;"> FSJ </a>
+    </div>
+    {% endblock %}
+
+    {% block picture %}
+    <div class="image_wrapper2 grey_cover pic1cont" id="container">
+        <img src="{{ STATIC_URL }}/static/media/interested_team-01.jpg" id='home_view' alt="Twio X auf Silikonband geschrieben">
+        <script type="text/javascript">
+            $("document").ready(function(){
+                var ele = document.getElementsByClassName("pic1cont")[0].getBoundingClientRect()
+                var pic = window.pageYOffset + ele.top
+                var win = window.pageYOffset
+                document.getElementById("home_view").style.top =(pic-win)*-0.15+"px";
+            });
+            window.addEventListener('scroll',function(){
+                var ele = document.getElementsByClassName("pic1cont")[0].getBoundingClientRect()
+                var pic = window.pageYOffset + ele.top
+                var win = window.pageYOffset
+                document.getElementById("home_view").style.top =(pic-win)*-0.15+"px";
+            });
+        </script>
+    </div>
+    {% endblock %}
+    {% block content %}
+    <section class="padding_all_big">
+        <h1>FSJ im Parkourverein</h1>
+        <style>
+            p{
+                font-size: 14pt !important;
+                padding-bottom: 10px !important;
+            }
+            li{
+                list-style-type: circle !important;
+                font-size: 14pt !important;
+            }
+            ul {
+                padding-left: 20px;
+                padding-bottom: 10px !important;
+            }
+        </style>
+
+        <h3>Wer sind wir?</h3>
+
+        <p>Wir sind der Twio X e.V., ein Parkourverein mit rund 150 Mitgliedern und einer der 
+            wenigen Parkourvereine in Mitteldeutschland. Unser Team setzt sich aus dem Vorstand, 
+            der Vereinsjugend und 15 engagierten Trainerinnen und Trainern zusammen. 
+            In den letzten sieben Jahren haben wir drei FSJ-Stellen erfolgreich besetzt und dabei 
+            wertvolle Erfahrungen mit Freiwilligen gesammelt.
+        </p>
+
+        <h3>Was bieten wir?</h3>
+
+        <p>Als rein ehrenamtlich geführter Verein sind wir auf Unterstützung 
+            angewiesen und bieten dir die Möglichkeit, alle Facetten des 
+            Vereinslebens kennenzulernen. Deine Aufgaben reichen von der 
+            Mithilfe beim Training für Erwachsene und Kinder über die 
+            Mitarbeit im Vereinsvorstand bis hin zur Organisation und Umsetzung 
+            von Veranstaltungen.
+        </p>
+
+        <p>
+            Insbesondere können wir dir Einblicke gewähren in:        
+        </p>
+
+        <ul>
+            <li>Flexible und agile Arbeitsweise</li>
+            <li>Umgang mit Microsoft 365, Nextcloud & Miro</li>
+            <li>Grundlagen im Vereinsrecht</li>
+            <li>Methodisches Arbeiten</li>
+            <li>Führung- und Persönlichkeitsentwicklung</li>
+        </ul>
+
+        <p>
+            Falls du noch keine Erfahrung im Parkour hast, ermöglichen wir dir 
+            bei Interesse zusätzlich eine fachliche Ausbildung sowie individuelles 
+            Training, um unsere Sportart besser kennenzulernen.
+        </p>
+
+        <p>
+            Darüber kannst du eigenständig Projekte während deines FSJ vorantreiben, wie beispielsweise:
+        </p>
+
+        <ul>
+            <li>Gestaltung unseres digitalen Auftritts (z.B. Social Media)</li>
+            <li>Unterstützung bei der Leipziger Parkourjam 2026</li>
+            <li>Zusammenarbeit mit unserer Vereinsjugend</li>
+            <li>Mitwirkung beim Aufbau eines Bundesverbandes</li>
+        </ul>
+        
+    <h3>Was bringst du mit?</h3>
+
+    <p>
+        Du bist motiviert und hast Freude am Training mit jungen Menschen und Kindern? Dann bist du bei uns genau richtig!    </p>
+    
+    <p>
+        Da wir kein Vereinsheim besitzen und keine hauptamtlichen Mitarbeiter beschäftigen, ist ein gewisses Maß an selbstständiger Arbeit im Homeoffice erforderlich. Falls nötig, stellen wir dir einen Computer zur Verfügung.  
+    </p>
+
+    <p>
+        Die Betreuung erfolgt durch wöchentliche organisatorische Treffen zwischen Mentorin und unseren Freiwilligen. Darüber hinaus wünschen wir uns deine Teilnahme an wöchentlichen Vorstands- und Trainertreffen, um Aufgaben und gemeinsame Projekte zu besprechen.
+    </p>
+
+    <h3>Nächste Schritte</h3>
+    <p>
+        Sende uns bis zum <strong>15.05.2025</strong> eine Email an <a class="more_info_button" style="padding: 0px;font-size: 14pt;" href="mailto:parkour@twio-x.de">parkour@twio-x.de</a> 
+    </p>
+
+
+    </section>
+    <script>
+        $(document).ready(function(){
+            $("#members").removeClass("here_I_am");
+            $("#interested").addClass("here_I_am");
+        });
+    </script>
+    {% endblock %}

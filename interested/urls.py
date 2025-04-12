@@ -6,6 +6,7 @@ urlpatterns = [
     path("interessierte-angebot", views.interested_offers, name="offers"),
     path("interessierte-philosophie", views.interested_philosophy, name="philosophy"),
     path("interessierte-team", views.interested_team, name="team"),
+    path("FSJ", views.fsj_view, name='fsj'),
     path(
         "team/neu/leipzig/",
         views.TeamerLeipzigCreateView.as_view(),
