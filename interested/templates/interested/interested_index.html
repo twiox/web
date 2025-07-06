@@ -96,27 +96,9 @@
     </div>
     {% endblock %}
     {% block content2 %}
+    {% if public_events or perms.interested.add_publicevent %}
     <div class="frame" style="margin-bottom: 1%;padding-bottom: 0px;min-height: 0px;">
         <h1> Aktuelles </h1>
-        <div style="display:flex;flex-wrap: wrap;margin-top: 30px;">
-            <div class="col-4">
-                <div class="padding_all_small">
-                    <a href="{% url 'fsj' %}" style="padding: 0px;">
-                        <div class="primary padding_all_big prim_hover flex_center_vertical">
-                            <div class="flex_center">
-                                <div style="width:50%;" >
-                                    <img style="width:100%;" src="{{ STATIC_URL }}/static/icons/fsj.svg">
-                                </div>
-                            </div>
-                            <h5>Wir suchen Freiwillige für ein FSJ im Twio X e.V.</h5><br>
-                            <h6>Deadline <strong>15.05.2025</strong></h6>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        {% if public_events or perms.interested.add_publicevent %}
         <section id="Events">
             {% if perms.interested.add_publicevent %}
                 <a href="{%url 'public_event_add' %}" target="_blank" class="more_info_button"> Hinzufügen </a>
@@ -161,8 +143,8 @@
                     })
             </script>
         </section>
-        {% endif %}
     </div>
+    {% endif %}
     {% endblock %}
     {% block content3 %}
     <div class="frame">
