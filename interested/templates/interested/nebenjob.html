@@ -4,25 +4,16 @@
         <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'interested_index' %}#The_Club">
             Interessierte </a>
         <a class="float_left"> > </a>
-        <a class="float_left strong" style="font-size: 1.1rem; color:white;"> FSJ </a>
+        <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Nebenjob </a>
     </div>
     {% endblock %}
 
     {% block picture %}
-    <div class="image_wrapper2 grey_cover pic1cont" id="container">
-        <img src="{{ STATIC_URL }}/static/media/interested_team-01.jpg" id='home_view' alt="Twio X auf Silikonband geschrieben">
+    <div class="image_wrapper">
+        <img src="{{ STATIC_URL }}/static/media/misc/Merlin_Präzi_Serie_cropped.jpg" id='home_view'>
         <script type="text/javascript">
-            $("document").ready(function(){
-                var ele = document.getElementsByClassName("pic1cont")[0].getBoundingClientRect()
-                var pic = window.pageYOffset + ele.top
-                var win = window.pageYOffset
-                document.getElementById("home_view").style.top =(pic-win)*-0.15+"px";
-            });
             window.addEventListener('scroll',function(){
-                var ele = document.getElementsByClassName("pic1cont")[0].getBoundingClientRect()
-                var pic = window.pageYOffset + ele.top
-                var win = window.pageYOffset
-                document.getElementById("home_view").style.top =(pic-win)*-0.15+"px";
+                document.getElementById("home_view").style.bottom=-window.scrollY*0.30+"px";
             });
         </script>
     </div>
