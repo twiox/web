@@ -432,3 +432,6 @@ class EventMerchDeleteView(UserPassesTestMixin, DeleteView):
 
 def fsj_view(request):
     return render(request,'interested/fsj.html')
+
+def nebenjob_view(request):
+    return render(request,'interested/nebenjob.html')
