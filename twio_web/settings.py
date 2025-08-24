@@ -142,3 +142,4 @@ DEFAULT_FROM_EMAIL = secrets.DEFAULT_FROM_EMAIL
 GOOGLE_API_KEY = secrets.GOOGLE_API_KEY
 
 AUTHENTICATION_BACKENDS = ["user_handling.backends.EmailBackend"]
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

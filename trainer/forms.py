@@ -1,8 +1,19 @@
 #we need this to add custom fields to our UserCreationForm
 from django import forms
 from members.models import Trainer, Group
+from .models import TrainingSessionEntry
 from django.contrib.auth.models import User
 
+class TrainingSessionForm(forms.ModelForm):
+    class Meta:
+        model = TrainingSessionEntry
+        fields = [
+            'date',
+            'group',
+            'start',
+            'end',
+            'notes'
+        ]
 
 class TrainerCreationForm(forms.ModelForm):
     user = forms.ModelChoiceField(label="Wer?",queryset=User.objects.exclude(trainer__user__username__contains=""))

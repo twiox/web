@@ -15,6 +15,7 @@ urlpatterns = [
     path("interessierte/", include('interested.urls')),
     path('veranstalter/', include('organizers.urls')),
     path("trainer/", include('trainer.urls')),
+    path("session/", include('trainer.trainingsession')),
     path("vorstand/", include('user_handling.urls')),
     path("login/", auth_views.LoginView.as_view(template_name="user_handling/login.html"), name="login"),
     path("logout/", user_views.LogoutView.as_view(template_name="user_handling/logout.html"), name="logout"),

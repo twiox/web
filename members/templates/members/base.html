@@ -119,5 +119,9 @@
                 <a class="more_info_button button_padding" href="{%url 'impressum' %}">Impressum</a> ⋅ <a href="{%url 'dataprotection' %}" class="more_info_button button_padding">Datenschutz</a>
             </div>
         </footer>
+        <script>
+            const fields = document.querySelectorAll('.mdc-text-field');
+            fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+        </script>
     </body>
 </html>
