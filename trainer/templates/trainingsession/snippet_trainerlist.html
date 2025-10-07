@@ -1,0 +1,35 @@
+<div>
+    <ul>
+    {% for trainer in trainer_list %}
+    <li>{{trainer.user.first_name}} {{trainer.user.last_name}} 
+        <span 
+            hx-post="{% url 'trainingsession_del_trainer' session.pk %}?type={{type}}" 
+            hx-vals='{"trainer_pk":"{{trainer.pk}}"}'
+            hx-target="#{{type}}-list"
+            style="cursor: pointer;">
+            <i class="far fa-minus-square" aria-hidden="true"></i>
+        </span>
+    </li>
+    
+    {% endfor %}
+    </ul>
+    <form
+        hx-get="{% url 'trainingsession_trainer_search' session.pk %}?type={{type}}"
+        hx-target="#{{type}}-search-results"
+        hx-trigger="input changed delay:500ms"
+    >
+        <label class="mdc-text-field">
+        <input type="text" class="mdc-text-field__input" name="trainer" >
+        <span class="mdc-floating-label" id="trainer-label">Trainersuche</span>
+    </label>
+</form>
+
+<div id="{{type}}-search-results"></div>
+</div>
+
+<script>
+    document.body.addEventListener('htmx:afterSettle', function (evt) {
+    const fields = evt.detail.target.querySelectorAll('.mdc-text-field');
+    fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
+});
+</script>

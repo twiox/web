@@ -1,6 +1,17 @@
 {% extends 'members/base.html' %}
 {% block content %}
 <h1>{{object}}</h1>
+<section class="flex_2even padding_rl_big">
+    <div>
+        <h3>Trainer*innen</h3>
+        <div id="trainer-list" hx-get="{% url 'trainingsession_get_trainerlist' object.pk %}?type=trainer" hx-trigger="load once"></div>
+    </div>
+    <div>
+        <h3>Co-Trainer*innen</h3>
+        <div id='cotrainer-list' hx-get="{% url 'trainingsession_get_trainerlist' object.pk %}?type=cotrainer" hx-trigger="load once"></div>
+    </div>
+</section>
 
+<h2>Teilnehmende</h2>
 
 {% endblock %}
