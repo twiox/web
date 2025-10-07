@@ -26,6 +26,7 @@
                 <th>Zeit</th>
                 <th>Gruppe</th>
                 <th>Menschen</th>
+                <th>Notizen</th>
                 <th>Abgesendet</th>
                 <th>Überwiesen</th>
             </tr>
@@ -38,6 +39,7 @@
                 <td nowrap>{{entry.start}} - {{entry.end}}</td>
                 <td nowrap>{{entry.group}}</td>
                 <td nowrap>{{entry.participant.all|length}}</td>
+                <td nowrap>{{entry.notes|truncatechars:15}}</td>
                 <td nowrap style="background-color:{{entry.billed|yesno:'green,darkred'}};">{{entry.billed|yesno:'Ja,Nein'}}</td>
                 <td nowrap style="background-color:{{entry.payed|yesno:'green,darkred'}};">{{entry.payed|yesno:'Ja,Nein'}}</td>
             </tr>
