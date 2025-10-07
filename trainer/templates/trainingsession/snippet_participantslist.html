@@ -1,11 +1,17 @@
 <div>
     <ul>
-    {% for trainer in object_list %}
-    <li>{{trainer.user.first_name}} {{trainer.user.last_name}} 
+    {% for participant in object_list %}  
+    <li id="{{type}}-participant-{{participant.pk}}">
+        {% if participant.user %}
+            {{participant.user.first_name}} {{participant.user.last_name}} ({{participant.user.profile.age}}) 
+        {% else %}
+            {{participant.name}}
+        {% endif %}
         <span 
-            hx-post="{% url 'trainingsession_del_trainer' session.pk %}?type={{type}}" 
-            hx-vals='{"trainer_pk":"{{trainer.pk}}"}'
-            hx-target="#{{type}}-list"
+            hx-post="{% url 'trainingsession_del_participant' session.pk %}" 
+            hx-vals='{"part_pk":"{{participant.pk}}"}'
+            hx-target="closest li"
+            hx-swap="delete"
             style="cursor: pointer;">
             <i class="far fa-minus-square" aria-hidden="true"></i>
         </span>
@@ -13,6 +19,7 @@
     
     {% endfor %}
     </ul>
+    {% if type == 'member' %}
     <form
         hx-get="{% url 'trainingsession_search' session.pk %}?type={{type}}"
         hx-target="#{{type}}-search-results"
@@ -20,8 +27,9 @@
     >
         <label class="mdc-text-field">
         <input type="text" class="mdc-text-field__input" name="query" >
-        <span class="mdc-floating-label" id="query-label">Trainersuche</span>
+        <span class="mdc-floating-label" id="query-label">Mitglieder-Suche</span>
     </label>
+    {% endif %}
 </form>
 
 <div id="{{type}}-search-results"></div>

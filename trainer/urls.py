@@ -5,6 +5,7 @@ from user_handling import views as user_views
 urlpatterns = [
     path("", views.trainer_index, name="trainer_index"),
     path("abrechnung", views.abrechnungstable, name="abrechnung"),
+    path("daten", views.trainer_data, name="trainer_data"),
     path("abrechnung/<int:pk>", views.AbrechnungstableDetailView.as_view(), name="abrechnung_detail"),
     path("abrechnung/ajax/add_week/", views.add_week, name='add_week'),
     path("abrechnung/ajax/reset/", views.reset_table, name='reset_table'),

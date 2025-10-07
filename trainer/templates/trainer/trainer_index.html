@@ -2,118 +2,49 @@
 {% block content %}
 <h1>Trainerdokument</h1>
 <div style="display:flex; justify-content: left; flex-wrap:wrap;">
-        <a href="{% url 'trainer_index' %}" class="padding_all_small here_I_am">Deine Daten</a>
-        <a href="{% url 'abrechnung' %}" class="padding_all_small">Abrechnungstabelle</a>
+        <a href="{% url 'trainer_index' %}" class="padding_all_small here_I_am">Trainingstabellen</a>
+        <a href="{% url 'trainer_data' %}" class="padding_all_small">Meine Daten</a>
+        <a href="{% url 'abrechnung' %}" class="padding_all_small">Abrechnungstabelle (ALT)</a>
         <!--<a href="{% url 'trainer_list' %}" class="padding_all_small">Trainerübersicht</a>-->
 </div>
 <br>
-<h3> Deine Daten </h3>
-<div class="padding_all_small">
-    <div class="" style="display:flex; justify-content:left; flex-wrap:wrap;">
-        <div class="col-20 padding_all_big tertiary_bg">
-            <img src="{{request.user.trainer.image.url}}" class="team_picture" style="border-radius:50%;">
-        </div>
-        <div class="col-80 padding_all_small tertiary_bg">
-            <h3>{{request.user.first_name}} {{request.user.last_name}}</h3>
-            <br>
-            <table>
-                <tr><td><strong>Telefon:</strong></td> <td>{{request.user.trainer.trainer_telnr}}</td></tr>
-                <tr><td><strong>Email:</strong></td> <td>{{request.user.trainer.trainer_email}}</td></tr>
-                {% if request.user.trainer.license_number %}
-                <td><strong>Lizenznr.:</strong></td> <td>{{request.user.trainer.license_number}}</td></tr>
-                {% endif %}
-                {% if request.user.trainer.license_valid %}
-                <td><strong>Gültigkeit:</strong></td> <td>{{request.user.trainer.license_valid|date:"d.m.Y"}}</td></tr>
-                {% endif %}
-                <tr><td><a class="more_info_button" style="padding-left:0px;" href={% url 'trainer_self_update_form' %}>bearbeiten</a></td></tr>
-            </table>
-        </div>
-    </div>
-    <div>
-        <ul style="display:flex; justify-content:left; flex-wrap:wrap;">
-            {%if request.user.trainer.contract %}
-            <li class="padding_all_small col-4">
-                <a class="download tertiary_bg prim_hover padding_all_small" href="{{request.user.trainer.contract.url}}">
-                    <p class="padding_rl_small">Dein aktueller Vertrag</p>
-                    <div class="flex_center_vertical">
-                        <i class="fas fa-file-download padding_rl_small"></i>
-                    </div>
-                </a>
-            </li>
-            {% endif %}
-            {%if request.user.trainer.license %}
-            <li class="padding_all_small col-4">
-                <a class="download tertiary_bg prim_hover padding_all_small" href="{{request.user.trainer.license.url}}">
-                    <p class="padding_rl_small">Deine Lizenz</p>
-                    <div class="flex_center_vertical">
-                        <i class="fas fa-file-download padding_rl_small"></i>
-                    </div>
-                </a>
-            </li>
-            {% endif %}
-            {%if request.user.trainer.codex %}
-            <li class="padding_all_small col-4">
-                <a class="download tertiary_bg prim_hover padding_all_small" href="{{request.user.trainer.codex.url}}">
-                    <p class="padding_rl_small">Dein Ehrenkodex</p>
-                    <div class="flex_center_vertical">
-                        <i class="fas fa-file-download padding_rl_small"></i>
-                    </div>
-                </a>
-            </li>
-            {% endif %}
-        </ul>
-    </div>
+<h3> Neue Trainingsstunde </h3>
+
+<p>Fülle für jedes Training ein neues Dokument aus!</p>
+
+<a href="{% url 'trainingsession_create' %}"><i class="far fa-plus-square" style="font-size: 25pt;"></i></a>
+
+{% if trainer_sessions %}
+<h3 class="padding_tb_big"> Deine Trainingsstunden </h3>
+
+<div class="side_scroll">
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Datum</th>
+                <th>Zeit</th>
+                <th>Gruppe</th>
+                <th>Menschen</th>
+                <th>Abgesendet</th>
+                <th>Überwiesen</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in trainer_sessions %}
+            <tr class="{% cycle 'odd' 'even' %}">
+                <td nowrap><a href="{% url 'trainingsession_detail' entry.pk %}" class="more_info_button" style="padding: 0px;">Edit</td>
+                <td nowrap>{{entry.date|date:'d.m.Y'}}</td>
+                <td nowrap>{{entry.start}} - {{entry.end}}</td>
+                <td nowrap>{{entry.group}}</td>
+                <td nowrap>{{entry.participant.all|length}}</td>
+                <td nowrap style="background-color:{{entry.billed|yesno:'green,darkred'}};">{{entry.billed|yesno:'Ja,Nein'}}</td>
+                <td nowrap style="background-color:{{entry.payed|yesno:'green,darkred'}};">{{entry.payed|yesno:'Ja,Nein'}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
-<!--
-<h3> Deine Einheiten </h3>
-<div>
-    <div>
-        {% for session in trainer_sessions %}
-        <div class="padding_all_small float_left col-4" id="container">
-            <div>
-                {% if session.hinweis %}
-                    <div id="info_position">
-                        <p class="session_alert"> {{session.hinweis}} </p>
-                    </div>
-                {% endif %}
-                <div style="display:flex;" class="tertiary_bg">
-                    <div class="padding_all_big polygon primary">
-                        <p class="strong">{{session.day}}</p>
-                    </div>
-                    <div class="second_section padding_all_big">
-                        <h4> {{session.group}}</h4>
-                        <p> {{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
-                        <h4> {{session.spot.title}}</h4>
-                    </div>
-                </div>
-                <div class="third_session tertiary_bg padding_all_med">
-                    <a class="more_info_button" href="{% url 'session_detail' session.id %}#nav">weitere Informationen</a>
-                </div>
-            </div>
-        </div>
-        {% empty %}
-            <p> Leider gibt es im Moment keine Einheiten für dich </p>
-        {% endfor %}
-    </div>
-</div>
-<h3>Deine Gruppen</h3>
-    <div style="display:flex; flex-wrap:wrap; justify-content: left;">
-    {% for group in trainer_groups %}
-        <div class="padding_all_small col-4">
-            <div>
-                <div style="display:flex;" class="tertiary_bg">
-                    <div class="second_section padding_all_big">
-                        <h4>Gruppe {{group.group_id}}</h4>
-                    </div>
-                </div>
-                <div class="third_session tertiary_bg padding_all_med">
-                    <a class="more_info_button" href="{% url 'real_group_detail' group.id %}#nav">Gruppeninfo</a>
-                </div>
-            </div>
-        </div>
-    {% empty %}
-        <p> Leider gibt es im Moment keine Gruppen für dich </p>
-    {% endfor %}
-    </div>
--->
+{% endif %}
+
 {% endblock %}

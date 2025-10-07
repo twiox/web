@@ -1,5 +1,5 @@
 from .forms import *
-from .models import Trainer_table, Table_entry
+from .models import Trainer_table, Table_entry, TrainingSessionEntry
 from django.core.files import File
 from django.core.files.base import ContentFile
 from django.shortcuts import render, redirect
@@ -19,6 +19,8 @@ from django.contrib.auth.decorators import user_passes_test
 import json
 import codecs
 import django
+from django.db.models import Q
+
 
 def trainer_check(user):
     return hasattr(user, "trainer")
@@ -26,15 +28,17 @@ def trainer_check(user):
 @user_passes_test(trainer_check)
 def trainer_index(request):
     """ I just assume for the moment, that the user is a trainer """
-    trainer_sessions = Session.objects.filter(trainer=Trainer.objects.get(user=request.user))
-    trainer_groups = Group.objects.filter(session__trainer=Trainer.objects.get(user=request.user)).distinct()
+    user = request.user
+    trainer_sessions = TrainingSessionEntry.objects.filter(
+        Q(trainer=user.trainer) |
+        Q(cotrainer=user.trainer)
+    ).order_by('-date')
 
     return render(
         request,"trainer/trainer_index.html",
         {"trainer_sessions":trainer_sessions,
-         "trainer_groups":trainer_groups,
          }
-            )
+    )
 
 @user_passes_test(trainer_check)
 def abrechnungstable(request):
@@ -47,6 +51,13 @@ def abrechnungstable(request):
     entries = Table_entry.objects.filter(table=table).all()
     tables = Trainer_table.objects.filter(trainer=request.user.trainer, active=False).order_by('-id')[:10]
     return render(request, "trainer/abrechnung_form.html", context={"tables":tables, "entries":entries})
+
+@user_passes_test(trainer_check)
+def trainer_data(request):
+    """ I just assume for the moment, that the user is a trainer """
+    return render(
+        request,"trainer/trainer_data.html",
+    )
 
 ### JQUERY AJAX STUFF ###
 def is_privileged(user):

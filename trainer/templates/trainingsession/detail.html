@@ -1,17 +1,74 @@
 {% extends 'members/base.html' %}
+{% block navbar2 %} 
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_index' %}#nav">
+        Trainerdokument </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Session Details</a>
+</div>
+{% endblock %}
 {% block content %}
-<h1>{{object}}</h1>
-<section class="flex_2even padding_rl_big">
-    <div>
-        <h3>Trainer*innen</h3>
-        <div id="trainer-list" hx-get="{% url 'trainingsession_get_trainerlist' object.pk %}?type=trainer" hx-trigger="load once"></div>
+<h1>Session Details</h1>
+<ul>
+    <li>{{object.group}}</li>
+    <li>{{object.date|date:'d.m.Y'}} ({{object.start}} - {{object.end}})</li>
+</ul>
+<br>
+<h3>Anwesenheiten</h3>
+
+<section class="flex_2even padding_all_big" style="max-width: 1040px;">
+    <div class="padding_tb_small">
+        <h4>Trainer*innen</h4>
+        <div id="trainer-list" hx-get="{% url 'trainingsession_get_trainerlist' object.pk %}?type=trainer" hx-trigger="load once">
+        </div>
     </div>
-    <div>
-        <h3>Co-Trainer*innen</h3>
-        <div id='cotrainer-list' hx-get="{% url 'trainingsession_get_trainerlist' object.pk %}?type=cotrainer" hx-trigger="load once"></div>
+    <div class="padding_tb_small">
+        <h4>Co-Trainer*innen</h4>
+        <div id='cotrainer-list' hx-get="{% url 'trainingsession_get_trainerlist' object.pk %}?type=cotrainer" hx-trigger="load once">
+        </div>
     </div>
 </section>
 
-<h2>Teilnehmende</h2>
+<section class="flex_2even padding_all_big" style="max-width: 1040px;">
+    <div class="padding_tb_small">
+        <h4>Mitglieder</h4>
+        <div id="member-list" hx-get="{% url 'trainingsession_get_participants' object.pk %}?type=member" hx-trigger="load once">
+        </div>
+    </div>
+    <div class="padding_tb_small">
+        <h4>Nichtmitglieder</h4>
+        <div id='non-member-list' hx-get="{% url 'trainingsession_get_participants' object.pk %}?type=non-member" hx-trigger="load once">
+        </div>
+    </div>
+</section>
 
+<h3>Fertigstellen</h3>
+<span>Hier können deine Anmerkungen stehen</span>
+<form method="POST">
+    {% csrf_token %}
+    <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
+        <textarea class="mdc-text-field__input" rows="2" cols="80" aria-label="comment" id="id_comment" name="comment">{{object.notes}}</textarea>
+        <span class="mdc-notched-outline mdc-notched-outline--no-label">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__trailing"></span>
+        </span>
+    </label>
+    <div class="mdc-form-field padding_all_big">
+        <div class="mdc-checkbox">
+            <input type="checkbox" class="mdc-checkbox__native-control" id="confirm" name="confirm" {% if object.billed %} checked="" {% endif %}>
+            <div class="mdc-checkbox__background">
+            <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                <path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+            </svg>
+            <div class="mdc-checkbox__mixedmark"></div>
+            </div>
+        </div>
+        <label for="confirm">
+            <div>Die Tabelle ist bereit für die Abrechnung</div>
+        </label>
+    </div>
+    <button type="submit" class="form_button">Senden</button>
+</form>
+
+                 
 {% endblock %}

@@ -37,14 +37,15 @@ class TrainingSessionEntry(models.Model):
     start = models.TextField(blank=True, null=True)
     end = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
-    billed = models.BooleanField(default=False)
+    billed = models.BooleanField(default=False) # invoice sent!
+    payed = models.BooleanField(default=False) # invoice payed
 
     def __str__(self):
         return f"{self.date.strftime('%d.%m.%Y')}-{self.group}"
 
 
 class TrainingSessionParticipant(models.Model):
-    session = models.ForeignKey(TrainingSessionEntry, on_delete=models.CASCADE)
+    session = models.ForeignKey(TrainingSessionEntry, on_delete=models.CASCADE, related_name='participant')
     user = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True
     )  # set null, so that we still see the number of participants even after user is gone
