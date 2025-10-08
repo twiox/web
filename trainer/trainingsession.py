@@ -1,6 +1,6 @@
 from django.urls import path
 from django.shortcuts import render, reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from datetime import datetime
 from trainer.forms import TrainingSessionForm
 from trainer.models import TrainingSessionEntry, TrainingSessionParticipant
@@ -11,6 +11,12 @@ from django.db.models import Q
 
 def trainer_check(user):
     return hasattr(user, "trainer")
+
+@csrf_exempt
+@user_passes_test(trainer_check)
+def session_delete(request, pk):
+    TrainingSessionEntry.objects.get(pk=pk).delete()
+    return HttpResponse("") 
 
 ## HTMX snippets
 @user_passes_test(trainer_check)
@@ -171,6 +177,7 @@ def session_create_view(request):
 urlpatterns = [
     path("", session_create_view, name="trainingsession_create"),
     path("<int:pk>", session_detail_view, name="trainingsession_detail"),
+    path("<int:pk>/remove/", session_delete, name='trainingsession_delete'),
     path("<int:pk>/search", search, name="trainingsession_search"),
     path("<int:pk>/trainer/list", get_trainer_list, name='trainingsession_get_trainerlist'),
     path("<int:pk>/trainer/add", add_trainer, name='trainingsession_add_trainer'),
@@ -178,5 +185,7 @@ urlpatterns = [
     path("<int:pk>/participant/list", get_participants_list, name='trainingsession_get_participants'),
     path("<int:pk>/participant/add", add_member, name='trainingsession_add_member'),
     path("<int:pk>/participant/remove/", delete_participant, name='trainingsession_del_participant'),
+
+    
 ]
 

@@ -29,12 +29,13 @@
                 <th>Notizen</th>
                 <th>Abgesendet</th>
                 <th>Überwiesen</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
             {% for entry in trainer_sessions %}
             <tr class="{% cycle 'odd' 'even' %}">
-                <td nowrap><a href="{% url 'trainingsession_detail' entry.pk %}" class="more_info_button" style="padding: 0px;">Edit</td>
+                <td nowrap><a href="{% url 'trainingsession_detail' entry.pk %}" class="more_info_button" style="padding: 0px;">Edit</a></td>
                 <td nowrap>{{entry.date|date:'d.m.Y'}}</td>
                 <td nowrap>{{entry.start}} - {{entry.end}}</td>
                 <td nowrap>{{entry.group}}</td>
@@ -42,6 +43,19 @@
                 <td nowrap>{{entry.notes|truncatechars:15}}</td>
                 <td nowrap style="background-color:{{entry.billed|yesno:'green,darkred'}};">{{entry.billed|yesno:'Ja,Nein'}}</td>
                 <td nowrap style="background-color:{{entry.payed|yesno:'green,darkred'}};">{{entry.payed|yesno:'Ja,Nein'}}</td>
+                <td>
+                    {% if not entry.payed %}
+                    <span 
+                        hx-post="{% url 'trainingsession_delete' entry.pk %}"
+                        hx-target="closest tr"
+                        hx-swap="delete"
+                        hx-confirm="Bist du dir sicher, dass du den Eintrag löschen willst??"
+                        style="cursor: pointer;"
+                        >
+                        <i class="far fa-minus-square" aria-hidden="true"></i>
+                    </span>
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>
