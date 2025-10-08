@@ -104,6 +104,21 @@ def add_member(request, pk):
 
 @csrf_exempt
 @user_passes_test(trainer_check)
+def add_nonmember(request, pk):
+    session = TrainingSessionEntry.objects.get(pk=pk)
+    type = request.GET.get('type')
+    name = request.POST.get('name','').strip()
+
+    # create the participant
+    TrainingSessionParticipant(
+        session = session,
+        name = name
+    ).save()
+
+    return get_participants_list(request, pk)
+
+@csrf_exempt
+@user_passes_test(trainer_check)
 def delete_participant(request, pk):
     """
     Remove participant from session,then return the list-snippet 
@@ -185,7 +200,6 @@ urlpatterns = [
     path("<int:pk>/participant/list", get_participants_list, name='trainingsession_get_participants'),
     path("<int:pk>/participant/add", add_member, name='trainingsession_add_member'),
     path("<int:pk>/participant/remove/", delete_participant, name='trainingsession_del_participant'),
-
-    
+    path("<int:pk>/participant/non-member/", add_nonmember, name="trainingsession_nonmember_add")
 ]
 
