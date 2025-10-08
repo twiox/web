@@ -12,4 +12,6 @@ else
     echo "-- Not first container startup --"
 fi
 
+# temporary change by Merlin - reverse later
+uv run manage.py migrate
 gunicorn twio_web.wsgi:application --bind 0.0.0.0:8000
