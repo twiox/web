@@ -1,10 +1,10 @@
 from django.urls import path
 from django.shortcuts import render, reverse
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from datetime import datetime
 from trainer.forms import TrainingSessionForm
 from trainer.models import TrainingSessionEntry, TrainingSessionParticipant
-from members.models import Trainer, Profile
+from members.models import Trainer, Profile, Session
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Q
@@ -158,6 +158,19 @@ def search(request, pk):
     
     return render(request, 'trainingsession/snippet_searchresult.html', context)
 
+# to populate the session form fields
+def fill_session_details(request):
+    session_id = request.GET.get("session_id")
+    session = Session.objects.get(pk=session_id)
+
+    return JsonResponse({
+        "start_time": session.start_time,
+        "end_time": session.end_time,
+        "age_upper": session.agegroup.upper,
+        "age_lower": session.agegroup.lower
+    })
+
+# This is the detail-view
 @user_passes_test(trainer_check)
 def session_detail_view(request, pk):
     object = TrainingSessionEntry.objects.get(pk=pk)
@@ -172,6 +185,7 @@ def session_detail_view(request, pk):
 
     return render(request, 'trainingsession/detail.html', {'object':object})
 
+# this is the main form for creating a new session entry
 @user_passes_test(trainer_check)
 def session_create_view(request):
     form = TrainingSessionForm
@@ -200,6 +214,7 @@ urlpatterns = [
     path("<int:pk>/participant/list", get_participants_list, name='trainingsession_get_participants'),
     path("<int:pk>/participant/add", add_member, name='trainingsession_add_member'),
     path("<int:pk>/participant/remove/", delete_participant, name='trainingsession_del_participant'),
-    path("<int:pk>/participant/non-member/", add_nonmember, name="trainingsession_nonmember_add")
+    path("<int:pk>/participant/non-member/", add_nonmember, name="trainingsession_nonmember_add"),
+    path("ajax/session-details/", fill_session_details, name="fill_session_details")
 ]
 

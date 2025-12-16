@@ -31,6 +31,7 @@ class Table_entry(models.Model):
 class TrainingSessionEntry(models.Model):
     trainer = models.ManyToManyField(Trainer, related_name='trainer', blank=True)
     cotrainer = models.ManyToManyField(Trainer, related_name='cotrainer', blank=True) # in the case we ever have different rates of payment again...
+    session = models.ForeignKey(Session, related_name='session', blank=True, null=True, on_delete=models.SET_NULL) # link to a session to get all the related information
     date = models.DateTimeField(blank=True, null=True)
     day = models.TextField(blank=True, null=True)
     group = models.TextField(blank=True, null=True)

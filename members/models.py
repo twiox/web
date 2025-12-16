@@ -331,7 +331,7 @@ class Session(models.Model):
         return reverse("index")
 
     def __str__(self):
-        return f"Session: {self.title}_{self.day}"
+        return f"{self.title} ({self.day})"
 
     class Meta:
         ordering = ["day_key"]

@@ -9,6 +9,7 @@ class TrainingSessionForm(forms.ModelForm):
         model = TrainingSessionEntry
         fields = [
             'date',
+            'session',
             'group',
             'start',
             'end',
