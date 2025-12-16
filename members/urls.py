@@ -12,7 +12,6 @@ urlpatterns = [
     path("veranstaltungen/<int:pk>/stornieren/", views.EventUnParticipateView.as_view(),name="event_unparticipate"),
     path("veranstaltungen/ajax/update_participant/", views.update_memberparticipant, name="ajax_update_memberparticipant"),
     path("veranstaltungen/ajax/update_file/", views.ajax_event_filehandle, name='ajax_event_filehandle'),
-    path("trainingseinheit/<int:pk>/", views.SessionDetailView.as_view(),name="session_detail"),
     path("trainingseinheit/neu/", views.SessionCreateView.as_view(),name="session_create"),
     path("trainingseinheit/<int:pk>/ändern/", views.SessionUpdateView.as_view(),name="session_update"),
     path("trainingseinheit/<int:pk>/löschen/", views.SessionDeleteView.as_view(),name="session_delete"),

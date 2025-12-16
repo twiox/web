@@ -1,32 +1,25 @@
 {% extends "members/base.html" %}
 {% block navbar2 %}
-{% if object.id %}
+
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#training">
         Mitglieder </a>
     <a class="float_left"> > </a>
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'session_detail' object.id%}#nav">
-        {{object.title}}</a>
-    <a class="float_left"> > </a>
+    {% if object.id %}
     <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Bearbeiten </a>
-</div>
-{% else %}
-<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#training">
-        Mitglieder </a>
-    <a class="float_left"> > </a>
+    {% else %}
     <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Neu </a>
+    {% endif %}
 </div>
-{% endif %}
+
 {% endblock %}
 
 {% block content %}
 <section style="text-align:center">
     {% if object.id %}
         <h1>{{object.title}}</h1>
-        <h4>Gruppe {{object.group.group_id}}</h4>
     {% else %}
-        <h1>NEUE SESSION</h1>
+        <h1>Neue Trainingseinheit</h1>
     {% endif %}
     {% include "members/form_snippet.html" %}
 </section>

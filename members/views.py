@@ -380,29 +380,6 @@ def session_participation_toggle(request):
         session.participants.add(user.profile)
     return JsonResponse({"success": True})
 
-class SessionDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
-    # template: session_detail.html
-    model = Session
-
-    def test_func(self):
-        session = self.get_object()
-        if bool(trainer_check(self.request) or chairman_check(self.request)):
-            return True
-        # The trainers and the members
-        return session in Session.objects.filter(
-            agegroup__in=self.request.user.profile.agegroups
-        )
-
-    def get_context_data(self, **kwargs):
-        context = {"api_key": settings.GOOGLE_API_KEY}
-        if self.object:
-            context["object"] = self.object
-            context_object_name = self.get_context_object_name(self.object)
-            if context_object_name:
-                context[context_object_name] = self.object
-        context.update(kwargs)
-        return super().get_context_data(**context)
-
 
 class SessionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     # template: event_form.html
