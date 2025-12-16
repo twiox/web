@@ -10,8 +10,8 @@
 {% block content %}
 <h1>Session Details</h1>
 <ul>
-    <li>{{object.group}}</li>
-    <li>{{object.date|date:'d.m.Y'}} ({{object.start}} - {{object.end}})</li>
+    <li><strong>Gruppe:</strong> {{object.group}}</li>
+    <li><strong>Zeit/Datum:</strong> {{object.date|date:'d.m.Y'}} ({{object.start}} - {{object.end}})</li>
 </ul>
 <br>
 <h3>Anwesenheiten</h3>
@@ -71,5 +71,11 @@
     <button type="submit" class="form_button">Senden</button>
 </form>
 
+<br>
+<br>
+
+<div id="member-table" 
+    hx-get="{% url 'trainingsession_get_participants_table' object.pk %}" hx-trigger="load once, htmx:afterSwap from:#member-list">
+</div>
                  
 {% endblock %}

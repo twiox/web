@@ -36,6 +36,17 @@ def get_participants_list(request, pk):
     return render(request,'trainingsession/snippet_participantslist.html',context)
 
 @user_passes_test(trainer_check)
+def get_participants_table(request, pk):
+    """
+    Get the participants-table snippet for display in session-detail view 
+    """
+    session = TrainingSessionEntry.objects.get(pk=pk)
+    context = {'session':session}
+    context.update({'object_list':session.participant.filter(user__isnull=False)})
+
+    return render(request,'trainingsession/snippet_participantslist_contact.html',context)
+
+@user_passes_test(trainer_check)
 def get_trainer_list(request, pk):
     """
     Get the trainer-list snippet for display in session-detail view 
@@ -164,8 +175,8 @@ def fill_session_details(request):
     session = Session.objects.get(pk=session_id)
 
     return JsonResponse({
-        "start_time": session.start_time,
-        "end_time": session.end_time,
+        "start_time": session.start_time.strftime("%H:%m"),
+        "end_time": session.end_time.strftime("%H:%m"),
         "age_upper": session.agegroup.upper,
         "age_lower": session.agegroup.lower
     })
@@ -212,6 +223,7 @@ urlpatterns = [
     path("<int:pk>/trainer/add", add_trainer, name='trainingsession_add_trainer'),
     path("<int:pk>/trainer/remove", remove_trainer, name='trainingsession_del_trainer'),
     path("<int:pk>/participant/list", get_participants_list, name='trainingsession_get_participants'),
+    path("<int:pk>/participant/table", get_participants_table, name='trainingsession_get_participants_table'),
     path("<int:pk>/participant/add", add_member, name='trainingsession_add_member'),
     path("<int:pk>/participant/remove/", delete_participant, name='trainingsession_del_participant'),
     path("<int:pk>/participant/non-member/", add_nonmember, name="trainingsession_nonmember_add"),
