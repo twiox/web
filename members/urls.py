@@ -16,6 +16,7 @@ urlpatterns = [
     path("trainingseinheit/neu/", views.SessionCreateView.as_view(),name="session_create"),
     path("trainingseinheit/<int:pk>/ändern/", views.SessionUpdateView.as_view(),name="session_update"),
     path("trainingseinheit/<int:pk>/löschen/", views.SessionDeleteView.as_view(),name="session_delete"),
+    path("trainingseinheit/status-update/", views.session_participation_toggle,name="session_participation_toggle"),
     path("spots/", views.SpotListView.as_view(),name="spot_list"),
     path("spots/<int:pk>/", views.SpotDetailView.as_view(),name="spot_detail"),
     path("spots/neu/", views.SpotCreateView.as_view(),name="spot_create"),

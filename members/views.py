@@ -370,7 +370,15 @@ def update_memberparticipant(request):
 
 
 """FOR THE SESSIONS"""
-
+# this happens just in the background, no return value...
+def session_participation_toggle(request):
+    session = Session.objects.get(pk=int(request.GET.get('pk')))
+    user = request.user
+    if user.profile in session.participants.all():
+        session.participants.remove(user.profile)
+    else:
+        session.participants.add(user.profile)
+    return JsonResponse({"success": True})
 
 class SessionDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     # template: session_detail.html

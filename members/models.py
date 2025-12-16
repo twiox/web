@@ -278,6 +278,7 @@ class Session(models.Model):
     start_time = models.TimeField("Beginn", default="17:00")
     end_time = models.TimeField("Ende", default="19:00")
     hinweis = models.CharField("Hinweis", blank=True, max_length=50)
+    participants = models.ManyToManyField("Profile", related_name="session", blank=True)
 
     class Meta:
         ordering = ["start_time"]
