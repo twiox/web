@@ -12,4 +12,5 @@ else
     echo "-- Not first container startup --"
 fi
 
+uv run manage.py migrate
 gunicorn twio_web.wsgi:application --bind 0.0.0.0:8000
