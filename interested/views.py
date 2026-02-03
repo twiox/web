@@ -17,6 +17,7 @@ from django.views.generic import (
 from django.contrib import messages
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 from django.conf import settings
 from .forms import ProbetrainingForm, PublicEventForm
 from members.models import Chairman
@@ -39,31 +40,19 @@ def interested_index(request):
         if form.is_valid():
             # get Form data
             test = form.save()
-            test.save()
 
             mail_subject = (
-                f"Anfrage Probetraining von {test.first_name} {test.last_name}"
+                f"Twio X e.V. - Anfrage Probetraining {test.first_name} {test.last_name}"
             )
             message = render_to_string(
-                "interested/emails/probe_email.html",
-                {
-                    "object": test,
-                },
-            )
-            email = EmailMessage(mail_subject, message, to=[settings.TO_EMAIL])
-            email.send()
-            # And the message to the interested
-            message2 = render_to_string(
                 "interested/emails/probe_email_answer.html",
                 {
                     "object": test,
                 },
             )
-            EmailMessage(
-                f"Twio X e.V. - Deine Anfrage auf Probetraining",
-                message2,
-                to=[test.email],
-            ).send()
+            email = EmailMessage(mail_subject, message, to=[settings.TO_EMAIL, test.email])
+            email.content_subtype = 'html'
+            email.send()
             messages.add_message(request, messages.SUCCESS, "Anmeldung verschickt")
             return HttpResponseRedirect(reverse("interested_index"))
         else:

@@ -1,24 +1,97 @@
-{% autoescape off %}
-Hallo {{object.first_name}} {{object.last_name}}
+<p>Hallo {{object.first_name}} {{object.last_name}}</p>
 
-Vielen Dank für deine Anfrage, dein Interesse an einem Probetraining und an unserem Verein.
+<p>Schön, dass du dich für ein Probetraining bei Twio X interessierst, wir freuen uns sehr!<br>
 
-Wir freuen uns dass du unseren Sport versuchen möchtest und melden uns so schnell wie möglich
-bei dir um dir die Zeiten für ein Probetraining mitzuteilen!
+<p> Wir haben von dir die folgenden Daten übermittelt bekommen</p>
 
-Bei weiteren Fragen kannst du dich gerne jederzeit per E-Mail oder telefonisch melden.
+<ul>
+    <li>Name: {{object.first_name}} {{object.last_name}}</li>
+    <li>Geburtsdatum: {{object.birthday|date:'d.m.Y'}}</li>
+    <li>Geschlecht: {{object.sex}}</li>
+    <li>E-Mail: {{object.email}},
+    {% if object.telnr %}<li>Telefon:{{object.telnr}}</li>{%endif%}
+    {% if object.notes %}<li>Anmerkungen: {{object.notes}}</li>{% endif %}
+</ul>
 
-Bis bald!
+<p>Da uns aktuell viele Anfragen erreichen, möchten wir dir vorab erklären, wie unser Parkour-Angebot aufgebaut ist und wie es mit deiner Anfrage weitergeht.<br><br>
 
-Mit sportlichen Grüßen
+Bitte nimm dir kurz Zeit, um die folgenden Hinweise zu lesen:</p>
 
-Twio X e.V.
+<h3>Für wen ist unser Parkour-Angebot gedacht?</h3>
 
----
-Vorstand gem. § 26 BGB:
-Jewgeni Eisenberg | Merlin Szymanski | Oliver Grehl
-Vereinsregisternummer: VR 4359
-Steuernummer: 231/141/11554
-Telefon: +49 177 211 93 22 | E.Mail: parkour@twio-x.de | Internet: www.twio-x.de
+<p>Unser Training richtet sich an Kinder, Jugendliche und Erwachsene ab 9 Jahren.<br>
+Anfragen für Kinder unter 9 Jahren können wir leider nicht berücksichtigen, auch dann nicht, wenn bereits sportliche Vorerfahrungen vorhanden sind.</p>
 
-{% endautoescape %}
+<h3>Aktuelle Situation in unseren Trainingsgruppen</h3>
+
+<p>Als ehrenamtlich organisierter Sportverein sind unsere Trainingsplätze begrenzt.<br>
+Zusätzlich legen wir derzeit einen besonderen Fokus darauf, <strong>Mädchen und junge Frauen für Parkour zu begeistern und zu fördern</strong>, 
+da sie im Parkour oft weniger Raum finden.</p>
+
+<p>Daraus ergeben sich aktuell folgende Regelungen:</p>
+
+<p>
+    <strong>Jungs (männlich) unter 14 Jahren</strong>
+    <ul>
+        <li>Eine Aufnahme ist zurzeit leider nicht möglich, da unsere Gruppen vollständig ausgelastet sind.</li>
+        <li>Entsprechende Anfragen können wir aktuell nicht weiter berücksichtigen oder beantworten.</li>
+    </ul>
+    <p>Wir bitten hier um Verständnis.</p>
+</p>
+
+<p>
+    <strong>Mädchen zwischen 9 und 14 Jahren</strong>
+    <ul>
+        <li>Es besteht eine <strong>Wartezeit von etwa 4–6 Wochen.</strong></li>
+        <li>Sobald Plätze frei werden, melden wir uns mit konkreten Probetraining-Terminen per E-Mail.</li>
+    </ul>
+</p>
+
+<p>
+    <strong>Jugendliche von 14 bis 17 Jahren (alle Geschlechter)</strong>
+    <ul>
+        <li>Auch hier ist mit einer <strong>Wartezeit von ca. 4–6 Wochen</strong> zu rechnen.</li>
+        <li>Danach laden wir zu passenden Probetraining-Terminen ein.</li>
+    </ul>
+</p>
+
+<p>
+    <strong>Erwachsene</strong>
+    <ul>
+        <li>Die Wartezeit beträgt ca. <strong>1–2 Wochen.</strong></li>
+        <li>Anschließend setzen wir uns persönlich mit dir in Verbindung und besprechen gemeinsam, wann ein Probetraining gut passt.</li>
+    </ul>
+</p>
+
+<h3>Wichtiger Hinweis für Minderjährige</h3>
+
+<p>Für alle Teilnehmenden unter 18 Jahren benötigen wir zwingend eine <strong>schriftliche Einverständniserklärung der Erziehungsberechtigten</strong>.
+Das entsprechende <a href="https://twio-x.de/static/docs/Einverstaendniserklaerung_TwioX.pdf">Formular</a> steht auf unserer Website zum Download bereit. Ihr könnt uns das Formular gerne im Vorfeld per E-Mail zusenden.</p>
+
+<p>Ohne diese Einverständniserklärung ist eine Teilnahme leider <strong>nicht möglich.</strong></p>
+
+<h3>Noch ein paar Worte zum Ablauf</h3>
+
+<p>Da wir den Trainingsbetrieb komplett ehrenamtlich organisieren, bitten wir dich um etwas Geduld. 
+    Bitte habe auch Verständnis dafür, dass wir in der Wartezeit keine individuellen Rückmeldungen 
+    zum aktuellen Stand geben können.
+</p>
+
+
+<p>Wenn deine Fragen noch nicht beantwortet sind, dann schau dir gerne unsere 
+    <a href="https://share.twio-x.de/index.php/s/tiDrQrK2q3yB3de" target="_blank">FAQ auf der Website</a> an</p>
+
+
+<p>Vielen Dank für dein Verständnis und dein Interesse an unserem Verein. Wir freuen uns schon sehr auf das gemeinsame Training!</p>
+
+<p>Sportliche Grüße<br>
+Twio X e.V.</p>
+
+<hr>
+<p style="color: grey;font-size: 10pt;">
+<strong>Vorstand gem. § 26 BGB:<br>
+Jewgeni Eisenberg | Merlin Szymanski | Oliver Grehl</strong><br>
+Vereinsregisternummer: VR 4359<br>
+Steuernummer: 231/141/11554<br>
+Telefon: <a href="tel:+49 177 211 93 22">+49 177 211 93 22</a> | E.Mail: <a href="mailto:parkour@twio-x.de">parkour@twio-x.de</a> | Internet: <a href="www.twio-x.de">www.twio-x.de</a><br>
+</p>
