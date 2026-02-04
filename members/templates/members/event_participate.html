@@ -23,7 +23,7 @@
                     <p class="padding_tb_small" style="color:red;">{{error}}</p>
                     {% endfor %}
                 {% endif %}
-
+                {% if object.datenschutz or object.teilnahmebedingungen %}
                 <div class="mdc-form-field padding_all_big">
                     <div class="mdc-checkbox">
                       <input type="checkbox" class="mdc-checkbox__native-control" id="speicherung" name="confirm" required>
@@ -35,13 +35,26 @@
                       </div>
                     </div>
                     <label for="speicherung" >
-                        <div align="left">Ich habe die<a class="more_info_button" href={%if object.datenschutz%}"{{object.datenschutz.url}}"{% else %}"https://twio-x.de/datenschutzerkl%C3%A4rung"{%endif%}>Datenschutzerklärung</a>und die<a class="more_info_button"
-                        href={%if object.teilnahmebedingungen%}"{{object.teilnahmebedingungen.url}}"{% else %}"#"{%endif%}>Teilnahmebedingungen</a>gelesen und akzeptiere sie.
-                        Ich willige ein, dass die von mir hinterlegten Daten für die Drurchführung der Veranstaltung an die notwendigen Stellen übermittelt werden. <strong> Beachte, dass wir von Minderjährigen das
-                        Einverständnis der Eltern benötigen!</strong></div>
+                        <strong>Wichtige Dokumente</strong>
+                        <ul>
+                          {% if object.datenschutz %}
+                          <li><a class="more_info_button" href="{{object.datenschutz.url}}">Datenschutzerklärung</a></li>
+                          {% endif %}
+                          {% if object.teilnahmebedingungen %}
+                          <li><a class="more_info_button" href="{{object.teilnahmebedingungen.url}}">Teilnahmebedingungen</a></li>
+                          {% endif %}
+                        </ul>
+                        <div align="left">Ich habe die Dokumente gelesen und akzeptiere sie.
+                          Ich willige ein, dass die von mir hinterlegten Daten für die Drurchführung der Veranstaltung an die notwendigen Stellen übermittelt werden. 
+                          <strong> Beachte, dass wir von Minderjährigen das
+                          Einverständnis der Eltern benötigen!</strong>
+                        </div>
                     </label>
                 </div>
-
+                {% else %}
+                    <input type="checkbox" class="mdc-checkbox__native-control" id="speicherung" checked name="confirm" required style="display: none;">
+                {% endif %}
+                {% if object.ticket %}
                 <div class="mdc-form-field padding_all_big">
                     <div class="mdc-checkbox">
                       <input type="checkbox" class="mdc-checkbox__native-control" id="ticket" name="ticket">
@@ -56,6 +69,7 @@
                         <span>Ich besitze zur Zeit der Veranstaltung ein <strong>Deutschlandticket</strong></span>
                     </label>
                 </div>
+                {% endif %}
 
                 <h6> Die An- und Abmeldefrist endet am {{object.deadline|date:"d.m.Y"}} </h6>
                 <br>
