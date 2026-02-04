@@ -43,6 +43,9 @@
                           {% if object.teilnahmebedingungen %}
                           <li><a class="more_info_button" href="{{object.teilnahmebedingungen.url}}">Teilnahmebedingungen</a></li>
                           {% endif %}
+                          {% if object.einverstaendnis %}
+                          <li><a class="more_info_button" href="{{object.einverstaendnis.url}}">Einverständniserklärung</a></li>
+                          {% endif %}
                         </ul>
                         <div align="left">Ich habe die Dokumente gelesen und akzeptiere sie.
                           Ich willige ein, dass die von mir hinterlegten Daten für die Drurchführung der Veranstaltung an die notwendigen Stellen übermittelt werden. 
@@ -54,7 +57,7 @@
                 {% else %}
                     <input type="checkbox" class="mdc-checkbox__native-control" id="speicherung" checked name="confirm" required style="display: none;">
                 {% endif %}
-                {% if object.ticket %}
+                {% if object.ask_ticket %}
                 <div class="mdc-form-field padding_all_big">
                     <div class="mdc-checkbox">
                       <input type="checkbox" class="mdc-checkbox__native-control" id="ticket" name="ticket">

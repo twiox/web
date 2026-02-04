@@ -40,6 +40,7 @@ class EventForm(forms.ModelForm):
             "title",
             "place",
             "info_only",
+            "ask_ticket",
             "costs",
             "start_date",
             "end_date",

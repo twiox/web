@@ -145,6 +145,7 @@ class Event(models.Model):
         "Kosten", blank=True, null=True, max_digits=8, decimal_places=2
     )
     info_only = models.BooleanField("Nur Ankündigung?", default=False)
+    ask_ticket = models.BooleanField("Deutschlandticket Abfragen", default=False)
 
     teilnahmebedingungen = models.FileField(
         "Teilnahmebedingungen", upload_to=f"Events/Docs/", null=True, blank=True
