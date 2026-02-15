@@ -8,15 +8,16 @@
         <!--<a href="{% url 'trainer_list' %}" class="padding_all_small">Trainerübersicht</a>-->
 </div>
 <br>
-<h3> Neue Trainingsstunde </h3>
+<h3>Neue Trainingsstunde</h3>
 
 <p>Fülle für jedes Training ein neues Dokument aus!</p>
 
 <a href="{% url 'trainingsession_create' %}"><i class="far fa-plus-square" style="font-size: 25pt;"></i></a>
 
 {% if trainer_sessions %}
-<h3 class="padding_tb_big"> Deine Trainingsstunden </h3>
-
+<h3 class="padding_tb_big">Deine Trainingsstunden </h3>
+<p>Zur Übersicht aller Stunden: <a href="{% url 'trainingsession_list' %}" class="more_info_button" style="padding: 0px;">HIER</a></p>
+<br><br>
 <div class="side_scroll">
     <table>
         <thead>

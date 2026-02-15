@@ -238,7 +238,7 @@ def session_list_view(request):
 
     grouping = {}
    
-    sessions = TrainingSessionEntry.objects.all()
+    sessions = TrainingSessionEntry.objects.filter(billed=True)
     dates = []
     trainers = []
 
@@ -261,7 +261,7 @@ def session_list_view(request):
                 grouping[date][name] = [session]
 
     unpayed_invoices = TrainingSessionInvoice.objects.filter(date_payed__isnull=True)
-    payed_invoices = TrainingSessionInvoice.objects.filter(date_payed__isnull=False)
+    payed_invoices = TrainingSessionInvoice.objects.filter(date_payed__isnull=False).order_by('-date_billed')
 
     return render(request, "trainingsession/list.html", {
             'grouping':grouping, 
@@ -276,7 +276,7 @@ def session_list_view(request):
 @user_passes_test(trainer_check)    
 def generate_invoices(request):
     # get sessions that are not part of an invoice yet
-    sessions = TrainingSessionEntry.objects.filter(invoice__isnull=True)
+    sessions = TrainingSessionEntry.objects.filter(invoice__isnull=True, billed=True)
 
     date_billed = datetime.today()
 

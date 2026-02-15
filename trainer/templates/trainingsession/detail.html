@@ -17,29 +17,41 @@
 
 {% if object.session %}
 <h3>Trainingsgruppe</h3>
-    {% for profile in object.session.participants.all %}
-        {{profile.user.first_name}} {{profile.user.last_name}} 
+    <ul>
+    {% for member in object.session.participants.all %}
+    <li>{{member.user.first_name}} {{member.user.last_name}} ({{member.user.profile.age}}) 
+        <span 
+            hx-post="{% url 'trainingsession_add_member' object.pk %}?type=member" 
+            hx-vals='{"member_pk":"{{member.pk}}"}'
+            hx-target="#member-list"
+            style="cursor: pointer;">
+            <i class="far fa-plus-square" aria-hidden="true"></i>
+        </span>
+    </li>
     {% endfor %}
+    </ul>
 <br>
 <br>
 {% endif%}
 
-<h3>Anwesenheiten</h3>
+<h2>Anwesenheit</h2>
 
-<section class="flex_2even padding_all_big" style="max-width: 1040px;">
+<section class="padding_all_big" style="max-width: 1040px;">
     <div class="padding_tb_small">
         <h4>Trainer*innen</h4>
         <div id="trainer-list" hx-get="{% url 'trainingsession_get_trainerlist' object.pk %}?type=trainer" hx-trigger="load once">
         </div>
     </div>
+    <!--
     <div class="padding_tb_small">
         <h4>Co-Trainer*innen</h4>
         <div id='cotrainer-list' hx-get="{% url 'trainingsession_get_trainerlist' object.pk %}?type=cotrainer" hx-trigger="load once">
         </div>
     </div>
+    -->
 </section>
 
-<section class="flex_2even padding_all_big" style="max-width: 1040px;">
+<section class="padding_all_big" style="max-width: 1040px;">
     <div class="padding_tb_small">
         <h4>Mitglieder</h4>
         <div id="member-list" hx-get="{% url 'trainingsession_get_participants' object.pk %}?type=member" hx-trigger="load once">
@@ -51,19 +63,12 @@
         </div>
     </div>
 </section>
+
 {% if not object.payed %}
-<h3>Fertigstellen</h3>
-<span>Hier können deine Anmerkungen stehen</span>
+<h2>Fertigstellen</h2>
+
 <form method="POST">
     {% csrf_token %}
-    <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
-        <textarea class="mdc-text-field__input" rows="2" cols="80" aria-label="comment" id="id_comment" name="comment">{{object.notes}}</textarea>
-        <span class="mdc-notched-outline mdc-notched-outline--no-label">
-            <span class="mdc-notched-outline__leading"></span>
-            <span class="mdc-notched-outline__trailing"></span>
-        </span>
-    </label>
-    <br>
     <div class="mdc-form-field padding_all_big">
         <div class="mdc-checkbox">
             <input type="checkbox" class="mdc-checkbox__native-control" id="confirm" name="confirm" {% if object.billed %} checked="" {% endif %}>
@@ -75,10 +80,21 @@
             </div>
         </div> 
         <label for="confirm">
-            <div>Die Tabelle ist bereit für die Abrechnung</div>
+            <div>Die Stunde kann abgerechnet werden!</div>
         </label>
     </div>
-    <button type="submit" class="form_button">Senden</button>
+    <br>
+    <div style="display: flex; flex-direction: column;">
+        <span>Anmerkungen</span>
+        <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
+            <textarea class="mdc-text-field__input" rows="2" cols="80" aria-label="comment" id="id_comment" name="comment">{{object.notes}}</textarea>
+            <span class="mdc-notched-outline mdc-notched-outline--no-label">
+                <span class="mdc-notched-outline__leading"></span>
+                <span class="mdc-notched-outline__trailing"></span>
+            </span>
+        </label>  
+        <button type="submit" class="form_button">Senden</button>
+    </div>  
 </form>
 {% endif %}
 
