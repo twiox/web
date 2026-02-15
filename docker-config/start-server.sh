@@ -5,8 +5,8 @@ if [ ! -e $CONTAINER_ALREADY_STARTED ]; then
     touch $CONTAINER_ALREADY_STARTED
     echo "-- First container startup --"
     # YOUR_JUST_ONCE_LOGIC_HERE
-    sleep 2
-    uv run manage.py migrate
+#    sleep 2
+#    uv run manage.py migrate
     # copy static files created during build process to volume, so NGINX can reach it.
     cp -r /opt/twio_web/static /opt/.
 else
