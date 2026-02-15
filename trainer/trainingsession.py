@@ -214,8 +214,67 @@ def session_create_view(request):
         'form': form
     })
 
+
+@user_passes_test(trainer_check)
+def session_list_view(request):
+    from collections import defaultdict
+
+    # I want the structure
+    # { month: {
+    #     trainer: [
+    #            Abrechnung 1,
+    #            Abrechnung 2,
+    #            Abrechnung 3  
+    #         ]
+    #     }   
+    # }
+    #
+
+    grouping = {}
+   
+    sessions = TrainingSessionEntry.objects.all()
+    dates = []
+    trainers = []
+
+    for session in sessions:
+        # compile a list of dates
+        date = session.date.strftime('%Y-%m')
+        if date not in dates:
+            dates.append(date)
+        if date not in grouping:
+            grouping[date] = {}
+        # compile a list of trainers
+        for trainer in session.trainer.all():
+            name = f"{trainer.user.first_name} {trainer.user.last_name}"
+            if name not in trainers:
+                trainers.append(name)
+            # compile a list of sessions per date and trainer
+            if name in grouping[date]:
+                grouping[date][name].append(session)
+            else:
+                grouping[date][name] = [session]
+
+    unpayed_sessions = TrainingSessionEntry.objects.filter(billed=True, payed=False)
+
+    return render(request, "trainingsession/list.html", {
+            'grouping':grouping, 
+            'dates':sorted(dates), 
+            'trainers':sorted(trainers),
+            'unpayed_sessions':unpayed_sessions
+        }
+    )
+
+    
+@user_passes_test(trainer_check)    
+def generate_invoices(request):
+    sessions = TrainingSessionEntry.objects.filter(billed=True, payed=False)
+    return render(request, "trainingsession/list.html")
+
+
 urlpatterns = [
     path("", session_create_view, name="trainingsession_create"),
+    path("list", session_list_view, name="trainingsession_list"),
+    path("generate-invoices", generate_invoices, name="generate_invoices"),
     path("<int:pk>", session_detail_view, name="trainingsession_detail"),
     path("<int:pk>/remove/", session_delete, name='trainingsession_delete'),
     path("<int:pk>/search", search, name="trainingsession_search"),

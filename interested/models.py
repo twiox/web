@@ -134,6 +134,7 @@ class EventParticipant(models.Model):
     payed = models.BooleanField("Bezahlt", default=False)
     merch_wanted = models.BooleanField("Merch bestellt", default=False)
     merch_size = models.CharField("Größe", max_length=200, blank=True, null=True)
+    inform_ok = models.BooleanField("Email für Werbung verwenden", default=False)
     notes = models.TextField("Notizen", blank=True, null=True)
 
     def __str__(self):

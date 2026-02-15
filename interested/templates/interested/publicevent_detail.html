@@ -70,64 +70,8 @@
                 {{object.description_rendered|safe}}
             </div>
             <form  id="event_form" method="POST">
-            <!-- THIS BREAKS THE MECH FUNCTION AND SHOULD BE FIXED AFTER XDREAM2024
-            {% if merch %}
-            <div class="padding_all_small">
-                <br>
-                <h1>{{merch.title}}</h1>
-                <div class="flex_left" id="container">
-                    <div class="trainer_ui">
-                        {% if chairman %}
-                        <a href="{% url 'eventmerch_update' merch.pk  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
-                        {% endif %}
-                    </div>
-                    <div class="chair_col-5 padding_all_small">
-                        <img style="max-height:100%;max-width: 100%;" src="{{merch.image.url}}">
-                    </div>
-                    <div class="chair_col-5 padding_all_small" style="display:flex; flex-direction: column;">
-                        {{merch.description_rendered|safe}}
-                        <br><br>
-                        <p> <strong> Kosten: {{merch.price|floatformat:2}} €</strong> </p>
-                        <div class="mdc-form-field">
-                            <div class="mdc-checkbox">
-                            <input type="checkbox" class="mdc-checkbox__native-control" id="merch_yes" name="merch_wanted" {% if form.data.merch_wanted == "on" %} checked {% endif %}>
-                            <div class="mdc-checkbox__background">
-                                <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
-                                <path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
-                                </svg>
-                                <div class="mdc-checkbox__mixedmark"></div>
-                            </div>
-                            </div>
-                            <label for="merch_yes" >
-                                <div>{{merch.title}} dazubestellen</div>
-                            </label>
-                        </div>
-                        <div id="merch_sizes" hidden>
-                            {% if form.merch_size.errors %}
-                            {% for error in form.merch_size.errors %}
-                                <p style="color:red;">{{error}}</p>
-                            {% endfor %}
-                            {% endif %}
-                            <label class="mdc-text-field mdc-text-field--filled merch_size">
-                                <i class="mdc-select__dropdown-icon"></i>
-                                <span class="mdc-text-field__ripple"></span>
-                                <select id="select-merch_size" class="mdc-text-field__input" style="background-color:inherit;" name="merch_size">
-                                    <option value="" style="background-color:inherit;"></option>
-                                    {% for k in sizes %}
-                                        <option value='{{k}}' style="background-color:inherit;" {% if form.data.merch_size == k %} selected {% endif %}>{{k}}</option>
-                                    {% endfor %}
-                                </select>
-                                <span class="mdc-floating-label" id="merch_size-label">Größe</span>
-                                <span class="mdc-line-ripple"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-            -->
-            {% if not event.info_only %}
-            <div class="padding_tb_big">
+                {% if not event.info_only %}
+                <div class="padding_tb_big">
                     <h1 id="anmeldung"> Anmeldung </h1>
                     {% csrf_token %}
                     <div style="display:flex;flex-wrap:wrap;">
@@ -213,6 +157,7 @@
                             </label>
                         </div>
                     </div>
+                    <!--
                     <div class="padding_all_small">
                         <div class="mdc-form-field">
                             <div class="mdc-checkbox">
@@ -245,6 +190,7 @@
                             </div>
                         </div>
                     </div>
+                    -->
 
                     <input id="real_costs" type="text" hidden name="costs">
                     <div class="padding_all_small" style="padding-top:40px;">
@@ -266,7 +212,7 @@
                                         </div>
                                         <div>
                                             <label for="speicherung" >
-                                            <div>Ich stimme der {%if object.datenschutz %}<a class="more_info_button" style="padding:0px" href="{{event.datenschutz.url}}">Datenschutzerklärung</a>{% else %} Datenschutzerklärung {%endif%} zu</div>
+                                            <div>Ich stimme der {%if object.datenschutz %}<a class="more_info_button" style="padding:0px" href="{{event.datenschutz.url}}">Datenschutzerklärung</a>{% else %} Datenschutzerklärung {%endif%} zu*</div>
                                             </label>
                                             {% if form.confirm.errors %}
                                             {% for error in form.confirm.errors %}
@@ -288,13 +234,29 @@
                                         <div>
                                         <label for="speicherung2" >
                                         <div>Ich stimme den {% if event.teilnahmebedingungen %} <a class="more_info_button" style="padding:0px" href="{{event.teilnahmebedingungen.url}}">Teilnahmebedingungen</a>
-                                             {% else %}Teilnahmebedingungen {% endif %} zu</div>
+                                             {% else %}Teilnahmebedingungen {% endif %} zu*</div>
                                         </label>
                                         {% if form.confirm.errors %}
                                         {% for error in form.confirm.errors %}
                                             <p style="color:red;">{{error}}</p>
                                         {% endfor %}
                                         {% endif %}
+                                    </div>
+                                    </div>
+                                    <div class="mdc-form-field" style="margin:0px;">
+                                        <div class="mdc-checkbox">
+                                        <input type="checkbox" class="mdc-checkbox__native-control" id="inform_ok" name="inform_ok" checked>
+                                        <div class="mdc-checkbox__background">
+                                            <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                                            <path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+                                            </svg>
+                                            <div class="mdc-checkbox__mixedmark"></div>
+                                        </div>
+                                        </div>
+                                        <div>
+                                        <label for="inform_ok" >
+                                        <div>Ich möchte in der Zukunft über Jams des Twio X e.V. per E-Mail informiert werden</div>
+                                        </label>
                                     </div>
                                     </div>
                                 </div>

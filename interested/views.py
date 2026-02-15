@@ -238,14 +238,12 @@ class PublicEventView(DetailView):
                 invoice=float(event.base_costs),
                 merch_wanted=form.cleaned_data.get("merch_wanted", False),
                 merch_size=form.cleaned_data.get("merch_size", ""),
+                inform_ok = form.cleaned_data.get("inform_ok", False),
                 notes="",
             )
 
-            print(form.cleaned_data)
-
             participant.save()
-            mail_subject = f"Twio X e.V. | {event.title}: Anmeldebestätigung"
-            mail_subject2 = f"Anmeldung: {event.title}: {participant.first_name} {participant.last_name}"
+            mail_subject = f"Twio X e.V. | {event.title}: Anmeldebestätigung {participant.first_name} {participant.last_name}"
             message = render_to_string(
                 "interested/public_event_confirmation_email.html",
                 {
@@ -266,10 +264,8 @@ class PublicEventView(DetailView):
                     "event": event.title.replace(" ", "-"),
                 },
             )
-            email = EmailMessage(mail_subject2, message, to=[settings.TO_EMAIL])
-            email2 = EmailMessage(mail_subject, message, to=[participant.email])
+            email = EmailMessage(mail_subject, message, to=[settings.TO_EMAIL, participant.email])
             email.send()
-            email2.send()
 
             messages.add_message(
                 request, messages.SUCCESS, "Du hast dich erfolgreich angemeldet"

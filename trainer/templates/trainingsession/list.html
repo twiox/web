@@ -1,0 +1,48 @@
+{% extends 'members/base.html' %}
+{% load custom_filters %}
+
+{% block navbar2 %} 
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_index' %}#nav">
+        Trainerdokument </a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Session Details</a>
+</div>
+{% endblock %}
+{% block content %}
+<h1>Sessions</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Trainer*in</th>
+            {% for date in dates %}
+            <th>{{date}}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for trainer in trainers %}
+        <tr>
+            <td>{{trainer}}</td>
+            {% for date in dates %}
+            <td>
+                {% for session in grouping|lookup:date|lookup:trainer %}
+                    <a href="{% url 'trainingsession_detail' session.pk %}" style="color:{% if session.payed %}green{% else %}red{% endif %}; padding: 0px;">{{session.participant.all|length}}</a>
+                {% endfor %}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>   
+<br><br>
+<a>Abrechnungen Generieren</a>
+
+<h3>Unbezahlte Stunden</h3>
+<ul>
+{% for session in unpayed_sessions %}
+<li><a href="{% url 'trainingsession_detail' session.pk%}" class="more_info_button" style="padding: 0px;">{{session}}</li>
+{% endfor %}
+</ul>
+{% endblock %}

@@ -29,6 +29,7 @@ class PublicEventForm(forms.Form):
     contact = forms.CharField(required=False)
     costs = forms.CharField(required=False)
     confirm = forms.BooleanField()
+    inform_ok = forms.BooleanField(required=False)
     # merch-data
     merch_wanted = forms.BooleanField(required=False)
     merch_size = forms.CharField(required=False)
@@ -45,4 +46,5 @@ class PublicEventForm(forms.Form):
             "merch_size",
             "costs",
             "confirm",
+            "inform_ok"
         ]

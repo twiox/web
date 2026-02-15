@@ -51,7 +51,7 @@
         </div>
     </div>
 </section>
-
+{% if not object.payed %}
 <h3>Fertigstellen</h3>
 <span>Hier können deine Anmerkungen stehen</span>
 <form method="POST">
@@ -80,6 +80,7 @@
     </div>
     <button type="submit" class="form_button">Senden</button>
 </form>
+{% endif %}
 
 <br>
 <br>

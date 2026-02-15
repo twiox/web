@@ -81,7 +81,6 @@ def register(request):
     if request.method == "POST":  # if the form is filled out
         form = MemberCreationForm(request.POST)
         form2 = ProfileCreationForm(request.POST)
-        print(form)
         if form.is_valid() and form2.is_valid():  # and the form is valid
             real_user = form.save(commit=False)  # save the user to fire the signal
             real_user.username = form.cleaned_data.get(
