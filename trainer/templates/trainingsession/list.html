@@ -10,8 +10,7 @@
 </div>
 {% endblock %}
 {% block content %}
-<h1>Sessions</h1>
-
+<h1>Trainingsstunden</h1>
 <table>
     <thead>
         <tr>
@@ -28,7 +27,7 @@
             {% for date in dates %}
             <td>
                 {% for session in grouping|lookup:date|lookup:trainer %}
-                    <a href="{% url 'trainingsession_detail' session.pk %}" style="color:{% if session.payed %}green{% else %}red{% endif %}; padding: 0px;">{{session.participant.all|length}}</a>
+                    <a href="{% url 'trainingsession_detail' session.pk %}" style="color:{% if session.payed %}green{% else %}red{% endif %}; padding: 0px;">{{session.pk}}</a> |
                 {% endfor %}
             </td>
             {% endfor %}
@@ -36,13 +35,67 @@
         {% endfor %}
     </tbody>
 </table>   
-<br><br>
-<a>Abrechnungen Generieren</a>
-
-<h3>Unbezahlte Stunden</h3>
-<ul>
-{% for session in unpayed_sessions %}
-<li><a href="{% url 'trainingsession_detail' session.pk%}" class="more_info_button" style="padding: 0px;">{{session}}</li>
-{% endfor %}
-</ul>
+<br>
+<h3>Unbezahlte Rechnungen</h3>
+<a href="{% url 'generate_invoices' %}" class="more_info_button" style="padding: 0px;">Abrechnungen Generieren</a><br>
+<br>
+{% if unpayed_invoices %}
+<table>
+    <thead>
+        <tr>
+            <th>Trainer*in</th>
+            <th>Rechnungsdatum</th>
+            <th>Einheiten</th>
+            <th>Stunden</th>
+            <th>TAE</th>
+            <th>Rechnung</th>
+            <th>Bezahlt?</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for invoice in unpayed_invoices %}
+        <tr>
+            <td>{{invoice.trainer.user.first_name}} {{invoice.trainer.user.last_name}}</td>
+            <td>{{invoice.date_billed|date:"d.m.Y"}}</td>
+            <td>{{invoice.sessions.all|length}}</td>
+            <td>{{invoice.total_time}}</td>
+            <td>{{invoice.total_money}} €</td>
+            <td><a href="{{invoice.invoice_pdf.url}}" class="more_info_button" style="padding: 0px;">pdf</a></td>
+            <td><a href="{% url 'trainingsession_mark_invoice_as_payed' invoice.pk %}" class="more_info_button" style="padding: 0px;">als bezahlt markieren</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+<br>
+<h3>Rechnungen (Archiv)</h3>
+<br>
+{% if payed_invoices %}
+<table>
+    <thead>
+        <tr>
+            <th>Trainer*in</th>
+            <th>Rechnungsdatum</th>
+            <th>Einheiten</th>
+            <th>Stunden</th>
+            <th>TAE</th>
+            <th>pdf</th>
+            <th>Bezahlt</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for invoice in payed_invoices %}
+        <tr>
+            <td>{{invoice.trainer.user.first_name}} {{invoice.trainer.user.last_name}}</td>
+            <td>{{invoice.date_billed|date:"d.m.Y"}}</td>
+            <td>{{invoice.sessions.all|length}}</td>
+            <td>{{invoice.total_time}}</td>
+            <td>{{invoice.total_money}} €</td>
+            <td><a href="{{invoice.invoice_pdf.url}}" class="more_info_button" style="padding: 0px;">pdf</a></td>
+            <td>{{invoice.date_payed|date:"d.m.Y"}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
 {% endblock %}
