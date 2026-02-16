@@ -1,16 +1,22 @@
 from django.urls import path
-from django.shortcuts import render, reverse
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
-from datetime import datetime
+from datetime import datetime, timedelta
 from trainer.forms import TrainingSessionForm
-from trainer.models import TrainingSessionEntry, TrainingSessionParticipant
+from trainer.models import TrainingSessionEntry, TrainingSessionParticipant, TrainingSessionInvoice
 from members.models import Trainer, Profile, Session
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Q
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 def trainer_check(user):
     return hasattr(user, "trainer")
+
+def chairman_check(user):
+    return hasattr(user, "chairman") or user.is_superuser
 
 @csrf_exempt
 @user_passes_test(trainer_check)
@@ -232,7 +238,7 @@ def session_list_view(request):
 
     grouping = {}
    
-    sessions = TrainingSessionEntry.objects.all()
+    sessions = TrainingSessionEntry.objects.filter(billed=True)
     dates = []
     trainers = []
 
@@ -254,21 +260,84 @@ def session_list_view(request):
             else:
                 grouping[date][name] = [session]
 
-    unpayed_sessions = TrainingSessionEntry.objects.filter(billed=True, payed=False)
+    unpayed_invoices = TrainingSessionInvoice.objects.filter(date_payed__isnull=True)
+    payed_invoices = TrainingSessionInvoice.objects.filter(date_payed__isnull=False).order_by('-date_billed')
 
     return render(request, "trainingsession/list.html", {
             'grouping':grouping, 
             'dates':sorted(dates), 
             'trainers':sorted(trainers),
-            'unpayed_sessions':unpayed_sessions
+            'unpayed_invoices':unpayed_invoices,
+            'payed_invoices':payed_invoices
         }
     )
 
     
 @user_passes_test(trainer_check)    
 def generate_invoices(request):
-    sessions = TrainingSessionEntry.objects.filter(billed=True, payed=False)
-    return render(request, "trainingsession/list.html")
+    # get sessions that are not part of an invoice yet
+    sessions = TrainingSessionEntry.objects.filter(invoice__isnull=True, billed=True)
+
+    date_billed = datetime.today()
+
+    trainers = set(sessions.values_list('trainer', flat=True))
+
+    #now cast the sessions into a list! This is necessary, because otherwise only the first trainer-invoice is generated
+    sessions = list(sessions)
+    
+    # generate an invoice for each trainer!
+    for trainer in trainers:
+        total_time = 0
+        total_money = 0
+        trainer_object = Trainer.objects.get(pk=trainer)
+        open_sessions = [x for x in sessions if trainer_object in x.trainer.all()]
+
+        # this is the fresh invoice
+        tmp = TrainingSessionInvoice(
+            date_billed = date_billed,
+            trainer = trainer_object,
+        )
+        tmp.save()
+        tmp.refresh_from_db()
+
+        for session in open_sessions:
+            tmp.sessions.add(session)
+            start = datetime.strptime(session.start, "%H:%M")
+            end = datetime.strptime(session.end, "%H:%M")
+            duration = end - start
+            hours = duration.total_seconds() / 3600
+            total_time += hours
+
+        total_money = total_time * float(trainer_object.salary.replace(',','.'))
+
+        tmp.total_money = round(total_money, 2)
+        tmp.total_time = total_time
+        tmp.save()
+        tmp.generate_pdf()
+
+    return redirect('trainingsession_list')
+
+
+@user_passes_test(chairman_check)
+def mark_invoice_as_payed(request, pk):
+    invoice = TrainingSessionInvoice.objects.get(pk=pk)
+    invoice.date_payed = datetime.today()
+    invoice.save()
+
+    return redirect('trainingsession_list')
+
+
+# Add signals
+@receiver(post_save, sender=TrainingSessionInvoice)
+def update_session(sender, instance, **kwargs):
+    # trigger after invoice payed
+    if instance.date_payed != None:
+        # check for each sessions of the invoice instance that all associated invoices are payed
+        # and set the sessions to 'payed' if that is true
+        for session in instance.sessions.all():
+            if all([x.date_payed != None for x in session.invoice.all()]):
+                session.payed = True
+                session.save()
 
 
 urlpatterns = [
@@ -277,6 +346,7 @@ urlpatterns = [
     path("generate-invoices", generate_invoices, name="generate_invoices"),
     path("<int:pk>", session_detail_view, name="trainingsession_detail"),
     path("<int:pk>/remove/", session_delete, name='trainingsession_delete'),
+    path("<int:pk>/set-payed/", mark_invoice_as_payed, name='trainingsession_mark_invoice_as_payed'),
     path("<int:pk>/search", search, name="trainingsession_search"),
     path("<int:pk>/trainer/list", get_trainer_list, name='trainingsession_get_trainerlist'),
     path("<int:pk>/trainer/add", add_trainer, name='trainingsession_add_trainer'),

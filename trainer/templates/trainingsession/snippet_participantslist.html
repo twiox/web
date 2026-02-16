@@ -35,12 +35,16 @@
         hx-post="{% url 'trainingsession_nonmember_add' session.pk %}?type={{type}}"
         hx-target="#{{type}}-list"
         hx-trigger="click from:#non-member-submit"
-    >
-        <label class="mdc-text-field">
-        <input type="text" class="mdc-text-field__input" name="name" >
-        <span class="mdc-floating-label" id="name-label">Name</span>
-    </label>
-    <span id='non-member-submit' style="cursor: pointer;" class="form_button">Add</span>
+    >   
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <label class="mdc-text-field">
+                <input type="text" class="mdc-text-field__input" name="name" >
+                <span class="mdc-floating-label" id="name-label">Name</span>
+            </label>
+            <div>
+                <span id='non-member-submit' style="cursor: pointer; max-width: 100%;" class="form_button">Add</span>
+            </div>
+        </div>
     </form>
     {% endif %}
 

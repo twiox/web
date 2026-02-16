@@ -57,3 +57,92 @@ class TrainingSessionParticipant(models.Model):
         if user:
             return f"{self.user.first_name} {self.user.last_name}"
         return self.name
+
+
+class TrainingSessionInvoice(models.Model):
+    date_billed = models.DateTimeField("Rechnungsdatum", blank=True, null=True)
+    date_payed = models.DateTimeField("Bezahldatum", blank=True, null=True)
+    trainer = models.ForeignKey(Trainer, related_name='invoice', on_delete=models.SET_NULL, null=True)
+    sessions = models.ManyToManyField(TrainingSessionEntry, related_name='invoice')
+    total_time = models.FloatField('Stunden', blank=True, null=True)
+    total_money = models.FloatField('TAE', blank=True, null=True)
+    invoice_pdf = models.FileField('PDF', blank=True, null=True, upload_to="trainer_tables/")
+
+    def generate_pdf(self):
+        """
+        Generate a PDF and store it in this instance's invoice_pdf FileField using Platypus.
+        """
+        import io
+        from django.core.files.base import ContentFile
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib import colors
+        from reportlab.lib.styles import getSampleStyleSheet
+
+        # Create in-memory buffer
+        buffer = io.BytesIO()
+
+        # Set up document
+        doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
+        elements = []
+        styles = getSampleStyleSheet()
+        normal = styles["Normal"]
+        heading = styles["Heading2"]
+
+        # -----------------------
+        # Header
+        # -----------------------
+        elements.append(Paragraph(f"Rechnungsdatum: {self.date_billed.strftime('%d.%m.%Y')}", heading))
+        elements.append(Spacer(1, 12))
+        elements.append(Paragraph(f"Trainer: {self.trainer.user.first_name} {self.trainer.user.last_name}", normal))
+        if self.trainer.license_number:
+            elements.append(Paragraph(f"Lizenznummer: {self.trainer.license_number}", normal))
+        if self.trainer.license_valid:
+            elements.append(Paragraph(f"Gültigkeit: {self.trainer.license_valid.strftime('%d.%m.%Y')}", normal))
+        elements.append(Spacer(1, 20))
+
+        # -----------------------
+        # Table
+        # -----------------------
+        table_data = [["Datum", "Tag", "Gruppe", "Von", "Bis", "Anmerkung"]]
+
+        for session in self.sessions.all():
+            table_data.append([
+                session.date.strftime("%d.%m.%Y"),
+                session.date.strftime('%a'),
+                session.group,
+                session.start,
+                session.end,
+                session.notes
+            ])
+
+        table = Table(table_data, repeatRows=1)
+        table.hAlign = 'LEFT'
+
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ]))
+        elements.append(table)
+        elements.append(Spacer(1, 20))
+
+        # -----------------------
+        # Totals
+        # -----------------------
+        elements.append(Paragraph(f"Stunden: {self.total_time} mit TAE/Stunde: {self.trainer.salary} €", normal))
+        elements.append(Paragraph(f"<b>Gesamt: {self.total_money} €</b>", normal))
+
+        # -----------------------
+        # Build PDF
+        # -----------------------
+        doc.build(elements)
+
+        # Move buffer to beginning
+        buffer.seek(0)
+
+        # Save PDF to FileField
+        filename = f"invoice_{self.date_billed.strftime('%d.%m.%Y')}_{self.trainer.pk}.pdf"
+        self.invoice_pdf.save(filename, ContentFile(buffer.read()))
+        buffer.close()
