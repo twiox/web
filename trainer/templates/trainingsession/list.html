@@ -14,7 +14,7 @@
 <table>
     <thead>
         <tr>
-            <th>Trainer*in</th>
+            <th nowrap>Trainer*in</th>
             {% for date in dates %}
             <th>{{date}}</th>
             {% endfor %}
@@ -23,11 +23,11 @@
     <tbody>
         {% for trainer in trainers %}
         <tr>
-            <td>{{trainer}}</td>
+            <td nowrap>{{trainer}}</td>
             {% for date in dates %}
             <td>
                 {% for session in grouping|lookup:date|lookup:trainer %}
-                    <a href="{% url 'trainingsession_detail' session.pk %}" style="color:{% if session.payed %}green{% else %}red{% endif %}; padding: 0px;">{{session.pk}}</a> |
+                    <a href="{% url 'trainingsession_detail' session.pk %}" style="color:{% if session.payed %}green{% else %}red{% endif %}; padding: 0px;">{{session.date|date:'d.'}}</a> |
                 {% endfor %}
             </td>
             {% endfor %}
@@ -37,7 +37,9 @@
 </table>   
 <br>
 <h3>Unbezahlte Rechnungen</h3>
+{% if request.user.chairman %}
 <a href="{% url 'generate_invoices' %}" class="more_info_button" style="padding: 0px;">Abrechnungen Generieren</a><br>
+{% endif %}
 <br>
 {% if unpayed_invoices %}
 <table>
@@ -61,7 +63,11 @@
             <td>{{invoice.total_time}}</td>
             <td>{{invoice.total_money}} €</td>
             <td><a href="{{invoice.invoice_pdf.url}}" class="more_info_button" style="padding: 0px;">pdf</a></td>
+            {% if request.user.chairman %}
             <td><a href="{% url 'trainingsession_mark_invoice_as_payed' invoice.pk %}" class="more_info_button" style="padding: 0px;">als bezahlt markieren</a></td>
+            {% else %}
+            <td></td>
+            {% endif %}
         </tr>
         {% endfor %}
     </tbody>

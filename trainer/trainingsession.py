@@ -250,7 +250,7 @@ def session_list_view(request):
         if date not in grouping:
             grouping[date] = {}
         # compile a list of trainers
-        for trainer in session.trainer.all():
+        for trainer in session.get_trainers:
             name = f"{trainer.user.first_name} {trainer.user.last_name}"
             if name not in trainers:
                 trainers.append(name)
@@ -276,11 +276,10 @@ def session_list_view(request):
 @user_passes_test(trainer_check)    
 def generate_invoices(request):
     # get sessions that are not part of an invoice yet
-    sessions = TrainingSessionEntry.objects.filter(invoice__isnull=True, billed=True)
+    sessions = TrainingSessionEntry.objects.filter(invoice__isnull=True, billed=True).prefetch_related("trainer", "cotrainer")
+    trainers = set().union(*(x.get_trainers for x in sessions))
 
     date_billed = datetime.today()
-
-    trainers = set(sessions.values_list('trainer', flat=True))
 
     #now cast the sessions into a list! This is necessary, because otherwise only the first trainer-invoice is generated
     sessions = list(sessions)
@@ -289,13 +288,12 @@ def generate_invoices(request):
     for trainer in trainers:
         total_time = 0
         total_money = 0
-        trainer_object = Trainer.objects.get(pk=trainer)
-        open_sessions = [x for x in sessions if trainer_object in x.trainer.all()]
+        open_sessions = [x for x in sessions if trainer in x.get_trainers]
 
         # this is the fresh invoice
         tmp = TrainingSessionInvoice(
             date_billed = date_billed,
-            trainer = trainer_object,
+            trainer = trainer,
         )
         tmp.save()
         tmp.refresh_from_db()
@@ -308,7 +306,7 @@ def generate_invoices(request):
             hours = duration.total_seconds() / 3600
             total_time += hours
 
-        total_money = total_time * float(trainer_object.salary.replace(',','.'))
+        total_money = total_time * float(trainer.salary.replace(',','.'))
 
         tmp.total_money = round(total_money, 2)
         tmp.total_time = total_time

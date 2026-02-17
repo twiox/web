@@ -32,7 +32,7 @@ def trainer_index(request):
     trainer_sessions = TrainingSessionEntry.objects.filter(
         Q(trainer=user.trainer) |
         Q(cotrainer=user.trainer)
-    ).order_by('-date')
+    ).distinct().order_by('-date')
 
     return render(
         request,"trainer/trainer_index.html",

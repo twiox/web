@@ -43,6 +43,13 @@ class TrainingSessionEntry(models.Model):
 
     def __str__(self):
         return f"{self.date.strftime('%d.%m.%Y')}-{self.group}"
+    
+    @property
+    def get_trainers(self):
+        trainers = list(self.trainer.all())
+        trainers.extend(self.cotrainer.all())
+        return set(trainers)
+
 
 
 class TrainingSessionParticipant(models.Model):
