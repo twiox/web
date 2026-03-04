@@ -224,6 +224,17 @@ def session_create_view(request):
 @user_passes_test(trainer_check)
 def session_list_view(request):
     from collections import defaultdict
+    from django.db.models.functions import ExtractYear
+
+    year = request.GET.get('year', datetime.today().strftime('%Y'))
+    all_years = (
+        TrainingSessionEntry.objects
+        .filter(date__isnull=False)
+        .annotate(year=ExtractYear('date'))
+        .values_list('year', flat=True)
+        .distinct()
+        .order_by('year')
+    )
 
     # I want the structure
     # { month: {
@@ -238,7 +249,7 @@ def session_list_view(request):
 
     grouping = {}
    
-    sessions = TrainingSessionEntry.objects.filter(billed=True)
+    sessions = TrainingSessionEntry.objects.filter(billed=True, date__year=int(year))
     dates = []
     trainers = []
 
@@ -268,7 +279,8 @@ def session_list_view(request):
             'dates':sorted(dates), 
             'trainers':sorted(trainers),
             'unpayed_invoices':unpayed_invoices,
-            'payed_invoices':payed_invoices
+            'payed_invoices':payed_invoices,
+            'all_years':all_years
         }
     )
 
