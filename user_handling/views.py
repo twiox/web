@@ -1,9 +1,4 @@
-from .forms import (
-    MemberCreationForm,
-    ProfileCreationForm,
-    MemberListUserUpdateForm,
-    MemberListProfileUpdateForm,
-)
+from .forms import MemberForm, ProfileForm
 from .permissions import chairman_permissions
 from members.models import (
     Group,
@@ -76,23 +71,23 @@ def register(request):
     current_member = User.objects.latest("pk")
     y, num = get_mandatsref(current_member.profile.mandatsref)
     ref = f"{get_ordering(current_member)+1}-{y}-{num}"
-    if request.method == "POST":  # if the form is filled out
-        form = MemberCreationForm(request.POST)
-        form2 = ProfileCreationForm(request.POST)
-        if form.is_valid() and form2.is_valid():  # and the form is valid
-            real_user = form.save(commit=False)  # save the user to fire the signal
-            real_user.username = form.cleaned_data.get(
-                "first_name"
-            ).lower() + form2.cleaned_data.get("member_num")
+    initial = {"member_num": get_ordering(current_member) + 1, "mandatsref": ref}
+    if request.method == "POST":
+        user_form = MemberForm(request.POST)
+        profile_form = ProfileForm(request.POST, initial=initial)
+        if user_form.is_valid() and profile_form.is_valid():
+            real_user = user_form.save(commit=False)
+            real_user.username = (
+                user_form.cleaned_data["first_name"].lower()
+                + profile_form.cleaned_data["member_num"]
+            )
             alphabet = string.ascii_letters + string.digits
             password = "".join(secrets.choice(alphabet) for i in range(8))
             real_user.set_password(password)
-            real_user.is_active = True
-            real_user.save()
-            real_user.refresh_from_db()  # get the user again
-            for key, value in form2.cleaned_data.items():
+            real_user.save()  # fires the signal that creates the profile
+            for key, value in profile_form.cleaned_data.items():
                 setattr(real_user.profile, key, value)
-            real_user.save()  # save the entries
+            real_user.profile.save()
             try:
                 send_set_password_email(request, real_user)
             except OSError:  # covers smtplib.SMTPException and DNS/socket errors
@@ -111,17 +106,12 @@ def register(request):
                 )
             return redirect("register")
     else:
-        form = MemberCreationForm()
-        form2 = ProfileCreationForm()
+        user_form = MemberForm()
+        profile_form = ProfileForm(initial=initial)
     return render(
         request,
         "user_handling/register.html",
-        context={
-            "form": form,
-            "form2": form2,
-            "current_member": get_ordering(current_member),
-            "ref": ref,
-        },
+        context={"user_form": user_form, "profile_form": profile_form},
     )
 
 
@@ -166,30 +156,17 @@ class UserDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 @permission_required("auth.add_user", raise_exception=True)
 def member_update(request, pk):
     real_user = get_object_or_404(User, pk=pk)
-
-    if request.method == "POST":  # if the form is filled out
-
-        form = MemberListUserUpdateForm(request.POST)
-        form2 = MemberListProfileUpdateForm(request.POST)
-
-        if form.is_valid() and form2.is_valid():  # and the form is valid
-
-            for key, value in form.cleaned_data.items():
-                setattr(real_user, key, value)
-
-            for key, value in form2.cleaned_data.items():
-                setattr(real_user.profile, key, value)
-
-            real_user.save()  # save the entries
-            messages.add_message(
-                request, messages.SUCCESS, "Account erfolgreich bearbeitet"
-            )
-            return redirect("member_list")
-    else:
-        form = MemberListUserUpdateForm(instance=real_user)
-        form2 = MemberListProfileUpdateForm(instance=real_user.profile)
+    user_form = MemberForm(request.POST or None, instance=real_user)
+    profile_form = ProfileForm(request.POST or None, instance=real_user.profile)
+    if request.method == "POST" and user_form.is_valid() and profile_form.is_valid():
+        user_form.save()
+        profile_form.save()
+        messages.add_message(request, messages.SUCCESS, "Account erfolgreich bearbeitet")
+        return redirect("member_list")
     return render(
-        request, "user_handling/register.html", context={"form": form, "form2": form2}
+        request,
+        "user_handling/register.html",
+        context={"user_form": user_form, "profile_form": profile_form},
     )
 
 

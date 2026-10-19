@@ -1,18 +1,57 @@
-# we need this to add custom fields to our UserCreationForm
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User
-from members.models import Profile, Group, Trainer, Chairman
+from members.models import Profile
 
 
-class MemberListUserUpdateForm(forms.ModelForm):
+def date_widget():
+    # native date picker; the value must be ISO formatted for type="date"
+    return forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
+
+
+class MdcFormMixin:
+    """Adds the Material Design input class to every widget."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            attrs = field.widget.attrs
+            attrs.setdefault("class", "mdc-text-field__input")
+            attrs.setdefault("aria-labelledby", f"{self[name].id_for_label}-label")
+            if isinstance(field.widget, forms.Textarea):
+                attrs.update(rows=8, cols=80)
+
+
+class MemberForm(MdcFormMixin, forms.ModelForm):
     class Meta:
         model = User
         fields = ["first_name", "last_name", "email"]
+        labels = {
+            "first_name": "Vorname",
+            "last_name": "Nachname",
+            "email": "E-Mail-Adresse",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # blank=True on the User model, but we need them for every member
+        for name in self.fields:
+            self.fields[name].required = True
 
 
-class MemberListProfileUpdateForm(forms.ModelForm):
-    group = forms.ModelChoiceField(label="Gruppe", queryset=Group.objects.all())
+class ProfileForm(MdcFormMixin, forms.ModelForm):
+    # TODO: move these choices to the model
+    sex = forms.ChoiceField(
+        label="Geschlecht",
+        choices=[("", "---------"), ("m", "m"), ("w", "w"), ("d", "d")],
+    )
+    member_num = forms.CharField(label="Mitgliedsnummer", max_length=30)
+    birthday = forms.DateField(label="Geburtsdatum", required=False, widget=date_widget())
+    membership_start = forms.DateField(
+        label="Beginn der Mitgliedschaft", required=False, widget=date_widget()
+    )
+    membership_end = forms.DateField(
+        label="Kündigung zum", required=False, widget=date_widget()
+    )
 
     class Meta:
         model = Profile
@@ -21,9 +60,10 @@ class MemberListProfileUpdateForm(forms.ModelForm):
             "address",
             "telephone",
             "sex",
+            "parent",
+            "parent_telnr",
             "status",
             "member_num",
-            "group",
             "membership_start",
             "membership_end",
             "mandatsref",
@@ -31,47 +71,25 @@ class MemberListProfileUpdateForm(forms.ModelForm):
             "beitrag",
             "notes_trainer",
             "notes_chairman",
-            "parent",
-            "parent_telnr",
         ]
-
-
-class MemberCreationForm(UserCreationForm):
-    first_name = forms.CharField(label="Vorname")
-    last_name = forms.CharField(label="Nachname")
-    email = forms.EmailField(label="Emailadresse")  # required, so leave blank
+        labels = {
+            "telephone": "Telefonnummer",
+            "beitrag": "Mitgliedsbeitrag",
+            "notes_trainer": "Trainernotizen",
+            "notes_chairman": "Vorstandsnotizen",
+        }
 
     def __init__(self, *args, **kwargs):
-        super(MemberCreationForm, self).__init__(*args, **kwargs)
-        self.fields["password1"].required = False
-        self.fields["password2"].required = False
-        self.fields["password1"].widget.attrs["autocomplete"] = "off"
-        self.fields["password2"].widget.attrs["autocomplete"] = "off"
+        super().__init__(*args, **kwargs)
+        if self.instance.pk is None:
+            # a new member cannot have cancelled yet
+            del self.fields["membership_end"]
 
-    class Meta:
-        model = User
-        fields = ["first_name", "last_name", "email"]
-
-
-class ProfileCreationForm(forms.ModelForm):
-    member_num = forms.CharField(label="Mitgl.Nr.")
-    # group = forms.ModelChoiceField(label="Gruppe",queryset=Group.objects.all())
-
-    class Meta:
-        model = Profile
-        fields = [
-            "birthday",
-            "address",
-            "telephone",
-            "sex",
-            "status",
-            "member_num",
-            "membership_start",
-            "mandatsref",
-            "zahlungsart",
-            "beitrag",
-            "notes_trainer",
-            "notes_chairman",
-            "parent",
-            "parent_telnr",
-        ]
+    def clean_member_num(self):
+        member_num = self.cleaned_data["member_num"].strip()
+        if not member_num.isdigit():
+            raise forms.ValidationError("Die Mitgliedsnummer darf nur Ziffern enthalten.")
+        taken = Profile.objects.filter(member_num=member_num).exclude(pk=self.instance.pk)
+        if taken.exists():
+            raise forms.ValidationError("Diese Mitgliedsnummer ist bereits vergeben.")
+        return member_num

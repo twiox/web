@@ -713,6 +713,12 @@ footer{
     label span{
         color: $font_col;
     }
+    select.mdc-text-field__input{
+        background-color: #333333;
+    }
+}
+.form_error{
+    color: red;
 }
 
 .select_overwrite{

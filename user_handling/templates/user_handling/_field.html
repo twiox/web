@@ -1,0 +1,22 @@
+{% for error in field.errors %}
+    <p class="form_error">{{ error }}</p>
+{% endfor %}
+{% if field.widget_type == "textarea" %}
+    <h6>{{ field.label }}</h6>
+    <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
+        {{ field }}
+        <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__trailing"></span>
+        </span>
+    </label>
+{% else %}
+    <label class="mdc-text-field mdc-text-field--filled">
+        {% if field.widget_type == "select" %}<i class="mdc-select__dropdown-icon"></i>{% endif %}
+        <span class="mdc-text-field__ripple"></span>
+        {{ field }}
+        <span class="mdc-floating-label{% if field.widget_type == 'select' or field.widget_type == 'date' %} mdc-floating-label--float-above{% endif %}"
+              id="{{ field.id_for_label }}-label">{{ field.label }}{% if field.field.required %} *{% endif %}</span>
+        <span class="mdc-line-ripple"></span>
+    </label>
+{% endif %}
