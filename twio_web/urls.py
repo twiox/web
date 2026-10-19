@@ -19,8 +19,6 @@ urlpatterns = [
     path("vorstand/", include('user_handling.urls')),
     path("login/", auth_views.LoginView.as_view(template_name="user_handling/login.html"), name="login"),
     path("logout/", user_views.LogoutView.as_view(template_name="user_handling/logout.html"), name="logout"),
-    path("aktiviere/<str:uidb64>/<str:token>/", user_views.activate, name="activate"),
-    path("aktiviere/<str:uidb64>/<str:token>/neu", user_views.resend_activate, name="resend_activate"),
     path("passwort_zurücksetzen/", user_views.PasswordResetView.as_view(template_name="user_handling/password_reset.html"), name="password_reset"),
     path("passwort_zurücksetzen/bestätigen/<str:uidb64>/<str:token>/", user_views.PasswordResetConfirmView.as_view(template_name="user_handling/password_reset_confirm.html"), name="password_reset_confirm"),
 ]

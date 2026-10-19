@@ -10,7 +10,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "wz$ns1s)!r58z)dn1tub(@-3ifm!l)n_y%mt=*ki(c_cs_e_-0"
-PASSWORD_RESET_TIMEOUT_DAYS = 14
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 24 * 14  # 14 days
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = secrets.DEBUG
@@ -78,6 +78,13 @@ DATABASES = {
         "HOST": secrets.DB_HOST,
     },
 }
+
+#DATABASES = {
+#    "default": {
+#        "ENGINE": "django.db.backends.sqlite3",
+#        "NAME": f"{BASE_DIR}/db.sqlite3",
+#    }
+#}
 
 CONN_MAX_AGE = 300
 

@@ -1,6 +1,10 @@
-from .forms import *
-from .tokens import account_activation_token
-from .permissions import trainer_permissions, chairman_permissions
+from .forms import (
+    MemberCreationForm,
+    ProfileCreationForm,
+    MemberListUserUpdateForm,
+    MemberListProfileUpdateForm,
+)
+from .permissions import chairman_permissions
 from members.models import (
     Group,
     Chairman,
@@ -11,43 +15,37 @@ from members.models import (
     MemberParticipant,
 )
 from interested.models import PublicEvent, EventParticipant
-import django
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
+from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
-from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
-from django.utils.encoding import force_bytes, force_str
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
+from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import (
     permission_required,
     login_required,
     user_passes_test,
 )
-from django.contrib.auth.models import User, Permission
+from django.contrib.auth.models import User
 from django.contrib.auth.models import Group as Permission_group
-from django.contrib.auth.mixins import (
-    LoginRequiredMixin,
-    UserPassesTestMixin,
-    PermissionRequiredMixin,
-    UserPassesTestMixin,
-)
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import DeleteView, UpdateView, CreateView, ListView
 from django.contrib.auth.views import (
-    LoginView,
     PasswordResetView,
     LogoutView,
     PasswordResetConfirmView,
 )
 from django.urls import reverse
-from django.db.models.functions import Cast
 import datetime
+import logging
 import string
 import secrets
+
+logger = logging.getLogger(__name__)
 
 
 @permission_required("auth.add_user", raise_exception=True)
@@ -89,33 +87,28 @@ def register(request):
             alphabet = string.ascii_letters + string.digits
             password = "".join(secrets.choice(alphabet) for i in range(8))
             real_user.set_password(password)
-            real_user.is_active = False
+            real_user.is_active = True
             real_user.save()
             real_user.refresh_from_db()  # get the user again
             for key, value in form2.cleaned_data.items():
                 setattr(real_user.profile, key, value)
             real_user.save()  # save the entries
-            current_site = get_current_site(request)
-            password_reset_token = PasswordResetTokenGenerator()
-
-            mail_subject = "Aktiviere deinen Account für den Twio Mitgliederbereich"
-            message = render_to_string(
-                "user_handling/acc_active_email.html",
-                {
-                    "user": real_user,
-                    "domain": current_site.domain,
-                    "uid": urlsafe_base64_encode(force_bytes(real_user.pk)),
-                    "token": account_activation_token.make_token(real_user),
-                },
-            )
-            to_email = form.cleaned_data.get("email")
-            email = EmailMessage(mail_subject, message, to=[to_email])
-            email.send()
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Account angelegt. Das Mitglied bekommt eine Email",
-            )
+            try:
+                send_set_password_email(request, real_user)
+            except OSError:  # covers smtplib.SMTPException and DNS/socket errors
+                logger.exception("Could not send set-password email to %s", real_user)
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    "Account angelegt, aber die Email konnte nicht verschickt werden. "
+                    "Das Mitglied kann über 'Passwort vergessen' einen Link anfordern.",
+                )
+            else:
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    "Account angelegt. Das Mitglied bekommt eine Email",
+                )
             return redirect("register")
     else:
         form = MemberCreationForm()
@@ -132,74 +125,20 @@ def register(request):
     )
 
 
-def activate(request, uidb64, token):
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-    if (
-        user is not None
-        and account_activation_token.check_token(user, token)
-        and user.is_active == False
-    ):
-        user.is_active = True
-        user.save()
-
-        password_reset_token = PasswordResetTokenGenerator()
-        uid2 = urlsafe_base64_encode(force_bytes(user.pk))
-        token2 = password_reset_token.make_token(user)
-
-        # return redirect('home')
-        return render(
-            request,
-            "user_handling/activate.html",
-            context={"user": user, "uid": uid2, "token": token2},
-        )
-    else:
-        return render(
-            request,
-            "user_handling/activate_fail.html",
-            context={"uidb64": uidb64, "token": token},
-        )
-
-
-def resend_activate(request, uidb64, token):
-    uid = force_str(urlsafe_base64_decode(uidb64))
-    try:
-        real_user = User.objects.get(pk=uid)
-        to_email = real_user.email
-
-        password_reset_token = PasswordResetTokenGenerator()
-        mail_subject = "Aktiviere deinen Account für den Twio Mitgliederbereich"
-        message = render_to_string(
-            "user_handling/acc_active_email.html",
-            {
-                "user": real_user,
-                "domain": get_current_site(request).domain,
-                "uid": urlsafe_base64_encode(force_bytes(real_user.pk)),
-                "token": account_activation_token.make_token(real_user),
-            },
-        )
-        email = EmailMessage(mail_subject, message, to=[to_email])
-        email.send()
-        messages.add_message(
-            request, messages.SUCCESS, "Neuer Aktivierungslink verschickt"
-        )
-    except:
-        messages.add_message(
-            request,
-            messages.SUCCESS,
-            "FEHLER: Der Benutzer existiert nicht. Bitte wende dich an den Vorstand",
-        )
-    return redirect("activate", uidb64=uidb64, token=token)
-
-
-def get_ordering(n):
-    try:
-        return int(n.profile.member_num)
-    except:
-        return 0
+def send_set_password_email(request, user):
+    message = render_to_string(
+        "user_handling/set_password_email.html",
+        {
+            "user": user,
+            "domain": get_current_site(request).domain,
+            "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+            "token": default_token_generator.make_token(user),
+        },
+    )
+    email = EmailMessage(
+        "Dein Account für den Twio Mitgliederbereich", message, to=[user.email]
+    )
+    email.send()
 
 
 class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
@@ -418,7 +357,6 @@ def get_all_emails(request):
                 add_emails = AdditionalEmail.objects.filter(user=user)
                 emails.extend([x.email for x in add_emails])
                 if hasattr(user, "trainer"):
-                    trainer = Trainer.objects.get(user=user)
                     emails.append(user.trainer.trainer_email)
         elif data["id"].startswith("email"):
             _, stat = data["id"].split("_")
@@ -486,7 +424,7 @@ def member_detail_update(request, pk):
         mail.save()
     try:
         user.save()
-    except django.core.exceptions.ValidationError:
+    except ValidationError:
         return JsonResponse({"data": False})
     return JsonResponse({"data": data})
 
