@@ -120,6 +120,7 @@ def send_set_password_email(request, user):
         "user_handling/set_password_email.html",
         {
             "user": user,
+            "protocol": request.scheme,
             "domain": get_current_site(request).domain,
             "uid": urlsafe_base64_encode(force_bytes(user.pk)),
             "token": default_token_generator.make_token(user),
@@ -128,6 +129,7 @@ def send_set_password_email(request, user):
     email = EmailMessage(
         "Dein Account für den Twio Mitgliederbereich", message, to=[user.email]
     )
+    email.content_subtype = "html"
     email.send()
 
 
