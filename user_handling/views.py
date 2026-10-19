@@ -247,7 +247,7 @@ class ChairmanUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView
 
 
 class ChairmanListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
-    model = Chairman
+    queryset = Chairman.objects.select_related("user__profile").order_by("user__last_name")
     permission_required = "members.change_chairman"
     template_name = "user_handling/chairman_list.html"
 

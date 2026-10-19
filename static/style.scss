@@ -963,6 +963,13 @@ footer{
         color: grey;
     }
 }
+.member_table--static tbody tr{
+    cursor: default;
+    a{
+        padding: 0 4px;
+        font-size: 1.1rem;
+    }
+}
 .member_table td.status_cell{
     background-color: $primary;
     color: white;
