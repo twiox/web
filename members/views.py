@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic import (
@@ -28,6 +28,7 @@ from .models import (
 )
 from django.contrib.auth.decorators import login_required, permission_required
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import (
     LoginRequiredMixin,
@@ -1005,10 +1006,9 @@ def delete_additional_email(request):
     return JsonResponse({"data": data})
 
 
-@permission_required("auth.add_user")
+@permission_required("auth.add_user", raise_exception=True)
+@require_POST
 def delete_additional_email_chair(request, pk):
-    data = {x: v[0] for (x, v) in dict(request.GET).items()}
-    user = User.objects.get(pk=pk)
-    email = AdditionalEmail.objects.get(user=user, pk=int(data["id"]))
+    email = get_object_or_404(AdditionalEmail, user__pk=pk, pk=request.POST.get("id"))
     email.delete()
-    return JsonResponse({"data": data})
+    return JsonResponse({"data": True})

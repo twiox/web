@@ -898,3 +898,169 @@ footer{
         padding: 10px;
     }
 }
+
+/* Member list (Vorstand) */
+.member_page{
+    padding: 0 $padding_small;
+}
+.member_toolbar{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $padding_small $padding_big;
+    margin-bottom: $padding_small;
+    h1{
+        margin: 0;
+    }
+    .searchbar{
+        flex: 1 1 250px;
+        width: auto;
+        padding: $padding_small;
+    }
+}
+.member_layout{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: $padding_small;
+    align-items: start;
+}
+@media (max-width: 1000px){
+    .member_layout{
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+.member_table_wrapper{
+    max-height: 75vh;
+    overflow: auto;
+}
+.member_table{
+    width: 100%;
+    th{
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background-color: DarkSlateGray;
+        padding: $padding_small;
+        white-space: nowrap;
+    }
+    td{
+        padding: 6px $padding_small;
+        border-bottom: 1px solid $quartiary_bg;
+        white-space: nowrap;
+    }
+    tbody tr{
+        cursor: pointer;
+        &:hover, &:focus{
+            background-color: $secondary_bg;
+            outline: none;
+        }
+        &.selected{
+            background-color: $quartiary_bg;
+            box-shadow: inset 4px 0 0 $primary;
+        }
+    }
+    small{
+        color: grey;
+    }
+}
+.member_table td.status_cell{
+    background-color: $primary;
+    color: white;
+    &--forderndes-mitglied{
+        background-color: #c9a227;
+        color: $primary_bg;
+    }
+    &--pausiertes-mitglied{
+        background-color: grey;
+    }
+    // last, so a set cancellation date wins over the status colour
+    &--kundigung{
+        background-color: $secondary;
+    }
+}
+.member_panel{
+    position: sticky;
+    top: $padding_small;
+    max-height: 90vh;
+    overflow: auto;
+    padding: $padding_big;
+    &__header{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        h3{
+            margin: 0;
+        }
+        a{
+            font-size: 1.3rem;
+            padding: 0 4px;
+        }
+    }
+    &__meta, &__hint{
+        color: grey;
+        font-size: 0.9rem;
+    }
+}
+.member_tabs{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: $padding_small 0;
+    border-bottom: 1px solid $quartiary_bg;
+    button{
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: $font_col;
+        cursor: pointer;
+        padding: 8px $padding_small;
+        font-size: 0.95rem;
+        &.here_I_am{
+            color: white;
+            border-bottom-color: $primary;
+        }
+        &.has_error{
+            color: red;
+        }
+    }
+}
+.member_fields{
+    display: grid;
+    &[hidden]{
+        display: none;
+    }
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: $padding_small;
+    align-items: start;
+    .mdc-text-field{
+        width: 100%;
+    }
+    &__heading, .form_error, .member_emails{
+        grid-column: 1 / -1;
+        margin: $padding_small 0 0 0;
+    }
+    &--wide{
+        grid-template-columns: minmax(0, 1fr);
+        h6{
+            margin: 0;
+        }
+    }
+    select.mdc-text-field__input{
+        background-color: #333333;
+    }
+}
+.member_emails td{
+    padding: 4px $padding_small 4px 0;
+}
+.icon_button{
+    background: none;
+    border: none;
+    color: $font_col;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+.member_form__submit{
+    margin: $padding_big auto 0 auto;
+    max-width: 200px;
+    cursor: pointer;
+}

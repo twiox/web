@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from members.models import Profile
+from members.models import Profile, AdditionalEmail
 
 
 def date_widget():
@@ -85,6 +85,16 @@ class ProfileForm(MdcFormMixin, forms.ModelForm):
             # a new member cannot have cancelled yet
             del self.fields["membership_end"]
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get("membership_end"):
+            cleaned_data["status"] = "Kündigung"
+        elif cleaned_data.get("status") == "Kündigung":
+            # new members have no membership_end field, so the error goes on the status there
+            field = "membership_end" if "membership_end" in self.fields else "status"
+            self.add_error(field, "Bei einer Kündigung muss das Kündigungsdatum gesetzt sein.")
+        return cleaned_data
+
     def clean_member_num(self):
         member_num = self.cleaned_data["member_num"].strip()
         if not member_num.isdigit():
@@ -93,3 +103,21 @@ class ProfileForm(MdcFormMixin, forms.ModelForm):
         if taken.exists():
             raise forms.ValidationError("Diese Mitgliedsnummer ist bereits vergeben.")
         return member_num
+
+
+class AdditionalEmailForm(MdcFormMixin, forms.ModelForm):
+    # a CharField on the model, so validate the address here
+    email = forms.EmailField(label="Weitere E-Mail-Adresse", max_length=200)
+
+    class Meta:
+        model = AdditionalEmail
+        fields = ["title", "email"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.required = True
+
+    def has_input(self):
+        """The fields are optional on the page, so only validate when something was typed."""
+        return any(self.data.get(self.add_prefix(name)) for name in self.fields)

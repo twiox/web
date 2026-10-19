@@ -1,4 +1,4 @@
-from .forms import MemberForm, ProfileForm
+from .forms import MemberForm, ProfileForm, AdditionalEmailForm
 from .permissions import chairman_permissions
 from members.models import (
     Group,
@@ -11,8 +11,9 @@ from members.models import (
 )
 from interested.models import PublicEvent, EventParticipant
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db import transaction
 from django.http import HttpResponseRedirect, JsonResponse
-from django.core.exceptions import ValidationError
+from django.views.decorators.http import require_POST
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
@@ -139,9 +140,15 @@ class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     template_name = "user_handling/member_list.html"
 
     def get_queryset(self):
-        ordered = sorted(User.objects.all(), key=lambda n: get_ordering(n))
-        return ordered
-        # User.objects.all().order_by("profile__member_num")
+        users = sorted(User.objects.select_related("profile"), key=get_ordering)
+        today = datetime.date.today()
+        for user in users:
+            birthday = user.profile.birthday
+            # the parent contact is only relevant for minors
+            user.is_minor = bool(birthday) and (
+                today.year - birthday.year - ((today.month, today.day) < (birthday.month, birthday.day))
+            ) < 18
+        return users
 
 
 class UserDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
@@ -347,68 +354,59 @@ def get_all_emails(request):
     return JsonResponse({"data": data, "string": string})
 
 
+@login_required
 @permission_required("auth.add_user", raise_exception=True)
 def member_detail_form(request, pk):
-    user = User.objects.get(pk=int(pk))
-    groups = [(x.pk, f"Gruppe: {x.group_id}") for x in Group.objects.all()]
-    membership_choices = user.profile.choices
-    zahlungsart_choices = user.profile.choices2
-    additional_emails = AdditionalEmail.objects.filter(user=user)
-
+    user = get_object_or_404(User.objects.select_related("profile"), pk=pk)
     return render(
         request,
         "user_handling/ajax/member_detail.html",
         context={
             "user": user,
-            "group_choices": groups,
-            "zahlungsart_choices": zahlungsart_choices,
-            "membership_choices": membership_choices,
-            "additional_emails": additional_emails,
+            "user_form": MemberForm(instance=user),
+            "profile_form": ProfileForm(instance=user.profile),
+            # both fields are only required once something is typed, see has_input()
+            "email_form": AdditionalEmailForm(prefix="add_email", use_required_attribute=False),
+            "additional_emails": AdditionalEmail.objects.filter(user=user),
         },
     )
 
 
+@login_required
 @permission_required("auth.add_user", raise_exception=True)
+@require_POST
+def member_activate(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    user.is_active = True
+    user.save(update_fields=["is_active"])
+    return JsonResponse({"data": True})
+
+
+@login_required
+@permission_required("auth.add_user", raise_exception=True)
+@require_POST
 def member_detail_update(request, pk):
-    data = request.POST
-    user = User.objects.get(pk=pk)
-    data = {k: v[0] for (k, v) in dict(request.POST).items()}
+    user = get_object_or_404(User.objects.select_related("profile"), pk=pk)
+    user_form = MemberForm(request.POST, instance=user)
+    profile_form = ProfileForm(request.POST, instance=user.profile)
+    email_form = AdditionalEmailForm(request.POST, prefix="add_email")
+    forms = [user_form, profile_form]
+    if email_form.has_input():
+        forms.append(email_form)
 
-    ## Save the data
-    user.first_name = data["first_name"]
-    user.last_name = data["last_name"]
-    user.email = data["email"]
-    user.profile.birthday = data["birthday"]
-    user.profile.address = data["address"]
-    user.profile.telephone = data["telephone"]
-    user.profile.sex = data["sex"]
-    user.profile.parent = data["parent"]
-    user.profile.parent_telnr = data["parent_telnr"]
-    user.profile.status = data["status"]
-    user.profile.member_num = data["member_num"]
-    # user.profile.group = Group.objects.get(pk=int(data['group']))
-    user.profile.membership_start = data["membership_start"]
-    user.profile.membership_end = (
-        data["membership_end"] if data["membership_end"] != "" else None
-    )
-    user.profile.mandatsref = data["mandatsref"]
-    user.profile.zahlungsart = data["zahlungsart"]
-    user.profile.beitrag = int(data["beitrag"])
-    user.profile.notes_trainer = data["notes_trainer"]
-    user.profile.notes_chairman = data["notes_chairman"]
-    if data["add_email_email"] and data["add_email_title"]:
-        mail = AdditionalEmail.objects.create(
-            user=user, title=data["add_email_title"], email=data["add_email_email"]
-        )
-        mail.save()
-    try:
-        user.save()
-    except ValidationError:
-        return JsonResponse({"data": False})
-    return JsonResponse({"data": data})
+    if not all([form.is_valid() for form in forms]):  # list: validate every form
+        errors = {}
+        for form in forms:
+            for name, messages_ in form.errors.items():
+                label = form.fields[name].label if name in form.fields else name
+                errors[form.add_prefix(name)] = {"label": str(label), "messages": messages_}
+        return JsonResponse({"data": False, "errors": errors}, status=400)
 
-
-@permission_required("auth.add_user", raise_exception=True)
-def order_members(request, key):
-    members = Profile.objects.all().order_by(key)
-    return JsonResponse({"members": members})
+    with transaction.atomic():
+        user_form.save()
+        profile_form.save()
+        if email_form in forms:
+            additional_email = email_form.save(commit=False)
+            additional_email.user = user
+            additional_email.save()
+    return JsonResponse({"data": True})

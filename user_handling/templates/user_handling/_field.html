@@ -16,7 +16,7 @@
         <span class="mdc-text-field__ripple"></span>
         {{ field }}
         <span class="mdc-floating-label{% if field.widget_type == 'select' or field.widget_type == 'date' %} mdc-floating-label--float-above{% endif %}"
-              id="{{ field.id_for_label }}-label">{{ field.label }}{% if field.field.required %} *{% endif %}</span>
+              id="{{ field.id_for_label }}-label">{{ field.label }}</span>
         <span class="mdc-line-ripple"></span>
     </label>
 {% endif %}

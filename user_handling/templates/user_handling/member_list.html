@@ -8,230 +8,207 @@
 </div>
 {% endblock %}
 
-{%block content %}
-<style>
-.tscroll table{
-    border-collapse: separate;
-    border-spacing: 0;
-}
-.tscroll td:first-child{
-  position: sticky;
-  left: 0;
-  background-color: DarkSlateGray;
-}
-
-.tscroll td, th{
-  border: solid grey 1px;
-}
-</style>
-<h1>Vorstandsdokument </h1>
-<section>
-    <div id="container">
-        <h3>Mitgliederliste</h3>
-        <div class="trainer_ui">
-            {% if perms.auth.add_user %}
-                <a href="{% url 'register' %}#nav" title="Benutzer hinzufügen"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
-            {% endif %}
-        </div>
-        <div class="padding_tb_big">
-            <input class="searchbar" id="myInput" type="text" placeholder="Suche..">
-        </div>
+{% block content %}
+<section class="member_page">
+    <div class="member_toolbar">
+        <h1>Mitgliederliste</h1>
+        <input class="searchbar" id="member_search" type="search" placeholder="Suche nach Name, Nummer, E-Mail …">
+        {% if perms.auth.add_user %}
+            <a class="more_info_button" href="{% url 'register' %}#nav"><i class="far fa-plus-square"></i> Neues Mitglied</a>
+        {% endif %}
     </div>
 
-    <div style="display:flex;max-height:600px;">
-        <div id='table_data' style="width:50%; overflow:auto"  class="tertiary_bg tscroll">
-            <table id="the_table">
-                <thead style="position: sticky; top:0; background-color:DarkSlateGray;z-index:3;">
+    <div class="member_layout">
+        <div class="member_table_wrapper tertiary_bg">
+            <table class="member_table">
+                <thead>
                     <tr>
-                        <th nowrap="nowrap">Nr</th>
-                        <th nowrap="nowrap">Benutzername</th>
-                        <th class="sticky-col" nowrap="nowrap">Vorname</th>
-                        <th nowrap="nowrap">Nachname</th>
-                        <th nowrap="nowrap">Mitgl.</th>
-                        <!--<th nowrap="nowrap"><h5> Gruppe </th>-->
-                        <th nowrap="nowrap">Geschlecht</th>
-                        <th nowrap="nowrap">Geb.-Datum</th>
-                        <th nowrap="nowrap">E-Mail-Adresse</th>
-                        <th nowrap="nowrap">Ansprechpartner</th>
-                        <th nowrap="nowrap">Adresse</th>
-                        <th nowrap="nowrap">Telefonnummer</th>
-                        <th nowrap="nowrap">Notfallnummer</th>
-                        <th nowrap="nowrap">Anmeldung</th>
-                        <th nowrap="nowrap">Kündigung</th>
-                        <th nowrap="nowrap">Mandatsreferenz</th>
-                        <th nowrap="nowrap">Zahlungsart</th>
-                        <th nowrap="nowrap">Beitrag</th>
-                        <th nowrap="nowrap">Notizen Trainer</th>
-                        <th nowrap="nowrap">Notizen Vorstand</th>
-                        <th nowrap="nowrap">Status</th>
+                        <th>Nr.</th>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Geb.-Datum</th>
+                        <th>Ansprechpartner*in</th>
+                        <th>E-Mail</th>
+                        <th>Telefon</th>
+                        <th>Eintritt</th>
+                        <th>Kündigung zum</th>
+                        <th>Vorstandsnotizen</th>
                     </tr>
                 </thead>
-                <tbody id="table_body">
+                <tbody id="member_rows">
                 {% for member in object_list %}
-                    <tr id={{member.profile.status}} class="{% cycle 'odd' 'even' %} table_row" data-url="{% url 'get_member_detail_form' member.pk %}">
-                        <td nowrap="nowrap" class="counter"> {{forloop.counter}}</td>
-                        <td nowrap="nowrap"> {{member.username}}</td>
-                        <td nowrap="nowrap"> {%if member.first_name %} {{member.first_name}} {% endif %}</td>
-                        <td nowrap="nowrap"> {%if member.last_name %} {{member.last_name}} {% endif %}</td>
-                        <td nowrap="nowrap"> {%if member.profile.member_num %} {{member.profile.member_num}}{% endif %} </td>
-                        <!--
-                        <td nowrap="nowrap"> {%if member.profile.group.group_id %} {{member.profile.group.group_id }} {% endif %}</td>
-                        -->
-                        <td nowrap="nowrap"> {%if member.profile.sex %} {{member.profile.sex}} {% endif %}</td>
-                        <td nowrap="nowrap"> {%if member.profile.birthday %} {{member.profile.birthday|date:"d.m.Y"}} {% endif %}</td>
-                        <td nowrap="nowrap"> {%if member.email %} {{member.email}} {% endif %}</td>
-                        <td nowrap="nowrap"> {%if member.profile.parent %} {{member.profile.parent}} {% endif %}</td>
-                        <td nowrap="nowrap"> {%if member.profile.address %} {{member.profile.address}} {% endif %}</td>
-                        <td nowrap="nowrap"> {%if member.profile.telephone %} {{member.profile.telephone}} {% endif %}</td>
-                        <td nowrap="nowrap"> {%if member.profile.parent_telnr %} {{member.profile.parent_telnr}} {% endif %}</td>
-                        <td nowrap="nowrap"> {%if member.profile.membership_start %} {{member.profile.membership_start|date:"m/Y"}} {% endif %}</td>
-                        <td nowrap="nowrap"> {%if member.profile.membership_end %} Kündigung: {{member.profile.membership_end|date:"d.m.Y"}} {% endif %}</td>
-                        <td nowrap="nowrap"> {%if member.profile.mandatsref %} {{member.profile.mandatsref}} {% endif %}</td>
-                        <td nowrap="nowrap"> {%if member.profile.zahlungsart %} {{member.profile.zahlungsart}} {% endif %}</td>
-                        <td nowrap="nowrap"> {%if member.profile.beitrag %} {{member.profile.beitrag}},00 €{% endif %}</td>
-                        <td nowrap="nowrap"> {%if member.profile.notes_trainer %} {{member.profile.notes_trainer}} {% endif %}</td>
-                        <td nowrap="nowrap"> {%if member.profile.notes_chairman %} {{member.profile.notes_chairman}} {% endif %}</td>
-                        <td nowrap="nowrap"> {%if member.profile.status %} {{member.profile.status}} {% endif %}</td>
-                        <td nowrap="nowrap" hidden class="member_id">{{member.pk}}</td>
+                    <tr data-pk="{{ member.pk }}" data-url="{% url 'get_member_detail_form' member.pk %}" tabindex="0">
+                        <td>{{ member.profile.member_num }}</td>
+                        <td>{% if member.last_name %}{{ member.last_name }}, {{ member.first_name }}{% else %}{{ member.username }}{% endif %}</td>
+                        <td class="status_cell status_cell--{{ member.profile.status|slugify }}{% if member.profile.membership_end %} status_cell--kundigung{% endif %}">
+                            {{ member.profile.status|cut:"es Mitglied" }}
+                        </td>
+                        <td>{{ member.profile.birthday|date:"d.m.Y" }}</td>
+                        <td>{% if member.is_minor %}{{ member.profile.parent|default:"" }}{% endif %}</td>
+                        <td>{{ member.email }}</td>
+                        <td>{{ member.profile.telephone|default:"" }}</td>
+                        <td>{{ member.profile.membership_start|date:"m/Y" }}</td>
+                        <td>{{ member.profile.membership_end|date:"d.m.Y" }}</td>
+                        <td title="{{ member.profile.notes_chairman|default:'' }}">{{ member.profile.notes_chairman|default:""|truncatechars:40 }}</td>
                     </tr>
+                {% empty %}
+                    <tr><td colspan="10">Noch keine Mitglieder.</td></tr>
                 {% endfor %}
                 </tbody>
             </table>
+            <p id="member_no_results" class="padding_all_small" hidden>Keine Treffer.</p>
         </div>
-        <div >
-            <div id='toggle_detail' class='primary_bg flex_center_vertical' style="max-height:600px;width:10px;cursor:pointer">
-                <i class="fas fa-chevron-right"></i>
-            </div>
-        </div>
-        <div id='update_tab' style="width:50%;">
-            <div class="tertiary_bg padding_all_small" style="border: solid 1px; border-color:white; position:sticky; top:0">
-                <div class='side_scroll' id="member_detail">
-                    Detailansicht: Klick auf eine Reihe!
-                </div>
-            </div>
-        </div>
+
+        <aside id="member_detail" class="member_panel tertiary_bg">
+            <p class="member_panel__hint">Klicke auf ein Mitglied, um die Details zu sehen und zu bearbeiten.</p>
+        </aside>
     </div>
 </section>
 
 <script>
-function validate(){
-    var valid = true;
-    $("input:required").each(function(){
-        if(this.value === ""){
-            var formid = $(this).parent().closest('div').attr('id');
-            var headid = formid.substring(0, formid.lastIndexOf('_'));
-            $(`#${headid}`).css("color",'#7b1b42')
-            $(this).css("backgroundColor","#7b1b42")
-            valid = false;
-        }
-    });
-    setTimeout(function(){
-        $("input:required").each(function(){
-            if(this.value === ""){
-                $(this).css("backgroundColor","inherit");
-                var formid = $(this).parent().closest('div').attr('id');
-                var headid = formid.substring(0, formid.lastIndexOf('_'));
-                $(`#${headid}`).css("color",'inherit')
-            }
-        })
-    }, 1000);
-    if (valid) return true;
-    if (! valid) return false;
-}
-function updateDetails(){
-    $.ajax({
-        url: '{% url "get_member_detail_form" 1234 %}'.replace("1234", $('#user_pk').html().toString()),
-        type: 'GET',
-        success: function (data){
-            $("#member_detail").html(data);
-            fields = document.querySelectorAll('.mdc-text-field');
-            fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
-        }
-    });
-}
+(function () {
+    const rows = document.getElementById('member_rows');
+    const panel = document.getElementById('member_detail');
+    const search = document.getElementById('member_search');
 
-function sendData(){
-    var pk = $('#user_pk').html();
-    if (! validate()) return false;
-    $.ajax({
-        type: 'POST',
-        url:"{% url 'member_detail_form_update' 1234 %}".replace("1234", pk.toString()),
-        data: $("form").serialize(),
-        success: function(data){
-            if(data["data"]!= false){
-                $('#the_table').html("").load(document.URL + ' #the_table', function(){
-                    bindButtonClick();
-                    updateTable()
-                    updateDetails()
-                    snackbar.labelText = "Daten aktualisiert";
-                    snackbar.open()
-                });
-            } else {
-                alert('error')
-            }
-        }
-    });
-}
+    function showMessage(text) {
+        snackbar.labelText = text;
+        snackbar.open();
+    }
 
-function updateTable(){
-    var value = $("#myInput").val().toLowerCase();
-    $("#table_body tr").filter(function() {
-        if($(this).text().toLowerCase().indexOf(value) > -1){
-            $(this).show()
-        } else {
-            $(this).hide()
-        }
-    });
-    $(".counter:visible").each(function(index, value){
-        $(this).html(index+1)});
-    $(".table_row:visible").each(function(index, value){
-        $(this).removeClass('odd');
-        if(index%2===1){
-            $(this).addClass('odd');
-        };
-    });
-};
-
-function bindButtonClick(){
-    // the search function
-    $("#myInput").on("keyup", function() {
-        updateTable()
-    });
-    // This is for the included detail view
-    $('body').on('click','#table_body tr',function(){
-        var pk = $(this).find($(".member_id")).html();
-        $.ajax({
-            url: $(this).attr('data-url'),
-            type: 'GET',
-            success: function (data){
-                $("#member_detail").html(data);
-                fields = document.querySelectorAll('.mdc-text-field');
-                fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
-            }
+    function filterRows() {
+        const value = search.value.trim().toLowerCase();
+        let visible = 0;
+        rows.querySelectorAll('tr[data-pk]').forEach(row => {
+            const match = row.textContent.toLowerCase().includes(value);
+            row.hidden = !match;
+            if (match) visible++;
         });
-    });
-    $('body').on('click', '#toggle_detail', function(e){
-        e.stopImmediatePropagation();
-        if($('body').find("#update_tab").width() != 0){
-            $('body').find("#update_tab").width('0%')
-            $('body').find("#table_data").width('100%')
-            $('body').find('#toggle_detail').html('<i class="fas fa-chevron-left"></i>')
+        document.getElementById('member_no_results').hidden = visible > 0;
+    }
+
+    function markSelected(pk) {
+        rows.querySelectorAll('tr.selected').forEach(row => row.classList.remove('selected'));
+        const row = rows.querySelector(`tr[data-pk="${pk}"]`);
+        if (row) row.classList.add('selected');
+    }
+
+    async function loadDetail(url) {
+        const response = await fetch(url);
+        if (!response.ok) {
+            showMessage('Mitglied konnte nicht geladen werden');
+            return;
         }
-        else{
-            $('body').find("#update_tab").width('50%')
-            $('body').find("#table_data").width('50%')
-            $('body').find('#toggle_detail').html('<i class="fas fa-chevron-right"></i>')
+        panel.innerHTML = await response.text();
+        panel.querySelectorAll('.mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));
+        markSelected(panel.querySelector('form').dataset.pk);
+    }
+
+    async function reloadRows() {
+        // swap only the table body, the event listeners live on the parent elements
+        const html = await (await fetch(window.location.href)).text();
+        const fresh = new DOMParser().parseFromString(html, 'text/html').getElementById('member_rows');
+        rows.innerHTML = fresh.innerHTML;
+        filterRows();
+    }
+
+    function showErrors(form, errors) {
+        let firstTab = null;
+        for (const [name, error] of Object.entries(errors)) {
+            const input = form.querySelector(`[name="${name}"]`);
+            const p = document.createElement('p');
+            p.className = 'form_error';
+            p.textContent = input ? error.messages.join(' ') : `${error.label}: ${error.messages.join(' ')}`;
+            if (input) {
+                input.closest('label').before(p);
+                const tab = input.closest('[data-tab-panel]').dataset.tabPanel;
+                form.querySelector(`[data-tab="${tab}"]`).classList.add('has_error');
+                firstTab = firstTab || tab;
+            } else {
+                form.prepend(p);
+            }
         }
+        if (firstTab) switchTab(form, firstTab);
+    }
+
+    function switchTab(form, name) {
+        form.querySelectorAll('[data-tab]').forEach(tab => tab.classList.toggle('here_I_am', tab.dataset.tab === name));
+        form.querySelectorAll('[data-tab-panel]').forEach(p => p.hidden = p.dataset.tabPanel !== name);
+    }
+
+    async function save(form) {
+        form.querySelectorAll('.form_error').forEach(p => p.remove());
+        form.querySelectorAll('.has_error').forEach(tab => tab.classList.remove('has_error'));
+        const response = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+        if (response.ok) {
+            const activeTab = form.querySelector('.here_I_am').dataset.tab;
+            await reloadRows();  // first, so loadDetail can mark the new row as selected
+            await loadDetail(form.dataset.detailUrl);
+            switchTab(panel.querySelector('form'), activeTab);
+            showMessage('Daten gespeichert');
+        } else if (response.status === 400) {
+            showErrors(form, (await response.json()).errors);
+            showMessage('Bitte die markierten Felder prüfen');
+        } else {
+            showMessage('Fehler beim Speichern');
+        }
+    }
+
+    async function deleteEmail(button) {
+        const form = button.closest('form');
+        const body = new FormData();
+        body.append('id', button.dataset.id);
+        body.append('csrfmiddlewaretoken', form.querySelector('[name=csrfmiddlewaretoken]').value);
+        const response = await fetch(button.dataset.url, { method: 'POST', body });
+        if (response.ok) {
+            button.closest('tr').remove();
+        } else {
+            showMessage('E-Mail konnte nicht gelöscht werden');
+        }
+    }
+
+    async function activate(button) {
+        const body = new FormData();
+        body.append('csrfmiddlewaretoken', panel.querySelector('[name=csrfmiddlewaretoken]').value);
+        const response = await fetch(button.dataset.activateUrl, { method: 'POST', body });
+        if (response.ok) {
+            await loadDetail(panel.querySelector('form').dataset.detailUrl);
+            showMessage('Nutzer aktiviert');
+        } else {
+            showMessage('Nutzer konnte nicht aktiviert werden');
+        }
+    }
+
+    // every listener is registered once here; the panel content is replaced, the listeners stay
+    search.addEventListener('input', filterRows);
+    rows.addEventListener('click', event => {
+        const row = event.target.closest('tr[data-url]');
+        if (row) loadDetail(row.dataset.url);
     });
-};
-
-
-</script>
-<script>
-$(document).ready(function(){
-    bindButtonClick();
-    updateTable()
-});
-
+    rows.addEventListener('keydown', event => {
+        const row = event.target.closest('tr[data-url]');
+        if (row && event.key === 'Enter') loadDetail(row.dataset.url);
+    });
+    panel.addEventListener('click', event => {
+        const tab = event.target.closest('[data-tab]');
+        if (tab) switchTab(tab.closest('form'), tab.dataset.tab);
+        const deleteButton = event.target.closest('[data-delete-email]');
+        if (deleteButton) deleteEmail(deleteButton);
+        const activateButton = event.target.closest('[data-activate-url]');
+        if (activateButton) activate(activateButton);
+    });
+    panel.addEventListener('submit', event => {
+        event.preventDefault();
+        const form = event.target;
+        // the form is novalidate because the browser can't show errors on a hidden tab
+        const invalid = Array.from(form.elements).find(el => el.willValidate && !el.checkValidity());
+        if (invalid) {
+            switchTab(form, invalid.closest('[data-tab-panel]').dataset.tabPanel);
+            invalid.reportValidity();
+            return;
+        }
+        save(form);
+    });
+})();
 </script>
 {% endblock %}
