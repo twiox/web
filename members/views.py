@@ -11,7 +11,6 @@ from django.views.generic import (
 from .models import (
     is_trainer,
     is_chairman,
-    Group,
     Event,
     Profile,
     Chairman,
@@ -24,7 +23,6 @@ from .models import (
     ShopItem,
     Image,
     Gallery,
-    AgeGroup,
     MemberParticipant,
     Document,
 )
@@ -80,52 +78,26 @@ def index(request):
             msg.delete()
 
     # now the actual view
-    agegroups = request.user.profile.agegroups
-    sessions = Session.objects.all()
-    if agegroups:
-        events = Event.objects.filter(allowed_agegroups__in=agegroups).distinct()
-        training_messags = (
-            Message.objects.filter(agegroup__in=agegroups)
-            .filter(display="sessions")
-            .distinct()
-        )
-        event_messags = (
-            Message.objects.filter(agegroup__in=agegroups)
-            .filter(display="events")
-            .distinct()
-        )
+    age = request.user.profile.age
+    privileged = is_trainer(request.user) or is_chairman(request.user)
+    if privileged:
+        events = Event.objects.all()
+        notices = Message.objects.all()
     else:
-        events = []
-        training_messags = []
-        event_messags = []
+        events = Event.visible_for_age(age)
+        notices = Message.visible_for_age(age)
+    training_messags = notices.filter(display="sessions")
+    event_messags = notices.filter(display="events")
     chairmen = Chairman.objects.filter(active=True, show__contains="member_site")
 
-    posts = News.objects.all().order_by("-id")
-    if len(posts) > 3:
-        posts = posts[:3]
+    posts = News.objects.all().order_by("-id")[:3]
 
-    trainer_sessions = None
-    trainer_groups = None
-    if is_trainer(request.user):
-        events = Event.objects.all()
-        training_messags = Message.objects.all().filter(display="sessions")
-        event_messags = Message.objects.all().filter(display="events")
-
-    if is_chairman(request.user):
-        # sessions = Session.objects.all()
-        events = Event.objects.all()
-        training_messags = Message.objects.all().filter(display="sessions")
-        event_messags = Message.objects.all().filter(display="events")
-
-    session_days = sorted(
-        list(set([(x.day, x.weekday, x.order) for x in sessions])), key=lambda x: x[2]
-    )
-    # group sessions by day and pack into dict
-    grouped_sessions = {}
-    for short, day, order in session_days:
-        grouped_sessions[short] = Session.objects.filter(day=short).order_by(
-            "start_time"
-        )
+    # all sessions are listed, the ones outside the member's age are greyed out
+    sessions = list(Session.objects.order_by("start_time"))
+    for session in sessions:
+        session.visible = privileged or session.allows_age(age)
+    session_days = sorted({(x.day, x.weekday, x.order) for x in sessions}, key=lambda x: x[2])
+    grouped_sessions = {short: [x for x in sessions if x.day == short] for short, _, _ in session_days}
 
     return render(
         request,
@@ -138,7 +110,6 @@ def index(request):
             "training_messags": training_messags,
             "event_messags": event_messags,
             "chairman": is_chairman(request.user),
-            "groups": Group.objects.all(),
             "posts": posts,
         },
     )
@@ -150,9 +121,7 @@ def index(request):
 def event_test_func(request, event):
     if bool(trainer_check(request) or chairman_check(request)):
         return True
-    return event in Event.objects.filter(
-        allowed_agegroups__in=request.user.profile.agegroups
-    )
+    return Event.visible_for_age(request.user.profile.age).filter(pk=event.pk).exists()
 
 
 class EventListView(LoginRequiredMixin, ListView, UserPassesTestMixin):
@@ -205,13 +174,6 @@ class EventUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     # who can update the event?
     permission_required = "members.change_event"
 
-    def get_context_data(self, **kwargs):
-        context = {
-            "picked_groups": [x[0] for x in self.object.allowed_agegroups.values_list()]
-        }
-        context["object"] = self.request.user
-        context.update(kwargs)
-        return super().get_context_data(**context)
 
     def form_valid(self, form):
         self.object = form.save()
@@ -534,147 +496,12 @@ class NewsDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         return reverse("news_list")
 
 
-"""For the Groups"""
-
-
-class GroupCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    model = Group
-    permission_required = "members.create_group"
-    fields = ["group_id"]
-
-    def form_valid(self, form):
-        self.object = form.save()
-        messages.add_message(self.request, messages.SUCCESS, "Gruppe erstellt")
-        return super().form_valid(form)
-
-
-class GroupDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
-    model = Group
-    permission_required = "members.delete_group"
-
-    def delete(self, request, *args, **kwargs):
-        """
-        Call the delete() method on the fetched object and then redirect to the
-        success URL.
-        """
-        self.object = self.get_object()
-
-        if len(User.objects.filter(profile__group=self.object)) == 0:
-            success_url = self.get_success_url()
-            self.object.delete()
-            messages.add_message(request, messages.SUCCESS, "Gruppe gelöscht")
-            return HttpResponseRedirect(success_url)
-
-        else:
-            messages.add_message(
-                request, messages.ERROR, "Fehler. Die Gruppe ist nicht leer"
-            )
-            return HttpResponseRedirect(
-                reverse("group_delete", kwargs={"pk": self.object.id})
-            )
-
-    def get_success_url(self, **kwargs):
-        return reverse("group_list")
-
-
-class GroupListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
-    model = Group
-    permission_required = "members.delete_group"
-
-
-### Age Groups ###
-class AgeGroupDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
-    model = AgeGroup
-
-    def test_func(self):
-        return self.request.user.profile.privileged
-
-
-class AgeGroupCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
-    model = AgeGroup
-    fields = ["lower", "upper"]
-
-    def test_func(self):
-        return self.request.user.profile.privileged
-
-    def form_valid(self, form):
-        self.object = form.save()
-        messages.add_message(self.request, messages.SUCCESS, "Altersgruppe erstellt")
-        return super().form_valid(form)
-
-
-class AgeGroupDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-    model = AgeGroup
-
-    def test_func(self):
-        return self.request.user.profile.privileged
-
-    def get_success_url(self, **kwargs):
-        return reverse("agegroup_list")
-
-
-class AgeGroupListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-    model = AgeGroup
-
-    def test_func(self):
-        return self.request.user.profile.privileged
-
-
-class AgeGroupUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    model = AgeGroup
-    # who can update the event?
-    fields = ["lower", "upper"]
-
-    def test_func(self):
-        return self.request.user.profile.privileged
-
-    def form_valid(self, form):
-        self.object = form.save()
-        messages.add_message(self.request, messages.SUCCESS, "Altersgruppe geändert")
-        return super().form_valid(form)
-
-
-class RealGroupDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
-    model = Group
-    template_name = "members/real_group_detail.html"
-
-    def test_func(self):
-        if is_trainer(self.request.user):
-            return True
-        if is_chairman(self.request.user):
-            return True
-        return False
-
-    def get_context_data(self, **kwargs):
-        context = {"member_list": User.objects.filter(profile__group=self.object)}
-        if self.object:
-            context["object"] = self.object
-            context_object_name = self.get_context_object_name(self.object)
-            if context_object_name:
-                context[context_object_name] = self.object
-        context.update(kwargs)
-        return super().get_context_data(**context)
-
-
-class GroupUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    # template: event_detail.html
-    model = Group
-    # who can update the event?
-    permission_required = "members.change_group"
-    fields = ["group_id"]
-
-    def form_valid(self, form):
-        self.object = form.save()
-        messages.add_message(self.request, messages.SUCCESS, "Name der Gruppe geändert")
-        return super().form_valid(form)
-
-
 """For The Messages"""
 
 
 class MessageEveCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Message
-    fields = ["title", "message", "agegroup", "autodelete"]
+    fields = ["title", "message", "sessions", "autodelete"]
     permission_required = "members.add_message"
 
     def form_valid(self, form):
@@ -687,7 +514,7 @@ class MessageEveCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateVi
 
 class MessageSessCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Message
-    fields = ["title", "message", "agegroup", "autodelete"]
+    fields = ["title", "message", "sessions", "autodelete"]
     permission_required = "members.add_message"
 
     def form_valid(self, form):
@@ -709,11 +536,11 @@ class MessageDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView)
 class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     # template: event_form.html
     model = Message
-    fields = ["title", "message", "agegroup", "autodelete"]
+    fields = ["title", "message", "sessions", "autodelete"]
     permission_required = "members.change_message"
 
     def get_context_data(self, **kwargs):
-        context = {"group_values": [x[0] for x in self.object.agegroup.values_list()]}
+        context = {"picked_sessions": list(self.object.sessions.values_list("pk", flat=True))}
         context["object"] = self.get_object()
         context.update(kwargs)
         return super().get_context_data(**context)

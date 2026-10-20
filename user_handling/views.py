@@ -2,7 +2,6 @@ from .forms import MemberForm, ProfileForm, AdditionalEmailForm
 from members.models import (
     is_trainer,
     is_chairman,
-    Group,
     Chairman,
     Trainer,
     Profile,
@@ -225,9 +224,7 @@ def trainer_or_chairman(user):
 
 @user_passes_test(trainer_or_chairman)
 def mailing_lists(request):
-    return render(
-        request, "user_handling/mailing-lists.html", context={"groups": Group.objects.all()}
-    )
+    return render(request, "user_handling/mailing-lists.html")
 
 
 def emails_of(users):
@@ -252,21 +249,17 @@ def get_participants_emails(request):
 
 @user_passes_test(trainer_or_chairman)
 def get_all_emails(request):
-    """id is a group pk, "alle", or "email_<status>"."""
+    """id is "alle" or "email_<status>"."""
     list_id = request.GET.get("id", "")
     if list_id == "alle":
         users = User.objects.all()
-        trainer_emails = Trainer.objects.filter(active=True).values_list("trainer_email", flat=True)
+        trainer_emails = set(Trainer.objects.filter(active=True).values_list("trainer_email", flat=True))
     elif list_id.startswith("email_"):
         users = User.objects.filter(profile__status=list_id.removeprefix("email_"))
-        trainer_emails = []
+        trainer_emails = set()
     else:
-        group = get_object_or_404(Group, pk=list_id)
-        users = User.objects.filter(profile__group=group)
-        if request.GET.get("only_active") == "true":
-            users = users.filter(profile__status="Ordentliches Mitglied")
-        trainer_emails = Trainer.objects.filter(session__group=group).values_list("trainer_email", flat=True)
-    return email_list_response(emails_of(users) | set(trainer_emails))
+        raise Http404
+    return email_list_response(emails_of(users) | trainer_emails)
 
 
 @login_required

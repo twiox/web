@@ -54,13 +54,14 @@
                 <span class="mdc-line-ripple"></span>
             </label>
             </br></br>
-            <h6>Welche Altersgruppen</h6>
+            <h6>Für welche Trainingszeiten?</h6>
+            <p style="color: grey; font-size: 0.9rem;">Sichtbar für alle, die eine der Trainingszeiten sehen. Keine Auswahl: für alle Mitglieder.</p>
             <div style="display:flex; flex-wrap: wrap;">
-                {% for value, text in form.agegroup.field.choices %}
+                {% for session in form.sessions.field.queryset %}
                 <div class="mdc-form-field">
                     <div class="mdc-checkbox">
-                      <input type="checkbox" class="mdc-checkbox__native-control" id="speicherung{{forloop.counter0}}" name="{{ form.agegroup.name }}" value="{{ value }}"
-                       {% if value in group_values %} checked="checked" {% endif %}>
+                      <input type="checkbox" class="mdc-checkbox__native-control" id="session{{ session.pk }}" name="{{ form.sessions.name }}" value="{{ session.pk }}"
+                       {% if session.pk in picked_sessions %} checked="checked" {% endif %}>
                       <div style="margin:0px;" class="mdc-checkbox__background">
                         <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
                           <path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
@@ -68,8 +69,8 @@
                         <div class="mdc-checkbox__mixedmark"></div>
                       </div>
                     </div>
-                    <label for="speicherung{{forloop.counter0}}">
-                        <div>{{ text }}</div>
+                    <label for="session{{ session.pk }}">
+                        <div>{{ session.title }}, {{ session.day }} {{ session.format_start_time }}{% if session.age_label %} ({{ session.age_label }}){% endif %}</div>
                     </label>
                 </div>
                 {% endfor %}

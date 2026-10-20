@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -70,32 +71,46 @@ class Spot(models.Model):
         return reverse("spot_detail", kwargs={"pk": self.pk})
 
 
-class AgeGroup(models.Model):
-    lower = models.IntegerField("von", default=0)
-    upper = models.IntegerField("bis", default=99)
+class AgeRange(models.Model):
+    """Optional age limits; an empty field means no limit on that side."""
+
+    min_age = models.PositiveSmallIntegerField("Mindestalter", blank=True, null=True)
+    max_age = models.PositiveSmallIntegerField("Höchstalter", blank=True, null=True)
 
     class Meta:
-        ordering = ["lower"]
+        abstract = True
 
-    def __str__(self):
-        return f"Altersgruppe: {self.lower} - {self.upper} Jahre"
+    def clean(self):
+        super().clean()
+        if self.min_age is not None and self.max_age is not None and self.min_age > self.max_age:
+            raise ValidationError({"max_age": "Das Höchstalter muss mindestens so hoch sein wie das Mindestalter."})
 
-    def get_profiles(self):
-        profiles = Profile.objects.filter(birthday__isnull=False)
-        return [x for x in profiles if self in x.agegroups]
+    def allows_age(self, age):
+        # members without a birthday see nothing that is age-dependent
+        if age is None:
+            return False
+        return (self.min_age is None or age >= self.min_age) and (
+            self.max_age is None or age <= self.max_age
+        )
 
-    def get_absolute_url(self):
-        return reverse("agegroup_list")
+    @classmethod
+    def visible_for_age(cls, age):
+        if age is None:
+            return cls.objects.none()
+        return cls.objects.filter(
+            Q(min_age__isnull=True) | Q(min_age__lte=age),
+            Q(max_age__isnull=True) | Q(max_age__gte=age),
+        )
 
-
-class Group(models.Model):
-    group_id = models.CharField("Gruppe (z.B 'A')", max_length=10)
-
-    def __str__(self):
-        return f"Gruppe: {self.group_id}" if self.group_id else "Gruppe ohne Id"
-
-    def get_absolute_url(self):
-        return reverse("group_list")
+    @property
+    def age_label(self):
+        if self.min_age is not None and self.max_age is not None:
+            return f"{self.min_age}–{self.max_age} J."
+        if self.min_age is not None:
+            return f"ab {self.min_age} J."
+        if self.max_age is not None:
+            return f"bis {self.max_age} J."
+        return ""
 
 
 ## Event related models
@@ -149,14 +164,7 @@ class MemberParticipant(models.Model):
         return f"{self.user.first_name} {self.user.last_name}"
 
 
-class Event(models.Model):
-    allowed_groups = models.ManyToManyField(
-        Group, verbose_name="Für die Gruppen", blank=True
-    )
-    allowed_agegroups = models.ManyToManyField(
-        AgeGroup, verbose_name="Altersgruppen", related_name="event", blank=True
-    )
-
+class Event(AgeRange):
     title = models.CharField("Event-name", max_length=100)
     place = models.CharField(
         "Veranstaltungsort", max_length=200, blank=True, default="Leipzig"
@@ -274,22 +282,7 @@ class Trainer(models.Model):
         return "\n".join(info)
 
 
-class Session(models.Model):
-    group = models.ForeignKey(
-        Group,
-        on_delete=models.CASCADE,
-        verbose_name="Gruppe",
-        blank=True,
-        null=True,
-    )
-    agegroup = models.ForeignKey(
-        AgeGroup,
-        on_delete=models.SET_NULL,
-        verbose_name="Altersgruppe",
-        related_name="agegroup",
-        blank=True,
-        null=True,
-    )
+class Session(AgeRange):
     trainer = models.ManyToManyField(Trainer, blank=True, verbose_name="Trainer")
     spot = models.ForeignKey(
         Spot, blank=True, null=True, on_delete=models.SET_NULL, verbose_name="Spot"
@@ -304,9 +297,10 @@ class Session(models.Model):
     hinweis = models.CharField("Hinweis", blank=True, max_length=50)
     participants = models.ManyToManyField("Profile", related_name="session", blank=True)
 
-    class Meta:
-        ordering = ["start_time"]
-        permissions = [("see_group", "Can see members of the group")]
+    @property
+    def billing_label(self):
+        """Stored in the trainer billing tables, e.g. "Hallentraining (9–13 J.)"."""
+        return f"{self.title} ({self.age_label})" if self.age_label else self.title
 
     @property
     def trainerlist(self):
@@ -372,14 +366,21 @@ class Message(models.Model):
     date = models.DateTimeField(default=datetime(2020, 11, 14, 1, 54, 52, 799289))
     autodelete = models.DateTimeField("Automatisches Löschen", blank=True, null=True)
     display = models.CharField(max_length=20, choices=choices, blank=True)
-    groups = models.ManyToManyField(Group, verbose_name="Für die Gruppen", blank=True)
-    agegroup = models.ManyToManyField(
-        AgeGroup, verbose_name="Altersgruppen", related_name="message", blank=True
+    # whoever sees one of these sessions sees the message; none means everyone
+    sessions = models.ManyToManyField(
+        Session, verbose_name="Für die Trainingszeiten", related_name="messages", blank=True
     )
 
     def save(self, *args, **kwargs):
         self.date = datetime.today()
         super().save(*args, **kwargs)
+
+    @classmethod
+    def visible_for_age(cls, age):
+        if age is None:
+            return cls.objects.none()
+        sessions = Session.visible_for_age(age)
+        return cls.objects.filter(Q(sessions__isnull=True) | Q(sessions__in=sessions)).distinct()
 
     @property
     def delme(self):
@@ -480,7 +481,6 @@ class Profile(models.Model):
         max_length=40, choices=choices, default="Ordentliches Mitglied"
     )
     member_num = models.CharField("Mitgliedsnummer", blank=True, max_length=30)
-    group = models.ForeignKey(Group, blank=True, null=True, on_delete=models.SET_NULL)
     membership_start = models.DateTimeField(
         "Beginn der Mitgliedschaft", null=True, blank=True
     )
@@ -508,14 +508,6 @@ class Profile(models.Model):
             or self.user.is_superuser
             or is_trainer(self.user)
         )
-
-    @property
-    def agegroups(self):
-        if self.birthday:
-            return AgeGroup.objects.filter(
-                Q(upper__gte=self.age) & Q(lower__lte=self.age)
-            )
-        return None
 
     @property
     def age(self):

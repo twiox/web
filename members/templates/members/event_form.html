@@ -123,25 +123,25 @@
                     </label>
                 </div>
             </div>
-            <h5>Gruppen</h5>
-            <div style="display:flex; flex-wrap: wrap;">
-            {% for value, text in form.allowed_agegroups.field.choices %}
-            <div class="mdc-form-field padding_all_small">
-                <div class="mdc-checkbox">
-                  <input type="checkbox" class="mdc-checkbox__native-control" id="speicherung{{forloop.counter0}}" name="{{ form.allowed_agegroups.name }}"
-                  value="{{ value }}" {% if value in picked_groups %} checked="checked" {% endif %}>
-                  <div class="mdc-checkbox__background">
-                    <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
-                      <path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
-                    </svg>
-                    <div class="mdc-checkbox__mixedmark"></div>
-                  </div>
-                </div>
-                <label for="speicherung{{forloop.counter0}}">
-                    <div align="left">{{ text }}</div>
+            <h5>Alter</h5>
+            <p style="color: grey; font-size: 0.9rem;">Leer lassen für keine Grenze.</p>
+            {% for error in form.min_age.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+            {% for error in form.max_age.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+            <div style="display:flex; flex-wrap: wrap; gap: 10px;">
+                <label class="mdc-text-field mdc-text-field--filled min_age">
+                    <span class="mdc-text-field__ripple"></span>
+                    <input type="number" min="0" max="120" class="mdc-text-field__input" aria-labelledby="min_age-label" name="min_age"
+                           value="{{ form.min_age.value|default_if_none:'' }}">
+                    <span class="mdc-floating-label" id="min_age-label">Mindestalter</span>
+                    <span class="mdc-line-ripple"></span>
                 </label>
-            </div>
-            {% endfor %}
+                <label class="mdc-text-field mdc-text-field--filled max_age">
+                    <span class="mdc-text-field__ripple"></span>
+                    <input type="number" min="0" max="120" class="mdc-text-field__input" aria-labelledby="max_age-label" name="max_age"
+                           value="{{ form.max_age.value|default_if_none:'' }}">
+                    <span class="mdc-floating-label" id="max_age-label">Höchstalter</span>
+                    <span class="mdc-line-ripple"></span>
+                </label>
             </div>
 
             <h5>Beschreibung</h5>

@@ -8,7 +8,9 @@ from trainer.models import TrainingSessionEntry, TrainingSessionParticipant, Tra
 from members.models import Trainer, Profile, Session, is_trainer, is_chairman
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import user_passes_test
+from django.db import transaction
 from django.db.models import Q
+from django.contrib import messages
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -181,10 +183,9 @@ def fill_session_details(request):
     session = Session.objects.get(pk=session_id)
 
     return JsonResponse({
-        "start_time": session.start_time.strftime("%H:%m"),
-        "end_time": session.end_time.strftime("%H:%m"),
-        "age_upper": session.agegroup.upper,
-        "age_lower": session.agegroup.lower
+        "start_time": session.start_time.strftime("%H:%M"),
+        "end_time": session.end_time.strftime("%H:%M"),
+        "group": session.billing_label,
     })
 
 # This is the detail-view
@@ -285,46 +286,69 @@ def session_list_view(request):
     )
 
     
-@user_passes_test(trainer_check)    
+def hourly_rate(trainer):
+    """The trainer's TAE per hour as a number, None if missing or invalid."""
+    try:
+        rate = float(trainer.salary.replace(",", "."))
+    except (AttributeError, ValueError):
+        return None
+    return rate if rate > 0 else None
+
+
+def session_hours(session):
+    """Duration of a session entry in hours, None if start or end is not HH:MM."""
+    try:
+        start = datetime.strptime(session.start, "%H:%M")
+        end = datetime.strptime(session.end, "%H:%M")
+    except (TypeError, ValueError):
+        return None
+    return (end - start).total_seconds() / 3600
+
+
+@user_passes_test(trainer_check)
 def generate_invoices(request):
-    # get sessions that are not part of an invoice yet
-    sessions = TrainingSessionEntry.objects.filter(invoice__isnull=True, billed=True).prefetch_related("trainer", "cotrainer")
-    trainers = set().union(*(x.get_trainers for x in sessions))
+    """One invoice per trainer for all billed sessions that have no invoice yet.
 
+    Trainers with missing data are skipped; their sessions stay open for the next run.
+    """
+    sessions = list(
+        TrainingSessionEntry.objects.filter(invoice__isnull=True, billed=True).prefetch_related("trainer", "cotrainer")
+    )
+    trainers = sorted(set().union(*(x.get_trainers for x in sessions)), key=lambda t: (t.user.last_name, t.user.first_name))
     date_billed = datetime.today()
+    created, skipped = [], []
 
-    #now cast the sessions into a list! This is necessary, because otherwise only the first trainer-invoice is generated
-    sessions = list(sessions)
-    
-    # generate an invoice for each trainer!
     for trainer in trainers:
-        total_time = 0
-        total_money = 0
+        name = f"{trainer.user.first_name} {trainer.user.last_name}"
         open_sessions = [x for x in sessions if trainer in x.get_trainers]
+        rate = hourly_rate(trainer)
+        hours = [session_hours(x) for x in open_sessions]
+        if rate is None:
+            skipped.append(f"{name} (kein TAE-Satz)")
+            continue
+        if None in hours:
+            skipped.append(f"{name} (ungültige Uhrzeit in einer Trainingsstunde)")
+            continue
 
-        # this is the fresh invoice
-        tmp = TrainingSessionInvoice(
-            date_billed = date_billed,
-            trainer = trainer,
-        )
-        tmp.save()
-        tmp.refresh_from_db()
+        total_time = sum(hours)
+        with transaction.atomic():
+            invoice = TrainingSessionInvoice.objects.create(
+                date_billed=date_billed,
+                trainer=trainer,
+                total_time=total_time,
+                total_money=round(total_time * rate, 2),
+            )
+            invoice.sessions.add(*open_sessions)
+            invoice.generate_pdf()
+        created.append(name)
 
-        for session in open_sessions:
-            tmp.sessions.add(session)
-            start = datetime.strptime(session.start, "%H:%M")
-            end = datetime.strptime(session.end, "%H:%M")
-            duration = end - start
-            hours = duration.total_seconds() / 3600
-            total_time += hours
-
-        total_money = total_time * float(trainer.salary.replace(',','.'))
-
-        tmp.total_money = round(total_money, 2)
-        tmp.total_time = total_time
-        tmp.save()
-        tmp.generate_pdf()
-
+    if skipped:
+        text = f"{len(created)} Abrechnung(en) erstellt. Nicht abgerechnet, bitte Daten ergänzen: {', '.join(skipped)}"
+        messages.add_message(request, messages.WARNING, text)
+    elif created:
+        messages.add_message(request, messages.SUCCESS, f"{len(created)} Abrechnung(en) erstellt.")
+    else:
+        messages.add_message(request, messages.INFO, "Keine offenen Trainingsstunden zum Abrechnen.")
     return redirect('trainingsession_list')
 
 

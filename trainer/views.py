@@ -1,19 +1,12 @@
-from .models import Trainer_table, Table_entry, TrainingSessionEntry
-from django.core.files.base import ContentFile
-from django.shortcuts import render
-from members.models import Trainer, Session, AdditionalEmail, is_trainer, is_chairman
-from django.contrib import messages
+from .models import TrainingSessionEntry
+from django.shortcuts import render, get_object_or_404
+from members.models import Trainer, Session, Profile, AdditionalEmail, is_trainer, is_chairman
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
-from django.views.generic import DeleteView, UpdateView, ListView, DetailView
+from django.views.generic import DeleteView, UpdateView, ListView
 from django.urls import reverse
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseRedirect, JsonResponse
-from datetime import datetime
-from django.core.mail import EmailMessage
-from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
-import codecs
-import django
 from django.db.models import Q
 
 
@@ -36,18 +29,6 @@ def trainer_index(request):
     )
 
 @user_passes_test(trainer_check)
-def abrechnungstable(request):
-    table, created = Trainer_table.objects.get_or_create(trainer=request.user.trainer, active=True)
-    sessions = Session.objects.filter(trainer=request.user.trainer)
-    if created:
-        for sess in sessions.all():
-            Table_entry.objects.create(table=table, day=sess.day, group=sess.agegroup, start=sess.start_time.strftime("%H:%M"), end=sess.end_time.strftime("%H:%M"))
-
-    entries = Table_entry.objects.filter(table=table).all()
-    tables = Trainer_table.objects.filter(trainer=request.user.trainer, active=False).order_by('-id')[:10]
-    return render(request, "trainer/abrechnung_form.html", context={"tables":tables, "entries":entries})
-
-@user_passes_test(trainer_check)
 def trainer_data(request):
     """ I just assume for the moment, that the user is a trainer """
     return render(
@@ -61,172 +42,16 @@ def is_privileged(user):
 @user_passes_test(is_privileged)
 def get_session_emails(request, sessionid):
     """
-    Get the emails of all members in the agegroup of a session
+    Get the emails of all regular members whose age fits the session, plus its trainers
     """
-    session = Session.objects.get(pk=sessionid)
-    if agegroup := session.agegroup:
-        emails = []
-        for profile in agegroup.get_profiles():
-            #only use ordentliche mitglieder
-            if profile.status != 'Ordentliches Mitglied':
-                continue
-            emails.append(profile.user.email)
-            query = AdditionalEmail.objects.filter(user=profile.user)
-            emails.extend([x.email for x in query])
-        for trainer in session.trainer.all():
-            emails.append(trainer.trainer_email)
-        emails = set(emails)
-        return JsonResponse({'emailstring':','.join(emails)})
-    return JsonResponse({'emailstring':''})
+    session = get_object_or_404(Session, pk=sessionid)
+    profiles = Profile.objects.filter(status="Ordentliches Mitglied", birthday__isnull=False).select_related("user")
+    users = [p.user for p in profiles if session.allows_age(p.age)]
+    emails = {u.email for u in users}
+    emails |= set(AdditionalEmail.objects.filter(user__in=users).values_list("email", flat=True))
+    emails |= set(session.trainer.values_list("trainer_email", flat=True))
+    return JsonResponse({'emailstring': ','.join(sorted(e for e in emails if e))})
 
-
-def reset_table(request):
-    table = Trainer_table.objects.get(trainer=request.user.trainer, active=True)
-    sessions = Session.objects.filter(trainer=request.user.trainer)
-    Table_entry.objects.filter(table=table).all().delete()
-
-    for sess in sessions.all():
-        Table_entry.objects.create(table=table, day=sess.day, group=sess.agegroup, start=sess.start_time.strftime("%H:%M"), end=sess.end_time.strftime("%H:%M"))
-
-    entries = Table_entry.objects.filter(table=table).all()
-    data = {}
-    for obj in entries:
-        data[obj.pk] = {
-            "day":obj.day,
-            "start_time":obj.start,
-            "end_time":obj.end,
-            "group":obj.group,
-            "notes":obj.notes
-        }
-    return JsonResponse(data)
-
-def save_entries(request):
-    table = Trainer_table.objects.get(trainer=request.user.trainer, active=True)
-    data = request.POST
-
-    for entry in zip(*[tuple(x[1]) for x in data.lists()][1:]):
-        tab = Table_entry.objects.get(pk=entry[0])
-        tab.date = entry[1]
-        tab.day = entry[2]
-        tab.group = entry[3]
-        tab.start = entry[4]
-        tab.end = entry[5]
-        tab.dur = entry[6]
-        tab.notes = entry[7]
-        try:
-            tab.save()
-        except django.core.exceptions.ValidationError:
-            return JsonResponse({"data":False})
-    return JsonResponse({"data":True})
-
-def add_week(request):
-    table = Trainer_table.objects.get(trainer=request.user.trainer, active=True)
-    sessions = Session.objects.filter(trainer=request.user.trainer)
-
-    entries = []
-    data = {}
-    for sess in sessions.all():
-        temp = Table_entry.objects.create(table=table, day=sess.day, group=str(sess.agegroup), start=sess.start_time.strftime("%H:%M"), end=sess.end_time.strftime("%H:%M"))
-        entries.append(temp)
-
-    for obj in entries:
-        data[obj.pk] = {
-            "day":obj.day,
-            "start_time":obj.start,
-            "end_time":obj.end,
-            "group":obj.group,
-            "notes":obj.notes
-        }
-    return JsonResponse(data)
-
-def add_row(request):
-    table = Trainer_table.objects.get(trainer=request.user.trainer, active=True)
-    obj = Table_entry.objects.create(table=table, day="Mo", start="17:00", end="19:00", group="A")
-    data = {}
-    data[obj.pk] = {
-        "day":obj.day,
-        "start_time":obj.start,
-        "end_time":obj.end,
-        "group":obj.group,
-        "notes":obj.notes
-        }
-    return JsonResponse(data)
-
-def delete_row(request):
-    _,_,pk = request.GET.get('id', None).split("_")
-    Table_entry.objects.filter(id=pk).delete()
-    row_id = f"js_row_{pk}"
-    data = {'row':row_id}
-    return JsonResponse(data)
-
-def send_email(table, hours):
-    user = table.trainer.user
-    try:
-        sal = hours * float(user.trainer.salary.replace(",","."))
-    except AttributeError:
-        sal = 0.0
-
-    with codecs.open(table.final_file.path, "w", encoding='windows-1252') as outfile:
-        print(datetime.today().strftime('%d.%m.%Y'), file=outfile)
-        print("--------", file=outfile)
-        print(table.trainer.trainer_info(),file=outfile)
-        print("--------", file=outfile)
-        print("Datum\tWochentag\tGruppe\tVon\tBis\tDauer\tAnmerkung",file=outfile)
-        print("\n".join([str(entry) for entry in Table_entry.objects.filter(table=table).all()]), file=outfile)
-        print("--------", file=outfile)
-        print(f"Stunden: {hours}\tTAE/Stunde: {user.trainer.salary} €\tGesamt: {sal:.2f} €",file=outfile)
-    mail_subject=f"{datetime.today().strftime('%d.%m.%Y')}_Abrechnung_{user.first_name}_{user.last_name}"
-    message= f"Trainerabrechnung von {user.first_name} {user.last_name}"
-    to_email = settings.TO_EMAIL
-    try:
-        email=EmailMessage(mail_subject, message, to=[to_email], cc=[table.trainer.trainer_email])
-        email.attach_file(table.final_file.path)
-        email.send()
-        table.final_file.delete()
-        return True
-    except ValueError:
-        return False
-
-def send_table(request):
-    data = request.POST
-    hours = 0
-
-    for entry in zip(*[tuple(x[1]) for x in data.lists()][1:]):
-        tab = Table_entry.objects.get(pk=entry[0])
-        tab.date = entry[1]
-        tab.day = entry[2]
-        tab.group = entry[3]
-        tab.start = entry[4]
-        tab.end = entry[5]
-        tab.dur = entry[6]
-        hours += float(entry[6].replace(",","."))
-        tab.notes = entry[7]
-        try:
-            tab.save()
-        except django.core.exceptions.ValidationError:
-            return JsonResponse({"data":False, "email":False})
-
-    table = Trainer_table.objects.get(trainer=request.user.trainer, active=True)
-    table.title = f"Abrechnung_{datetime.today().strftime('%d.%m.%Y')}_{request.user.first_name}_{request.user.last_name}"
-    table.final_file.save(f"{datetime.today().strftime('%Y-%m-%d')}_Abrechnung_{request.user.first_name}_{request.user.last_name}.txt", ContentFile("Trainerabrechnung"))
-    table.save()
-    if send_email(table, hours):
-        messages.add_message(request, messages.SUCCESS, 'Abrechnungstabelle verschickt')
-        table.active = False
-        table.save()
-        return JsonResponse({"data":True})
-    else:
-        return JsonResponse({"data":False, "email":True})
-
-#### More views ####
-
-class AbrechnungstableDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
-    model = Trainer_table
-
-    def test_func(self):
-        table = self.get_object()
-        user = self.request.user
-        return is_chairman(user) or (is_trainer(user) and table.trainer == user.trainer)
 
 class TrainerListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     queryset = Trainer.objects.filter(active=True).select_related("user").order_by("user__last_name")

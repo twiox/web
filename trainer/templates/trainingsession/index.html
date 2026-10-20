@@ -104,7 +104,7 @@ $(document).ready(function () {
                 console.log(data)
                 $("#start_time").val(data.start_time);
                 $("#end_time").val(data.end_time);
-                $("#group").val(`${data.age_lower}-${data.age_upper} Jahre`);
+                $("#group").val(data.group);
             },
         });
     });

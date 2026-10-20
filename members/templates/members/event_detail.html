@@ -16,9 +16,7 @@
     <section>
         <h1>{{object.title}}</h1>
         <div style="display:flex; gap:20px">
-            {% for agegroup in object.allowed_agegroups.all %}
-            <span style="color: grey; font-size:0.9rem;">{{agegroup}}</span>
-            {% endfor %}
+            {% if object.age_label %}<span style="color: grey; font-size:0.9rem;">Alter: {{ object.age_label }}</span>{% endif %}
         </div>
         <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
             <div class="trainer_ui">

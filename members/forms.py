@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Event, Session, Group, Spot, Document, Trainer
+from .models import Event, Session, Spot, Document, Trainer
 
 
 class EventFileForm(forms.ModelForm):
@@ -27,7 +27,7 @@ class SpotForm(forms.ModelForm):
 class SessionForm(forms.ModelForm):
     class Meta:
         model = Session
-        fields = ["title", "day", "start_time", "end_time", "hinweis", "spot", "trainer", "agegroup"]
+        fields = ["title", "day", "start_time", "end_time", "hinweis", "spot", "trainer", "min_age", "max_age"]
         widgets = {
             "trainer": forms.CheckboxSelectMultiple,
         }
@@ -51,14 +51,13 @@ class EventForm(forms.ModelForm):
             "deadline",
             "hinweis",
             "description",
-            "allowed_agegroups",
+            "min_age",
+            "max_age",
             "teilnahmebedingungen",
             "datenschutz",
             "einverstaendnis",
         ]
-        widgets = {
-            "allowed_agegroups": forms.CheckboxSelectMultiple,
-        }
+
 
 
 class EventUpdateParticipantForm(forms.ModelForm):

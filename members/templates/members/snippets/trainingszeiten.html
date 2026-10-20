@@ -48,7 +48,7 @@
                 {% for session in sessions|lookup:short %}
                     <!--session hinweise -->
                     <div style="margin-top:10px;">
-                        {% if session.agegroup in request.user.profile.agegroups.all or request.user.profile.privileged %}
+                        {% if session.visible %}
                         {% if session.hinweis %}
                         <div class="third_session" style="padding:3px; background-color: darkslategray;">
                             <!-- Hinweise -->
@@ -66,19 +66,15 @@
                                 {% endif %}
                             </div>
 
-                            {% if session.agegroup %}
-                            {% if session.agegroup in request.user.profile.agegroups.all or request.user.profile.privileged %}
-                            <span style="font-size: 0.9rem;">Alter: {{session.agegroup.lower }} - {{session.agegroup.upper }} Jahre</span>
-                            {% else %}
-                            <span style="color:grey;font-size: 0.9rem;">Alter: {{session.agegroup.lower }} - {{session.agegroup.upper }} Jahre</span>
+                            {% if session.age_label %}
+                            <span style="font-size: 0.9rem;{% if not session.visible %} color:grey;{% endif %}">Alter: {{ session.age_label }}</span>
                             {% endif %}
-                            {% endif %}
-                            {% if session.agegroup in request.user.profile.agegroups.all or request.user.profile.privileged %}
+                            {% if session.visible %}
                             <p>{{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
                             {%else%}
                             <p style="color:grey;">{{session.format_start_time}} - {{session.format_end_time}} Uhr</p>
                             {%endif%}
-                            {% if session.agegroup in request.user.profile.agegroups.all or request.user.profile.privileged %}
+                            {% if session.visible %}
                             <div style="display: flex; justify-content: space-between; gap:5px;">
                                 <h4 style="text-overflow: ellipsis; overflow: hidden;" title="{{session.spot.title}}">{{session.spot.title}}</h4>
                                 <a class="more_info_button" style="padding:0px" target="_blank"
@@ -112,22 +108,14 @@
                         <div style="display: flex;">
                             <div id="emaillist_{{session.pk}}"
                                 data-url="{% url 'trainer_get_sessionemails' session.pk %}"
-                                class="third_session tertiary_bg prim_hover email_copy" style="display:none; cursor: pointer; width:50%">
+                                class="third_session tertiary_bg prim_hover email_copy" style="display:none; cursor: pointer; width:100%">
                                 <i class="far fa-envelope padding_all_small"><p>Emails</p></i>
                             </div>
-                            {% if session.agegroup %}
-                            <a href="{% url 'agegroup_detail' session.agegroup.pk %}" style="width:50%;padding:0px;">
-                                <div id="userlist_{{session.pk}}"
-                                    class="third_session tertiary_bg prim_hover" style="display:none; cursor: pointer">
-                                    <i class="far fa-user padding_all_small"><p>Liste</p></i>
-                                </div>
-                            </a>
-                            {% endif %}
                         </div>
                         {% endif %}
                         <div id="trainerchip_{{session.pk}}" class="third_session tertiary_bg padding_all_small" style="text-align: left; display:none;">
                             <!-- Trainerchip -->
-                            {% if session.agegroup in request.user.profile.agegroups.all or request.user.profile.privileged %}
+                            {% if session.visible %}
                             {% for trainer in session.trainer.all %}
                             {% if trainer.trainer_telnr %}
                             <div style="display:flex; gap:5px; margin-bottom:5px;">
@@ -159,7 +147,6 @@
             var pk = $(this).attr('id').split('_')[1]
             $(`#trainerchip_${pk}`).toggle(300)
             $(`#emaillist_${pk}`).toggle(300)
-            $(`#userlist_${pk}`).toggle(300)
             $(this).find('i').toggleClass('fa-angle-down').toggleClass('fa-angle-up')
         });
 
