@@ -39,7 +39,7 @@
                     <tr>
                         <td class="table_actions">
                             <a href="{% url 'trainingsession_detail' entry.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
-                            {% if not entry.payed %}
+                            {% if not entry.payed and not entry.invoice_count %}
                             <a role="button" title="Löschen"
                                hx-post="{% url 'trainingsession_delete' entry.pk %}"
                                hx-target="closest tr"

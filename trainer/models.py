@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from members.models import Trainer, Session, User
 
 class TrainingSessionEntry(models.Model):
@@ -126,3 +128,16 @@ class TrainingSessionInvoice(models.Model):
         filename = f"invoice_{self.date_billed.strftime('%d.%m.%Y')}_{self.trainer.pk}.pdf"
         self.invoice_pdf.save(filename, ContentFile(buffer.read()))
         buffer.close()
+
+
+# sessions count as paid once every invoice they are on is paid
+@receiver(post_save, sender=TrainingSessionInvoice)
+def update_session(sender, instance, **kwargs):
+    # trigger after invoice payed
+    if instance.date_payed != None:
+        # check for each sessions of the invoice instance that all associated invoices are payed
+        # and set the sessions to 'payed' if that is true
+        for session in instance.sessions.all():
+            if all([x.date_payed != None for x in session.invoice.all()]):
+                session.payed = True
+                session.save()

@@ -11,10 +11,7 @@ from django.db.models import Count, Q
 from itertools import groupby
 
 
-def trainer_check(user):
-    return is_trainer(user)
-
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
 def trainer_index(request):
     trainer = request.user.trainer
     entries = (
@@ -37,7 +34,7 @@ def trainer_index(request):
     return render(request, "trainer/trainer_index.html", {"months": months})
 
 
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
 def trainer_data(request):
     """ I just assume for the moment, that the user is a trainer """
     return render(
@@ -68,7 +65,7 @@ class TrainerListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
     def test_func(self):
         user = self.request.user
-        return trainer_check(user) or is_chairman(user) or user.is_superuser
+        return is_trainer(user) or is_chairman(user) or user.is_superuser
 
 class TrainerDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Trainer
@@ -104,7 +101,7 @@ class TrainerUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
 
 
 
-class TrainerSelfUpdateView(UpdateView, LoginRequiredMixin,UserPassesTestMixin):
+class TrainerSelfUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Trainer
     fields = [
         "trainer_telnr",
@@ -120,7 +117,7 @@ class TrainerSelfUpdateView(UpdateView, LoginRequiredMixin,UserPassesTestMixin):
     template_name = "trainer/trainer_form.html"
 
     def get_object(self):
-        return Trainer.objects.get(pk=self.request.user.trainer.pk)
+        return self.request.user.trainer
 
     def test_func(self):
         return is_trainer(self.request.user)

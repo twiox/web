@@ -1,8 +1,7 @@
 from django.urls import path
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
-from datetime import datetime, timedelta
+from django.http import HttpResponse, JsonResponse
+from datetime import datetime
 from itertools import groupby
 from trainer.forms import TrainingSessionForm
 from trainer.models import TrainingSessionEntry, TrainingSessionParticipant, TrainingSessionInvoice
@@ -13,23 +12,23 @@ from django.views.decorators.http import require_POST
 from django.db import transaction
 from django.db.models import Count, Q
 from django.contrib import messages
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
-def trainer_check(user):
-    return is_trainer(user)
 
 def chairman_check(user):
     return is_chairman(user) or user.is_superuser
 
 @csrf_exempt
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
+@require_POST
 def session_delete(request, pk):
-    TrainingSessionEntry.objects.get(pk=pk).delete()
-    return HttpResponse("") 
+    entry = get_object_or_404(TrainingSessionEntry, pk=pk)
+    if entry.payed or entry.invoice.exists():
+        # deleting it would make the invoice wrong; htmx keeps the row on an error status
+        return HttpResponse("Bereits abgerechnet", status=409)
+    entry.delete()
+    return HttpResponse("")
 
 ## HTMX snippets
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
 def get_participants_list(request, pk):
     """
     Get the trainer-list snippet for display in session-detail view 
@@ -45,7 +44,7 @@ def get_participants_list(request, pk):
         context.update({'object_list':session.participant.filter(user__isnull=True)})
     return render(request,'trainingsession/snippet_participantslist.html',context)
 
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
 def get_participants_table(request, pk):
     """
     Get the participants-table snippet for display in session-detail view 
@@ -56,7 +55,7 @@ def get_participants_table(request, pk):
 
     return render(request,'trainingsession/snippet_participantslist_contact.html',context)
 
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
 def get_trainer_list(request, pk):
     """
     Get the trainer-list snippet for display in session-detail view 
@@ -73,7 +72,8 @@ def get_trainer_list(request, pk):
     return render(request,'trainingsession/snippet_trainerlist.html',context)
 
 @csrf_exempt
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
+@require_POST
 def remove_trainer(request, pk):
     """
     Remove trainer or cotrainer from session,then return the list-snippet 
@@ -89,7 +89,8 @@ def remove_trainer(request, pk):
     return get_trainer_list(request, pk)
 
 @csrf_exempt
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
+@require_POST
 def add_trainer(request, pk):
     """
     Add trainer or cotrainer from session,then return the list-snippet 
@@ -106,7 +107,8 @@ def add_trainer(request, pk):
 
 
 @csrf_exempt
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
+@require_POST
 def add_member(request, pk):
     """
     Add member to session,then return the list-snippet 
@@ -124,7 +126,8 @@ def add_member(request, pk):
     return get_participants_list(request, pk)
 
 @csrf_exempt
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
+@require_POST
 def add_nonmember(request, pk):
     session = TrainingSessionEntry.objects.get(pk=pk)
     type = request.GET.get('type')
@@ -139,7 +142,8 @@ def add_nonmember(request, pk):
     return get_participants_list(request, pk)
 
 @csrf_exempt
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
+@require_POST
 def delete_participant(request, pk):
     """
     Remove participant from session,then return the list-snippet 
@@ -148,7 +152,7 @@ def delete_participant(request, pk):
 
     return get_participants_list(request, pk)
 
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
 def search(request, pk):
     """
     search function (trainer or member)
@@ -181,8 +185,7 @@ def search(request, pk):
 
 # to populate the session form fields
 def fill_session_details(request):
-    session_id = request.GET.get("session_id")
-    session = Session.objects.get(pk=session_id)
+    session = get_object_or_404(Session, pk=request.GET.get("session_id") or None)
 
     return JsonResponse({
         "start_time": session.start_time.strftime("%H:%M"),
@@ -191,7 +194,7 @@ def fill_session_details(request):
     })
 
 # This is the detail-view
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
 def session_detail_view(request, pk):
     object = TrainingSessionEntry.objects.get(pk=pk)
 
@@ -224,7 +227,7 @@ def session_form_values(form):
     }
 
 
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
 def session_create_view(request):
     form = TrainingSessionForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -234,7 +237,7 @@ def session_create_view(request):
     return render(request, "trainingsession/index.html", {"form": form, "values": session_form_values(form)})
 
 
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
 def session_edit_view(request, pk):
     entry = get_object_or_404(TrainingSessionEntry, pk=pk)
     if entry.payed or entry.invoice.exists():
@@ -248,9 +251,8 @@ def session_edit_view(request, pk):
     return render(request, "trainingsession/index.html", {"form": form, "values": session_form_values(form), "entry": entry})
 
 
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
 def session_list_view(request):
-    from collections import defaultdict
     from django.db.models.functions import ExtractYear
 
     year = request.GET.get('year', datetime.today().strftime('%Y'))
@@ -350,7 +352,7 @@ def session_hours(session):
     return (end - start).total_seconds() / 3600
 
 
-@user_passes_test(trainer_check)
+@user_passes_test(is_trainer)
 @require_POST
 def generate_invoices(request):
     """One invoice per trainer for all billed sessions that have no invoice yet.
@@ -417,19 +419,6 @@ def delete_invoice(request, pk):
     invoice.delete()
     messages.add_message(request, messages.SUCCESS, "Rechnung gelöscht, die Trainingsstunden sind wieder offen")
     return redirect('trainingsession_list')
-
-
-# Add signals
-@receiver(post_save, sender=TrainingSessionInvoice)
-def update_session(sender, instance, **kwargs):
-    # trigger after invoice payed
-    if instance.date_payed != None:
-        # check for each sessions of the invoice instance that all associated invoices are payed
-        # and set the sessions to 'payed' if that is true
-        for session in instance.sessions.all():
-            if all([x.date_payed != None for x in session.invoice.all()]):
-                session.payed = True
-                session.save()
 
 
 urlpatterns = [
