@@ -244,7 +244,8 @@ def get_participants_emails(request):
         event = get_object_or_404(PublicEvent, pk=request.GET.get("id"))
         return email_list_response(EventParticipant.objects.filter(event=event).values_list("email", flat=True))
     event = get_object_or_404(Event, pk=request.GET.get("id"))
-    return email_list_response(emails_of(User.objects.filter(memberparticipant__event=event)))
+    # cancelled participants don't get the event mails any more
+    return email_list_response(emails_of(User.objects.filter(memberparticipant__event=event, memberparticipant__storno=False)))
 
 
 @user_passes_test(trainer_or_chairman)

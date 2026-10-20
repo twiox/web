@@ -1,245 +1,199 @@
 {% extends "members/base.html" %}
 {% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#events">
-        Mitglieder </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#events">Mitglieder</a>
     <a class="float_left"> > </a>
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_detail' object.id %}">
-        {{object.title}}</a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_detail' object.id %}">{{ object.title }}</a>
     <a class="float_left"> > </a>
     <a class="float_left strong" style="font-size: 1.1rem; color:white;">Orga</a>
 </div>
 {% endblock %}
 
 {% block content %}
-<style>
-    .tscroll table{
-        border-collapse: separate;
-        border-spacing: 0;
-    }
-    .tscroll td:first-child{
-      position: sticky;
-      left: 0;
-      background-color: DarkSlateGray;
-    }
-
-    .tscroll td, th{
-      border: solid grey 1px;
-    }
-    .success{
-        border: solid aqua 1px !important;
-    }
-    .storno td:first-child{
-        background-color: crimson !important;
-    }
-</style>
-<section>
+<section class="member_page">
     {% csrf_token %}
-    <h1> Event Orga</h1>
-    <div>
-        <h3>Teilnehmende</h3>
-        <div class="tertiary_bg" style="max-height: 600px; display: flex;">
-            <div class="tscroll" style="overflow: auto;min-width: 100%;">
-                <table id='participant_list' style="min-width:100%">
-                    <thead style="position: sticky; top:0; background-color:DarkSlateGray;z-index:3;">
-                        <th>Nr</th>
-                        <th>Name</th>
-                        <th>Geburtsdatum</th>
-                        <th>Email</th>
-                        <th>Telefon</th>
-                        <th>Ansprechpartner</th>
-                        <th>Notfallnummer</th>
-                        <th>Bezahlt</th>
-                        <th>Notizen</th>
-                        <th>Deutschlandticket</th>
-                        <th>Storno</th>
-                    </thead>
-                {% for participant in participants %}
-                <tr class="{% if participant.storno %}storno{% endif %}">
-                    <td nowrap="nowrap"> {{forloop.counter}} </td>
-                    <td nowrap="nowrap"> {{participant}} ({{participant.user.profile.member_num}}) </td>
-                    <td nowrap="nowrap"> {{participant.user.profile.birthday|date:"d.m.Y"}} ({{participant.user.profile.age}}) </td>
-                    <td nowrap="nowrap"> {{participant.user.email}} </td>
-                    <td nowrap="nowrap"> {% if participant.user.profile.telephone %} {{participant.user.profile.telephone}} {% else %} - {% endif %}</td>
-                    <td nowrap="nowrap"> {% if participant.user.profile.parent %} {{participant.user.profile.parent}} {% else %} - {% endif %} </td>
-                    <td nowrap="nowrap"> {% if participant.user.profile.parent_telnr %} {{participant.user.profile.parent_telnr}} {% else %} - {% endif %}</td>
-                    <td><input class='field_update' type="checkbox" {% if participant.payed %} checked {% endif %} data-participant="{{participant.pk}}" data-field="payed"></td>
-                    <td><input style="min-width: 100%;background-color: inherit;"
-                        class='field_update' type="text" data-participant="{{participant.pk}}" data-field="notes"
-                        value="{% if participant.notes %}{{participant.notes}}{% endif %}"></td>
-                    <td><input class='field_update' type="checkbox" {% if participant.has_ticket %} checked {% endif %} data-participant="{{participant.pk}}" data-field="has_ticket"></td>
-                    <td>{% if participant.storno %}STORNO{% endif %}</td>
+    <div class="member_toolbar">
+        <h1>{{ object.title }}</h1>
+    </div>
+    <p class="member_panel__hint orga_summary">
+        {% include "members/snippets/event_dates.html" %} · {{ object.place }}<br>
+        <strong>{{ count_active }}</strong> angemeldet · <strong>{{ count_payed }}</strong> bezahlt
+        {% if object.ask_ticket %} · <strong>{{ count_ticket }}</strong> mit Deutschlandticket{% endif %}
+        {% if count_storno %} · {{ count_storno }} storniert{% endif %}
+    </p>
+
+    <div class="member_toolbar">
+        <input class="searchbar" id="participant_search" type="search" placeholder="Suche nach Name, E-Mail, Notiz …">
+        <button type="button" class="table_action" id="copy_emails" data-url="{% url 'get_participants_emails' %}?id={{ object.pk }}">
+            <i class="far fa-envelope"></i> E-Mails kopieren
+        </button>
+        <a class="table_action" href="{% url 'event_participants_csv' object.pk %}"><i class="fas fa-file-csv"></i> CSV herunterladen</a>
+    </div>
+
+    <div class="member_table_wrapper tertiary_bg">
+        <table class="member_table member_table--static orga_table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Alter</th>
+                    <th>Kontakt</th>
+                    <th>Ansprechpartner*in</th>
+                    <th>Bezahlt</th>
+                    {% if object.ask_ticket %}<th>Ticket</th>{% endif %}
+                    <th>Notizen</th>
                 </tr>
-                {% endfor %}
-                </table>
-            </div>
+            </thead>
+            <tbody id="participant_rows">
+            {% for participant in participants %}
+                {% with user=participant.user profile=participant.user.profile %}
+                <tr class="{% if participant.storno %}orga_table__storno{% endif %}">
+                    <td>
+                        {{ user.last_name }}, {{ user.first_name }}
+                        {% if participant.storno %}<span class="orga_table__badge">storniert</span>{% endif %}
+                    </td>
+                    <td title="{{ profile.birthday|date:'d.m.Y' }}">{{ profile.age|default:"–" }}</td>
+                    <td>
+                        <a href="mailto:{{ user.email }}" title="{{ user.email }}"><i class="far fa-envelope"></i></a>
+                        {% if profile.telephone %}<a href="tel:{{ profile.telephone }}" title="{{ profile.telephone }}"><i class="fas fa-phone"></i></a> {{ profile.telephone }}{% endif %}
+                    </td>
+                    <td>
+                        {% if profile.parent or profile.parent_telnr %}
+                            {{ profile.parent|default:"" }}
+                            {% if profile.parent_telnr %}<a href="tel:{{ profile.parent_telnr }}" title="Notfallnummer"><i class="fas fa-phone"></i></a> {{ profile.parent_telnr }}{% endif %}
+                        {% else %}–{% endif %}
+                    </td>
+                    <td class="orga_table__check">
+                        <input class="field_update" type="checkbox" {% if participant.payed %}checked{% endif %}
+                               data-participant="{{ participant.pk }}" data-field="payed" aria-label="Bezahlt">
+                    </td>
+                    {% if object.ask_ticket %}
+                    <td class="orga_table__check">
+                        <input class="field_update" type="checkbox" {% if participant.has_ticket %}checked{% endif %}
+                               data-participant="{{ participant.pk }}" data-field="has_ticket" aria-label="Deutschlandticket">
+                    </td>
+                    {% endif %}
+                    <td>
+                        <input class="field_update orga_table__notes" type="text" value="{{ participant.notes|default:'' }}"
+                               data-participant="{{ participant.pk }}" data-field="notes" aria-label="Notizen" placeholder="Notiz …">
+                    </td>
+                </tr>
+                {% endwith %}
+            {% empty %}
+                <tr><td colspan="7">Noch keine Anmeldungen.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <p id="participant_no_results" class="padding_all_small" hidden>Keine Treffer.</p>
+    </div>
+
+    <div class="session_grid orga_documents">
+        <div class="session_card" id="file_viewer">
+            <h3>Dokumente</h3>
+            <p class="member_panel__hint">Öffentliche Dokumente stehen auf der Veranstaltungsseite, die anderen sieht nur die Orga.</p>
+            {% for doc in object.public_docs.all %}
+                {% include "members/snippets/orga_document.html" with public=True %}
+            {% endfor %}
+            {% for doc in object.orga_docs.all %}
+                {% include "members/snippets/orga_document.html" with public=False %}
+            {% endfor %}
+            {% if not object.public_docs.exists and not object.orga_docs.exists %}
+                <p class="member_panel__hint">Noch keine Dokumente.</p>
+            {% endif %}
         </div>
-    </div>
-    <br>
-    <div style="display: flex; gap: 5px;" class="side_scroll">
-        <span style='width:150px;display:block;cursor:pointer'>
-            <div id='{{object.pk}}' class='mail_click padding_all_small tertiary_bg prim_hover' style="margin-bottom:5px;">
-                Mailverteiler
+
+        <form class="session_card orga_upload" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h3>Dokument hinzufügen</h3>
+            {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+            <div class="member_fields member_fields--wide">
+                {% include "user_handling/_field.html" with field=form.name %}
             </div>
-            <div id='download_list' class='list_click padding_all_small tertiary_bg prim_hover'>
-                Teilnehmerliste
+            <div class="file_field">
+                {% for error in form.file.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+                <span class="file_field__label">Datei</span>
+                <span></span>
+                <label class="table_action">Datei wählen {{ form.file }}</label>
+                <span class="file_field__name"></span>
             </div>
-        </span>
-        <span class="tertiary_bg padding_all_small" style='min-width:200px'>
-            <h5>Dokument hinzufügen</h5>
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <input id="id_file" name='file' type="file" style="margin-bottom:3px" required>
-                <input id="id_name" type="text" name="name" maxlength="200" required style="background-color: inherit; width: 100%; border: solid 1px grey; margin-bottom:3px;">
-                <!-- Radio button -->
-                <label for="id_orga_orga">Privat</label>
-                <input id="id_orga_orga" name='orga' value='private' required type="radio">
-                <label for="id_orga_public">Öffentlich</label>
-                <input id="id_orga_public" name='orga' value='public' type="radio">
-                <button class="form_button" type="submit">Hochladen</button>
-            </form>
-        </span>
-        <span id="file_viewer" class="tertiary_bg padding_all_small" style='min-width:200px'>
-            <h5>Dokumente</h5>
-            {% if event.public_docs.first %}
-                {% for file in event.public_docs.all %}
-                    <div style="display: flex; gap:3px; border: solid 1px grey;justify-content: space-around;" class="padding_all_small">
-                        <span class="file_handle" data-type="toggle" data-file="{{file.pk}}" style="cursor: pointer;">
-                            <i style="color:greenyellow;" class="fas fa-eye"></i>
-                        </span>
-                        <a href="{{file.file.url}}" target="_blank" style="padding:0px;">
-                            <i class="far fa-file more_info_button"></i>
-                        </a>
-                        <span>{{file.name}}</span>
-                        <div>
-                            <span class="file_handle" data-type="delete" data-file="{{file.pk}}" style="cursor: pointer;">
-                                <i class="fas fa-trash"></i>
-                            </span>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% endif %}
-            {% if event.orga_docs.first %}
-                {% for file in event.orga_docs.all %}
-                    <div style="display: flex; gap:3px; border: solid 1px grey;justify-content: space-around;" class="padding_all_small">
-                        <span class="file_handle" data-type="toggle" data-file="{{file.pk}}" style="cursor: pointer;">
-                            <i style="color:salmon;" class="fas fa-eye"></i>
-                        </span>
-                        <a href="{{file.file.url}}" target="_blank" style="padding:0px;">
-                            <i class="far fa-file more_info_button"></i>
-                        </a>
-                        <span>{{file.name}}</span>
-                        <div>
-                            <span class="file_handle" data-type="delete" data-file="{{file.pk}}" style="cursor: pointer;">
-                                <i class="fas fa-trash"></i>
-                            </span>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        </span>
+            <div class="chip_list orga_upload__options">
+                <label class="toggle_chip">{{ form.orga }}<span>{{ form.orga.label }}</span></label>
+            </div>
+            <button type="submit" class="form_button member_form__submit">Hochladen</button>
+        </form>
     </div>
-    <script>
-    $('body').on('click','.file_handle', function(){
-        ele = $(this)
-        formdata = new FormData()
-        formdata.append('csrfmiddlewaretoken',$('[name=csrfmiddlewaretoken]').val())
-        formdata.append('type', $(this).attr('data-type'))
-        formdata.append('id', $(this).attr('data-file'))
-        $.ajax({
-            url:"{% url 'ajax_event_filehandle' %}",
-            type: "POST",
-            processData: false,
-            contentType: false,
-            data: formdata,
-            success: function (){
-                $.ajax({
-                    url: document.URL,
-                    success: function(response) {
-                        // Find the element you want to load
-                        var update = $(response).find(`#file_viewer`);
-                        // Insert the element into the DOM
-                        $(`#file_viewer`).replaceWith(update)
-                    }
-                });
-            }
-        });
-    })
-
-
-    $('.field_update').on('change', function(){
-        ele = $(this)
-        formdata = new FormData()
-        formdata.append('csrfmiddlewaretoken',$('[name=csrfmiddlewaretoken]').val())
-        formdata.append('field', $(this).attr('data-field'))
-        formdata.append('id', $(this).attr('data-participant'))
-        formdata.append('value', [$(this).prop("checked")==true,$(this).val()])
-        $.ajax({
-            url:"{% url 'ajax_update_memberparticipant' %}",
-            type: "POST",
-            processData: false,
-            contentType: false,
-            data: formdata,
-            success: function (data){
-                ele.parent().addClass('success')
-                setTimeout(function(){
-                    ele.parent().removeClass('success')
-                }, 300);
-            }
-        });
-    })
-
-    $('.mail_click').on('click', function(){
-        $.ajax({
-            data: {'id':$(this).attr("id")},
-            url: '{% url "get_participants_emails" %}',
-            type: 'GET',
-            success: function (data){
-                navigator.clipboard.writeText(data['string']);
-            }
-        });
-    });
-    // I copied this from the internet...
-
-    const toCsv = function (table) {
-    // Query all rows
-    const rows = table.find('tr');
-
-    return [].slice
-        .call(rows)
-        .map(function (row) {
-            // Query all cells
-            const cells = row.querySelectorAll('th,td');
-            return [].slice
-                .call(cells)
-                .map(function (cell) {
-                    return cell.textContent;
-                })
-                .join(',');
-        })
-        .join('\n');
-    };
-
-    const download = function (text, fileName) {
-    const link = document.createElement('a');
-    link.setAttribute('href', `data:text/csv;charset=utf-8,${encodeURIComponent(text)}`);
-    link.setAttribute('download', fileName);
-
-    link.style.display = 'none';
-    document.body.appendChild(link);
-
-    link.click();
-    document.body.removeChild(link);
-    };
-
-    $('#download_list').on('click', function () {
-        // Export to csv
-        const csv = toCsv($('#participant_list'));
-
-        // Download it
-        download(csv, 'teilnehmerliste.csv');
-    });
-
-</script>
 </section>
+
+<script>
+(function () {
+    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const showMessage = text => { snackbar.labelText = text; snackbar.open(); };
+
+    // search over all columns, notes included
+    const rows = document.getElementById('participant_rows');
+    document.getElementById('participant_search').addEventListener('input', event => {
+        const value = event.target.value.trim().toLowerCase();
+        let visible = 0;
+        rows.querySelectorAll('tr').forEach(row => {
+            const text = row.textContent + ' ' + (row.querySelector('.orga_table__notes')?.value || '');
+            row.hidden = !text.toLowerCase().includes(value);
+            if (!row.hidden) visible++;
+        });
+        document.getElementById('participant_no_results').hidden = visible > 0;
+    });
+
+    // payed, ticket and notes are saved right away
+    rows.addEventListener('change', async event => {
+        const input = event.target.closest('.field_update');
+        if (!input) return;
+        const body = new FormData();
+        body.append('csrfmiddlewaretoken', csrf);
+        body.append('field', input.dataset.field);
+        body.append('id', input.dataset.participant);
+        body.append('value', `${input.checked},${input.value}`);
+        const response = await fetch('{% url "ajax_update_memberparticipant" %}', { method: 'POST', body });
+        if (response.ok) {
+            showMessage('Gespeichert');
+        } else {
+            if (input.type === 'checkbox') input.checked = !input.checked;
+            showMessage('Konnte nicht gespeichert werden');
+        }
+    });
+
+    document.getElementById('copy_emails').addEventListener('click', async event => {
+        const response = await fetch(event.currentTarget.dataset.url);
+        if (!response.ok) return showMessage('E-Mails konnten nicht geladen werden');
+        const emails = (await response.json()).string;
+        try {
+            await navigator.clipboard.writeText(emails);
+            showMessage(emails ? `${emails.split(',').length} E-Mail-Adressen kopiert` : 'Keine E-Mail-Adressen');
+        } catch (error) {
+            showMessage('Kopieren nicht möglich (Browser-Berechtigung fehlt)');
+        }
+    });
+
+    // documents: toggle public/orga or delete, then reload the list
+    document.getElementById('file_viewer').parentElement.addEventListener('click', async event => {
+        const button = event.target.closest('[data-file]');
+        if (!button) return;
+        if (button.dataset.type === 'delete' && !confirm('Dokument wirklich löschen?')) return;
+        const body = new FormData();
+        body.append('csrfmiddlewaretoken', csrf);
+        body.append('type', button.dataset.type);
+        body.append('id', button.dataset.file);
+        const response = await fetch('{% url "ajax_event_filehandle" %}', { method: 'POST', body });
+        if (!response.ok) return showMessage('Aktion fehlgeschlagen');
+        const html = await (await fetch(window.location.href)).text();
+        const fresh = new DOMParser().parseFromString(html, 'text/html').getElementById('file_viewer');
+        document.getElementById('file_viewer').replaceWith(fresh);
+        showMessage(button.dataset.type === 'delete' ? 'Dokument gelöscht' : 'Sichtbarkeit geändert');
+    });
+
+    // upload form: text field styling and the chosen file name
+    document.querySelectorAll('.orga_upload .mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));
+    document.querySelector('.orga_upload').addEventListener('change', event => {
+        if (event.target.type !== 'file') return;
+        event.target.closest('.file_field').querySelector('.file_field__name').textContent = event.target.files[0]?.name || '';
+    });
+})();
+</script>
 {% endblock %}

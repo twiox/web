@@ -900,7 +900,6 @@ footer{
     margin-bottom: $padding_small;
     h1{
         margin: 0;
-        padding: 0;  // the global h1 padding would push the title above the badge
     }
     .searchbar{
         flex: 1 1 250px;
@@ -1806,6 +1805,79 @@ footer{
     height: 560px;
     max-height: 70vh;
     margin-bottom: $padding_small;
+}
+
+/* Event orga page (participants, payments, documents) */
+.orga_summary{
+    margin: 0 0 $padding_small 0;
+    strong{
+        color: white;
+    }
+}
+.orga_table{
+    td a{
+        padding: 0 4px 0 0;
+    }
+    &__check{
+        text-align: center;
+    }
+    &__notes{
+        width: 100%;
+        min-width: 160px;
+        padding: 4px 6px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        background: none;
+        color: $font_col;
+        &:hover, &:focus{
+            border-color: $quartiary_bg;
+        }
+    }
+    // cancelled: greyed out at the end of the list
+    &__storno td{
+        color: grey;
+    }
+    &__badge{
+        margin-left: 6px;
+        padding: 1px 6px;
+        border-radius: 4px;
+        background-color: $secondary;
+        color: white;
+        font-size: 0.75rem;
+    }
+}
+.orga_documents{
+    margin-top: $padding_small;
+}
+.orga_document{
+    display: flex;
+    align-items: center;
+    gap: $padding_small;
+    padding: 6px 0;
+    border-bottom: 1px solid $quartiary_bg;
+    &__name{
+        flex: 1;
+        padding: 0;
+        text-align: left;
+        color: white;
+    }
+    &__visibility{
+        padding: 2px 8px;
+        border: 1px solid $primary;
+        border-radius: 14px;
+        background: none;
+        color: $font_col;
+        font-size: 0.8rem;
+        cursor: pointer;
+        white-space: nowrap;
+        &--orga{
+            border-color: $quartiary_bg;
+            color: grey;
+        }
+    }
+}
+.orga_upload__options{
+    margin-top: $padding_small;
 }
 
 /* Event detail: description left, facts and sign-up right; on phones the facts come first */

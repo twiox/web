@@ -1,0 +1,9 @@
+{# one document on the orga page; public: shown on the event page #}
+<div class="orga_document">
+    <a href="{{ doc.file.url }}" target="_blank" class="orga_document__name"><i class="far fa-file"></i> {{ doc.name }}</a>
+    <button type="button" class="orga_document__visibility{% if not public %} orga_document__visibility--orga{% endif %}"
+            data-type="toggle" data-file="{{ doc.pk }}" title="Sichtbarkeit umschalten">
+        {% if public %}<i class="fas fa-eye"></i> öffentlich{% else %}<i class="fas fa-eye-slash"></i> nur Orga{% endif %}
+    </button>
+    <button type="button" class="icon_button" data-type="delete" data-file="{{ doc.pk }}" title="Löschen"><i class="far fa-trash-alt"></i></button>
+</div>

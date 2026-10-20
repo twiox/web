@@ -1,9 +1,10 @@
+import csv
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django import forms
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q
-from django.http import Http404, HttpResponseRedirect, JsonResponse
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.generic import (
     ListView,
     DetailView,
@@ -56,6 +57,7 @@ from django.core.mail import EmailMessage
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.views import PasswordChangeView
 from django.conf import settings
+from django.utils.text import slugify
 import markdown
 
 # Create your views here.
@@ -358,54 +360,92 @@ class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
 
 
 class EventOrgaView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    """Participants, payments and documents of an event; for trainers and chairmen."""
+
     model = Event
     template_name = "members/event_organisation.html"
 
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        context = self.get_context_data(object=self.object)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        event = self.object
+        # older events kept their participants in Event.participants: convert them once
+        known = set(MemberParticipant.objects.filter(event=event).values_list("user_id", flat=True))
+        for user in event.participants.all():
+            if user.pk not in known:
+                MemberParticipant.objects.create(user=user, event=event)
+            event.participants.remove(user)
 
-        # get a list of event participants
-        participants = list(MemberParticipant.objects.filter(event=self.object))
-        # for older events - convert participants to MemberParticipants
-        check = set([x.user for x in participants])
-        for user in self.object.participants.all():
-            if user not in check:
-                tmp = MemberParticipant(user=user, event=self.object)
-                tmp.save()
-                participants.append(tmp)
-                # remove from the legacy-list
-                self.object.participants.remove(user)
-
-        # update context
-        context.update(
-            {
-                "participants": sorted(participants, key=lambda x: x.user.first_name),
-                "form": EventFileForm(request.POST, request.FILES),
-            }
+        participants = list(
+            MemberParticipant.objects.filter(event=event).select_related("user__profile")
+            .order_by("storno", "user__last_name", "user__first_name")
         )
-        return self.render_to_response(context)
+        active = [p for p in participants if not p.storno]
+        context.update(
+            participants=participants,
+            count_active=len(active),
+            count_payed=sum(p.payed for p in active),
+            count_ticket=sum(p.has_ticket for p in active),
+            count_storno=len(participants) - len(active),
+            form=kwargs.get("form") or EventFileForm(),
+        )
+        return context
 
     def post(self, request, *args, **kwargs):
-        event = self.get_object()
-        file = request.FILES.get("file")
-        name = request.POST.get("name")
-        if private := request.POST.get("orga") == "private":
-            tmp = Document(file=file, event_orga=event, name=name)
+        """Uploads a document: public (shown on the event page) or only for the orga."""
+        self.object = self.get_object()
+        form = EventFileForm(request.POST, request.FILES)
+        if not form.is_valid():
+            return self.render_to_response(self.get_context_data(form=form))
+        doc = form.save(commit=False)
+        if form.cleaned_data["orga"]:
+            doc.event_orga = self.object
         else:
-            tmp = Document(file=file, event_public=event, name=name)
-        tmp.save()
-        return redirect(request.META["HTTP_REFERER"])
+            doc.event_public = self.object
+        doc.save()
+        messages.add_message(request, messages.SUCCESS, "Dokument hochgeladen")
+        return redirect("event_participants", pk=self.object.pk)
 
     def test_func(self):
         return trainer_check(self.request) or chairman_check(self.request)
 
 
+@login_required
+def event_participants_csv(request, pk):
+    """Participant list as CSV (semicolons, so Excel opens it directly)."""
+    if not (trainer_check(request) or chairman_check(request)):
+        raise PermissionDenied
+    event = get_object_or_404(Event, pk=pk)
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="teilnehmende-{slugify(event.title)}.csv"'
+    response.write("\ufeff")  # BOM: Excel recognises the umlauts
+    writer = csv.writer(response, delimiter=";")
+    writer.writerow(["Nr.", "Nachname", "Vorname", "Geburtsdatum", "Alter", "E-Mail", "Telefon",
+                     "Ansprechpartner*in", "Notfallnummer", "Bezahlt", "Deutschlandticket", "Storniert", "Notizen"])
+    participants = MemberParticipant.objects.filter(event=event).select_related("user__profile").order_by(
+        "storno", "user__last_name", "user__first_name")
+    for p in participants:
+        user, profile = p.user, getattr(p.user, "profile", None)
+        writer.writerow([
+            getattr(profile, "member_num", ""), user.last_name, user.first_name,
+            profile.birthday.strftime("%d.%m.%Y") if profile and profile.birthday else "", getattr(profile, "age", "") or "",
+            user.email, getattr(profile, "telephone", "") or "", getattr(profile, "parent", "") or "",
+            getattr(profile, "parent_telnr", "") or "",
+            "ja" if p.payed else "nein", "ja" if p.has_ticket else "nein", "ja" if p.storno else "nein", p.notes or "",
+        ])
+    return response
+
+
+@login_required
+@require_POST
 def ajax_event_filehandle(request):
-    doc = Document.objects.get(pk=int(request.POST.get("id")))
+    """Orga page: switch a document between public and orga-only, or delete it."""
+    if not (trainer_check(request) or chairman_check(request)):
+        return JsonResponse({"success": False}, status=403)
+    doc = get_object_or_404(Document, pk=request.POST.get("id"))
     if request.POST.get("type") == "toggle":
         doc.event_toggle()
-    if request.POST.get("type") == "delete":
+    elif request.POST.get("type") == "delete":
+        doc.file.delete(save=False)
         doc.delete()
     return JsonResponse({"success": True})
 

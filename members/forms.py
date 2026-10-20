@@ -9,12 +9,22 @@ from .event_content import clean_content
 from .models import Event, EventAsset, Message, Session, Spot, Document, Trainer
 
 
-class EventFileForm(forms.ModelForm):
-    orga = forms.BooleanField(required=False)
+class EventFileForm(MdcFormMixin, forms.ModelForm):
+    """Document upload on the orga page; "orga" keeps it from the event page."""
+
+    orga = forms.BooleanField(label="Nur für die Orga", required=False)
 
     class Meta:
         model = Document
         fields = ["name", "file", "orga"]
+        widgets = {"file": forms.FileInput}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["file"].required = True
+        for name in ["file", "orga"]:
+            self.fields[name].widget.attrs.pop("class", None)  # not rendered as text fields
+        self.fields["file"].widget.attrs["hidden"] = True  # opened by the "Datei wählen" button
 
 
 class CoordinateField(forms.DecimalField):
