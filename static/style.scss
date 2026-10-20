@@ -1435,3 +1435,57 @@ footer{
         cursor: pointer;
     }
 }
+
+/* Trainer chip in the training times */
+.trainer_chip{
+    display: flex;
+    align-items: center;
+    gap: $padding_small;
+    margin-bottom: 6px;
+    text-align: left;
+    img{
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+    p{
+        margin: 0;
+        text-align: left;
+    }
+    a{
+        display: inline-block;
+        padding: 2px 8px 0 0;
+        color: $primary;
+        font-size: 0.95rem;
+        &:hover{
+            color: $primary_hover;
+        }
+    }
+}
+
+/* Clickable chips for multiple choice, e.g. trainers of a training time */
+.toggle_chip{
+    display: inline-flex;
+    cursor: pointer;
+    input{
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+    span{
+        padding: 5px $padding_small;
+        border-radius: 14px;
+        border: 1px solid $quartiary_bg;
+        color: $font_col;
+    }
+    input:checked + span{
+        background-color: $primary;
+        border-color: $primary;
+        color: white;
+    }
+    input:focus-visible + span{
+        outline: 2px solid $primary_hover;
+    }
+}

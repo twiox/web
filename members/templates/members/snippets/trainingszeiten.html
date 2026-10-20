@@ -117,18 +117,15 @@
                             <!-- Trainerchip -->
                             {% if session.visible %}
                             {% for trainer in session.trainer.all %}
-                            {% if trainer.trainer_telnr %}
-                            <div style="display:flex; gap:5px; margin-bottom:5px;">
-
-                                <div style="max-width:50px;max-height:50px;" class="grey_cover">
-                                    <img style="object-fit:scale; width:100%; height:100%;" src="{{ trainer.image_url }}">
-                                </div>
-                                <div style="text-align: left;">
-                                    <p style="font-size:1.1rem;">{{trainer.user.first_name}} {{trainer.user.last_name}}</p>
-                                    <a class="more_info_button" style="padding:0px;" href="tel:{{trainer.trainer_telnr}}">{{trainer.trainer_telnr}}</a>
+                            <div class="trainer_chip">
+                                <img src="{{ trainer.image_url }}" alt="">
+                                <div>
+                                    <p>{{trainer.user.first_name}} {{trainer.user.last_name}}</p>
+                                    {# contact details are optional, e.g. co-trainers often have none #}
+                                    {% if trainer.trainer_telnr %}<a href="tel:{{ trainer.trainer_telnr }}" title="{{ trainer.trainer_telnr }}"><i class="fas fa-phone"></i></a>{% endif %}
+                                    {% if trainer.trainer_email %}<a href="mailto:{{ trainer.trainer_email }}" title="{{ trainer.trainer_email }}"><i class="far fa-envelope"></i></a>{% endif %}
                                 </div>
                             </div>
-                            {% endif %}
                             {% endfor %}
                             {% else %}
                             <p style="color:grey;">Mit {{session.trainerlist}}</p>

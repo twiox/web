@@ -1,26 +1,64 @@
 {% extends "members/base.html" %}
 {% block navbar2 %}
-
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#training">
         Mitglieder </a>
     <a class="float_left"> > </a>
-    {% if object.id %}
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Bearbeiten </a>
-    {% else %}
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Neu </a>
-    {% endif %}
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{% if object.id %}Trainingszeit bearbeiten{% else %}Neue Trainingszeit{% endif %}</a>
 </div>
-
 {% endblock %}
 
 {% block content %}
-<section style="text-align:center">
-    {% if object.id %}
-        <h1>{{object.title}}</h1>
-    {% else %}
-        <h1>Neue Trainingseinheit</h1>
-    {% endif %}
-    {% include "members/form_snippet.html" %}
+<section class="member_page">
+    <div class="member_toolbar">
+        <h1>{% if object.id %}{{ object.title }}{% else %}Neue Trainingszeit{% endif %}</h1>
+    </div>
+
+    <form method="POST" class="session_form_page">
+        {% csrf_token %}
+        {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+        <div class="session_grid">
+            <div class="session_card">
+                <h3>Training</h3>
+                <div class="member_fields">
+                    {% include "user_handling/_field.html" with field=form.title %}
+                    {% include "user_handling/_field.html" with field=form.day %}
+                    {% include "user_handling/_field.html" with field=form.start_time %}
+                    {% include "user_handling/_field.html" with field=form.end_time %}
+                    {% include "user_handling/_field.html" with field=form.spot %}
+                    {% include "user_handling/_field.html" with field=form.hinweis %}
+                </div>
+            </div>
+
+            <div class="session_card">
+                <h3>Alter</h3>
+                <p class="member_panel__hint">Leer lassen für keine Grenze. Mitglieder außerhalb des Alters sehen die Trainingszeit ausgegraut.</p>
+                <div class="member_fields">
+                    {% include "user_handling/_field.html" with field=form.min_age %}
+                    {% include "user_handling/_field.html" with field=form.max_age %}
+                </div>
+            </div>
+
+            <div class="session_card">
+                <h3>Trainer*innen</h3>
+                {% for error in form.trainer.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+                <div class="chip_list">
+                    {% for option in form.trainer %}
+                    <label class="toggle_chip">
+                        {{ option.tag }}
+                        <span>{{ option.choice_label }}</span>
+                    </label>
+                    {% empty %}
+                    <p class="member_panel__hint">Keine aktiven Trainer*innen.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="form_button member_form__submit">Speichern</button>
+    </form>
 </section>
+
+<script>
+    document.querySelectorAll('.session_form_page .mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));
+</script>
 {% endblock %}
