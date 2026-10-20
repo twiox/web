@@ -202,26 +202,50 @@ def session_detail_view(request, pk):
         object.notes = notes
         object.billed = billable
         object.save()
+        messages.add_message(request, messages.SUCCESS, "Gespeichert")
+        # redirect, so reloading the page does not send the form again
+        return redirect('trainingsession_detail', pk=object.pk)
 
     return render(request, 'trainingsession/detail.html', {'object':object})
 
-# this is the main form for creating a new session entry
+def session_form_values(form):
+    """Field values for the hand-written form inputs: the submitted data, or the entry being edited."""
+    if form.is_bound:
+        return form.data
+    entry = form.instance
+    if entry.pk is None:
+        return {"date": datetime.today().strftime("%Y-%m-%d"), "start": "17:00", "end": "19:00"}
+    return {
+        "date": entry.date.strftime("%Y-%m-%d") if entry.date else "",
+        "session": str(entry.session_id or ""),
+        "group": entry.group or "",
+        "start": entry.start or "",
+        "end": entry.end or "",
+    }
+
+
 @user_passes_test(trainer_check)
 def session_create_view(request):
-    form = TrainingSessionForm
-    if request.method == "POST":
-        form = TrainingSessionForm(request.POST)  # if no files
-        if form.is_valid():
-            # get Form data
-            session = form.save()
-            session.trainer.add(request.user.trainer)
-            return HttpResponseRedirect(reverse('trainingsession_detail', kwargs={'pk': session.pk}))
+    form = TrainingSessionForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        session = form.save()
+        session.trainer.add(request.user.trainer)
+        return redirect('trainingsession_detail', pk=session.pk)
+    return render(request, "trainingsession/index.html", {"form": form, "values": session_form_values(form)})
 
-    today = datetime.today()
-    return render(request, "trainingsession/index.html", {
-        'today':today.strftime('%Y-%m-%d'),
-        'form': form
-    })
+
+@user_passes_test(trainer_check)
+def session_edit_view(request, pk):
+    entry = get_object_or_404(TrainingSessionEntry, pk=pk)
+    if entry.payed or entry.invoice.exists():
+        messages.add_message(request, messages.WARNING, "Diese Stunde ist bereits abgerechnet und kann nicht mehr geändert werden.")
+        return redirect('trainingsession_detail', pk=pk)
+    form = TrainingSessionForm(request.POST or None, instance=entry)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.add_message(request, messages.SUCCESS, "Gespeichert")
+        return redirect('trainingsession_detail', pk=pk)
+    return render(request, "trainingsession/index.html", {"form": form, "values": session_form_values(form), "entry": entry})
 
 
 @user_passes_test(trainer_check)
@@ -413,6 +437,7 @@ urlpatterns = [
     path("list", session_list_view, name="trainingsession_list"),
     path("generate-invoices", generate_invoices, name="generate_invoices"),
     path("<int:pk>", session_detail_view, name="trainingsession_detail"),
+    path("<int:pk>/bearbeiten/", session_edit_view, name="trainingsession_edit"),
     path("<int:pk>/remove/", session_delete, name='trainingsession_delete'),
     path("<int:pk>/set-payed/", mark_invoice_as_payed, name='trainingsession_mark_invoice_as_payed'),
     path("rechnung/<int:pk>/loeschen/", delete_invoice, name='trainingsession_delete_invoice'),

@@ -10,5 +10,4 @@ class TrainingSessionForm(forms.ModelForm):
             'group',
             'start',
             'end',
-            'notes'
-        ]
+        ]  # notes are edited on the detail page

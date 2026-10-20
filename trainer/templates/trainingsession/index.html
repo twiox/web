@@ -1,117 +1,93 @@
 {% extends 'members/base.html' %}
-{% block navbar2 %} 
+{% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_index' %}">
         Trainerdokument </a>
     <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Session</a>
+    {% if entry %}
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainingsession_detail' entry.pk %}">{{ entry.date|date:"d.m.Y" }}</a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Bearbeiten</a>
+    {% else %}
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Neue Trainingsstunde</a>
+    {% endif %}
 </div>
 {% endblock %}
 {% block content %}
-<h1>Neue Trainingsstunde</h1>
-<form method="POST">
-    {% csrf_token %}
-    <div>
-        <label class="mdc-text-field mdc-text-field--filled date">
-            <span class="mdc-text-field__ripple"></span>
-            <input type="date" class="mdc-text-field__input" aria-labelledby="date-label" name="date" value="{{today}}">
-            <span class="mdc-floating-label" id="date-label">Datum</span>
-            <span class="mdc-line-ripple"></span>
-        </label>
+<section class="member_page session_form">
+    <div class="member_toolbar">
+        <h1>{% if entry %}Trainingsstunde bearbeiten{% else %}Neue Trainingsstunde{% endif %}</h1>
     </div>
-    <div>
-        <label class="mdc-text-field mdc-text-field--filled session">
-            <i class="mdc-select__dropdown-icon"></i>
-            <span class="mdc-text-field__ripple"></span>
-            <select id="select-session" class="mdc-text-field__input" name="session">
-                <option value="">---------</option>
-                {% for choice in form.session.field.queryset %}
-                    <option value="{{ choice.pk }}" {% if choice.pk == form.session.value %} selected {% endif %}>
-                        {{ choice }}
-                    </option>
-                {% endfor %}
-            </select>
-            <span class="mdc-floating-label" id="session-label">Trainingseinheit</span>
-            <span class="mdc-line-ripple"></span>
-        </label>
-    </div>
-    <div>
-        {% if form.group.errors %}
-        {% for error in form.group.errors %}
-            <p style="color:red;">{{error}}</p>
-        {% endfor %}
-        {% endif %}
-        <label class="mdc-text-field mdc-text-field--filled group">
-            <span class="mdc-text-field__ripple"></span>
-            <input id="group" type="text" class="mdc-text-field__input" aria-labelledby="group-label" name="group">
-            <span class="mdc-floating-label" id="group-label">Gruppe</span>
-            <span class="mdc-line-ripple"></span>
-        </label>
-    </div>
+    <p class="member_panel__hint">Wähle die Trainingszeit aus, dann werden Training und Uhrzeit automatisch ausgefüllt. {% if not entry %}Teilnehmende trägst du im nächsten Schritt ein.{% endif %}</p>
 
-    <div>
-        {% if form.start.errors %}
-        {% for error in form.start.errors %}
-            <p style="color:red;">{{error}}</p>
-        {% endfor %}
-        {% endif %}
-        <label class="mdc-text-field mdc-text-field--filled start">
-            <span class="mdc-text-field__ripple"></span>
-            <input id="start_time" type="time" class="mdc-text-field__input" aria-labelledby="start-label" name="start" value="17:00">
-            <span class="mdc-floating-label" id="start-label">Start</span>
-            <span class="mdc-line-ripple"></span>
-        </label>
-    </div>
+    <form method="POST" class="session_card">
+        {% csrf_token %}
+        {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+        <div class="member_fields">
+            {% for error in form.date.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+            <label class="mdc-text-field mdc-text-field--filled">
+                <span class="mdc-text-field__ripple"></span>
+                <input type="date" class="mdc-text-field__input" aria-labelledby="date-label" name="date" value="{{ values.date }}" required>
+                <span class="mdc-floating-label mdc-floating-label--float-above" id="date-label">Datum</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
 
-    <div>
-        {% if form.end.errors %}
-        {% for error in form.end.errors %}
-            <p style="color:red;">{{error}}</p>
-        {% endfor %}
-        {% endif %}
-        <label class="mdc-text-field mdc-text-field--filled end">
-            <span class="mdc-text-field__ripple"></span>
-            <input id="end_time" type="time" class="mdc-text-field__input" aria-labelledby="end-label" name="end" value="19:00">
-            <span class="mdc-floating-label" id="end-label">Ende</span>
-            <span class="mdc-line-ripple"></span>
-        </label>
-    </div>
-    
-    <div style="clear:both;">
-        <div class="flex_center_vertical">
-            <div class="flex_center padding_all_big">
-                <button type="submit" class="form_button" id="prob_button">Absenden</button>
-            </div>
+            {% for error in form.session.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+            <label class="mdc-text-field mdc-text-field--filled">
+                <i class="mdc-select__dropdown-icon"></i>
+                <span class="mdc-text-field__ripple"></span>
+                <select id="select-session" class="mdc-text-field__input" name="session" aria-labelledby="session-label">
+                    <option value="">Andere / ohne Trainingszeit</option>
+                    {% for choice in form.session.field.queryset %}
+                        <option value="{{ choice.pk }}" {% if choice.pk|stringformat:"s" == values.session %}selected{% endif %}>
+                            {{ choice.title }}, {{ choice.day }} {{ choice.format_start_time }}{% if choice.age_label %} ({{ choice.age_label }}){% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+                <span class="mdc-floating-label mdc-floating-label--float-above" id="session-label">Trainingszeit</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+
+            {% for error in form.group.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+            <label class="mdc-text-field mdc-text-field--filled">
+                <span class="mdc-text-field__ripple"></span>
+                <input id="group" type="text" class="mdc-text-field__input" aria-labelledby="group-label" name="group" value="{{ values.group|default:'' }}">
+                <span class="mdc-floating-label" id="group-label">Training</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+
+            {% for error in form.start.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+            <label class="mdc-text-field mdc-text-field--filled">
+                <span class="mdc-text-field__ripple"></span>
+                <input id="start_time" type="time" class="mdc-text-field__input" aria-labelledby="start-label" name="start" value="{{ values.start }}" required>
+                <span class="mdc-floating-label mdc-floating-label--float-above" id="start-label">Beginn</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+
+            {% for error in form.end.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+            <label class="mdc-text-field mdc-text-field--filled">
+                <span class="mdc-text-field__ripple"></span>
+                <input id="end_time" type="time" class="mdc-text-field__input" aria-labelledby="end-label" name="end" value="{{ values.end }}" required>
+                <span class="mdc-floating-label mdc-floating-label--float-above" id="end-label">Ende</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
         </div>
-    </div>
-</form>
-
+        <button type="submit" class="form_button member_form__submit">{% if entry %}Speichern{% else %}Anlegen{% endif %}</button>
+        {% if entry %}<p style="text-align: center;"><a class="more_info_button" href="{% url 'trainingsession_detail' entry.pk %}">Abbrechen</a></p>{% endif %}
+    </form>
+</section>
 
 <script>
-$(document).ready(function () {
-
-    $('body').on("change", '#select-session', function () {
-        const sessionId = $(this).val();
-        console.log(sessionId)
-
-        $.ajax({
-            url: "{% url 'fill_session_details' %}",
-            data: {
-                session_id: sessionId
-            },
-            dataType: "json",
-            success: function (data) {
-                console.log(data)
-                $("#start_time").val(data.start_time);
-                $("#end_time").val(data.end_time);
-                $("#group").val(data.group);
-            },
-        });
+    document.querySelectorAll('.session_form .mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));
+    document.getElementById('select-session').addEventListener('change', async function () {
+        if (!this.value) return;
+        const params = new URLSearchParams({ session_id: this.value });
+        const data = await (await fetch("{% url 'fill_session_details' %}?" + params)).json();
+        document.getElementById('start_time').value = data.start_time;
+        document.getElementById('end_time').value = data.end_time;
+        const group = document.getElementById('group');
+        group.value = data.group;
+        group.dispatchEvent(new Event('input'));  // lets the floating label move up
     });
-
-});
 </script>
-
-
 {% endblock %}
-

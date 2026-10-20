@@ -1,37 +1,29 @@
 {% if type == 'trainer' or type == 'cotrainer' %}
-<div>
-    <ul>
+<ul class="chip_list">
     {% for trainer in object_list %}
-    <li>{{trainer.user.first_name}} {{trainer.user.last_name}} 
-            <span 
-                hx-post="{% url 'trainingsession_add_trainer' session.pk %}?type={{type}}" 
-                hx-vals='{"trainer_pk":"{{trainer.pk}}"}'
-                hx-target="#{{type}}-list"
-                style="cursor: pointer;">
-                <i class="far fa-plus-square" aria-hidden="true"></i>
-            </span>
-        </li>
+    <li class="person_chip person_chip--add">
+        {{ trainer.user.first_name }} {{ trainer.user.last_name }}
+        <button type="button" title="Hinzufügen"
+                hx-post="{% url 'trainingsession_add_trainer' session.pk %}?type={{ type }}"
+                hx-vals='{"trainer_pk":"{{ trainer.pk }}"}'
+                hx-target="#{{ type }}-list"><i class="far fa-plus-square"></i></button>
+    </li>
+    {% empty %}
+    <li class="chip_empty">Keine Treffer</li>
     {% endfor %}
-
-    </ul>
-</div>
+</ul>
 {% elif type == 'member' %}
-
-<div>
-    <ul>
+<ul class="chip_list">
     {% for member in object_list %}
-    <li>{{member.user.first_name}} {{member.user.last_name}} ({{member.user.profile.age}}) 
-            <span 
-                hx-post="{% url 'trainingsession_add_member' session.pk %}?type={{type}}" 
-                hx-vals='{"member_pk":"{{member.pk}}"}'
-                hx-target="#{{type}}-list"
-                style="cursor: pointer;">
-                <i class="far fa-plus-square" aria-hidden="true"></i>
-            </span>
-        </li>
+    <li class="person_chip person_chip--add">
+        {{ member.user.first_name }} {{ member.user.last_name }} <small>{{ member.user.profile.age|default:"" }}</small>
+        <button type="button" title="Hinzufügen"
+                hx-post="{% url 'trainingsession_add_member' session.pk %}?type={{ type }}"
+                hx-vals='{"member_pk":"{{ member.pk }}"}'
+                hx-target="#{{ type }}-list"><i class="far fa-plus-square"></i></button>
+    </li>
+    {% empty %}
+    <li class="chip_empty">Keine Treffer</li>
     {% endfor %}
-
-    </ul>
-</div>
-
+</ul>
 {% endif %}

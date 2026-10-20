@@ -1217,7 +1217,8 @@ footer{
     border-bottom: none;
     font-size: 0.9rem;
 }
-.member_table td.entry_status{
+// training session status, used in table cells and as a label on the detail page
+.entry_status, .member_table td.entry_status{
     color: white;
     white-space: nowrap;
     &--draft{
@@ -1244,5 +1245,101 @@ footer{
     td{
         overflow: hidden;
         text-overflow: ellipsis;
+    }
+}
+
+/* Training session: create form and detail page */
+.session_header{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $padding_small $padding_big;
+    margin-bottom: $padding_small;
+    h1{
+        margin: 0;
+    }
+    .entry_status{
+        padding: 4px $padding_small;
+        border-radius: 4px;
+        color: white;
+    }
+}
+.session_grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: $padding_small;
+    align-items: start;
+    margin-bottom: $padding_small;
+}
+.session_card{
+    background-color: $tertiary_bg;
+    padding: $padding_big;
+    border-radius: 4px;
+    h3{
+        margin: 0 0 $padding_small 0;
+    }
+    h4{
+        margin: $padding_small 0 6px 0;
+        color: grey;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+    .mdc-text-field{
+        width: 100%;
+    }
+    form{
+        margin: 0;
+    }
+}
+.chip_list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 $padding_small 0;
+    padding: 0;
+    list-style: none;
+}
+.person_chip{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px 4px $padding_small;
+    border-radius: 14px;
+    background-color: $quartiary_bg;
+    color: white;
+    small{
+        color: $font_col;
+    }
+    button{
+        background: none;
+        border: none;
+        color: $font_col;
+        cursor: pointer;
+        padding: 0 2px;
+        &:hover{
+            color: white;
+        }
+    }
+    &--add{
+        background-color: transparent;
+        border: 1px dashed $primary;
+    }
+}
+.chip_empty{
+    color: grey;
+    font-size: 0.9rem;
+}
+.inline_form{
+    display: flex;
+    gap: $padding_small;
+    align-items: center;
+    .mdc-text-field{
+        flex: 1;
+    }
+}
+.session_form{
+    max-width: 720px;
+    .member_fields{
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     }
 }

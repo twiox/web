@@ -1,30 +1,29 @@
-
-<div>
-    <h2>Kontakt-Daten</h2>
-    <div class="tertiary_bg" style="max-height: 600px; display: flex;">
-        <div class="tscroll" style="overflow: auto;min-width: 100%;">
-            <table class="tscroll" style="min-width:100%">
-                <thead style="position: sticky; top:0; background-color:DarkSlateGray;z-index:3;">
-                    <th><h5>Vorname</h5></th>
-                    <th><h5>Nachname</h5></th>
-                    <th><h5>Telefonnummer</h5></th>
-                    <th><h5>Erziehungsberechtigter</h5></th>
-                    <th><h5>Notfallnummer</h5></th>
-                    <th><h5>Anmerkungen</h5></th>
-                </thead>
+{% if object_list %}
+<h3>Kontaktdaten der anwesenden Mitglieder</h3>
+<div class="member_table_wrapper tertiary_bg">
+    <table class="member_table member_table--static">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Telefon</th>
+                <th>Erziehungsberechtigte*r</th>
+                <th>Notfallnummer</th>
+                <th>Hinweise für Trainer*innen</th>
+            </tr>
+        </thead>
+        <tbody>
             {% for participant in object_list %}
             {% with profile=participant.user.profile %}
-            <tr id="{{profile.status}}" class="{% cycle 'odd' 'even' %}">
-                <td nowrap="nowrap">{{profile.user.first_name}}</td>
-                <td nowrap="nowrap">{{profile.user.last_name}}</td>
-                <td nowrap="nowrap">{% if profile.telephone %} {{profile.telephone}} {% else %} - {% endif %}</td>
-                <td nowrap="nowrap">{% if profile.parent %} {{profile.parent}} {% else %} - {% endif %}</td>
-                <td nowrap="nowrap">{% if profile.parent_telnr %} {{profile.parent_telnr}} {% else %} - {% endif %}</td>
-                <td nowrap="nowrap">{% if profile.notes_trainer %} {{profile.notes_trainer}} {% else %} - {% endif %}</td>
+            <tr>
+                <td>{{ profile.user.first_name }} {{ profile.user.last_name }}</td>
+                <td>{{ profile.telephone|default:"–" }}</td>
+                <td>{{ profile.parent|default:"–" }}</td>
+                <td>{{ profile.parent_telnr|default:"–" }}</td>
+                <td>{{ profile.notes_trainer|default:"–" }}</td>
             </tr>
             {% endwith %}
             {% endfor %}
-            </table>
-        </div>
-    </div>
+        </tbody>
+    </table>
 </div>
+{% endif %}
