@@ -1,7 +1,7 @@
 from django import forms
-from user_handling.forms import MdcFormMixin
+from user_handling.forms import MdcFormMixin, date_widget
 from django.contrib.auth.models import User
-from .models import Event, Session, Spot, Document, Trainer
+from .models import Event, Message, Session, Spot, Document, Trainer
 
 
 class EventFileForm(forms.ModelForm):
@@ -39,6 +39,24 @@ class SpotForm(MdcFormMixin, forms.ModelForm):
         if not -limit <= value <= limit:
             raise forms.ValidationError(f"Muss zwischen -{limit} und {limit} liegen.")
         return value
+
+
+class MessageForm(MdcFormMixin, forms.ModelForm):
+    autodelete = forms.DateField(label="Automatisch löschen nach", required=False, widget=date_widget())
+
+    class Meta:
+        model = Message
+        fields = ["title", "message", "autodelete", "sessions"]
+        labels = {"title": "Titel", "message": "Text", "sessions": "Für welche Trainingszeiten?"}
+        widgets = {"message": forms.Textarea, "sessions": forms.CheckboxSelectMultiple}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["message"].widget.attrs["rows"] = 4
+        sessions = self.fields["sessions"]
+        sessions.queryset = Session.objects.order_by("day_key", "start_time")
+        sessions.widget.attrs.pop("class", None)  # rendered as chips, not as a text field
+        sessions.label_from_instance = lambda s: f"{s.title}, {s.day} {s.format_start_time}" + (f" ({s.age_label})" if s.age_label else "")
 
 
 WEEKDAYS = [("Mo", "Montag"), ("Di", "Dienstag"), ("Mi", "Mittwoch"), ("Do", "Donnerstag"),

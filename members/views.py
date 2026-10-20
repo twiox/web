@@ -42,6 +42,7 @@ from .forms import (
     UpdateMemberInformationForm,
     UpdateMemberEmailForm,
     SpotForm,
+    MessageForm,
     EventFileForm,
 )
 from django.contrib import messages
@@ -517,36 +518,28 @@ class NewsDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
 class MessageEveCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Message
-    fields = ["title", "message", "sessions", "autodelete"]
+    form_class = MessageForm
     permission_required = "members.add_message"
 
     def form_valid(self, form):
-        message = form.save()
-        message.author = self.request.user
-        message.display = "events"
-        message.save()
-        return super(MessageEveCreateView, self).form_valid(form)
+        form.instance.author = self.request.user
+        form.instance.display = "events"
+        return super().form_valid(form)
 
 
 class MessageSessCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Message
-    fields = ["title", "message", "sessions", "autodelete"]
+    form_class = MessageForm
     permission_required = "members.add_message"
 
-    def form_valid(self, form):
-        message = form.save()
-        message.author = self.request.user
-        message.display = "sessions"
-        message.save()
-        return super(MessageSessCreateView, self).form_valid(form)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_initial(self):
         # "Hinweis" button on a training time passes ?session=<pk>, so it starts ticked
-        form = context["form"]
-        selected = form.data.getlist("sessions") if form.is_bound else self.request.GET.getlist("session")
-        context["picked_sessions"] = [int(pk) for pk in selected if pk.isdigit()]
-        return context
+        return {"sessions": [pk for pk in self.request.GET.getlist("session") if pk.isdigit()]}
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.display = "sessions"
+        return super().form_valid(form)
 
 
 class MessageDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
@@ -558,23 +551,13 @@ class MessageDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView)
 
 
 class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    # template: event_form.html
     model = Message
-    fields = ["title", "message", "sessions", "autodelete"]
+    form_class = MessageForm
     permission_required = "members.change_message"
 
-    def get_context_data(self, **kwargs):
-        context = {"picked_sessions": list(self.object.sessions.values_list("pk", flat=True))}
-        context["object"] = self.get_object()
-        context.update(kwargs)
-        return super().get_context_data(**context)
-
     def form_valid(self, form):
-        message = form.save()
-        message.author = self.request.user
-        message.date = datetime.now()
-        message.save()
-        return super(MessageUpdateView, self).form_valid(form)
+        form.instance.author = self.request.user
+        return super().form_valid(form)
 
 
 """USER STUFF"""
