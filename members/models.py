@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.db.models import Q
@@ -54,21 +56,12 @@ class News(models.Model):
 # Create your models here.
 class Spot(models.Model):
     title = models.CharField("Spotname", max_length=30)
-    lat = models.CharField("Latitude", max_length=30, default="51.347127")
-    long = models.CharField("Longitude", max_length=30, default="12.350504")
-    description = models.TextField(
-        "Beschreibung, Zusatzinformation", default="Lorem Ipsum"
-    )
-    description_rendered = models.TextField(blank=True, null=True)
-    picture = models.ImageField(
-        "Foto vom Spot", blank=True, null=True, upload_to="spot_pics/"
-    )
+    lat = models.DecimalField("Breitengrad", max_digits=9, decimal_places=6, default=Decimal("51.347127"))
+    long = models.DecimalField("Längengrad", max_digits=9, decimal_places=6, default=Decimal("12.350504"))
+    description = models.TextField("Beschreibung", blank=True, default="")
 
     def __str__(self):
         return f"Spot: {self.title}"
-
-    def get_absolute_url(self):
-        return reverse("spot_detail", kwargs={"pk": self.pk})
 
 
 class AgeRange(models.Model):

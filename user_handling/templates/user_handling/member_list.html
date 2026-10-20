@@ -14,7 +14,7 @@
         <h1>Mitgliederliste</h1>
         <input class="searchbar" id="member_search" type="search" placeholder="Suche nach Name, Nummer, E-Mail …">
         {% if perms.auth.add_user %}
-            <a class="more_info_button" href="{% url 'register' %}"><i class="far fa-plus-square"></i> Neues Mitglied</a>
+            <a href="{% url 'register' %}" class="table_action table_action--primary"><i class="far fa-plus-square"></i> Neues Mitglied</a>
         {% endif %}
     </div>
 

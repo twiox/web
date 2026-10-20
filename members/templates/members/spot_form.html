@@ -1,88 +1,39 @@
 {% extends "members/base.html" %}
 {% block navbar2 %}
-{% if object.title %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#training">
-        Mitglieder </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}?karte=1">Spots</a>
     <a class="float_left"> > </a>
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'spot_list' %}">
-        Spotliste </a>
-    <a class="float_left"> > </a>
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'spot_detail' object.id%}">
-        {{object.title}}</a>
-    <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Bearbeiten </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{% if object.id %}{{ object.title }}{% else %}Neuer Spot{% endif %}</a>
 </div>
-{% else %}
-<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#training">
-        Mitglieder </a>
-    <a class="float_left"> > </a>
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'spot_list' %}">
-        Spotliste </a>
-    <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Neu </a>
-</div>
-{% endif %}
 {% endblock %}
-
-{%block content %}
-<section>
-    <div style="text-align:center;">
-    {% if object.title %}
-    <h1>{{object.title}}</h1>
-    {% else %}
-    <h1>Neuer Spot</h1>
-    {% endif %}
+{% block content %}
+<section class="member_page">
+    <div class="member_toolbar">
+        <h1>{% if object.id %}{{ object.title }}{% else %}Neuer Spot{% endif %}</h1>
     </div>
-    <form class="form_wrapper" method="POST" enctype="multipart/form-data">
+    <form method="POST" class="spot_form session_grid">
         {% csrf_token %}
-        <div class ="inner_form padding_all_big flex_center">
-            {% if form.errors %}
-                {% for error in form.non_field_errors %}
-                <p class="padding_tb_small" style="color:red;">{{error}}</p>
-                {% endfor %}
-            {% endif %}
-            <label class="mdc-text-field mdc-text-field--filled title">
-                <span class="mdc-text-field__ripple"></span>
-                <input type="text" class="mdc-text-field__input" aria-labelledby="title-label" name="title" required value=
-                    {% if form.instance.title %} "{{form.instance.title}}" {% else %} "{{form.data.title}}" {% endif %}>
-                <span class="mdc-floating-label" id="title-label">Titel</span>
-                <span class="mdc-line-ripple"></span>
-            </label>
-            </br>
-            <label class="mdc-text-field mdc-text-field--filled lat">
-                <span class="mdc-text-field__ripple"></span>
-                <input type="text" class="mdc-text-field__input" aria-labelledby="lat-label" name="lat" required value=
-                    {% if form.instance.lat %} "{{form.instance.lat}}" {% else %} "{{form.data.lat}}" {% endif %}>
-                <span class="mdc-floating-label" id="lat-label">Latitude</span>
-                <span class="mdc-line-ripple"></span>
-            </label>
-            </br>
-            <label class="mdc-text-field mdc-text-field--filled long">
-                <span class="mdc-text-field__ripple"></span>
-                <input type="text" class="mdc-text-field__input" aria-labelledby="long-label" name="long" required value=
-                    {% if form.instance.long %} "{{form.instance.long}}" {% else %} "{{form.data.long}}" {% endif %}>
-                <span class="mdc-floating-label" id="long-label">Longitude</span>
-                <span class="mdc-line-ripple"></span>
-            </label>
-            <h5>Beschreibung</h5>
-            <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
-              <textarea class="mdc-text-field__input" rows="8" cols="80" aria-label="description" id="id_comment" 
-              name="description" >{% if form.instance.description %} {{form.instance.description}} {% else %} {{form.data.description}} {% endif %}</textarea>
-              <span class="mdc-notched-outline">
-                <span class="mdc-notched-outline__leading"></span>
-                <span class="mdc-notched-outline__trailing"></span>
-              </span>
-            </label>
-            <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
-                <span >OK</span>
-            </button>
+        <div class="session_card">
+            {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+            <div class="member_fields member_fields--wide">
+                {% include "user_handling/_field.html" with field=form.title %}
+                {% include "user_handling/_field.html" with field=form.description %}
+            </div>
+            <div class="member_fields">
+                {% include "user_handling/_field.html" with field=form.lat %}
+                {% include "user_handling/_field.html" with field=form.long %}
+            </div>
+            <button type="submit" class="form_button member_form__submit">Speichern</button>
+        </div>
+        <div class="session_card">
+            <p class="member_panel__hint">Klicke auf die Karte oder ziehe den Marker an die richtige Stelle.</p>
+            <div id="spot_picker" class="spot_map spot_map--small"></div>
         </div>
     </form>
-    <script>
-        const fields = document.querySelectorAll('.mdc-text-field');
-        fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
-    </script>
 </section>
+{% include "members/snippets/leaflet.html" %}
+<script>
+    document.querySelectorAll('.spot_form .mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));
+    SpotMap.picker(document.getElementById('spot_picker'), document.getElementById('id_lat'), document.getElementById('id_long'));
+</script>
 {% endblock %}

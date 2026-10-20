@@ -1489,3 +1489,84 @@ footer{
         outline: 2px solid $primary_hover;
     }
 }
+
+/* Spot map (Leaflet) */
+// the global "div { overflow: hidden }" above cuts off Leaflet's tiles, markers and popups
+.leaflet-container div{
+    overflow: visible;
+}
+.spot_map_section{
+    margin: $padding_small 0 $padding_big 0;
+}
+.spot_map_layout{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: $padding_small;
+    &--with-list{
+        grid-template-columns: minmax(0, 1fr) 300px;
+    }
+}
+@media (max-width: 800px){
+    .spot_map_layout--with-list{
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+.spot_map{
+    height: 450px;
+    border-radius: 4px;
+    z-index: 0;  // keep Leaflet's panes below the sticky site navigation
+    &--small{
+        height: 320px;
+    }
+    &--placing{
+        cursor: crosshair;
+    }
+}
+.spot_map_list{
+    max-height: 450px;
+    overflow: auto;
+    ul{
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    li[data-spot]{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px solid $quartiary_bg;
+        cursor: pointer;
+        small{
+            display: block;
+            color: grey;
+        }
+        &:hover strong{
+            color: $primary_hover;
+        }
+    }
+}
+// Leaflet popups and controls are light, the site's text and link colours are made for a dark background
+.leaflet-container .leaflet-bar a{
+    color: #333;
+}
+.leaflet-container .spot_popup{
+    color: #222;
+    strong, p{
+        color: #222;
+    }
+    p{
+        margin: 4px 0;
+    }
+    &__sessions{
+        font-size: 0.85rem;
+        color: #555;
+    }
+    &__links a{
+        margin-right: 10px;
+    }
+    &__hint{
+        font-size: 0.8rem;
+        color: #888;
+    }
+}

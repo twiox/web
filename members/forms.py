@@ -1,7 +1,6 @@
 from django import forms
 from user_handling.forms import MdcFormMixin
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
 from .models import Event, Session, Spot, Document, Trainer
 
 
@@ -13,16 +12,33 @@ class EventFileForm(forms.ModelForm):
         fields = ["name", "file", "orga"]
 
 
-class SpotForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(SpotForm, self).__init__(*args, **kwargs)
-        self.fields["description"].strip = False
-
-    description = forms.CharField(widget=forms.Textarea)
-
+class SpotForm(MdcFormMixin, forms.ModelForm):
     class Meta:
         model = Spot
-        fields = ["title", "lat", "long", "description"]
+        fields = ["title", "description", "lat", "long"]
+        labels = {"description": "Kurze Beschreibung (z.B. Eingang, Treffpunkt)"}
+        widgets = {
+            "description": forms.Textarea,
+            # any precision, the map fills them in
+            "lat": forms.NumberInput(attrs={"step": "any"}),
+            "long": forms.NumberInput(attrs={"step": "any"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["description"].widget.attrs["rows"] = 3
+
+    def clean_lat(self):
+        return self._in_range("lat", 90)
+
+    def clean_long(self):
+        return self._in_range("long", 180)
+
+    def _in_range(self, name, limit):
+        value = self.cleaned_data[name]
+        if not -limit <= value <= limit:
+            raise forms.ValidationError(f"Muss zwischen -{limit} und {limit} liegen.")
+        return value
 
 
 WEEKDAYS = [("Mo", "Montag"), ("Di", "Dienstag"), ("Mi", "Mittwoch"), ("Do", "Donnerstag"),

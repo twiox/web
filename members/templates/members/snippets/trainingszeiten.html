@@ -9,11 +9,10 @@
             {% if perms.members.add_message %}
                 <a href="{% url 'message_sess_create' %}" title="Hinweis hinzufügen"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
             {% endif %}
-            {% if perms.members.add_spot %}
-                <a href="{% url 'spot_list' %}" title="Spots verwalten"><i class="fas fa-map-marker-alt" style="font-size:27px;"></i></a>
-            {% endif %}
         </div>
+        <button type="button" id="spot_toggle" class="table_action"><i class="fas fa-map-marked-alt"></i> Spots anzeigen</button>
     </div>
+    {% include "members/snippets/spot_map.html" %}
     <!-- Here the Messages -->
     {% if training_messags %}
     <section>

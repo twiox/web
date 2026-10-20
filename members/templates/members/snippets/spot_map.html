@@ -1,0 +1,66 @@
+{# Spot map on the dashboard: every member sees it, trainers/chairmen get the list and can edit #}
+<section id="spots" class="spot_map_section" hidden>
+    <div class="spot_map_layout{% if perms.members.change_spot %} spot_map_layout--with-list{% endif %}">
+        <div id="spot_map" class="spot_map"></div>
+        {% if perms.members.change_spot %}
+        <div class="spot_map_list session_card">
+            <div class="member_toolbar">
+                <h3>Spots</h3>
+                {% if perms.members.add_spot %}
+                <button type="button" id="spot_new" class="table_action table_action--primary"><i class="fas fa-map-marker-alt"></i> Neuer Spot</button>
+                {% endif %}
+            </div>
+            <ul id="spot_list">
+                {% for spot in spots %}
+                <li data-spot="{{ spot.id }}">
+                    <span>
+                        <strong>{{ spot.title }}</strong>
+                        {% if spot.sessions %}<small>{{ spot.sessions|length }} Trainingszeit{{ spot.sessions|length|pluralize:"en" }}</small>{% else %}<small>nicht genutzt</small>{% endif %}
+                    </span>
+                    <span class="table_actions">
+                        <a href="{{ spot.edit_url }}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
+                        {% if perms.members.delete_spot %}<a href="{{ spot.delete_url }}" title="Löschen"><i class="far fa-minus-square"></i></a>{% endif %}
+                    </span>
+                </li>
+                {% empty %}
+                <li class="member_panel__hint">Noch keine Spots.</li>
+                {% endfor %}
+            </ul>
+            <p class="member_panel__hint">Klick auf einen Spot zeigt ihn auf der Karte. Marker lassen sich verschieben.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{{ spots|json_script:"spot_data" }}
+{% include "members/snippets/leaflet.html" %}
+<script>
+(function () {
+    const section = document.getElementById('spots');
+    const toggle = document.getElementById('spot_toggle');
+    let map = null;
+
+    function show(open) {
+        section.hidden = !open;
+        toggle.classList.toggle('table_action--primary', open);
+        toggle.lastChild.textContent = open ? ' Spots ausblenden' : ' Spots anzeigen';
+        if (open && !map) {
+            map = SpotMap.overview(document.getElementById('spot_map'), JSON.parse(document.getElementById('spot_data').textContent), {
+                canEdit: {{ perms.members.change_spot|yesno:"true,false" }},
+                csrfToken: '{{ csrf_token }}',
+                list: document.getElementById('spot_list'),
+                newButton: document.getElementById('spot_new'),
+                createUrl: "{% url 'spot_create' %}",
+                onMessage: text => { snackbar.labelText = text; snackbar.open(); },
+            });
+        } else if (open) {
+            map.invalidateSize();
+        }
+    }
+    toggle.addEventListener('click', () => show(section.hidden));
+    // after creating/editing a spot the dashboard opens with the map
+    if (new URLSearchParams(window.location.search).has('karte')) {
+        show(true);
+        section.scrollIntoView();
+    }
+})();
+</script>

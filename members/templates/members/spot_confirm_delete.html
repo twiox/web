@@ -1,10 +1,9 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}">
-        Mitglieder </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}?karte=1">Spots</a>
     <a class="float_left"> > </a>
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'spot_detail' object.id %}">{{object.title}}</a>
+    <a class="float_left" style="font-size: 1.1rem;">{{object.title}}</a>
     <a class="float_left"> > </a>
     <a class="float_left strong" style="font-size: 1.1rem; color:white;">Löschen</a>
 </div>
@@ -14,7 +13,8 @@
     <h1>{{object.title}}</h1>
     <div class="flex_center">
         <div class="tertiary_bg padding_all_big col-5" style="text-align:center;">
-            <p> Willst du den Spot wirklich löschen?</p>
+            <p>Willst du den Spot wirklich löschen?</p>
+            {% if object.session_set.exists %}<p class="entry_status_hint">Er wird noch von {{ object.session_set.count }} Trainingszeit(en) genutzt; dort ist danach kein Ort mehr eingetragen.</p>{% endif %}
             <form class="padding_all_big" method="POST">
                 {% csrf_token %}
                 <button type="submit" class="form_button_sec" style="margin: 0 auto;">Jawoll</button>
