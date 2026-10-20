@@ -1,12 +1,8 @@
 {% extends 'members/base.html' %}
 {% block content %}
-<h1>Trainerdokument</h1>
-<div style="display:flex; justify-content: left; flex-wrap:wrap;">
-        <a href="{% url 'trainer_index' %}" class="padding_all_small">Trainingstabellen</a>
-        <a href="{% url 'trainer_data' %}" class="padding_all_small here_I_am">Meine Daten</a>
-        <!--<a href="{% url 'trainer_list' %}" class="padding_all_small">Trainerübersicht</a>-->
-</div>
-<br>
+<section class="member_page">
+{% include "trainer/_tabs.html" with active="data" %}
+</section>
 <h3> Deine Daten </h3>
 <div class="padding_all_small">
     <div class="" style="display:flex; justify-content:left; flex-wrap:wrap;">

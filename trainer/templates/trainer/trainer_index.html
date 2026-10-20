@@ -1,67 +1,76 @@
 {% extends 'members/base.html' %}
 {% block content %}
-<h1>Trainerdokument</h1>
-<div style="display:flex; justify-content: left; flex-wrap:wrap;">
-        <a href="{% url 'trainer_index' %}" class="padding_all_small here_I_am">Trainingstabellen</a>
-        <a href="{% url 'trainer_data' %}" class="padding_all_small">Meine Daten</a>
-        <!--<a href="{% url 'trainer_list' %}" class="padding_all_small">Trainerübersicht</a>-->
-</div>
-<br>
-<h3>Neue Trainingsstunde</h3>
+<section class="member_page">
+    {% include "trainer/_tabs.html" with active="sessions" %}
 
-<p>Fülle für jedes Training ein neues Dokument aus!</p>
+    <div class="member_toolbar">
+        <a href="{% url 'trainingsession_create' %}" class="table_action table_action--primary"><i class="far fa-plus-square"></i> Neue Trainingsstunde</a>
+        <span class="member_panel__hint">Fülle für jedes Training einen Eintrag aus und sende ihn ab, sobald er vollständig ist.</span>
+        <a href="{% url 'trainingsession_list' %}" class="more_info_button">Alle Stunden & Rechnungen</a>
+    </div>
 
-<a href="{% url 'trainingsession_create' %}"><i class="far fa-plus-square" style="font-size: 25pt;"></i></a>
-
-
-<h3 class="padding_tb_big">Deine Trainingsstunden </h3>
-<p>Zur Übersicht aller Stunden: <a href="{% url 'trainingsession_list' %}" class="more_info_button" style="padding: 0px;">HIER</a></p>
-{% if trainer_sessions %}
-<br><br>
-<div class="side_scroll">
-    <table>
-        <thead>
-            <tr>
-                <th></th>
-                <th>Datum</th>
-                <th>Zeit</th>
-                <th>Gruppe</th>
-                <th>Menschen</th>
-                <th>Notizen</th>
-                <th>Abgesendet</th>
-                <th>Überwiesen</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entry in trainer_sessions %}
-            <tr class="{% cycle 'odd' 'even' %}">
-                <td nowrap><a href="{% url 'trainingsession_detail' entry.pk %}" class="more_info_button" style="padding: 0px;">Edit</a></td>
-                <td nowrap>{{entry.date|date:'d.m.Y'}}</td>
-                <td nowrap>{{entry.start}} - {{entry.end}}</td>
-                <td nowrap>{{entry.group}}</td>
-                <td nowrap>{{entry.participant.all|length}}</td>
-                <td nowrap>{{entry.notes|truncatechars:15}}</td>
-                <td nowrap style="background-color:{{entry.billed|yesno:'green,darkred'}};">{{entry.billed|yesno:'Ja,Nein'}}</td>
-                <td nowrap style="background-color:{{entry.payed|yesno:'green,darkred'}};">{{entry.payed|yesno:'Ja,Nein'}}</td>
-                <td>
-                    {% if not entry.payed %}
-                    <span 
-                        hx-post="{% url 'trainingsession_delete' entry.pk %}"
-                        hx-target="closest tr"
-                        hx-swap="delete"
-                        hx-confirm="Bist du dir sicher, dass du den Eintrag löschen willst??"
-                        style="cursor: pointer;"
-                        >
-                        <i class="far fa-minus-square" aria-hidden="true"></i>
-                    </span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-{% endif %}
-
+    {% for group in months %}
+    <details class="archive_month" {% if forloop.first %}open{% endif %}>
+        <summary>
+            <strong>{% if group.month %}{{ group.month|date:"F Y" }}{% else %}Ohne Datum{% endif %}</strong>
+            <span class="member_panel__hint">
+                {{ group.entries|length }} Trainingsstunde{{ group.entries|length|pluralize:"n" }}{% if group.unsent %} · <span class="entry_status_hint">{{ group.unsent }} nicht abgesendet</span>{% endif %}
+            </span>
+        </summary>
+        <div class="member_table_wrapper tertiary_bg">
+            <table class="member_table member_table--static member_table--fixed">
+                <colgroup>
+                    <col style="width: 70px"><col style="width: 140px"><col style="width: 110px"><col>
+                    <col style="width: 120px"><col style="width: 25%"><col style="width: 150px">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Datum</th>
+                        <th>Zeit</th>
+                        <th>Training</th>
+                        <th>Teilnehmende</th>
+                        <th>Notizen</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in group.entries %}
+                    <tr>
+                        <td class="table_actions">
+                            <a href="{% url 'trainingsession_detail' entry.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
+                            {% if not entry.payed %}
+                            <a role="button" title="Löschen"
+                               hx-post="{% url 'trainingsession_delete' entry.pk %}"
+                               hx-target="closest tr"
+                               hx-swap="delete"
+                               hx-confirm="Bist du dir sicher, dass du den Eintrag löschen willst?">
+                                <i class="far fa-minus-square"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                        <td>{{ entry.date|date:"D, d.m.Y" }}</td>
+                        <td>{{ entry.start }}–{{ entry.end }}</td>
+                        <td>{{ entry.group|default:"" }}</td>
+                        <td>{{ entry.participant_count }}</td>
+                        <td title="{{ entry.notes }}">{{ entry.notes|truncatechars:30 }}</td>
+                        {% if entry.payed %}
+                            <td class="entry_status entry_status--payed">Bezahlt</td>
+                        {% elif entry.invoice_count %}
+                            <td class="entry_status entry_status--billed">In Rechnung</td>
+                        {% elif entry.billed %}
+                            <td class="entry_status entry_status--sent">Abgesendet</td>
+                        {% else %}
+                            <td class="entry_status entry_status--draft">Nicht abgesendet</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </details>
+    {% empty %}
+    <p class="member_panel__hint">Noch keine Trainingsstunden eingetragen.</p>
+    {% endfor %}
+</section>
 {% endblock %}

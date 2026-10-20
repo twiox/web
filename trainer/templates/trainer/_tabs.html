@@ -1,0 +1,5 @@
+<h1>Trainerdokument</h1>
+<div class="year_tabs">
+    <a href="{% url 'trainer_index' %}" {% if active == 'sessions' %}class="here_I_am"{% endif %}>Trainingstabellen</a>
+    <a href="{% url 'trainer_data' %}" {% if active == 'data' %}class="here_I_am"{% endif %}>Meine Daten</a>
+</div>

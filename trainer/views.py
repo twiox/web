@@ -7,7 +7,8 @@ from django.urls import reverse
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import Q
+from django.db.models import Count, Q
+from itertools import groupby
 
 
 def trainer_check(user):
@@ -15,18 +16,26 @@ def trainer_check(user):
 
 @user_passes_test(trainer_check)
 def trainer_index(request):
-    """ I just assume for the moment, that the user is a trainer """
-    user = request.user
-    trainer_sessions = TrainingSessionEntry.objects.filter(
-        Q(trainer=user.trainer) |
-        Q(cotrainer=user.trainer)
-    ).distinct().order_by('-date')
-
-    return render(
-        request,"trainer/trainer_index.html",
-        {"trainer_sessions":trainer_sessions,
-         }
+    trainer = request.user.trainer
+    entries = (
+        TrainingSessionEntry.objects.filter(Q(trainer=trainer) | Q(cotrainer=trainer))
+        .annotate(
+            participant_count=Count("participant", distinct=True),
+            invoice_count=Count("invoice", distinct=True),
+        )
+        .order_by("-date")
     )
+    # grouped by month, newest first; entries without a date go last
+    months = []
+    for month, group in groupby(entries, key=lambda e: e.date.replace(day=1).date() if e.date else None):
+        group = list(group)
+        months.append({
+            "month": month,
+            "entries": group,
+            "unsent": sum(not e.billed for e in group),
+        })
+    return render(request, "trainer/trainer_index.html", {"months": months})
+
 
 @user_passes_test(trainer_check)
 def trainer_data(request):

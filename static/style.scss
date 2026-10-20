@@ -1217,3 +1217,32 @@ footer{
     border-bottom: none;
     font-size: 0.9rem;
 }
+.member_table td.entry_status{
+    color: white;
+    white-space: nowrap;
+    &--draft{
+        background-color: grey;
+    }
+    &--sent{
+        background-color: $primary;
+    }
+    &--billed{
+        background-color: #c9a227;
+        color: $primary_bg;
+    }
+    &--payed{
+        background-color: #6aa84f;
+    }
+}
+.entry_status_hint{
+    color: #e06666;
+}
+// same column widths in every month block
+.member_table--fixed{
+    table-layout: fixed;
+    min-width: 760px;
+    td{
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
