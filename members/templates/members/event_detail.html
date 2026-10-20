@@ -7,7 +7,7 @@
     <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{object.title}}</a>
     {% if perms.members.delete_event %}
     <a class="float_left"> > </a>
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_participants' object.id %}#nav">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_participants' object.id %}">
         Orga </a>
     {% endif %}
 </div>
@@ -23,7 +23,7 @@
         <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
             <div class="trainer_ui">
                 {% if perms.members.change_event %}
-                <a href="{% url 'event_update' object.id  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+                <a href="{% url 'event_update' object.id  %}" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
                 {% endif %}
                 {% if perms.members.delete_event %}
                 <a href="{% url 'event_delete' object.id  %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
@@ -109,12 +109,12 @@
                         <div class="flex_center_vertical">
                             {% if request.user in object.participant_users %}
                                 <div>
-                                    <a class="form_button_sec" href="{% url 'event_unparticipate' object.id %}#nav">Abmelden</a>
+                                    <a class="form_button_sec" href="{% url 'event_unparticipate' object.id %}">Abmelden</a>
                                     <p class="time_info">Deadline {{object.deadline|date:'d.m.Y'}}</p>
                                 </div>
                             {% else %}
                                 <div>
-                                    <a class="form_button" href="{% url 'event_participate' object.id %}#nav">Anmelden</a>
+                                    <a class="form_button" href="{% url 'event_participate' object.id %}">Anmelden</a>
                                     <p class="time_info">Deadline {{object.deadline|date:'d.m.Y'}}</p>
                                 </div>
                             {% endif %}

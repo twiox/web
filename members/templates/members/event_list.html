@@ -30,12 +30,12 @@
                         <tr class="{% cycle 'odd' 'even' %} table_row">
                             <td nowrap="nowrap" class="counter"> {{forloop.counter}}</td>
                             <td nowrap="nowrap">
-                                <a href="{% url 'event_update' event.id %}#nav" title="Bearbeiten">
+                                <a href="{% url 'event_update' event.id %}" title="Bearbeiten">
                                     <i class="fas fa-pen-square" style="font-size:17px;"></i>
                                 </a>
                             </td>
                             <td nowrap="nowrap">
-                                <a href="{% url 'event_delete' event.id %}#nav" title="Löschen">
+                                <a href="{% url 'event_delete' event.id %}" title="Löschen">
                                     <i class="far fa-minus-square" style="font-size:17px;"></i>
                                 </a>
                             </td>

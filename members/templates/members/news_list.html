@@ -13,7 +13,7 @@
         <h1>Alle Beiträge</h1>
             <div class="trainer_ui">
                 {% if perms.members.add_news %}
-                    <a class="blue_font" href="{% url 'news_create' %}#nav"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
+                    <a class="blue_font" href="{% url 'news_create' %}"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
                 {% endif %}
             </div>
         </div>
@@ -29,7 +29,7 @@
                     </div>
                 </div>
                 <div class="third_session tertiary_bg padding_all_med">
-                    <a class="more_info_button" href="{% url 'news_detail' news.id %}#nav">weitere Informationen</a>
+                    <a class="more_info_button" href="{% url 'news_detail' news.id %}">weitere Informationen</a>
                 </div>
             </div>
             {% empty %}

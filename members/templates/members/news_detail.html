@@ -5,7 +5,7 @@
         Mitglieder </a>
     <a class="float_left"> > </a>
     <!--
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'news_list' %}#nav">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'news_list' %}">
         Alle Beiträge </a> 
     <a class="float_left"> > </a> -->
     <a class="float_left strong" style="font-size: 1.1rem; color:white;"> {{object.title}} </a>
@@ -18,7 +18,7 @@
         <div id="container" style="overflow: visible;">
             <div class="trainer_ui">
                 {% if perms.members.change_spot %}
-                <a href="{% url 'news_update' object.id  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+                <a href="{% url 'news_update' object.id  %}" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
                 {% endif %}
                 {% if perms.members.delete_spot %}
                 <a href="{% url 'news_delete' object.id  %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>

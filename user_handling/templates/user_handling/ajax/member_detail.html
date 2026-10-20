@@ -9,8 +9,8 @@
                 <i class="fas fa-user-times"></i>
             </button>
         {% endif %}
-        <a href="{% url 'update_user' user.pk %}#nav" title="In voller Ansicht bearbeiten"><i class="fas fa-pen-square"></i></a>
-        <a href="{% url 'remove_user' user.pk %}#nav" title="Mitglied löschen"><i class="far fa-minus-square"></i></a>
+        <a href="{% url 'update_user' user.pk %}" title="In voller Ansicht bearbeiten"><i class="fas fa-pen-square"></i></a>
+        <a href="{% url 'remove_user' user.pk %}" title="Mitglied löschen"><i class="far fa-minus-square"></i></a>
     </div>
 </div>
 <p class="member_panel__meta">Nutzername: {{ user.username }} · Letzter Login: {{ user.last_login|date:"d.m.Y"|default:"noch nie" }}</p>
@@ -90,7 +90,7 @@
                        {% if chairman and not perms.members.delete_chairman or not chairman and not perms.members.add_chairman %}disabled{% endif %}>
                 Vorstand
             </label>
-            {% if chairman %}<a class="more_info_button" href="{% url 'chairman_update' chairman.pk %}#nav">Öffentliches Profil bearbeiten</a>{% endif %}
+            {% if chairman %}<a class="more_info_button" href="{% url 'chairman_update' chairman.pk %}">Öffentliches Profil bearbeiten</a>{% endif %}
         </div>
         <div class="role_row">
             <label>
@@ -99,7 +99,7 @@
                        {% if trainer and not perms.members.delete_trainer or not trainer and not perms.members.add_trainer %}disabled{% endif %}>
                 Trainer*in
             </label>
-            {% if trainer %}<a class="more_info_button" href="{% url 'trainer_update_form' trainer.pk %}#nav">Öffentliches Profil bearbeiten</a>{% endif %}
+            {% if trainer %}<a class="more_info_button" href="{% url 'trainer_update_form' trainer.pk %}">Öffentliches Profil bearbeiten</a>{% endif %}
         </div>
     </div>
 

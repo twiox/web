@@ -187,7 +187,7 @@ class TeamerDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         return self.delete(request, *args, **kwargs)
 
     def get_success_url(self):
-        return reverse("team") + "#nav"
+        return reverse("team")
 
 
 class PublicEventCreateView(PermissionRequiredMixin, CreateView):

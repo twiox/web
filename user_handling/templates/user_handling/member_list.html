@@ -1,7 +1,7 @@
 {% extends "members/base.html" %}
 {% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}#nav">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}">
         Übersicht </a>
     <a class="float_left"> > </a>
     <a class="float_left strong" style="font-size: 1.1rem; color:white;">Mitgliederliste</a>
@@ -14,7 +14,7 @@
         <h1>Mitgliederliste</h1>
         <input class="searchbar" id="member_search" type="search" placeholder="Suche nach Name, Nummer, E-Mail …">
         {% if perms.auth.add_user %}
-            <a class="more_info_button" href="{% url 'register' %}#nav"><i class="far fa-plus-square"></i> Neues Mitglied</a>
+            <a class="more_info_button" href="{% url 'register' %}"><i class="far fa-plus-square"></i> Neues Mitglied</a>
         {% endif %}
     </div>
 

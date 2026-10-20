@@ -33,7 +33,7 @@
     <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
         <div class="trainer_ui">
             {% if request.user.chairman.active %}
-            <a href="{% url 'public_event_change' object.pk  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+            <a href="{% url 'public_event_change' object.pk  %}" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
             <a href="{% url 'public_event_delete' object.pk %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
             {% endif %}
         </div>

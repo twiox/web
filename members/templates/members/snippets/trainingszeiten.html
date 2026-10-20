@@ -4,13 +4,13 @@
         <h1>TRAININGSZEITEN</h1>
         <div class="trainer_ui">
             {% if perms.members.add_session %}
-                <a href="{% url 'session_create' %}#nav" title="Trainingseinheit hinzufügen"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
+                <a href="{% url 'session_create' %}" title="Trainingseinheit hinzufügen"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
             {% endif %}
             {% if perms.members.add_message %}
-                <a href="{% url 'message_sess_create' %}#nav" title="Hinweis hinzufügen"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
+                <a href="{% url 'message_sess_create' %}" title="Hinweis hinzufügen"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
             {% endif %}
             {% if perms.members.add_spot %}
-                <a href="{% url 'spot_list' %}#nav" title="Spots verwalten"><i class="fas fa-map-marker-alt" style="font-size:27px;"></i></a>
+                <a href="{% url 'spot_list' %}" title="Spots verwalten"><i class="fas fa-map-marker-alt" style="font-size:27px;"></i></a>
             {% endif %}
         </div>
     </div>
@@ -27,10 +27,10 @@
                     <p>{{msg.message}}</p>
                     <div class="trainer_ui">
                         {% if perms.members.delete_message %}
-                        <a href="{% url 'message_delete' msg.id %}#nav" title="Löschen"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
+                        <a href="{% url 'message_delete' msg.id %}" title="Löschen"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                         {% endif %}
                         {% if perms.members.change_message %}
-                        <a href="{% url 'message_update' msg.id %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
+                        <a href="{% url 'message_update' msg.id %}" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
                         {% endif %}
                     </div>
                 </div>
@@ -59,7 +59,7 @@
                         <div class="padding_all_small tertiary_bg" id="container">
                             <div class="trainer_ui">
                                 {% if perms.members.change_session %}
-                                <a href="{% url 'session_update' session.id  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
+                                <a href="{% url 'session_update' session.id  %}" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
                                 {% endif %}
                                 {% if perms.members.delete_session %}
                                 <a href="{% url 'session_delete' session.id  %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>

@@ -1,7 +1,7 @@
 {% extends "members/base.html" %}
 {% block navbar2 %} 
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}#nav">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}">
         Übersicht</a>
     <a class="float_left"> > </a>
     <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Gruppenliste </a>
@@ -14,7 +14,7 @@
         <h3>Gruppenliste</h3>
             <div class="trainer_ui">
                 {% if perms.members.add_group %}
-                    <a class="blue_font" href="{% url 'group_create' %}#nav" title="Gruppe erstellen"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
+                    <a class="blue_font" href="{% url 'group_create' %}" title="Gruppe erstellen"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
                 {% endif %}
             </div>
         </div>
@@ -27,14 +27,14 @@
                     </div>
                     <div class="padding_all_med trainer_ui">
                         {% if perms.members.delete_group %}
-                        <a href="{% url 'group_delete' object.id %}#nav" title="Löschen"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
+                        <a href="{% url 'group_delete' object.id %}" title="Löschen"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                         {% endif %}
                         {% if perms.members.change_group %}
-                        <a href="{% url 'group_update' object.id %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
+                        <a href="{% url 'group_update' object.id %}" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
                         {% endif %}
                     </div>
                     <div class="second_section padding_all_big" style="height:80px;">
-                        <a href="{% url 'real_group_detail' object.id %}#nav" style="display: block;">
+                        <a href="{% url 'real_group_detail' object.id %}" style="display: block;">
                             <p class="more_info_button" style="margin: 0px auto;">Teilnehmer </p>
                         </a>
                     </div>
