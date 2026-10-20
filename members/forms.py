@@ -1,3 +1,5 @@
+from decimal import Decimal, InvalidOperation
+
 from django import forms
 from user_handling.forms import MdcFormMixin, date_widget
 from django.contrib.auth.models import User
@@ -13,33 +15,43 @@ class EventFileForm(forms.ModelForm):
         fields = ["name", "file", "orga"]
 
 
+class CoordinateField(forms.DecimalField):
+    """Latitude (limit 90) or longitude (limit 180), rounded to the 6 decimal places the models store.
+
+    Coordinates copied from other maps often have more decimals; 6 are about 10 cm.
+    """
+
+    def __init__(self, limit, **kwargs):
+        super().__init__(
+            min_value=-limit, max_value=limit, max_digits=9, decimal_places=6,
+            widget=forms.NumberInput(attrs={"step": "any"}), **kwargs,
+        )
+
+    def to_python(self, value):
+        value = super().to_python(value)
+        if value is None:
+            return None
+        try:
+            return value.quantize(Decimal("0.000001"))
+        except InvalidOperation:  # far too large to round; the range check would reject it anyway
+            raise forms.ValidationError(self.error_messages["invalid"], code="invalid")
+
+
 class SpotForm(MdcFormMixin, forms.ModelForm):
+    lat = CoordinateField(90, label="Breitengrad")
+    long = CoordinateField(180, label="Längengrad")
+
     class Meta:
         model = Spot
         fields = ["title", "description", "lat", "long"]
         labels = {"description": "Kurze Beschreibung (z.B. Eingang, Treffpunkt)"}
         widgets = {
             "description": forms.Textarea,
-            # any precision, the map fills them in
-            "lat": forms.NumberInput(attrs={"step": "any"}),
-            "long": forms.NumberInput(attrs={"step": "any"}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["description"].widget.attrs["rows"] = 3
-
-    def clean_lat(self):
-        return self._in_range("lat", 90)
-
-    def clean_long(self):
-        return self._in_range("long", 180)
-
-    def _in_range(self, name, limit):
-        value = self.cleaned_data[name]
-        if not -limit <= value <= limit:
-            raise forms.ValidationError(f"Muss zwischen -{limit} und {limit} liegen.")
-        return value
 
 
 class MessageForm(MdcFormMixin, forms.ModelForm):
@@ -96,12 +108,15 @@ class EventForm(MdcFormMixin, forms.ModelForm):
     deadline = forms.DateTimeField(label="Anmeldung/Abmeldung bis", widget=date_widget())
     # filled with the Editor.js output when the form is sent
     content = forms.JSONField(required=False, widget=forms.HiddenInput)
+    meeting_lat = CoordinateField(90, label="Breitengrad", required=False)
+    meeting_long = CoordinateField(180, label="Längengrad", required=False)
 
     class Meta:
         model = Event
         fields = [
             "title", "place", "costs", "start_date", "end_date", "deadline", "hinweis",
             "info_only", "ask_ticket", "min_age", "max_age", "content",
+            "meeting_point", "meeting_lat", "meeting_long",
             "teilnahmebedingungen", "datenschutz", "einverstaendnis",
         ]
         labels = {
@@ -111,6 +126,7 @@ class EventForm(MdcFormMixin, forms.ModelForm):
             "info_only": "Nur Ankündigung",
             "ask_ticket": "Deutschlandticket abfragen",
             "einverstaendnis": "Einverständniserklärung",
+            "meeting_point": "Beschreibung (z.B. Haupteingang)",
         }
         widgets = {
             "teilnahmebedingungen": forms.FileInput,
@@ -151,6 +167,9 @@ class EventForm(MdcFormMixin, forms.ModelForm):
         start, end = cleaned_data.get("start_date"), cleaned_data.get("end_date")
         if start and end and end < start:
             self.add_error("end_date", "Das Ende liegt vor dem Beginn.")
+        lat, long = cleaned_data.get("meeting_lat"), cleaned_data.get("meeting_long")
+        if (lat is None) != (long is None) and not self.has_error("meeting_lat") and not self.has_error("meeting_long"):
+            self.add_error(None, "Für den Treffpunkt werden Breiten- und Längengrad gebraucht – oder keins von beiden.")
         return cleaned_data
 
     def save(self, commit=True):

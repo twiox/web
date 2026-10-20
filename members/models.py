@@ -176,6 +176,10 @@ class Event(AgeRange):
     start_date = models.DateTimeField("Datum Beginn", blank=True, null=True)
     end_date = models.DateTimeField("Datum Ende", blank=True, null=True)
     hinweis = models.CharField("Hinweis", blank=True, max_length=50)
+    # optional meeting point, picked on a map; meant for the participants
+    meeting_point = models.CharField("Treffpunkt", blank=True, max_length=100)
+    meeting_lat = models.DecimalField("Breitengrad", max_digits=9, decimal_places=6, null=True, blank=True)
+    meeting_long = models.DecimalField("Längengrad", max_digits=9, decimal_places=6, null=True, blank=True)
     costs = models.DecimalField(
         "Kosten", blank=True, null=True, max_digits=8, decimal_places=2
     )
@@ -224,6 +228,10 @@ class Event(AgeRange):
         if not self.start_date == self.end_date:
             return True
         return False
+
+    @property
+    def has_meeting_coordinates(self):
+        return self.meeting_lat is not None and self.meeting_long is not None
 
     @property
     def has_legacy_description(self):

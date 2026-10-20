@@ -1554,7 +1554,12 @@ footer{
 }
 // Leaflet popups and controls are light, the site's text and link colours are made for a dark background
 .leaflet-container .leaflet-bar a{
-    color: #333;
+    &, span{
+        color: #333;
+    }
+    // Leaflet's own font and spacing for + and -; the site's link styles make them faint and off-centre
+    font: bold 18px/30px "Lucida Console", Monaco, monospace;
+    padding: 0;
 }
 .leaflet-container .spot_popup{
     color: #222;
@@ -1788,6 +1793,26 @@ footer{
 // the document names are longer than on the trainer form
 .event_form_page .file_field{
     grid-template-columns: 1fr auto auto;
+}
+
+// left: Eckdaten, Termine, Dokumente stacked; right: the meeting point map. One column on phones.
+.event_form_columns{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: $padding_small;
+    align-items: start;
+    margin-bottom: $padding_small;
+}
+.event_form_column{
+    display: flex;
+    flex-direction: column;
+    gap: $padding_small;
+}
+.meeting_point_map{
+    // about as tall as the three cards on the left
+    height: 560px;
+    max-height: 70vh;
+    margin-bottom: $padding_small;
 }
 
 /* Editor.js ships light-theme styles; adjust them to the dark cards */

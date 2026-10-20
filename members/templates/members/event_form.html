@@ -22,54 +22,70 @@
     <form method="POST" enctype="multipart/form-data" class="event_form_page">
         {% csrf_token %}
         {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
-        <div class="session_grid">
-            <div class="session_card">
-                <h3>Eckdaten</h3>
-                <div class="member_fields">
-                    {% include "user_handling/_field.html" with field=form.title %}
-                    {% include "user_handling/_field.html" with field=form.place %}
-                    {% include "user_handling/_field.html" with field=form.costs %}
-                    {% include "user_handling/_field.html" with field=form.hinweis %}
+        <div class="event_form_columns">
+            <div class="event_form_column">
+                <div class="session_card">
+                    <h3>Eckdaten</h3>
+                    <div class="member_fields">
+                        {% include "user_handling/_field.html" with field=form.title %}
+                        {% include "user_handling/_field.html" with field=form.place %}
+                        {% include "user_handling/_field.html" with field=form.costs %}
+                        {% include "user_handling/_field.html" with field=form.hinweis %}
+                    </div>
+                    <div class="chip_list">
+                        <label class="toggle_chip">{{ form.info_only }}<span>{{ form.info_only.label }}</span></label>
+                        <label class="toggle_chip">{{ form.ask_ticket }}<span>{{ form.ask_ticket.label }}</span></label>
+                    </div>
                 </div>
-                <div class="chip_list">
-                    <label class="toggle_chip">{{ form.info_only }}<span>{{ form.info_only.label }}</span></label>
-                    <label class="toggle_chip">{{ form.ask_ticket }}<span>{{ form.ask_ticket.label }}</span></label>
+
+                <div class="session_card">
+                    <h3>Termine</h3>
+                    <div class="member_fields">
+                        {% include "user_handling/_field.html" with field=form.start_date %}
+                        {% include "user_handling/_field.html" with field=form.end_date %}
+                        {% include "user_handling/_field.html" with field=form.deadline %}
+                    </div>
+                    <h4>Alter</h4>
+                    <p class="member_panel__hint">Leer lassen für keine Grenze.</p>
+                    <div class="member_fields">
+                        {% include "user_handling/_field.html" with field=form.min_age %}
+                        {% include "user_handling/_field.html" with field=form.max_age %}
+                    </div>
+                </div>
+
+                <div class="session_card">
+                    <h3>Dokumente</h3>
+                    {% for field in form.file_fields %}
+                    <div class="file_field">
+                        {% for error in field.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+                        <span class="file_field__label">{{ field.label }}</span>
+                        {% if field.value %}
+                            <a class="more_info_button" href="{{ field.value.url }}" target="_blank">ansehen</a>
+                        {% else %}
+                            <span class="member_panel__hint">fehlt</span>
+                        {% endif %}
+                        <label class="table_action">
+                            Datei wählen
+                            {{ field }}
+                        </label>
+                        <span class="file_field__name"></span>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
 
             <div class="session_card">
-                <h3>Termine</h3>
+                <h3>Treffpunkt</h3>
+                <p class="member_panel__hint">Optional. Klicke auf die Karte oder ziehe den Marker an die richtige Stelle. Sichtbar für die Teilnehmenden.</p>
+                <div id="meeting_point_picker" class="spot_map meeting_point_map"></div>
+                <div class="member_fields member_fields--wide">
+                    {% include "user_handling/_field.html" with field=form.meeting_point %}
+                </div>
                 <div class="member_fields">
-                    {% include "user_handling/_field.html" with field=form.start_date %}
-                    {% include "user_handling/_field.html" with field=form.end_date %}
-                    {% include "user_handling/_field.html" with field=form.deadline %}
+                    {% include "user_handling/_field.html" with field=form.meeting_lat %}
+                    {% include "user_handling/_field.html" with field=form.meeting_long %}
                 </div>
-                <h4>Alter</h4>
-                <p class="member_panel__hint">Leer lassen für keine Grenze.</p>
-                <div class="member_fields">
-                    {% include "user_handling/_field.html" with field=form.min_age %}
-                    {% include "user_handling/_field.html" with field=form.max_age %}
-                </div>
-            </div>
-
-            <div class="session_card">
-                <h3>Dokumente</h3>
-                {% for field in form.file_fields %}
-                <div class="file_field">
-                    {% for error in field.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
-                    <span class="file_field__label">{{ field.label }}</span>
-                    {% if field.value %}
-                        <a class="more_info_button" href="{{ field.value.url }}" target="_blank">ansehen</a>
-                    {% else %}
-                        <span class="member_panel__hint">fehlt</span>
-                    {% endif %}
-                    <label class="table_action">
-                        Datei wählen
-                        {{ field }}
-                    </label>
-                    <span class="file_field__name"></span>
-                </div>
-                {% endfor %}
+                <button type="button" id="meeting_point_clear" class="table_action table_action--danger"><i class="far fa-minus-square"></i> Treffpunkt entfernen</button>
             </div>
         </div>
 
@@ -97,6 +113,18 @@
         const name = event.target.files[0] ? event.target.files[0].name : '';
         event.target.closest('.file_field').querySelector('.file_field__name').textContent = name;
     });
+</script>
+{% include "members/snippets/leaflet.html" %}
+<script>
+    (function () {
+        const lat = document.getElementById('{{ form.meeting_lat.id_for_label }}');
+        const long = document.getElementById('{{ form.meeting_long.id_for_label }}');
+        SpotMap.picker(document.getElementById('meeting_point_picker'), lat, long);
+        document.getElementById('meeting_point_clear').addEventListener('click', () => {
+            lat.value = long.value = '';
+            lat.dispatchEvent(new Event('change'));
+        });
+    })();
 </script>
 {% if not object.has_legacy_description %}
 {% include "members/snippets/event_editor.html" %}

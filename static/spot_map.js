@@ -123,22 +123,27 @@
         return map;
     }
 
-    // Spot form: click or drag sets the coordinate inputs, typing moves the marker
+    // Spot and event forms: click or drag sets the coordinate inputs, typing moves the marker.
+    // Without coordinates (the event meeting point is optional) the marker appears on the first click
+    // and disappears again when the inputs are emptied.
     function picker(element, latInput, longInput) {
-        const start = latInput.value && longInput.value ? [parseFloat(latInput.value), parseFloat(longInput.value)] : LEIPZIG;
-        const map = baseMap(element, start, latInput.value ? 16 : 12);
-        const marker = L.marker(start, { draggable: true }).addTo(map);
+        const hasValue = latInput.value !== '' && longInput.value !== '';
+        const start = hasValue ? [parseFloat(latInput.value), parseFloat(longInput.value)] : LEIPZIG;
+        const map = baseMap(element, start, hasValue ? 16 : 12);
+        const marker = L.marker(start, { draggable: true });
+        if (hasValue) marker.addTo(map);
 
         function setInputs(latlng) {
             latInput.value = latlng.lat.toFixed(6);
             longInput.value = latlng.lng.toFixed(6);
             [latInput, longInput].forEach(input => input.dispatchEvent(new Event('input', { bubbles: true })));
         }
-        map.on('click', event => { marker.setLatLng(event.latlng); setInputs(event.latlng); });
+        map.on('click', event => { marker.setLatLng(event.latlng).addTo(map); setInputs(event.latlng); });
         marker.on('dragend', () => setInputs(marker.getLatLng()));
         [latInput, longInput].forEach(input => input.addEventListener('change', () => {
             const lat = parseFloat(latInput.value), long = parseFloat(longInput.value);
-            if (!isNaN(lat) && !isNaN(long)) { marker.setLatLng([lat, long]); map.panTo([lat, long]); }
+            if (!isNaN(lat) && !isNaN(long)) { marker.setLatLng([lat, long]).addTo(map); map.panTo([lat, long]); }
+            else marker.remove();
         }));
         return map;
     }
