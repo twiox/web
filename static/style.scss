@@ -1343,3 +1343,95 @@ footer{
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     }
 }
+
+/* Trainer: Meine Daten */
+.trainer_profile{
+    display: flex;
+    gap: $padding_big;
+    align-items: flex-start;
+    > div{
+        min-width: 0;
+    }
+    h3 a{
+        font-size: 1rem;
+        margin-left: 6px;
+    }
+    p{
+        display: flex;
+        gap: 6px;
+        margin: 4px 0;
+        overflow-wrap: anywhere;
+    }
+    &__image{
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+}
+// the profile card gets more room for name and email
+@media (min-width: 1000px){
+    .trainer_data_grid{
+        grid-template-columns: 1.4fr 1fr 1fr;
+    }
+}
+.data_list{
+    width: 100%;
+    th, td{
+        padding: 6px 0;
+        border-bottom: 1px solid $quartiary_bg;
+        text-align: left;
+        font-weight: normal;
+    }
+    th{
+        color: grey;
+        width: 45%;
+    }
+}
+.document_link{
+    display: flex;
+    align-items: center;
+    gap: $padding_small;
+    padding: $padding_small;
+    margin-bottom: 6px;
+    border-radius: 4px;
+    background-color: $quartiary_bg;
+    color: white;
+    &:hover{
+        background-color: $primary;
+    }
+    &--missing, &--missing:hover{
+        background-color: transparent;
+        border: 1px dashed $quartiary_bg;
+        color: grey;
+    }
+}
+
+/* Trainer edit form: file uploads */
+.file_field{
+    display: grid;
+    grid-template-columns: 110px 1fr auto;
+    align-items: center;
+    gap: 6px $padding_small;
+    padding: $padding_small 0;
+    border-bottom: 1px solid $quartiary_bg;
+    &__label{
+        color: white;
+    }
+    &__name{
+        grid-column: 2 / -1;
+        color: $primary_hover;
+        font-size: 0.9rem;
+        &:empty{
+            display: none;
+        }
+    }
+    .form_error{
+        grid-column: 1 / -1;
+        margin: 0;
+    }
+    label{
+        cursor: pointer;
+    }
+}

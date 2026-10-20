@@ -1,63 +1,52 @@
 {% extends 'members/base.html' %}
 {% block content %}
 <section class="member_page">
-{% include "trainer/_tabs.html" with active="data" %}
-</section>
-<h3> Deine Daten </h3>
-<div class="padding_all_small">
-    <div class="" style="display:flex; justify-content:left; flex-wrap:wrap;">
-        <div class="col-20 padding_all_big tertiary_bg">
-            <img src="{{ request.user.trainer.image_url }}" class="team_picture" style="border-radius:50%;">
+    {% include "trainer/_tabs.html" with active="data" %}
+
+    <div class="session_grid trainer_data_grid">
+        <div class="session_card trainer_profile">
+            <img src="{{ trainer.image_url }}" alt="Profilbild" class="trainer_profile__image">
+            <div>
+                <h3>
+                    {{ request.user.first_name }} {{ request.user.last_name }}
+                    <a href="{% url 'trainer_self_update_form' %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
+                </h3>
+                <h4>Öffentliche Kontaktdaten</h4>
+                <p><i class="fas fa-phone fa-fw"></i> {{ trainer.trainer_telnr|default:"–" }}</p>
+                <p><i class="far fa-envelope fa-fw"></i> {{ trainer.trainer_email|default:"–" }}</p>
+                <p class="member_panel__hint">Werden bei deinen Trainingszeiten angezeigt.</p>
+            </div>
         </div>
-        <div class="col-80 padding_all_small tertiary_bg">
-            <h3>{{request.user.first_name}} {{request.user.last_name}}</h3>
-            <br>
-            <table>
-                <tr><td><strong>Telefon:</strong></td> <td>{{request.user.trainer.trainer_telnr}}</td></tr>
-                <tr><td><strong>Email:</strong></td> <td>{{request.user.trainer.trainer_email}}</td></tr>
-                {% if request.user.trainer.license_number %}
-                <td><strong>Lizenznr.:</strong></td> <td>{{request.user.trainer.license_number}}</td></tr>
-                {% endif %}
-                {% if request.user.trainer.license_valid %}
-                <td><strong>Gültigkeit:</strong></td> <td>{{request.user.trainer.license_valid|date:"d.m.Y"}}</td></tr>
-                {% endif %}
-                <tr><td><a class="more_info_button" style="padding-left:0px;" href={% url 'trainer_self_update_form' %}>bearbeiten</a></td></tr>
+
+        <div class="session_card">
+            <h3>Lizenz & Bezahlung</h3>
+            <table class="data_list">
+                <tr><th>Lizenzstufe</th><td>{{ trainer.license_level|default:"–" }}</td></tr>
+                <tr><th>Lizenznummer</th><td>{{ trainer.license_number|default:"–" }}</td></tr>
+                <tr>
+                    <th>Gültig bis</th>
+                    <td>
+                        {{ trainer.license_valid|date:"d.m.Y"|default:"–" }}
+                        {% if license_expired %}<span class="entry_status_hint">abgelaufen</span>
+                        {% elif license_expires_soon %}<span class="entry_status_hint">läuft bald ab</span>{% endif %}
+                    </td>
+                </tr>
+                <tr><th>TAE pro Stunde</th><td>{% if trainer.salary %}{{ trainer.salary|floatformat:2 }} €{% else %}–{% endif %}</td></tr>
             </table>
+            <p class="member_panel__hint">Den TAE-Satz trägt der Vorstand ein.</p>
+        </div>
+
+        <div class="session_card">
+            <h3>Dokumente</h3>
+            {% for name, file in documents %}
+                {% if file %}
+                <a class="document_link" href="{{ file.url }}"><i class="fas fa-file-download fa-fw"></i> {{ name }}</a>
+                {% else %}
+                <span class="document_link document_link--missing"><i class="far fa-file fa-fw"></i> {{ name }} fehlt</span>
+                {% endif %}
+            {% endfor %}
+            <p class="member_panel__hint">Fehlende Dokumente bitte beim Vorstand einreichen.</p>
         </div>
     </div>
-    <div>
-        <ul style="display:flex; justify-content:left; flex-wrap:wrap;">
-            {%if request.user.trainer.contract %}
-            <li class="padding_all_small col-4">
-                <a class="download tertiary_bg prim_hover padding_all_small" href="{{request.user.trainer.contract.url}}">
-                    <p class="padding_rl_small">Dein aktueller Vertrag</p>
-                    <div class="flex_center_vertical">
-                        <i class="fas fa-file-download padding_rl_small"></i>
-                    </div>
-                </a>
-            </li>
-            {% endif %}
-            {%if request.user.trainer.license %}
-            <li class="padding_all_small col-4">
-                <a class="download tertiary_bg prim_hover padding_all_small" href="{{request.user.trainer.license.url}}">
-                    <p class="padding_rl_small">Deine Lizenz</p>
-                    <div class="flex_center_vertical">
-                        <i class="fas fa-file-download padding_rl_small"></i>
-                    </div>
-                </a>
-            </li>
-            {% endif %}
-            {%if request.user.trainer.codex %}
-            <li class="padding_all_small col-4">
-                <a class="download tertiary_bg prim_hover padding_all_small" href="{{request.user.trainer.codex.url}}">
-                    <p class="padding_rl_small">Dein Ehrenkodex</p>
-                    <div class="flex_center_vertical">
-                        <i class="fas fa-file-download padding_rl_small"></i>
-                    </div>
-                </a>
-            </li>
-            {% endif %}
-        </ul>
-    </div>
-</div>
+</section>
 {% endblock %}

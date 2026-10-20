@@ -1,12 +1,15 @@
+from .forms import TrainerForm, TrainerSelfForm
 from .models import TrainingSessionEntry
+from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
 from members.models import Trainer, Session, Profile, AdditionalEmail, is_trainer, is_chairman
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.views.generic import DeleteView, UpdateView, ListView
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth.decorators import user_passes_test
+from datetime import date
 from django.db.models import Count, Q
 from itertools import groupby
 
@@ -36,10 +39,19 @@ def trainer_index(request):
 
 @user_passes_test(is_trainer)
 def trainer_data(request):
-    """ I just assume for the moment, that the user is a trainer """
-    return render(
-        request,"trainer/trainer_data.html",
-    )
+    trainer = request.user.trainer
+    license_days_left = (trainer.license_valid.date() - date.today()).days if trainer.license_valid else None
+    documents = [
+        ("Vertrag", trainer.contract),
+        ("Lizenz", trainer.license),
+        ("Ehrenkodex", trainer.codex),
+    ]
+    return render(request, "trainer/trainer_data.html", {
+        "trainer": trainer,
+        "license_expired": license_days_left is not None and license_days_left < 0,
+        "license_expires_soon": license_days_left is not None and 0 <= license_days_left <= 60,
+        "documents": documents,
+    })
 
 ### JQUERY AJAX STUFF ###
 def is_privileged(user):
@@ -82,39 +94,21 @@ class TrainerDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView)
         return HttpResponseRedirect(self.get_success_url())
 
 class TrainerUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    #template: event_form.html
     model = Trainer
-    fields = [
-        "trainer_telnr",
-        "trainer_email",
-        "license_number",
-        "license_valid",
-        "license_level",
-        "contract",
-        "license",
-        "codex",
-        "salary",
-        "image"
-        ]
-    template_name="trainer/trainer_form.html"
-    permission_required = 'members.change_trainer'
+    form_class = TrainerForm
+    template_name = "trainer/trainer_form.html"
+    permission_required = "members.change_trainer"
 
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, "Gespeichert")
+        return super().form_valid(form)
 
 
 class TrainerSelfUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    model = Trainer
-    fields = [
-        "trainer_telnr",
-        "trainer_email",
-        "license_number",
-        "license_valid",
-        "license_level",
-        "contract",
-        "license",
-        "codex",
-        "image"
-    ]
+    form_class = TrainerSelfForm
     template_name = "trainer/trainer_form.html"
+    success_url = reverse_lazy("trainer_data")
+    extra_context = {"is_self": True}
 
     def get_object(self):
         return self.request.user.trainer
@@ -122,4 +116,6 @@ class TrainerSelfUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
     def test_func(self):
         return is_trainer(self.request.user)
 
-
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, "Gespeichert")
+        return super().form_valid(form)
