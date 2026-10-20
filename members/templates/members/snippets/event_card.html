@@ -1,0 +1,49 @@
+{# one card in the Eventkalender; expects an event prepared by views.prepare_event_cards #}
+<div class="event_card{% if not event.visible %} event_card--muted{% endif %}{% if event.can_open %} event_card--link{% endif %}">
+    <div class="event_card__main">
+        <div class="polygon primary event_card__date">
+            <span class="event_card__day">{{ event.start_date|date:"j" }}</span>
+            <span class="event_card__month">{{ event.start_date|date:"M" }}</span>
+        </div>
+        <div class="event_card__info">
+            {# the title link covers the whole card (see .event_card__link) #}
+            <h4>
+                {% if event.can_open %}<a class="event_card__link" href="{% url 'event_detail' event.id %}">{{ event.title }}</a>{% else %}{{ event.title }}{% endif %}
+                {% if event.age_label %}<small class="event_card__age">{{ event.age_label }}</small>{% endif %}
+            </h4>
+            <p><i class="far fa-calendar"></i>
+                {% if event.start_date|date:"Ymd" == event.end_date|date:"Ymd" %}{{ event.start_date|date:"D d.m.Y" }}{% else %}{{ event.start_date|date:"D d.m." }} – {{ event.end_date|date:"D d.m.Y" }}{% endif %}
+            </p>
+            {% if event.place %}<p><i class="fas fa-map-marker-alt"></i> {{ event.place }}</p>{% endif %}
+            <p><i class="fas fa-euro-sign"></i> {% if event.costs %}{{ event.costs|floatformat:"-2" }} €{% else %}kostenlos{% endif %}</p>
+        </div>
+        {% if perms.members.add_message %}
+        <a class="event_card__note" href="{% url 'message_eve_create' %}?event={{ event.pk }}" title="Hinweis zu dieser Veranstaltung"><i class="far fa-sticky-note"></i></a>
+        {% endif %}
+    </div>
+
+    {# pushed to the bottom, so the status of a row lines up; notices last #}
+    <div class="event_card__bottom">
+        <div class="event_card__status">
+            {% if not event.visible %}
+                <span>Nicht für deine Altersgruppe</span>
+            {% elif event.is_past_due %}
+                {% if event.is_participant %}<span class="entry_status entry_status--payed">Teilgenommen</span>{% else %}<span>Vergangen</span>{% endif %}
+            {% elif event.is_participant %}
+                <span class="entry_status entry_status--payed">Angemeldet</span>
+            {% elif event.info_only %}
+                <span>Nur Ankündigung</span>
+            {% elif event.deadline_reached %}
+                <span>Anmeldung vorbei</span>
+            {% elif event.deadline %}
+                <span>Anmeldung bis {{ event.deadline|date:"d.m." }}</span>
+            {% endif %}
+        </div>
+        {% if event.visible and event.hinweis %}
+        <div class="session_notice_block"><i class="fas fa-exclamation-triangle"></i> {{ event.hinweis }}</div>
+        {% endif %}
+        {% for notice in event.notices %}
+        <div class="session_notice_block">{{ notice }}</div>
+        {% endfor %}
+    </div>
+</div>

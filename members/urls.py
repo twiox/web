@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path("", views.index, name="index"),
     path("veranstaltungen/<int:pk>/", views.EventDetailView.as_view(),name="event_detail"),
+    path("veranstaltungen/vergangene/", views.past_events, name="past_events"),
     path("veranstaltungen/neu/", views.EventCreateView.as_view(),name="event_create"),
     path("veranstaltungen/<int:pk>/ändern/", views.EventUpdateView.as_view(),name="event_update"),
     path("veranstaltungen/<int:pk>/löschen/", views.EventDeleteView.as_view(),name="event_delete"),

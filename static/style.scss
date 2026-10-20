@@ -1838,6 +1838,32 @@ footer{
     gap: $padding_small;
     padding: $padding_small 0;
 }
+.event_grid--past:empty{
+    display: none;
+}
+// line with a label between the upcoming and the past events
+.event_separator{
+    display: flex;
+    align-items: center;
+    gap: $padding_medium;
+    margin: $padding_big 0 $padding_small 0;
+    color: grey;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    &::before, &::after{
+        content: "";
+        flex: 1;
+        border-top: 1px solid $quartiary_bg;
+    }
+    span{
+        color: grey;
+    }
+}
+.event_more{
+    text-align: center;
+    padding: $padding_small 0;
+}
 .event_card{
     position: relative;  // for the note button and the stretched title link
     display: flex;
@@ -1845,6 +1871,10 @@ footer{
     background-color: $tertiary_bg;
     &--muted{
         opacity: 0.5;
+        // grey date tab instead of the blue one
+        .event_card__date{
+            background-color: $quartiary_bg;
+        }
     }
     &__main{
         display: flex;

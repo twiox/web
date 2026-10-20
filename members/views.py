@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django import forms
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic import (
     ListView,
@@ -71,6 +72,43 @@ def trainer_check(request):
     return is_trainer(user) or user.is_superuser
 
 
+def past_events_q():
+    # same rule as Event.is_past_due: over for more than 3 days
+    return Q(end_date__lt=datetime.now() - timedelta(days=3))
+
+
+def prepare_event_cards(request, events):
+    """Adds what the event cards need; members see all events, the ones outside their age greyed out."""
+    privileged = is_trainer(request.user) or is_chairman(request.user)
+    age = request.user.profile.age
+    events = list(events)
+    for event in events:
+        event.visible = privileged or event.allows_age(age)
+        event.is_participant = request.user in event.participant_users
+        # every event the member may see opens its detail page, past ones included
+        event.can_open = event.visible
+        # titles of the notices linked to this event, shown on its card
+        event.notices = [notice.title for notice in event.messages.all()] if event.visible else []
+    return events
+
+
+PAST_EVENTS_PER_PAGE = 4  # one row
+
+
+@login_required
+def past_events(request):
+    """The "Vergangene Veranstaltungen" button: the next batch of past event cards, newest first."""
+    offset = int(request.GET.get("offset", 0)) if request.GET.get("offset", "").isdigit() else 0
+    past = Event.objects.filter(past_events_q()).order_by("-start_date").prefetch_related("messages")
+    events = prepare_event_cards(request, past[offset:offset + PAST_EVENTS_PER_PAGE])
+    next_offset = offset + PAST_EVENTS_PER_PAGE
+    return render(request, "members/snippets/past_events.html", {
+        "events": events,
+        "next_offset": next_offset if past.count() > next_offset else None,
+        "first_batch": offset == 0,
+    })
+
+
 @login_required
 def index(request):
     """This is the View for the homepage"""
@@ -86,14 +124,7 @@ def index(request):
     notices = Message.objects.all() if privileged else Message.visible_for_age(age)
 
     # all upcoming events are listed, the ones outside the member's age are greyed out
-    events = [event for event in Event.objects.prefetch_related("messages") if not event.is_past_due]
-    for event in events:
-        event.visible = privileged or event.allows_age(age)
-        event.is_participant = request.user in event.participant_users
-        # after the deadline only participants (and trainers/chairmen) still need the details
-        event.can_open = event.visible and (privileged or event.is_participant or not event.deadline_reached)
-        # titles of the notices linked to this event, shown on its card
-        event.notices = [notice.title for notice in event.messages.all()] if event.visible else []
+    events = prepare_event_cards(request, Event.objects.exclude(past_events_q()).prefetch_related("messages"))
     training_messags = notices.filter(display="sessions")
     event_messags = notices.filter(display="events")
     chairmen = Chairman.objects.filter(active=True, show__contains="member_site")
@@ -117,6 +148,7 @@ def index(request):
             "sessions": grouped_sessions,
             "session_days": session_days,
             "events": events,
+            "has_past_events": Event.objects.filter(past_events_q()).exists(),
             "training_messags": training_messags,
             "event_messags": event_messags,
             "chairman": is_chairman(request.user),

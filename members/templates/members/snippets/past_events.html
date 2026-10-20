@@ -1,0 +1,13 @@
+{# answer of the "Vergangene Veranstaltungen" button: more cards, and the button for the next batch #}
+{% if first_batch %}
+<div id="past_event_separator" class="event_separator" hx-swap-oob="true"><span>Vergangene Veranstaltungen</span></div>
+{% endif %}
+{% for event in events %}
+{% include "members/snippets/event_card.html" %}
+{% endfor %}
+<div class="event_more" id="event_more" hx-swap-oob="true">
+    {% if next_offset %}
+    <button type="button" class="table_action" hx-get="{% url 'past_events' %}?offset={{ next_offset }}"
+            hx-target="#past_event_grid" hx-swap="beforeend">Ältere Veranstaltungen laden</button>
+    {% endif %}
+</div>
