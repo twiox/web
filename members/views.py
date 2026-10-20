@@ -83,12 +83,17 @@ def index(request):
     # now the actual view
     age = request.user.profile.age
     privileged = is_trainer(request.user) or is_chairman(request.user)
-    if privileged:
-        events = Event.objects.all()
-        notices = Message.objects.all()
-    else:
-        events = Event.visible_for_age(age)
-        notices = Message.visible_for_age(age)
+    notices = Message.objects.all() if privileged else Message.visible_for_age(age)
+
+    # all upcoming events are listed, the ones outside the member's age are greyed out
+    events = [event for event in Event.objects.prefetch_related("messages") if not event.is_past_due]
+    for event in events:
+        event.visible = privileged or event.allows_age(age)
+        event.is_participant = request.user in event.participant_users
+        # after the deadline only participants (and trainers/chairmen) still need the details
+        event.can_open = event.visible and (privileged or event.is_participant or not event.deadline_reached)
+        # titles of the notices linked to this event, shown on its card
+        event.notices = [notice.title for notice in event.messages.all()] if event.visible else []
     training_messags = notices.filter(display="sessions")
     event_messags = notices.filter(display="events")
     chairmen = Chairman.objects.filter(active=True, show__contains="member_site")
@@ -150,6 +155,8 @@ class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         context.update(
             part=part,
             is_participant=is_participant,
+            # expired notices are only cleaned up on the members page
+            notices=[notice for notice in self.object.messages.all() if not notice.delme],
             # the meeting point is meant for the people who come along
             show_meeting_point=is_participant or trainer_check(self.request) or chairman_check(self.request),
         )
@@ -568,30 +575,33 @@ class NewsDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 """For The Messages"""
 
 
-class MessageEveCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class MessageCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    """Base for the two kinds of notices; ?session=<pk> or ?event=<pk> starts with that one ticked."""
+
     model = Message
     form_class = MessageForm
     permission_required = "members.add_message"
+    kind = None
 
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        form.instance.display = "events"
-        return super().form_valid(form)
-
-
-class MessageSessCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    model = Message
-    form_class = MessageForm
-    permission_required = "members.add_message"
+    def get_form_kwargs(self):
+        return {**super().get_form_kwargs(), "kind": self.kind}
 
     def get_initial(self):
-        # "Hinweis" button on a training time passes ?session=<pk>, so it starts ticked
-        return {"sessions": [pk for pk in self.request.GET.getlist("session") if pk.isdigit()]}
+        param = "session" if self.kind == "sessions" else "event"
+        return {self.kind: [pk for pk in self.request.GET.getlist(param) if pk.isdigit()]}
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        form.instance.display = "sessions"
+        form.instance.display = self.kind
         return super().form_valid(form)
+
+
+class MessageEveCreateView(MessageCreateView):
+    kind = "events"
+
+
+class MessageSessCreateView(MessageCreateView):
+    kind = "sessions"
 
 
 class MessageDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
@@ -606,6 +616,9 @@ class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
     model = Message
     form_class = MessageForm
     permission_required = "members.change_message"
+
+    def get_form_kwargs(self):
+        return {**super().get_form_kwargs(), "kind": "events" if self.object.display == "events" else "sessions"}
 
     def form_valid(self, form):
         form.instance.author = self.request.user

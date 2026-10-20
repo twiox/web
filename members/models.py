@@ -213,6 +213,8 @@ class Event(AgeRange):
 
     @property
     def is_past_due(self):
+        if self.end_date is None:  # some old events have none
+            return False
         return datetime.now().replace(tzinfo=None) > self.end_date.replace(
             tzinfo=None
         ) + timedelta(days=3)
@@ -420,9 +422,12 @@ class Message(models.Model):
     date = models.DateTimeField(default=datetime(2020, 11, 14, 1, 54, 52, 799289))
     autodelete = models.DateTimeField("Automatisches Löschen", blank=True, null=True)
     display = models.CharField(max_length=20, choices=choices, blank=True)
-    # whoever sees one of these sessions sees the message; none means everyone
+    # whoever sees one of these sessions/events sees the message; none means everyone
     sessions = models.ManyToManyField(
         Session, verbose_name="Für die Trainingszeiten", related_name="messages", blank=True
+    )
+    events = models.ManyToManyField(
+        Event, verbose_name="Für die Veranstaltungen", related_name="messages", blank=True
     )
 
     def save(self, *args, **kwargs):
@@ -434,7 +439,13 @@ class Message(models.Model):
         if age is None:
             return cls.objects.none()
         sessions = Session.visible_for_age(age)
-        return cls.objects.filter(Q(sessions__isnull=True) | Q(sessions__in=sessions)).distinct()
+        events = Event.visible_for_age(age)
+        return cls.objects.filter(
+            Q(display="sessions", sessions__isnull=True)
+            | Q(display="sessions", sessions__in=sessions)
+            | Q(display="events", events__isnull=True)
+            | Q(display="events", events__in=events)
+        ).distinct()
 
     @property
     def delme(self):

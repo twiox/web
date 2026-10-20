@@ -1,6 +1,8 @@
+from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 
 from django import forms
+from django.db.models import Q
 from user_handling.forms import MdcFormMixin, date_widget
 from django.contrib.auth.models import User
 from .event_content import clean_content
@@ -55,21 +57,51 @@ class SpotForm(MdcFormMixin, forms.ModelForm):
 
 
 class MessageForm(MdcFormMixin, forms.ModelForm):
+    """Notice for the training times (kind "sessions") or for the event calendar (kind "events")."""
+
     autodelete = forms.DateField(label="Automatisch löschen nach", required=False, widget=date_widget())
 
     class Meta:
         model = Message
-        fields = ["title", "message", "autodelete", "sessions"]
-        labels = {"title": "Titel", "message": "Text", "sessions": "Für welche Trainingszeiten?"}
-        widgets = {"message": forms.Textarea, "sessions": forms.CheckboxSelectMultiple}
+        fields = ["title", "message", "autodelete", "sessions", "events"]
+        labels = {
+            "title": "Titel",
+            "message": "Text",
+            "sessions": "Für welche Trainingszeiten?",
+            "events": "Für welche Veranstaltungen?",
+        }
+        help_texts = {
+            "sessions": "Sichtbar für alle, die eine der gewählten Trainingszeiten sehen. Keine Auswahl: für alle Mitglieder.",
+            "events": "Sichtbar für alle, die eine der gewählten Veranstaltungen sehen. Keine Auswahl: für alle Mitglieder.",
+        }
+        widgets = {
+            "message": forms.Textarea,
+            "sessions": forms.CheckboxSelectMultiple,
+            "events": forms.CheckboxSelectMultiple,
+        }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, kind="sessions", **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["message"].widget.attrs["rows"] = 4
-        sessions = self.fields["sessions"]
-        sessions.queryset = Session.objects.order_by("day_key", "start_time")
-        sessions.widget.attrs.pop("class", None)  # rendered as chips, not as a text field
-        sessions.label_from_instance = lambda s: f"{s.title}, {s.day} {s.format_start_time}" + (f" ({s.age_label})" if s.age_label else "")
+        # only the choices that fit the kind of notice
+        del self.fields["events" if kind == "sessions" else "sessions"]
+        self.choice_name = kind
+        choices = self.fields[kind]
+        choices.widget.attrs.pop("class", None)  # rendered as chips, not as a text field
+        if kind == "sessions":
+            choices.queryset = Session.objects.order_by("day_key", "start_time")
+            choices.label_from_instance = lambda s: f"{s.title}, {s.day} {s.format_start_time}" + (f" ({s.age_label})" if s.age_label else "")
+        else:
+            # events that are not over yet, plus the ones this notice is already linked to
+            linked = self.instance.events.all() if self.instance.pk else Event.objects.none()
+            choices.queryset = Event.objects.filter(
+                Q(end_date__gte=datetime.now() - timedelta(days=3)) | Q(pk__in=linked)
+            ).distinct().order_by("start_date")
+            choices.label_from_instance = lambda e: f"{e.title}, {e.start_date:%d.%m.%Y}"
+
+    @property
+    def choice_field(self):
+        return self[self.choice_name]
 
 
 WEEKDAYS = [("Mo", "Montag"), ("Di", "Dienstag"), ("Mi", "Mittwoch"), ("Do", "Donnerstag"),

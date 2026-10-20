@@ -1,7 +1,7 @@
 {% extends "members/base.html" %}
 {% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}">Mitglieder</a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}{% if form.choice_name == 'events' %}#events{% else %}#training{% endif %}">Mitglieder</a>
     <a class="float_left"> > </a>
     <a class="float_left strong" style="font-size: 1.1rem; color:white;">{% if object.pk %}Hinweis bearbeiten{% else %}Neuer Hinweis{% endif %}</a>
 </div>
@@ -29,19 +29,21 @@
             </div>
 
             <div class="session_card">
-                <h3>Für welche Trainingszeiten?</h3>
-                <p class="member_panel__hint">Sichtbar für alle, die eine der gewählten Trainingszeiten sehen. Keine Auswahl: für alle Mitglieder.</p>
-                {% for error in form.sessions.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+                {% with field=form.choice_field %}
+                <h3>{{ field.label }}</h3>
+                <p class="member_panel__hint">{{ field.help_text }}</p>
+                {% for error in field.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
                 <div class="chip_list">
-                    {% for option in form.sessions %}
+                    {% for option in field %}
                     <label class="toggle_chip">
                         {{ option.tag }}
                         <span>{{ option.choice_label }}</span>
                     </label>
                     {% empty %}
-                    <p class="member_panel__hint">Noch keine Trainingszeiten.</p>
+                    <p class="member_panel__hint">{% if form.choice_name == "events" %}Keine anstehenden Veranstaltungen.{% else %}Noch keine Trainingszeiten.{% endif %}</p>
                     {% endfor %}
                 </div>
+                {% endwith %}
             </div>
         </div>
         <button type="submit" class="form_button member_form__submit">Speichern</button>

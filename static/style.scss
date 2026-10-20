@@ -73,12 +73,6 @@ select { -webkit-appearance: none; }
 #container{
     position:relative;
 }
-#info_position{
-    position: absolute;
-    top: -5px;
-    right: 20px;
-    z-index:2;
-}
 #info_position2{
     position: absolute;
     top: 3px;
@@ -584,11 +578,6 @@ strong{
 .third_session{
     margin-top:1px;
     text-align:center;
-}
-.session_alert{
-    text-align: center;
-    background-color: #7b1b42;
-    padding:3px;
 }
 .odd{
     background-color:#262626;
@@ -1833,6 +1822,126 @@ footer{
         margin-right: 6px;
     }
 }
+.event_notice{
+    a{
+        padding: 0 0 0 6px;
+        color: white;
+    }
+    p{
+        margin: 4px 0 0 0;
+    }
+}
+/* Event cards in the calendar: equal heights per row, buttons aligned at the bottom */
+.event_grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: $padding_small;
+    padding: $padding_small 0;
+}
+.event_card{
+    position: relative;  // for the note button and the stretched title link
+    display: flex;
+    flex-direction: column;
+    background-color: $tertiary_bg;
+    &--muted{
+        opacity: 0.5;
+    }
+    &__main{
+        display: flex;
+        min-height: 130px;
+    }
+    // the blue date tab keeps its slanted bottom (.polygon)
+    &__date{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-shrink: 0;
+        width: 64px;
+        padding: $padding_medium 0 $padding_big 0;
+        color: white;
+        text-transform: uppercase;
+    }
+    &__day{
+        font-size: 1.8rem;
+        line-height: 1;
+    }
+    &__month{
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+    }
+    &__info{
+        padding: $padding_medium $padding_big $padding_medium $padding_medium;
+        min-width: 0;
+        h4{
+            margin: 0 0 6px 0;
+            padding-right: 20px;  // room for the note button
+        }
+        .event_card__age{
+            margin-left: 4px;
+            color: grey;
+            font-size: 0.8rem;
+            text-transform: none;
+            white-space: nowrap;
+        }
+        p{
+            margin: 2px 0;
+            color: $font_col;
+            font-size: 0.9rem;
+        }
+        i{
+            width: 16px;
+            color: grey;
+        }
+    }
+    &__note{
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        padding: 0;
+        z-index: 1;  // above the stretched card link
+    }
+    &__status{
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        min-height: 26px;
+        padding: 6px $padding_medium $padding_small $padding_medium;
+        font-size: 0.85rem;
+        span{
+            color: grey;  // spans get the light text colour globally
+        }
+        .entry_status{
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+        }
+    }
+    &__bottom{
+        margin-top: auto;
+        // notices: same side padding as the status above
+        .session_notice_block{
+            padding: 6px $padding_medium;
+        }
+    }
+    // whole card clickable: the title link stretches over it, the note button stays on top
+    &--link{
+        transition: background-color 0.4s ease;
+        &:hover{
+            background-color: lighten($tertiary_bg, 4%);
+        }
+    }
+    &__link{
+        padding: 0;
+        text-align: left;
+        color: inherit;
+        &::after{
+            content: "";
+            position: absolute;
+            inset: 0;
+        }
+    }
+}
+
 .event_detail_layout{
     display: grid;
     grid-template-columns: minmax(0, 1fr);

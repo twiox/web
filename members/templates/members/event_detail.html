@@ -23,11 +23,20 @@
     <p class="member_panel__hint event_detail_meta">
         {% if perms.members.change_event %}<a href="{% url 'event_update' object.id %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>{% endif %}
         {% if perms.members.delete_event %}<a href="{% url 'event_delete' object.id %}" title="Löschen"><i class="far fa-minus-square"></i></a>{% endif %}
+        {% if perms.members.add_message %}<a href="{% url 'message_eve_create' %}?event={{ object.pk }}" title="Hinweis zu dieser Veranstaltung"><i class="far fa-sticky-note"></i></a>{% endif %}
         {% include "members/snippets/event_dates.html" %} · {{ object.place }}
     </p>
     {% if object.hinweis %}
         <p class="session_notice_block event_notice"><i class="fas fa-exclamation-triangle"></i> {{ object.hinweis }}</p>
     {% endif %}
+    {% for notice in notices %}
+        <div class="session_notice_block event_notice">
+            <strong>{{ notice.title }}</strong>
+            {% if perms.members.change_message %}<a href="{% url 'message_update' notice.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>{% endif %}
+            {% if perms.members.delete_message %}<a href="{% url 'message_delete' notice.pk %}" title="Löschen"><i class="far fa-minus-square"></i></a>{% endif %}
+            {% if notice.message %}<p>{{ notice.message|linebreaksbr }}</p>{% endif %}
+        </div>
+    {% endfor %}
 
     <div class="event_detail_layout">
         {# first in the page, so phones show the key facts and the sign-up before the long text #}
