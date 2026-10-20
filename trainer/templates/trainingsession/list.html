@@ -1,111 +1,155 @@
 {% extends 'members/base.html' %}
 {% load custom_filters %}
 
-{% block navbar2 %} 
+{% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_index' %}">
         Trainerdokument </a>
     <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Session Details</a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Trainingsstunden & Rechnungen</a>
 </div>
 {% endblock %}
+
 {% block content %}
-<h1>Trainingsstunden</h1>
-{% for year in all_years %}
-<span><a class="more_info_button" style="padding-left: 5px;" href="{% url 'trainingsession_list' %}?year={{year}}">{{year}}</a></span>
-{% endfor %}
-<br><br>
-<table class="side_scroll">
-    <thead>
-        <tr>
-            <th nowrap>Trainer*in</th>
-            {% for date in dates %}
-            <th>{{date}}</th>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for trainer in trainers %}
-        <tr>
-            <td nowrap>{{trainer}}</td>
-            {% for date in dates %}
-            <td>
-                {% for session in grouping|lookup:date|lookup:trainer %}
-                    <a href="{% url 'trainingsession_detail' session.pk %}" style="color:{% if session.payed %}green{% else %}red{% endif %}; padding: 0px;">{{session.date|date:'d.'}}</a> |
+<section class="member_page">
+    <div class="member_toolbar">
+        <h1>Trainingsstunden</h1>
+    </div>
+    <div class="year_tabs">
+        {% for y in all_years %}
+            <a href="{% url 'trainingsession_list' %}?year={{ y }}" {% if y == year %}class="here_I_am"{% endif %}>{{ y }}</a>
+        {% endfor %}
+    </div>
+
+    {% if trainers %}
+    <div class="member_table_wrapper tertiary_bg">
+        <table class="member_table member_table--static">
+            <thead>
+                <tr>
+                    <th>Trainer*in</th>
+                    {% for key, month in months %}<th>{{ month|date:"F" }}</th>{% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for trainer in trainers %}
+                <tr>
+                    <td>{{ trainer }}</td>
+                    {% for key, month in months %}
+                    <td>
+                        {% for session in grouping|lookup:key|lookup:trainer %}
+                            <a href="{% url 'trainingsession_detail' session.pk %}" class="day_link{% if session.payed %} day_link--payed{% endif %}"
+                               title="{{ session.date|date:'d.m.Y' }}{% if session.payed %} – bezahlt{% else %} – offen{% endif %}">{{ session.date|date:'j.' }}</a>
+                        {% endfor %}
+                    </td>
+                    {% endfor %}
+                </tr>
                 {% endfor %}
-            </td>
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>   
-<br>
-<h3>Unbezahlte Rechnungen</h3>
-{% if request.user.chairman.active %}
-<a href="{% url 'generate_invoices' %}" class="more_info_button" style="padding: 0px;">Abrechnungen Generieren</a><br>
-{% endif %}
-<br>
-{% if unpayed_invoices %}
-<table>
-    <thead>
-        <tr>
-            <th>Trainer*in</th>
-            <th>Rechnungsdatum</th>
-            <th>Einheiten</th>
-            <th>Stunden</th>
-            <th>TAE</th>
-            <th>Rechnung</th>
-            <th>Bezahlt?</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for invoice in unpayed_invoices %}
-        <tr>
-            <td>{{invoice.trainer.user.first_name}} {{invoice.trainer.user.last_name}}</td>
-            <td>{{invoice.date_billed|date:"d.m.Y"}}</td>
-            <td>{{invoice.sessions.all|length}}</td>
-            <td>{{invoice.total_time}}</td>
-            <td>{{invoice.total_money}} €</td>
-            <td>{% if invoice.invoice_pdf %}<a href="{{invoice.invoice_pdf.url}}" class="more_info_button" style="padding: 0px;">pdf</a>{% else %}fehlt{% endif %}</td>
-            {% if request.user.chairman.active %}
-            <td><a href="{% url 'trainingsession_mark_invoice_as_payed' invoice.pk %}" class="more_info_button" style="padding: 0px;">als bezahlt markieren</a></td>
-            {% else %}
-            <td></td>
-            {% endif %}
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endif %}
-<br>
-<h3>Rechnungen (Archiv)</h3>
-<br>
-{% if payed_invoices %}
-<table>
-    <thead>
-        <tr>
-            <th>Trainer*in</th>
-            <th>Rechnungsdatum</th>
-            <th>Einheiten</th>
-            <th>Stunden</th>
-            <th>TAE</th>
-            <th>pdf</th>
-            <th>Bezahlt</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for invoice in payed_invoices %}
-        <tr>
-            <td>{{invoice.trainer.user.first_name}} {{invoice.trainer.user.last_name}}</td>
-            <td>{{invoice.date_billed|date:"d.m.Y"}}</td>
-            <td>{{invoice.sessions.all|length}}</td>
-            <td>{{invoice.total_time}}</td>
-            <td>{{invoice.total_money}} €</td>
-            <td>{% if invoice.invoice_pdf %}<a href="{{invoice.invoice_pdf.url}}" class="more_info_button" style="padding: 0px;">pdf</a>{% else %}fehlt{% endif %}</td>
-            <td>{{invoice.date_payed|date:"d.m.Y"}}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endif %}
+            </tbody>
+        </table>
+    </div>
+    <p class="member_panel__hint">Bestätigte Trainingsstunden nach Monat. <span class="day_link day_link--payed">grün</span> = bezahlt, <span class="day_link">rot</span> = offen.</p>
+    {% else %}
+    <p class="member_panel__hint">Keine bestätigten Trainingsstunden in {{ year }}.</p>
+    {% endif %}
+
+    <div class="member_toolbar invoice_heading">
+        <h3>Offene Rechnungen</h3>
+        {% if request.user.chairman.active %}
+        <form method="POST" action="{% url 'generate_invoices' %}">
+            {% csrf_token %}
+            <button type="submit" class="table_action table_action--primary">Rechnungen erstellen</button>
+        </form>
+        {% endif %}
+    </div>
+    {% if unpayed_invoices %}
+    <div class="member_table_wrapper tertiary_bg">
+        <table class="member_table member_table--static">
+            <thead>
+                <tr>
+                    <th>Trainer*in</th>
+                    <th>Rechnungsdatum</th>
+                    <th>Einheiten</th>
+                    <th>Stunden</th>
+                    <th>Betrag</th>
+                    <th>Rechnung</th>
+                    {% if request.user.chairman.active %}<th></th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in unpayed_invoices %}
+                <tr>
+                    <td>{{ invoice.trainer.user.first_name }} {{ invoice.trainer.user.last_name }}</td>
+                    <td>{{ invoice.date_billed|date:"d.m.Y" }}</td>
+                    <td>{{ invoice.session_count }}</td>
+                    <td>{{ invoice.total_time|floatformat:"-2"|default:"–" }}</td>
+                    <td>{% if invoice.total_money is not None %}{{ invoice.total_money|floatformat:2 }} €{% else %}–{% endif %}</td>
+                    <td>{% if invoice.invoice_pdf %}<a href="{{ invoice.invoice_pdf.url }}" class="more_info_button">PDF</a>{% else %}fehlt{% endif %}</td>
+                    {% if request.user.chairman.active %}
+                    <td class="table_actions">
+                        <form method="POST" action="{% url 'trainingsession_mark_invoice_as_payed' invoice.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="table_action">Als bezahlt markieren</button>
+                        </form>
+                        <form method="POST" action="{% url 'trainingsession_delete_invoice' invoice.pk %}"
+                              onsubmit="return confirm('Rechnung löschen? Die Trainingsstunden werden wieder offen und können neu abgerechnet werden.');">
+                            {% csrf_token %}
+                            <button type="submit" class="table_action table_action--danger">Löschen</button>
+                        </form>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="member_panel__hint">Keine offenen Rechnungen.</p>
+    {% endif %}
+
+    <div class="member_toolbar invoice_heading">
+        <h3>Archiv</h3>
+        <div class="year_tabs archive_switch">
+            <a href="?year={{ year }}&archiv=bezahlt" {% if archive_by == 'bezahlt' %}class="here_I_am"{% endif %}>nach Zahlungsmonat</a>
+            <a href="?year={{ year }}&archiv=rechnung" {% if archive_by == 'rechnung' %}class="here_I_am"{% endif %}>nach Rechnungsmonat</a>
+        </div>
+    </div>
+    {% for group in archive %}
+    <details class="archive_month" {% if forloop.first %}open{% endif %}>
+        <summary>
+            <strong>{{ group.month|date:"F Y" }}</strong>
+            <span class="member_panel__hint">{{ group.invoices|length }} Rechnung{{ group.invoices|length|pluralize:"en" }} · {{ group.total|floatformat:2 }} €</span>
+        </summary>
+        <div class="member_table_wrapper tertiary_bg">
+            <table class="member_table member_table--static">
+                <thead>
+                    <tr>
+                        <th>Trainer*in</th>
+                        <th>Rechnungsdatum</th>
+                        <th>Einheiten</th>
+                        <th>Stunden</th>
+                        <th>Betrag</th>
+                        <th>Rechnung</th>
+                        <th>Bezahlt am</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in group.invoices %}
+                    <tr>
+                        <td>{{ invoice.trainer.user.first_name }} {{ invoice.trainer.user.last_name }}</td>
+                        <td>{{ invoice.date_billed|date:"d.m.Y" }}</td>
+                        <td>{{ invoice.session_count }}</td>
+                        <td>{{ invoice.total_time|floatformat:"-2"|default:"–" }}</td>
+                        <td>{% if invoice.total_money is not None %}{{ invoice.total_money|floatformat:2 }} €{% else %}–{% endif %}</td>
+                        <td>{% if invoice.invoice_pdf %}<a href="{{ invoice.invoice_pdf.url }}" class="more_info_button">PDF</a>{% else %}fehlt{% endif %}</td>
+                        <td>{{ invoice.date_payed|date:"d.m.Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </details>
+    {% empty %}
+    <p class="member_panel__hint">Noch keine bezahlten Rechnungen.</p>
+    {% endfor %}
+</section>
 {% endblock %}

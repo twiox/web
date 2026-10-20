@@ -1,15 +1,17 @@
 from django.urls import path
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from datetime import datetime, timedelta
+from itertools import groupby
 from trainer.forms import TrainingSessionForm
 from trainer.models import TrainingSessionEntry, TrainingSessionParticipant, TrainingSessionInvoice
 from members.models import Trainer, Profile, Session, is_trainer, is_chairman
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import user_passes_test
+from django.views.decorators.http import require_POST
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.contrib import messages
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -250,7 +252,7 @@ def session_list_view(request):
 
     grouping = {}
    
-    sessions = TrainingSessionEntry.objects.filter(billed=True, date__year=int(year))
+    sessions = TrainingSessionEntry.objects.filter(billed=True, date__year=int(year)).order_by('date')
     dates = []
     trainers = []
 
@@ -272,16 +274,35 @@ def session_list_view(request):
             else:
                 grouping[date][name] = [session]
 
-    unpayed_invoices = TrainingSessionInvoice.objects.filter(date_payed__isnull=True)
-    payed_invoices = TrainingSessionInvoice.objects.filter(date_payed__isnull=False).order_by('-date_billed')
+    invoices = TrainingSessionInvoice.objects.select_related("trainer__user").annotate(session_count=Count("sessions"))
+    unpayed_invoices = invoices.filter(date_payed__isnull=True).order_by('-date_billed')
+    # the archive is grouped by the month an invoice was paid (default) or billed, newest first
+    archive_by = 'rechnung' if request.GET.get('archiv') == 'rechnung' else 'bezahlt'
+    if archive_by == 'bezahlt':
+        archive_date = lambda inv: inv.date_payed
+        payed_invoices = invoices.filter(date_payed__isnull=False).order_by('-date_payed')
+    else:
+        archive_date = lambda inv: inv.date_billed or inv.date_payed
+        payed_invoices = invoices.filter(date_payed__isnull=False).order_by('-date_billed')
+    archive = []
+    for month, group in groupby(payed_invoices, key=lambda inv: archive_date(inv).replace(day=1).date()):
+        group = list(group)
+        archive.append({
+            'month': month,
+            'invoices': group,
+            'total': sum(inv.total_money or 0 for inv in group),
+        })
 
     return render(request, "trainingsession/list.html", {
-            'grouping':grouping, 
-            'dates':sorted(dates), 
+            'grouping':grouping,
+            # (key for the grouping, first day of the month for display)
+            'months':[(d, datetime.strptime(d, '%Y-%m')) for d in sorted(dates)],
             'trainers':sorted(trainers),
             'unpayed_invoices':unpayed_invoices,
-            'payed_invoices':payed_invoices,
-            'all_years':all_years
+            'archive':archive,
+            'archive_by':archive_by,
+            'all_years':all_years,
+            'year':int(year),
         }
     )
 
@@ -306,6 +327,7 @@ def session_hours(session):
 
 
 @user_passes_test(trainer_check)
+@require_POST
 def generate_invoices(request):
     """One invoice per trainer for all billed sessions that have no invoice yet.
 
@@ -353,11 +375,23 @@ def generate_invoices(request):
 
 
 @user_passes_test(chairman_check)
+@require_POST
 def mark_invoice_as_payed(request, pk):
-    invoice = TrainingSessionInvoice.objects.get(pk=pk)
+    invoice = get_object_or_404(TrainingSessionInvoice, pk=pk)
     invoice.date_payed = datetime.today()
     invoice.save()
+    messages.add_message(request, messages.SUCCESS, "Rechnung als bezahlt markiert")
+    return redirect('trainingsession_list')
 
+
+@user_passes_test(chairman_check)
+@require_POST
+def delete_invoice(request, pk):
+    """Deletes an unpaid invoice; its sessions are open again for the next run."""
+    invoice = get_object_or_404(TrainingSessionInvoice, pk=pk, date_payed__isnull=True)
+    invoice.invoice_pdf.delete(save=False)
+    invoice.delete()
+    messages.add_message(request, messages.SUCCESS, "Rechnung gelöscht, die Trainingsstunden sind wieder offen")
     return redirect('trainingsession_list')
 
 
@@ -381,6 +415,7 @@ urlpatterns = [
     path("<int:pk>", session_detail_view, name="trainingsession_detail"),
     path("<int:pk>/remove/", session_delete, name='trainingsession_delete'),
     path("<int:pk>/set-payed/", mark_invoice_as_payed, name='trainingsession_mark_invoice_as_payed'),
+    path("rechnung/<int:pk>/loeschen/", delete_invoice, name='trainingsession_delete_invoice'),
     path("<int:pk>/search", search, name="trainingsession_search"),
     path("<int:pk>/trainer/list", get_trainer_list, name='trainingsession_get_trainerlist'),
     path("<int:pk>/trainer/add", add_trainer, name='trainingsession_add_trainer'),

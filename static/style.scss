@@ -1130,3 +1130,90 @@ footer{
         font-size: 0.9rem;
     }
 }
+
+/* Training sessions & invoices */
+.year_tabs{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: $padding_small;
+    border-bottom: 1px solid $quartiary_bg;
+    a{
+        padding: 8px $padding_small;
+        color: $font_col;
+        border-bottom: 2px solid transparent;
+        &.here_I_am{
+            color: white;
+            border-bottom-color: $primary;
+        }
+    }
+}
+.day_link{
+    display: inline-block;
+    padding: 0 3px;
+    color: #e06666;
+    &--payed{
+        color: #6aa84f;
+    }
+}
+.invoice_heading{
+    margin-top: $padding_big;
+    h3{
+        margin: 0;
+    }
+}
+.table_actions{
+    display: flex;
+    gap: 6px;
+    form{
+        margin: 0;
+    }
+}
+.table_action{
+    padding: 4px $padding_small;
+    border: 1px solid $primary;
+    border-radius: 4px;
+    background: none;
+    color: $font_col;
+    cursor: pointer;
+    white-space: nowrap;
+    &:hover{
+        background-color: $primary;
+        color: white;
+    }
+    &--primary{
+        background-color: $primary;
+        color: white;
+        &:hover{
+            background-color: $primary_hover;
+        }
+    }
+    &--danger{
+        border-color: $secondary;
+        &:hover{
+            background-color: $secondary;
+        }
+    }
+}
+.archive_month{
+    margin-bottom: $padding_small;
+    summary{
+        display: flex;
+        align-items: baseline;
+        gap: $padding_small;
+        padding: $padding_small;
+        background-color: $tertiary_bg;
+        cursor: pointer;
+        &:hover{
+            background-color: $quartiary_bg;
+        }
+    }
+    &[open] summary{
+        border-bottom: 2px solid $primary;
+    }
+}
+.archive_switch{
+    margin: 0;
+    border-bottom: none;
+    font-size: 0.9rem;
+}
