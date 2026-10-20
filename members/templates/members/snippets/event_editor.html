@@ -1,0 +1,97 @@
+{# Editor.js for the event description; expects #event_editor and the hidden form.content input #}
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.31.7/dist/editorjs.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@2.8.9/dist/header.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@2.0.9/dist/editorjs-list.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.7.6/dist/quote.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/delimiter@1.4.2/dist/delimiter.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.10.3/dist/image.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/attaches@1.3.2/dist/attaches.umd.js"></script>
+<script>
+(function () {
+    const input = document.getElementById('{{ form.content.id_for_label }}');
+    const form = input.form;
+    const uploadHeaders = { 'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value };
+
+    const editor = new EditorJS({
+        holder: 'event_editor',
+        data: input.value ? JSON.parse(input.value) : undefined,
+        placeholder: 'Beschreibung der Veranstaltung …',
+        minHeight: 200,  // room below the text; also keeps the "+" menu inside the editor
+        tools: {
+            header: { class: Header, inlineToolbar: ['link', 'italic'], config: { levels: [2, 3, 4], defaultLevel: 2 } },
+            list: { class: EditorjsList, inlineToolbar: true, config: { defaultStyle: 'unordered', maxLevel: 3 } },
+            quote: { class: Quote, inlineToolbar: true, config: { quotePlaceholder: 'Zitat', captionPlaceholder: 'Von wem?' } },
+            delimiter: Delimiter,
+            image: {
+                class: ImageTool,
+                config: {
+                    endpoints: { byFile: '{% url "event_asset_upload" "image" %}' },
+                    field: 'file',
+                    types: 'image/jpeg, image/png, image/gif, image/webp',
+                    additionalRequestHeaders: uploadHeaders,
+                    captionPlaceholder: 'Bildunterschrift',
+                    buttonContent: 'Bild auswählen',
+                    features: { border: false, background: false, stretch: false, caption: 'optional' },
+                },
+            },
+            attaches: {
+                class: AttachesTool,
+                config: {
+                    endpoint: '{% url "event_asset_upload" "file" %}',
+                    field: 'file',
+                    additionalRequestHeaders: uploadHeaders,
+                    buttonText: 'Datei auswählen',
+                    errorMessage: 'Datei konnte nicht hochgeladen werden',
+                },
+            },
+        },
+        i18n: {
+            messages: {
+                ui: {
+                    blockTunes: { toggler: { 'Click to tune': 'Klicken für Optionen', 'or drag to move': 'oder ziehen zum Verschieben' } },
+                    inlineToolbar: { converter: { 'Convert to': 'Umwandeln in' } },
+                    toolbar: { toolbox: { Add: 'Hinzufügen' } },
+                    popover: { Filter: 'Suchen', 'Nothing found': 'Nichts gefunden', 'Convert to': 'Umwandeln in' },
+                },
+                toolNames: {
+                    Text: 'Text', Heading: 'Überschrift', 'Unordered List': 'Liste', 'Ordered List': 'Nummerierte Liste',
+                    Checklist: 'Checkliste', Quote: 'Zitat', Delimiter: 'Trennlinie', Image: 'Bild', Attachment: 'Datei',
+                    Link: 'Link', Bold: 'Fett', Italic: 'Kursiv',
+                },
+                tools: {
+                    link: { 'Add a link': 'Link einfügen' },
+                    header: { 'Heading 2': 'Überschrift 2', 'Heading 3': 'Überschrift 3', 'Heading 4': 'Überschrift 4' },
+                    list: {
+                        Unordered: 'Liste', Ordered: 'Nummeriert', Checklist: 'Checkliste',
+                        'Start with': 'Beginnt mit', 'Counter type': 'Zählweise',
+                    },
+                    quote: { 'Align Left': 'Linksbündig', 'Align Center': 'Zentriert' },
+                    image: { Caption: 'Bildunterschrift', 'Select an Image': 'Bild auswählen', 'With caption': 'Mit Bildunterschrift' },
+                    stub: { 'The block can not be displayed correctly.': 'Dieser Baustein kann nicht angezeigt werden.' },
+                },
+                blockTunes: {
+                    delete: { Delete: 'Löschen', 'Click to delete': 'Zum Löschen klicken' },
+                    moveUp: { 'Move up': 'Nach oben' },
+                    moveDown: { 'Move down': 'Nach unten' },
+                },
+            },
+        },
+    });
+
+    // the editor keeps its content in memory; write it into the hidden field before sending
+    let saving = false;
+    form.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (saving) return;
+        saving = true;
+        try {
+            input.value = JSON.stringify(await editor.save());
+            form.submit();
+        } catch (error) {
+            saving = false;
+            snackbar.labelText = 'Beschreibung konnte nicht gespeichert werden';
+            snackbar.open();
+        }
+    });
+})();
+</script>

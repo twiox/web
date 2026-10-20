@@ -15,4 +15,5 @@ dependencies = [
     "rjsmin>=1.2.2",
     "six>=1.16.0",
     "reportlab>=4.4.10",
+    "nh3>=0.2.18",
 ]

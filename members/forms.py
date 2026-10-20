@@ -1,7 +1,8 @@
 from django import forms
 from user_handling.forms import MdcFormMixin, date_widget
 from django.contrib.auth.models import User
-from .models import Event, Message, Session, Spot, Document, Trainer
+from .event_content import clean_content
+from .models import Event, EventAsset, Message, Session, Spot, Document, Trainer
 
 
 class EventFileForm(forms.ModelForm):
@@ -89,27 +90,77 @@ class SessionForm(MdcFormMixin, forms.ModelForm):
         return super().save(commit)
 
 
-class EventForm(forms.ModelForm):
+class EventForm(MdcFormMixin, forms.ModelForm):
+    start_date = forms.DateTimeField(label="Beginn", widget=date_widget())
+    end_date = forms.DateTimeField(label="Ende", widget=date_widget())
+    deadline = forms.DateTimeField(label="Anmeldung/Abmeldung bis", widget=date_widget())
+    # filled with the Editor.js output when the form is sent
+    content = forms.JSONField(required=False, widget=forms.HiddenInput)
+
     class Meta:
         model = Event
         fields = [
-            "title",
-            "place",
-            "info_only",
-            "ask_ticket",
-            "costs",
-            "start_date",
-            "end_date",
-            "deadline",
-            "hinweis",
-            "description",
-            "min_age",
-            "max_age",
-            "teilnahmebedingungen",
-            "datenschutz",
-            "einverstaendnis",
+            "title", "place", "costs", "start_date", "end_date", "deadline", "hinweis",
+            "info_only", "ask_ticket", "min_age", "max_age", "content",
+            "teilnahmebedingungen", "datenschutz", "einverstaendnis",
         ]
+        labels = {
+            "title": "Titel",
+            "costs": "Kosten (€)",
+            "hinweis": "Warnhinweis",
+            "info_only": "Nur Ankündigung",
+            "ask_ticket": "Deutschlandticket abfragen",
+            "einverstaendnis": "Einverständniserklärung",
+        }
+        widgets = {
+            "teilnahmebedingungen": forms.FileInput,
+            "datenschutz": forms.FileInput,
+            "einverstaendnis": forms.FileInput,
+        }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["costs"].required = True
+        for name in ["info_only", "ask_ticket", "content", *self.file_field_names]:
+            self.fields[name].widget.attrs.pop("class", None)  # not rendered as text fields
+        for name in self.file_field_names:
+            self.fields[name].widget.attrs["hidden"] = True  # opened by the "Datei wählen" button
+        if self.instance.has_legacy_description:
+            del self.fields["content"]  # the old Markdown text stays as it is
+        self.used_assets = []
+
+    file_field_names = ["teilnahmebedingungen", "datenschutz", "einverstaendnis"]
+
+    @property
+    def file_fields(self):
+        return [self[name] for name in self.file_field_names]
+
+    def clean_content(self):
+        # uploads not yet linked to an event, plus the ones of this event
+        assets = EventAsset.objects.filter(event=None)
+        if self.instance.pk:
+            assets = assets | self.instance.assets.all()
+        content, self.used_assets = clean_content(
+            self.cleaned_data["content"] or {"blocks": []},
+            {asset.file.url: asset for asset in assets},
+        )
+        return content
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start, end = cleaned_data.get("start_date"), cleaned_data.get("end_date")
+        if start and end and end < start:
+            self.add_error("end_date", "Das Ende liegt vor dem Beginn.")
+        return cleaned_data
+
+    def save(self, commit=True):
+        event = super().save(commit)
+        if commit and "content" in self.fields:
+            used = [asset.pk for asset in self.used_assets]
+            EventAsset.objects.filter(pk__in=used).update(event=event)
+            for asset in event.assets.exclude(pk__in=used):  # removed from the description
+                asset.delete()
+        return event
 
 
 class EventUpdateParticipantForm(forms.ModelForm):

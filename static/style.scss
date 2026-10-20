@@ -1706,3 +1706,163 @@ footer{
     background-color: $secondary;
     color: white;
 }
+
+/* Event description (Editor.js blocks), shown on the detail page and inside the editor */
+.event_content{
+    h2, h3, h4{
+        text-transform: none;
+        margin: $padding_medium 0 $padding_small 0;
+    }
+    h2{ font-size: 1.4rem; }
+    h3{ font-size: 1.2rem; }
+    h4{ font-size: 1rem; }
+    ul li{
+        list-style-type: disc;
+    }
+    ol li{
+        list-style-type: inherit;
+        margin-left: 20px;
+    }
+    a{
+        color: $primary_hover;
+    }
+    .event_content__checklist li{
+        list-style-type: none;
+        &::before{
+            content: "☐ ";
+        }
+        &.checked::before{
+            content: "☑ ";
+        }
+    }
+    &__quote{
+        margin: $padding_small 0;
+        padding: 0 0 0 $padding_medium;
+        border-left: 3px solid $primary;
+        font-style: italic;
+        &--center{
+            text-align: center;
+            border-left: none;
+        }
+        cite{
+            display: block;
+            color: grey;
+            font-size: 0.9rem;
+        }
+    }
+    &__delimiter{
+        border: none;
+        border-top: 1px solid $quartiary_bg;
+        margin: $padding_big 0;
+    }
+    &__image{
+        margin: $padding_small 0;
+        img{
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        figcaption{
+            color: grey;
+            font-size: 0.9rem;
+            padding-top: 4px;
+        }
+    }
+    &__file{
+        align-items: center;
+        margin: $padding_small 0;
+        padding: $padding_small $padding_medium;
+        color: white;
+        span{
+            display: flex;
+            flex-direction: column;
+        }
+        small{
+            color: $font_col;
+            font-size: 0.8rem;
+        }
+    }
+}
+
+// the document names are longer than on the trainer form
+.event_form_page .file_field{
+    grid-template-columns: 1fr auto auto;
+}
+
+/* Editor.js ships light-theme styles; adjust them to the dark cards */
+// the global section/div{overflow:hidden} would cut off the editor menus below a short description
+.member_page--editor, .event_description_card{
+    overflow: visible;
+}
+// Undo the global div{overflow:hidden} inside the editor, which would cut off toolbars and menus.
+// :where() keeps this as weak as the global rule, so Editor.js's own scroll areas (the "+" menu) still win.
+:where(.event_editor) div{
+    overflow: visible;
+}
+.event_editor{
+    overflow: visible;
+    margin-top: $padding_small;
+    padding: $padding_small $padding_medium;
+    border: 1px solid $quartiary_bg;
+    border-radius: 4px;
+    color: $font_col;
+    ::selection{
+        background-color: rgba($primary, 0.6);
+        color: white;
+    }
+    .ce-block--selected .ce-block__content{
+        background-color: rgba($primary, 0.25);
+    }
+    .ce-toolbar__plus, .ce-toolbar__settings-btn{
+        color: white;
+        background-color: $tertiary_bg;
+        &:hover{
+            background-color: $quartiary_bg;
+        }
+    }
+    // menus ("+", block settings, text formatting): Editor.js colours them through these variables
+    .ce-popover, .ce-inline-toolbar{
+        --color-background: #{$secondary_bg};
+        --color-border: #{$quartiary_bg};
+        --color-shadow: rgba(0, 0, 0, 0.5);
+        --color-text-primary: #{$font_col};
+        --color-text-secondary: grey;
+        --color-border-icon: #{$quartiary_bg};
+        --color-border-icon-disabled: #{$tertiary_bg};
+        --color-text-icon-active: #{$primary_hover};
+        --color-background-icon-active: #{rgba($primary, 0.25)};
+        --color-background-item-hover: #{$tertiary_bg};
+        --color-background-item-focus: #{rgba($primary, 0.25)};
+        --color-shadow-item-focus: transparent;
+        color: $font_col;
+    }
+    .ce-popover__items{
+        scrollbar-color: $quartiary_bg transparent;
+    }
+    .cdx-search-field, .ce-inline-tool-input{
+        color: $font_col;
+        background-color: $tertiary_bg;
+        border-color: $quartiary_bg;
+    }
+    .ce-paragraph[data-placeholder]:empty::before,
+    .cdx-input[data-placeholder]::before{
+        color: grey;
+    }
+    .cdx-input, .cdx-attaches--with-file, .image-tool__image, .cdx-attaches__button, .image-tool .cdx-button{
+        color: $font_col;
+        background-color: $secondary_bg;
+        border-color: $quartiary_bg;
+        box-shadow: none;
+    }
+    .cdx-attaches__download-button{
+        color: $font_col;
+        background-color: $tertiary_bg;
+    }
+    .cdx-attaches__file-info, .cdx-attaches__title{
+        color: $font_col;
+    }
+    .cdx-quote__text{
+        min-height: 60px;
+    }
+}

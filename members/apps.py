@@ -6,3 +6,4 @@ class MembersConfig(AppConfig):
     
     def ready(self):
         import user_handling.signals #important, if we have signals
+        import members.signals

@@ -1,4 +1,6 @@
 from decimal import Decimal
+from pathlib import Path
+from uuid import uuid4
 
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -8,8 +10,11 @@ from django.contrib.auth.models import User
 from django.urls import reverse  # to get absolut_urls
 from datetime import datetime, timedelta
 from multiselectfield import MultiSelectField
-from PIL import Image as Img
+from PIL import Image as Img, ImageOps
 from django.templatetags.static import static
+from django.utils.safestring import mark_safe
+
+from .event_content import render_content
 
 PROFILE_PLACEHOLDER = "media/profile_placeholder.svg"
 
@@ -162,8 +167,11 @@ class Event(AgeRange):
     place = models.CharField(
         "Veranstaltungsort", max_length=200, blank=True, default="Leipzig"
     )
+    # Markdown from before the editor; still shown, but no longer editable
     description = models.TextField("Beschreibung", blank=True)
     description_rendered = models.TextField(blank=True, null=True)
+    # Editor.js blocks, see event_content.py
+    content = models.JSONField("Beschreibung", blank=True, null=True)
     deadline = models.DateTimeField("Anmeldung/Abmeldung bis", blank=True, null=True)
     start_date = models.DateTimeField("Datum Beginn", blank=True, null=True)
     end_date = models.DateTimeField("Datum Ende", blank=True, null=True)
@@ -217,8 +225,47 @@ class Event(AgeRange):
             return True
         return False
 
+    @property
+    def has_legacy_description(self):
+        return self.content is None and bool(self.description.strip())
+
+    @property
+    def description_html(self):
+        if self.has_legacy_description:
+            return mark_safe(self.description_rendered or "")
+        return render_content(self.content)
+
     def __str__(self):
         return f"Event: {self.title}"
+
+
+def event_asset_path(instance, filename):
+    # media files are public, so the names must not be guessable
+    return f"Events/Inhalte/{uuid4().hex}{Path(filename).suffix.lower()}"
+
+
+class EventAsset(models.Model):
+    """Image or file uploaded in the event editor; linked to its event once the event is saved."""
+
+    IMAGE, FILE = "image", "file"
+    kind = models.CharField(max_length=5, choices=[(IMAGE, "Bild"), (FILE, "Datei")])
+    file = models.FileField(upload_to=event_asset_path)
+    name = models.CharField(max_length=200)  # original file name, shown on download links
+    event = models.ForeignKey(
+        Event, on_delete=models.CASCADE, null=True, blank=True, related_name="assets"
+    )
+    uploaded = models.DateTimeField(auto_now_add=True)
+
+    def shrink_image(self):
+        """Scales big photos down; saving again also drops EXIF data like the GPS position."""
+        with Img.open(self.file.path) as img:
+            if img.format == "GIF":  # keep animations
+                return
+            img = ImageOps.exif_transpose(img)
+            if Path(self.file.path).suffix in (".jpg", ".jpeg") and img.mode not in ("RGB", "L"):
+                img = img.convert("RGB")
+            img.thumbnail((1600, 1600))
+            img.save(self.file.path, quality=85)
 
 
 class Trainer(models.Model):

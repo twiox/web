@@ -11,6 +11,7 @@ urlpatterns = [
     path("veranstaltungen/<int:pk>/orga/", views.EventOrgaView.as_view(),name="event_participants"),
     path("veranstaltungen/<int:pk>/stornieren/", views.EventUnParticipateView.as_view(),name="event_unparticipate"),
     path("veranstaltungen/ajax/update_participant/", views.update_memberparticipant, name="ajax_update_memberparticipant"),
+    path("veranstaltungen/hochladen/<str:kind>/", views.event_asset_upload, name="event_asset_upload"),
     path("veranstaltungen/ajax/update_file/", views.ajax_event_filehandle, name='ajax_event_filehandle'),
     path("trainingseinheit/neu/", views.SessionCreateView.as_view(),name="session_create"),
     path("trainingseinheit/<int:pk>/ändern/", views.SessionUpdateView.as_view(),name="session_update"),

@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
-from django.http import HttpResponseRedirect, JsonResponse
+from django import forms
+from django.core.exceptions import ValidationError
+from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic import (
     ListView,
     DetailView,
@@ -24,6 +26,7 @@ from .models import (
     Gallery,
     MemberParticipant,
     Document,
+    EventAsset,
 )
 from django.contrib.auth.decorators import login_required, permission_required
 from django.views.decorators.csrf import csrf_exempt
@@ -46,7 +49,7 @@ from .forms import (
     EventFileForm,
 )
 from django.contrib import messages
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 from django.contrib.auth import update_session_auth_hash
@@ -164,8 +167,6 @@ class EventCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     permission_required = "members.add_event"
 
     def form_valid(self, form):
-        self.object = form.save()
-        self.object.description_rendered = markdown.markdown(self.object.description)
         messages.add_message(self.request, messages.SUCCESS, "Veranstaltung erstellt")
         return super().form_valid(form)
 
@@ -179,10 +180,59 @@ class EventUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
 
     def form_valid(self, form):
-        self.object = form.save()
-        self.object.description_rendered = markdown.markdown(self.object.description)
         messages.add_message(self.request, messages.SUCCESS, "Veranstaltung geändert")
         return super().form_valid(form)
+
+
+# allowed uploads in the event editor; no HTML or SVG, the media folder is served from our domain
+EVENT_UPLOAD_TYPES = {
+    EventAsset.IMAGE: {".jpg", ".jpeg", ".png", ".gif", ".webp"},
+    EventAsset.FILE: {".pdf", ".doc", ".docx", ".odt", ".xls", ".xlsx", ".ods", ".ppt", ".pptx", ".odp",
+                      ".txt", ".csv", ".zip", ".jpg", ".jpeg", ".png"},
+}
+EVENT_UPLOAD_MAX_MB = {EventAsset.IMAGE: 10, EventAsset.FILE: 20}
+
+
+def check_event_upload(kind, upload):
+    """Returns an error message, or None if the upload is fine."""
+    if upload is None:
+        return "Keine Datei erhalten."
+    if os.path.splitext(upload.name)[1].lower() not in EVENT_UPLOAD_TYPES[kind]:
+        return "Dieser Dateityp ist nicht erlaubt."
+    if upload.size > EVENT_UPLOAD_MAX_MB[kind] * 1024 * 1024:
+        return f"Die Datei ist größer als {EVENT_UPLOAD_MAX_MB[kind]} MB."
+    if kind == EventAsset.IMAGE:
+        try:
+            forms.ImageField().clean(upload)
+        except ValidationError:
+            return "Die Datei ist kein gültiges Bild."
+    return None
+
+
+@login_required
+@require_POST
+def event_asset_upload(request, kind):
+    """Upload endpoint for the image and file blocks of the event editor (Editor.js response format)."""
+    if kind not in EVENT_UPLOAD_TYPES:
+        raise Http404
+    user = request.user
+    if not (user.has_perm("members.add_event") or user.has_perm("members.change_event")):
+        return JsonResponse({"success": 0, "message": "Keine Berechtigung."}, status=403)
+    upload = request.FILES.get("file")
+    if error := check_event_upload(kind, upload):
+        return JsonResponse({"success": 0, "message": error}, status=400)
+
+    asset = EventAsset.objects.create(kind=kind, file=upload, name=upload.name[:200])
+    if kind == EventAsset.IMAGE:
+        asset.shrink_image()
+    # uploads that never made it into a saved event
+    for orphan in EventAsset.objects.filter(event=None, uploaded__lt=datetime.now() - timedelta(days=1)):
+        orphan.delete()
+
+    file = {"url": asset.file.url}
+    if kind == EventAsset.FILE:
+        file.update(name=asset.name, size=asset.file.size, extension=os.path.splitext(asset.name)[1].lstrip(".").lower())
+    return JsonResponse({"success": 1, "file": file})
 
 
 class EventDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
