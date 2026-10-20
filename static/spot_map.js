@@ -148,5 +148,12 @@
         return map;
     }
 
-    window.SpotMap = { overview, picker, routeUrl };
+    // Event detail: a single fixed marker, e.g. the meeting point
+    function point(element, lat, long) {
+        const map = baseMap(element, [lat, long], 16);
+        L.marker([lat, long]).addTo(map);
+        return map;
+    }
+
+    window.SpotMap = { overview, picker, point, routeUrl };
 })();

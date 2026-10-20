@@ -1,0 +1,1 @@
+{% if object.start_date|date:"Ymd" == object.end_date|date:"Ymd" %}{{ object.start_date|date:"d.m.Y" }}{% else %}{{ object.start_date|date:"d.m." }} – {{ object.end_date|date:"d.m.Y" }}{% endif %}

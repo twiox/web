@@ -219,6 +219,8 @@ class Event(AgeRange):
 
     @property
     def deadline_reached(self):
+        if self.deadline is None:  # some old events have none
+            return False
         return datetime.now().replace(tzinfo=None) > self.deadline.replace(
             tzinfo=None
         ) + timedelta(days=1)
@@ -228,6 +230,10 @@ class Event(AgeRange):
         if not self.start_date == self.end_date:
             return True
         return False
+
+    @property
+    def has_meeting_point(self):
+        return bool(self.meeting_point) or self.has_meeting_coordinates
 
     @property
     def has_meeting_coordinates(self):

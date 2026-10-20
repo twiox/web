@@ -1,155 +1,164 @@
 {% extends "members/base.html" %}
+{% load l10n %}
 {% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#events">
-        Mitglieder </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#events">Mitglieder</a>
     <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{object.title}}</a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{ object.title }}</a>
     {% if perms.members.delete_event %}
     <a class="float_left"> > </a>
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_participants' object.id %}">
-        Orga </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_participants' object.id %}">Orga</a>
     {% endif %}
 </div>
 {% endblock %}
-{%block content %}
-    <section>
-        <h1>{{object.title}}</h1>
-        <div style="display:flex; gap:20px">
-            {% if object.age_label %}<span style="color: grey; font-size:0.9rem;">Alter: {{ object.age_label }}</span>{% endif %}
-        </div>
-        <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
-            <div class="trainer_ui">
-                {% if perms.members.change_event %}
-                <a href="{% url 'event_update' object.id  %}" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
-                {% endif %}
-                {% if perms.members.delete_event %}
-                <a href="{% url 'event_delete' object.id  %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
-                {% endif %}
+
+{% block content %}
+<section class="member_page">
+    <div class="session_header">
+        <h1>{{ object.title }}</h1>
+        {% if is_participant %}
+            <span class="entry_status entry_status--payed">Angemeldet</span>
+        {% endif %}
+    </div>
+    <p class="member_panel__hint event_detail_meta">
+        {% if perms.members.change_event %}<a href="{% url 'event_update' object.id %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>{% endif %}
+        {% if perms.members.delete_event %}<a href="{% url 'event_delete' object.id %}" title="Löschen"><i class="far fa-minus-square"></i></a>{% endif %}
+        {% include "members/snippets/event_dates.html" %} · {{ object.place }}
+    </p>
+    {% if object.hinweis %}
+        <p class="session_notice_block event_notice"><i class="fas fa-exclamation-triangle"></i> {{ object.hinweis }}</p>
+    {% endif %}
+
+    <div class="event_detail_layout">
+        {# first in the page, so phones show the key facts and the sign-up before the long text #}
+        <aside class="event_detail_aside">
+            <div class="session_card">
+                <h3>Eckdaten</h3>
+                <table class="data_list">
+                    <tr><th>Ort</th><td>{{ object.place }}</td></tr>
+                    <tr><th>Datum</th><td>{% include "members/snippets/event_dates.html" %}</td></tr>
+                    <tr><th>Kosten</th><td>{% if object.costs %}{{ object.costs }} €{% else %}kostenlos{% endif %}</td></tr>
+                    {% if object.deadline and not object.info_only %}
+                    <tr><th>Anmeldung bis</th><td>{{ object.deadline|date:"d.m.Y" }}</td></tr>
+                    {% endif %}
+                    {% if object.age_label %}
+                    <tr><th>Alter</th><td>{{ object.age_label }}</td></tr>
+                    {% endif %}
+                </table>
             </div>
-            <div class="tertiary_bg chair_col-20 padding_all_big">
-                <h4>{{object.place}}</h4>
-                <div class="padding_tb_small">
-                    {% if object.start_date == object.end_date %}
-                    <p>{{object.end_date|date:'d.m.Y'}}</p>
-                    {% else %}
-                    <p>{{object.start_date|date:'d.m'}} - {{object.end_date|date:'d.m.Y'}}</p>
-                    {% endif %}
-                    {% if object.costs == 0 %}
-                    <p><strong>Kostenlos</strong></p>
-                    {% else %}
-                    <p><strong>Kosten: {{object.costs}} € </strong></p>
-                    {% endif %}
-                </div>
-                <div class="padding_tb_small">
-                    {% csrf_token %}
-                    {% if part %}
-                    <h4>Deine Informationen</h4>
-                    <table>
-                        <thead>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Deutschlandticket während der Veranstaltung</td>
-                                {% if not object.deadline_reached %}
-                                <td><input class='field_update' type="checkbox" {% if part.has_ticket %} checked {% endif %} data-participant="{{part.pk}}" data-field="has_ticket"></td>
+
+            <div class="session_card">
+                <h3>Anmeldung</h3>
+                {% if object.info_only %}
+                    <p class="member_panel__hint">Die Anmeldung ist noch nicht geöffnet.</p>
+                {% else %}
+                    {% if is_participant %}
+                    <table class="data_list">
+                        <tr><th>Bezahlt</th><td>{% if part.payed %}ja{% else %}noch nicht{% endif %}</td></tr>
+                        {% if object.ask_ticket %}
+                        <tr>
+                            <th>Deutschlandticket</th>
+                            <td>
+                                {% if object.deadline_reached %}
+                                    {% if part.has_ticket %}ja{% else %}nein{% endif %}
                                 {% else %}
-                                <td>{% if part.has_ticket %}<span style="color:green">Ja{% else %}
-                                    <span style="color:red">Nein{% endif %}</span>
-                                </td>
+                                    <label class="event_ticket_toggle">
+                                        <input class="field_update" type="checkbox" {% if part.has_ticket %}checked{% endif %}
+                                               data-participant="{{ part.pk }}" data-field="has_ticket">
+                                        habe ich
+                                    </label>
                                 {% endif %}
-                            </tr>
-                            {% if part.payed %}
-                            <tr>
-                                <td>Bezahlt</td>
-                                <td><span style="color:green">Ja</span></td>
-                            </tr>
-                            {% endif %}
-                            {% if part.storno %}
-                            <tr>
-                                <td>Storniert</td>
-                                <td><span style="color:red">Ja</span></td>
-                            </tr>
-                            {% endif %}
-                        </tbody>
+                            </td>
+                        </tr>
+                        {% endif %}
                     </table>
                     {% endif %}
-                </div>
-            </div>
-            <div class="chair_col-80 tertiary_bg padding_all_big">
-                <div class="markdown event_content">
-                    {{ object.description_html }}
-                </div>
-            </div>
-        </div>
-        <br>
-        {% if not object.info_only %}
-            <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
-                <div class="padding_all_big chair_col-5">
-                    <ul>
-                    {% if object.teilnahmebedingungen %}
-                    <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{object.teilnahmebedingungen.url}}"><p>Teilnahmebedingungen</p><i class="fas fa-file-download"></i></a></li>
+                    {% if object.deadline_reached %}
+                        <p class="member_panel__hint">Die Anmeldung ist vorbei.</p>
+                    {% elif is_participant %}
+                        <a class="form_button_sec event_signup_button" href="{% url 'event_unparticipate' object.id %}">Abmelden</a>
+                    {% else %}
+                        <a class="form_button event_signup_button" href="{% url 'event_participate' object.id %}">Anmelden</a>
                     {% endif %}
-                    {% if object.datenschutz %}
-                    <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{object.datenschutz.url}}"><p>Datenschutzerklärung</p><i class="fas fa-file-download"></i></a></li>
-                    {% endif %}
-                    {% if object.einverstaendnis %}
-                    <li style="padding:5px; width:100%;"><a class="download padding_rl_big" href="{{object.einverstaendnis.url}}"><p>Einverständniserklärung</p><i class="fas fa-file-download"></i></a></li>
-                    {% endif %}
-                    {% for doc in object.public_docs.all %}
-                    <li style="padding:5px; width:100%;"><a class="download padding_rl_big" target="_blank" href="{{doc.file.url}}"><p>{{doc.name}}</p><i class="fas fa-file-download"></i></a></li>
-                    {% endfor %}
-                    </ul>
-                </div>
-                {% if not object.deadline_reached %}
-                <div class="padding_all_big chair_col-20">
-                    <div class="flex_center">
-                        <div class="flex_center_vertical">
-                            {% if request.user in object.participant_users %}
-                                <div>
-                                    <a class="form_button_sec" href="{% url 'event_unparticipate' object.id %}">Abmelden</a>
-                                    <p class="time_info">Deadline {{object.deadline|date:'d.m.Y'}}</p>
-                                </div>
-                            {% else %}
-                                <div>
-                                    <a class="form_button" href="{% url 'event_participate' object.id %}">Anmelden</a>
-                                    <p class="time_info">Deadline {{object.deadline|date:'d.m.Y'}}</p>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                {% else %}
-                     <span style="color:grey; font-size: 0.9rem;">Anmeldung vorbei</span>
                 {% endif %}
-        {% else %}
-            <div class="flex_center padding_all_big">
-                <h5> Anmeldung noch nicht geöffnet </h5>
             </div>
-        {% endif %}
-    </section>
 
-    <script>
-        $('.field_update').on('change', function(){
-        ele = $(this)
-        formdata = new FormData()
-        formdata.append('csrfmiddlewaretoken',$('[name=csrfmiddlewaretoken]').val())
-        formdata.append('field', $(this).attr('data-field'))
-        formdata.append('id', $(this).attr('data-participant'))
-        formdata.append('value', [$(this).prop("checked")==true,$(this).val()])
-        $.ajax({
-            url:"{% url 'ajax_update_memberparticipant' %}",
-            type: "POST",
-            processData: false,
-            contentType: false,
-            data: formdata,
-            success: function (data){
-                    ele.parent().addClass('success')
-                    setTimeout(function(){
-                        ele.parent().removeClass('success')
-                    }, 300);
-                }
-            });
-        })
-    </script>
+            {% if object.has_meeting_point %}
+            <div class="session_card">
+                <h3>Treffpunkt</h3>
+                {% if show_meeting_point %}
+                    {% if object.meeting_point %}<p>{{ object.meeting_point }}</p>{% endif %}
+                    {% if object.has_meeting_coordinates %}
+                    <div id="meeting_point_map" class="spot_map event_meeting_map"
+                         data-lat="{{ object.meeting_lat|unlocalize }}" data-long="{{ object.meeting_long|unlocalize }}"></div>
+                    <a class="table_action event_route_button" target="_blank" rel="noopener"
+                       href="https://www.google.de/maps/dir//{{ object.meeting_lat|unlocalize }},{{ object.meeting_long|unlocalize }}/@{{ object.meeting_lat|unlocalize }},{{ object.meeting_long|unlocalize }},17z">
+                        <i class="fas fa-route"></i> Route
+                    </a>
+                    {% endif %}
+                {% else %}
+                    <p class="member_panel__hint">Der Treffpunkt wird nach der Anmeldung angezeigt.</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if not object.info_only %}
+            {% with docs=object.public_docs.all %}
+            {% if object.teilnahmebedingungen or object.datenschutz or object.einverstaendnis or docs %}
+            <div class="session_card">
+                <h3>Dokumente</h3>
+                {% if object.teilnahmebedingungen %}
+                <a class="document_link" href="{{ object.teilnahmebedingungen.url }}" target="_blank"><i class="fas fa-file-download"></i> Teilnahmebedingungen</a>
+                {% endif %}
+                {% if object.datenschutz %}
+                <a class="document_link" href="{{ object.datenschutz.url }}" target="_blank"><i class="fas fa-file-download"></i> Datenschutzerklärung</a>
+                {% endif %}
+                {% if object.einverstaendnis %}
+                <a class="document_link" href="{{ object.einverstaendnis.url }}" target="_blank"><i class="fas fa-file-download"></i> Einverständniserklärung</a>
+                {% endif %}
+                {% for doc in docs %}
+                <a class="document_link" href="{{ doc.file.url }}" target="_blank"><i class="fas fa-file-download"></i> {{ doc.name }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+            {% endif %}
+        </aside>
+
+        <article class="session_card event_detail_main">
+            {% with description=object.description_html %}
+            {% if description %}
+            <div class="markdown event_content">{{ description }}</div>
+            {% else %}
+            <p class="member_panel__hint">Noch keine Beschreibung.</p>
+            {% endif %}
+            {% endwith %}
+        </article>
+    </div>
+    {% csrf_token %}
+</section>
+
+{% if show_meeting_point and object.has_meeting_coordinates %}
+{% include "members/snippets/leaflet.html" %}
+<script>
+    (function () {
+        const element = document.getElementById('meeting_point_map');
+        SpotMap.point(element, parseFloat(element.dataset.lat), parseFloat(element.dataset.long));
+    })();
+</script>
+{% endif %}
+<script>
+    // ticket checkbox: saved right away
+    document.querySelectorAll('.field_update').forEach(input => input.addEventListener('change', async () => {
+        const body = new FormData();
+        body.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        body.append('field', input.dataset.field);
+        body.append('id', input.dataset.participant);
+        body.append('value', `${input.checked},${input.value}`);
+        const response = await fetch('{% url "ajax_update_memberparticipant" %}', { method: 'POST', body });
+        snackbar.labelText = response.ok ? 'Gespeichert' : 'Konnte nicht gespeichert werden';
+        snackbar.open();
+        if (!response.ok) input.checked = !input.checked;
+    }));
+</script>
 {% endblock %}

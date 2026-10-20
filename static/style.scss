@@ -911,6 +911,7 @@ footer{
     margin-bottom: $padding_small;
     h1{
         margin: 0;
+        padding: 0;  // the global h1 padding would push the title above the badge
     }
     .searchbar{
         flex: 1 1 250px;
@@ -1262,6 +1263,9 @@ footer{
         padding: 4px $padding_small;
         border-radius: 4px;
         color: white;
+        // Catamaran leaves a lot of room below the capitals: lift the badge to the middle of the letters
+        position: relative;
+        top: -0.6em;
     }
 }
 .session_grid{
@@ -1812,6 +1816,67 @@ footer{
     // about as tall as the three cards on the left
     height: 560px;
     max-height: 70vh;
+    margin-bottom: $padding_small;
+}
+
+/* Event detail: description left, facts and sign-up right; on phones the facts come first */
+.event_notice{
+    margin: 0 0 $padding_small 0;
+    padding: $padding_small;
+    border-radius: 4px;
+}
+// edit/delete icons in front of the date line; links get padding globally
+.event_detail_meta{
+    margin: 0 0 $padding_small 0;
+    a{
+        padding: 0;
+        margin-right: 6px;
+    }
+}
+.event_detail_layout{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: $padding_small;
+    align-items: start;
+}
+@media (min-width: 1000px){
+    .event_detail_layout{
+        grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+    }
+    .event_detail_main{
+        grid-column: 1;
+        grid-row: 1;
+    }
+    .event_detail_aside{
+        grid-column: 2;
+        grid-row: 1;
+    }
+}
+.event_detail_aside{
+    display: flex;
+    flex-direction: column;
+    gap: $padding_small;
+    p{
+        margin: 0 0 $padding_small 0;
+    }
+}
+.event_detail_main .event_content > :first-child{
+    margin-top: 0;
+    padding-top: 0;
+}
+.event_signup_button{
+    display: block;
+    margin-top: $padding_small;
+    text-align: center;
+}
+.event_ticket_toggle{
+    cursor: pointer;
+}
+.event_route_button{
+    display: inline-block;  // inline links ignore their vertical padding
+}
+.event_meeting_map{
+    height: 220px;
     margin-bottom: $padding_small;
 }
 

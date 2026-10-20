@@ -143,16 +143,16 @@ class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Event
 
     def get_context_data(self, **kwargs):
-        context = super(EventDetailView, self).get_context_data(**kwargs)
-        try:
-            tmp = {
-                "part": MemberParticipant.objects.get(
-                    event=self.object, user=self.request.user
-                )
-            }
-        except:
-            tmp = {}
-        context.update(tmp)
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        part = MemberParticipant.objects.filter(event=self.object, user=user).first()
+        is_participant = part is not None and not part.storno
+        context.update(
+            part=part,
+            is_participant=is_participant,
+            # the meeting point is meant for the people who come along
+            show_meeting_point=is_participant or trainer_check(self.request) or chairman_check(self.request),
+        )
         return context
 
     def test_func(self):
@@ -372,18 +372,20 @@ def ajax_event_filehandle(request):
 
 
 ## Ajax Event Orga Stuff
+@login_required
+@require_POST
 def update_memberparticipant(request):
-    part = MemberParticipant.objects.get(pk=request.POST.get("id"))
+    """Orga page: trainers/chairmen edit payed, notes and ticket; participants only their own ticket."""
+    part = get_object_or_404(MemberParticipant, pk=request.POST.get("id"))
     field = request.POST.get("field")
-    check, text = request.POST.get("value").split(",", 1)
-    if field in ["payed", "has_ticket"]:
-        val = check == "true"
-    else:
-        val = text
+    is_orga = trainer_check(request) or chairman_check(request)
+    own_ticket = field == "has_ticket" and part.user == request.user and not part.event.deadline_reached
+    if field not in ["payed", "has_ticket", "notes"] or not (is_orga or own_ticket):
+        return JsonResponse({"success": False}, status=403)
 
-    setattr(part, field, val)
-    part.save()
-
+    check, text = request.POST.get("value", "").split(",", 1)
+    setattr(part, field, check == "true" if field in ["payed", "has_ticket"] else text)
+    part.save(update_fields=[field])
     return JsonResponse({"success": True})
 
 
