@@ -12,11 +12,7 @@
 {% endblock %}
 {%block content %}
 <section style="text-align: center;">
-    {% if form.instance.image %}
     <h1>{{form.instance.user.first_name}} {{form.instance.user.last_name}}</h1>
-    {% else %}
-    <h1>Neuer Trainer</h1>
-    {% endif %}
     <div class="chair_col-5 tertiary_bg padding_all_big" style="margin: 0 auto;">
         <form class="form_wrapper" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
@@ -26,27 +22,6 @@
                 {% endfor %}
             {% endif %}
             <div class ="inner_form padding_all_big flex_center">
-                {% if not form.instance.image %}
-                    {% if form.user.errors %}
-                    {% for error in form.user.errors %}
-                        <p style="color:red;">{{error}}</p>
-                    {% endfor %}
-                    {% endif %}
-                    <label class="mdc-text-field mdc-text-field--filled user">
-                        <i class="mdc-select__dropdown-icon"></i>
-                        <span class="mdc-text-field__ripple"></span>
-                        <select id="select-user" class="mdc-text-field__input" style="background-color:#333333;" name="user" required>
-                            <option value="" selected></option>
-                                {% for id, string in choices %}
-                                {% if user != "---------" %}
-                                <option value="{{ id }}">{{string}}</option>
-                                {% endif %}
-                                {% endfor %}
-                        </select>
-                        <span class="mdc-floating-label" id="user-label">Wähle ein Mitglied</span>
-                        <span class="mdc-line-ripple"></span>
-                    </label>
-                {% endif %}
                 {% if form.trainer_telnr.errors %}
                 {% for error in form.trainer_telnr.errors %}
                     <p style="color:red;">{{error}}</p>
@@ -71,7 +46,7 @@
                     <span class="mdc-floating-label" id="trainer_email-label">Öffentliche E-Mail-Adresse</span>
                     <span class="mdc-line-ripple"></span>
                 </label>
-                {% if request.user.trainer != form.instance or request.user.chairman %}
+                {% if request.user.trainer != form.instance or request.user.chairman.active %}
                 {% if form.salary.errors %}
                 {% for error in form.salary.errors %}
                     <p style="color:red;">{{error}}</p>
@@ -129,7 +104,7 @@
                 <div style="display:flex;">
                     <label class="upload">
                         <span style="display:flex;justify-content:center;"><i class="fas fa-file-upload"></i></span>
-                        <input type="file" id="inputFile" style="display: none" name="image" {% if not form.instance.image %}  required {% endif %}>
+                        <input type="file" id="inputFile" style="display: none" name="image">
                     </label>
                     <p class="padding_rl_small" id="fileText">Profilbild hochladen*</p>
                 </div>

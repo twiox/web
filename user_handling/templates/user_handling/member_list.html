@@ -179,6 +179,26 @@
         }
     }
 
+    async function toggleRole(checkbox) {
+        const name = checkbox.dataset.roleName;
+        if (!checkbox.checked && !confirm(`${name}-Rolle wirklich entfernen? Die Rechte werden sofort entzogen, Profil und Verlauf bleiben gespeichert.`)) {
+            checkbox.checked = true;
+            return;
+        }
+        const body = new FormData();
+        body.append('active', checkbox.checked ? '1' : '0');
+        body.append('csrfmiddlewaretoken', panel.querySelector('[name=csrfmiddlewaretoken]').value);
+        const response = await fetch(checkbox.dataset.roleUrl, { method: 'POST', body });
+        if (response.ok) {
+            await loadDetail(panel.querySelector('form').dataset.detailUrl);
+            switchTab(panel.querySelector('form'), 'roles');
+            showMessage(checkbox.checked ? `${name}-Rolle vergeben` : `${name}-Rolle entfernt`);
+        } else {
+            checkbox.checked = !checkbox.checked;
+            showMessage('Rolle konnte nicht geändert werden');
+        }
+    }
+
     // every listener is registered once here; the panel content is replaced, the listeners stay
     search.addEventListener('input', filterRows);
     rows.addEventListener('click', event => {
@@ -196,6 +216,9 @@
         if (deleteButton) deleteEmail(deleteButton);
         const activateButton = event.target.closest('[data-activate-url]');
         if (activateButton) activate(activateButton);
+    });
+    panel.addEventListener('change', event => {
+        if (event.target.matches('[data-role-url]')) toggleRole(event.target);
     });
     panel.addEventListener('submit', event => {
         event.preventDefault();

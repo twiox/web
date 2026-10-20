@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Event, Session, Group, Spot, Document
+from .models import Event, Session, Group, Spot, Document, Trainer
 
 
 class EventFileForm(forms.ModelForm):
@@ -31,6 +31,10 @@ class SessionForm(forms.ModelForm):
         widgets = {
             "trainer": forms.CheckboxSelectMultiple,
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["trainer"].queryset = Trainer.objects.filter(active=True)
 
 
 class EventForm(forms.ModelForm):

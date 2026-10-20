@@ -5,7 +5,7 @@
         Interessierte </a>
     <a class="float_left"> > </a>
     <a class="float_left strong" style="font-size: 1.1rem; color:white;"> {{object.title}} </a>
-    {% if request.user.chairman %}
+    {% if request.user.chairman.active %}
     <a class="float_left"> > </a>
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_participant_list' object.slug %}">
         Anmeldungen </a>
@@ -32,7 +32,7 @@
     </div>
     <div class="flex_center" style="flex-wrap:wrap; justify-content: space-between;" id="container">
         <div class="trainer_ui">
-            {% if request.user.chairman %}
+            {% if request.user.chairman.active %}
             <a href="{% url 'public_event_change' object.pk  %}#nav" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
             <a href="{% url 'public_event_delete' object.pk %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
             {% endif %}
@@ -329,7 +329,7 @@
                 <div class="flex_left">
                     <div class="chair_col-5 flex_center_vertical">
                         <div class="flex_center">
-                            <img class="padding_all_small round_profile_pic_chairman" src="{{object.image.url}}">
+                            <img class="padding_all_small round_profile_pic_chairman" src="{{ object.image_url }}">
                         </div>
                     </div>
                     <div class="chair_col-5 flex_center">

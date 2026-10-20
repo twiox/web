@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720" role="img" aria-label="Kein Profilbild">
+  <rect width="720" height="720" fill="#333333"/>
+  <circle cx="360" cy="285" r="130" fill="#088eaa"/>
+  <path d="M110 720c0-150 112-250 250-250s250 100 250 250z" fill="#088eaa"/>
+</svg>

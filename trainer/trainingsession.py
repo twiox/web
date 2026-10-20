@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from datetime import datetime, timedelta
 from trainer.forms import TrainingSessionForm
 from trainer.models import TrainingSessionEntry, TrainingSessionParticipant, TrainingSessionInvoice
-from members.models import Trainer, Profile, Session
+from members.models import Trainer, Profile, Session, is_trainer, is_chairman
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Q
@@ -13,10 +13,10 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 def trainer_check(user):
-    return hasattr(user, "trainer")
+    return is_trainer(user)
 
 def chairman_check(user):
-    return hasattr(user, "chairman") or user.is_superuser
+    return is_chairman(user) or user.is_superuser
 
 @csrf_exempt
 @user_passes_test(trainer_check)
@@ -162,7 +162,7 @@ def search(request, pk):
                 Q(user__last_name__icontains=query)
             )
         elif type in ['trainer', 'cotrainer']:
-            results = Trainer.objects.filter(
+            results = Trainer.objects.filter(active=True).filter(
                 Q(user__first_name__icontains=query) |
                 Q(user__last_name__icontains=query)
             )

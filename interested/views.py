@@ -32,7 +32,7 @@ from members.views import chairman_check, trainer_check
 
 
 def interested_index(request):
-    chairmen = Chairman.objects.filter(show__contains="interested_site")
+    chairmen = Chairman.objects.filter(active=True, show__contains="interested_site")
     public_events = [x for x in PublicEvent.objects.all() if not x.is_past_due]
 
     if request.method == "POST":
@@ -214,7 +214,7 @@ class PublicEventView(DetailView):
             context["sizes"] = []
         context["merch"] = merch
         context["chairmen"] = Chairman.objects.filter(
-            show__contains="interested_xdream"
+            active=True, show__contains="interested_xdream"
         )
 
         return context

@@ -8,7 +8,7 @@ from members.models import Chairman
 from .forms import OrganizerForm
   
 def organizers_index(request):
-    chairmen = Chairman.objects.filter(show__contains="event_site")
+    chairmen = Chairman.objects.filter(active=True, show__contains="event_site")
     if (request.method == "POST"):
         form = OrganizerForm(request.POST) #if no files
         if form.is_valid():

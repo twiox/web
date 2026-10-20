@@ -25,6 +25,7 @@
         <button type="button" data-tab="payment">Beitrag</button>
         <button type="button" data-tab="notes">Notizen</button>
         <button type="button" data-tab="emails">Zusatzmails ({{ additional_emails|length }})</button>
+        <button type="button" data-tab="roles">Rollen</button>
     </div>
 
     <div class="member_fields" data-tab-panel="personal">
@@ -78,6 +79,28 @@
         <h6 class="member_fields__heading">Neue Adresse hinzufügen</h6>
         {% include "user_handling/_field.html" with field=email_form.title %}
         {% include "user_handling/_field.html" with field=email_form.email %}
+    </div>
+
+    <div class="member_fields member_fields--wide" data-tab-panel="roles" hidden>
+        <p class="member_panel__hint">Rollen werden sofort gespeichert und vergeben bzw. entziehen die passenden Rechte. Beim Entfernen bleiben Profil und Verlauf erhalten.</p>
+        <div class="role_row">
+            <label>
+                <input type="checkbox" data-role-name="Vorstand" data-role-url="{% url 'member_role' user.pk 'chairman' %}"
+                       {% if chairman %}checked{% endif %}
+                       {% if chairman and not perms.members.delete_chairman or not chairman and not perms.members.add_chairman %}disabled{% endif %}>
+                Vorstand
+            </label>
+            {% if chairman %}<a class="more_info_button" href="{% url 'chairman_update' chairman.pk %}#nav">Öffentliches Profil bearbeiten</a>{% endif %}
+        </div>
+        <div class="role_row">
+            <label>
+                <input type="checkbox" data-role-name="Trainer" data-role-url="{% url 'member_role' user.pk 'trainer' %}"
+                       {% if trainer %}checked{% endif %}
+                       {% if trainer and not perms.members.delete_trainer or not trainer and not perms.members.add_trainer %}disabled{% endif %}>
+                Trainer*in
+            </label>
+            {% if trainer %}<a class="more_info_button" href="{% url 'trainer_update_form' trainer.pk %}#nav">Öffentliches Profil bearbeiten</a>{% endif %}
+        </div>
     </div>
 
     <button class="form_button padding_all_small member_form__submit" type="submit">Speichern</button>

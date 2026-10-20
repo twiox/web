@@ -41,7 +41,7 @@
 </table>   
 <br>
 <h3>Unbezahlte Rechnungen</h3>
-{% if request.user.chairman %}
+{% if request.user.chairman.active %}
 <a href="{% url 'generate_invoices' %}" class="more_info_button" style="padding: 0px;">Abrechnungen Generieren</a><br>
 {% endif %}
 <br>
@@ -67,7 +67,7 @@
             <td>{{invoice.total_time}}</td>
             <td>{{invoice.total_money}} €</td>
             <td><a href="{{invoice.invoice_pdf.url}}" class="more_info_button" style="padding: 0px;">pdf</a></td>
-            {% if request.user.chairman %}
+            {% if request.user.chairman.active %}
             <td><a href="{% url 'trainingsession_mark_invoice_as_payed' invoice.pk %}" class="more_info_button" style="padding: 0px;">als bezahlt markieren</a></td>
             {% else %}
             <td></td>

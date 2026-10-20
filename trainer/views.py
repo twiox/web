@@ -1,29 +1,24 @@
-from .forms import *
 from .models import Trainer_table, Table_entry, TrainingSessionEntry
-from django.core.files import File
 from django.core.files.base import ContentFile
-from django.shortcuts import render, redirect
-from members.models import Trainer, Profile, Event, Message, Session, Group, AdditionalEmail
+from django.shortcuts import render
+from members.models import Trainer, Session, AdditionalEmail, is_trainer, is_chairman
 from django.contrib import messages
-from user_handling.permissions import trainer_permissions
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
-from django.views.generic import DeleteView, UpdateView, CreateView, ListView, DetailView
+from django.views.generic import DeleteView, UpdateView, ListView, DetailView
 from django.urls import reverse
-from django.contrib.auth.decorators import permission_required, login_required
-from django.contrib.auth.models import Group as Permission_group
-from django.http import JsonResponse
+from django.contrib.auth.decorators import permission_required
+from django.http import HttpResponseRedirect, JsonResponse
 from datetime import datetime
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
-import json
 import codecs
 import django
 from django.db.models import Q
 
 
 def trainer_check(user):
-    return hasattr(user, "trainer")
+    return is_trainer(user)
 
 @user_passes_test(trainer_check)
 def trainer_index(request):
@@ -230,66 +225,30 @@ class AbrechnungstableDetailView(LoginRequiredMixin, UserPassesTestMixin, Detail
 
     def test_func(self):
         table = self.get_object()
-        return hasattr(self.request.user,"chairman") or table.trainer == self.request.user.trainer
+        user = self.request.user
+        return is_chairman(user) or (is_trainer(user) and table.trainer == user.trainer)
 
-class TrainerListView(LoginRequiredMixin, ListView):
-    model = Trainer
+class TrainerListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    queryset = Trainer.objects.filter(active=True).select_related("user").order_by("user__last_name")
     template_name = "user_handling/trainer_list.html"
 
-@login_required
-@permission_required('members.add_trainer', raise_exception=True)
-def register_trainer(request):
-    choices = [(x.pk, f"{x.first_name} {x.last_name} ({x.profile.member_num})") for x in User.objects.filter(trainer__id__isnull=True)]
-    if(request.method == "POST"): #if the form is filled out
-        form = TrainerCreationForm(request.POST,request.FILES)
-        if(form.is_valid()):
-            new_trainer = form.save() #save the trainer
-            user = new_trainer.user
-            group_t,_ = Group.objects.get_or_create(group_id="T")
-            user.profile.group = group_t
-            try:
-                trainer_group = Permission_group.objects.get(name='Trainer')
-            except:
-                trainer_group = Permission_group(name="Trainer")
-                trainer_group.save()
-                for perm in trainer_permissions():
-                    trainer_group.permissions.add(perm)
-            finally:
-                trainer_group.user_set.add(user)
-                trainer_group.save()
-                user.save()
-                new_trainer.save()
-                messages.add_message(request, messages.SUCCESS, "Trainer angelegt. Gruppe wurde auf T gesetzt")
-                return redirect("register_trainer")
-        else:
-            return render(request, 'trainer/trainer_form.html', context={'form': form, "choices":choices})
-    else:
-        form = TrainerCreationForm()
-    return render(request, 'trainer/trainer_form.html', context={"form":form,"choices":choices})
+    def test_func(self):
+        user = self.request.user
+        return trainer_check(user) or is_chairman(user) or user.is_superuser
 
-@login_required
-@permission_required('members.delete_trainer', raise_exception=True)
-def remove_trainer(request):
-    if(request.method == "POST"): #if the form is filled out
-        form = TrainerDeletionForm(request.POST)
-        if(form.is_valid()):
-            trainer = form.cleaned_data.get('trainer') #save the trainer
-            user = trainer.user
-            trainer.delete()
-            group = form.cleaned_data.get('group')
-            user.profile.group = group
-            trainer_group = Permission_group.objects.get(name='Trainer')
-            trainer_group.user_set.remove(user)
-            trainer_group.save()
-            user.save()
-            messages.add_message(request, messages.SUCCESS, f"Trainerstatus für {user.first_name} entfernt. Gruppe wurde auf {group.group_id} gesetzt")
-            return redirect("remove_trainer")
-        return render(request, "trainer/remove_trainer.html", context={"form":form})
-    else:
-        form = TrainerDeletionForm()
-        return render(request, "trainer/remove_trainer.html", context={"form":form})
+class TrainerDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Trainer
+    template_name = "user_handling/trainer_confirm_delete.html"
+    permission_required = "members.delete_trainer"
 
+    def get_success_url(self):
+        return reverse("trainer_list")
 
+    def form_valid(self, form):
+        # deactivate instead of delete, see member_role in user_handling/views.py
+        self.object.active = False
+        self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
 
 class TrainerUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     #template: event_form.html
@@ -330,6 +289,6 @@ class TrainerSelfUpdateView(UpdateView, LoginRequiredMixin,UserPassesTestMixin):
         return Trainer.objects.get(pk=self.request.user.trainer.pk)
 
     def test_func(self):
-        return hasattr(self.user, "trainer")
+        return is_trainer(self.request.user)
 
 

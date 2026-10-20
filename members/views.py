@@ -9,6 +9,8 @@ from django.views.generic import (
     DeleteView,
 )
 from .models import (
+    is_trainer,
+    is_chairman,
     Group,
     Event,
     Profile,
@@ -60,12 +62,12 @@ import os
 
 def chairman_check(request):
     user = request.user
-    return hasattr(user, "chairman") or user.is_superuser
+    return is_chairman(user) or user.is_superuser
 
 
 def trainer_check(request):
     user = request.user
-    return hasattr(user, "trainer") or user.is_superuser
+    return is_trainer(user) or user.is_superuser
 
 
 @login_required
@@ -96,7 +98,7 @@ def index(request):
         events = []
         training_messags = []
         event_messags = []
-    chairmen = Chairman.objects.filter(show__contains="member_site")
+    chairmen = Chairman.objects.filter(active=True, show__contains="member_site")
 
     posts = News.objects.all().order_by("-id")
     if len(posts) > 3:
@@ -104,12 +106,12 @@ def index(request):
 
     trainer_sessions = None
     trainer_groups = None
-    if hasattr(request.user, "trainer"):
+    if is_trainer(request.user):
         events = Event.objects.all()
         training_messags = Message.objects.all().filter(display="sessions")
         event_messags = Message.objects.all().filter(display="events")
 
-    if hasattr(request.user, "chairman"):
+    if is_chairman(request.user):
         # sessions = Session.objects.all()
         events = Event.objects.all()
         training_messags = Message.objects.all().filter(display="sessions")
@@ -135,7 +137,7 @@ def index(request):
             "events": events,
             "training_messags": training_messags,
             "event_messags": event_messags,
-            "chairman": hasattr(request.user, "chairman"),
+            "chairman": is_chairman(request.user),
             "groups": Group.objects.all(),
             "posts": posts,
         },
@@ -637,9 +639,9 @@ class RealGroupDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     template_name = "members/real_group_detail.html"
 
     def test_func(self):
-        if hasattr(self.request.user, "trainer"):
+        if is_trainer(self.request.user):
             return True
-        if hasattr(self.request.user, "chairman"):
+        if is_chairman(self.request.user):
             return True
         return False
 

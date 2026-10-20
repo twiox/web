@@ -1,8 +1,10 @@
 from .forms import MemberForm, ProfileForm, AdditionalEmailForm
-from .permissions import chairman_permissions
 from members.models import (
+    is_trainer,
+    is_chairman,
     Group,
     Chairman,
+    Trainer,
     Profile,
     AdditionalEmail,
     Session,
@@ -12,7 +14,8 @@ from members.models import (
 from interested.models import PublicEvent, EventParticipant
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
-from django.http import HttpResponseRedirect, JsonResponse
+from django.core.exceptions import PermissionDenied
+from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.views.decorators.http import require_POST
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
@@ -27,9 +30,8 @@ from django.contrib.auth.decorators import (
     user_passes_test,
 )
 from django.contrib.auth.models import User
-from django.contrib.auth.models import Group as Permission_group
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.views.generic import DeleteView, UpdateView, CreateView, ListView
+from django.views.generic import DeleteView, UpdateView, ListView
 from django.contrib.auth.views import (
     PasswordResetView,
     LogoutView,
@@ -179,55 +181,16 @@ def member_update(request, pk):
     )
 
 
-class ChairmanCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    # template: event_detail.html
-    model = Chairman
-    fields = ["user", "public_telnr", "public_email", "competences", "image", "show"]
-    template_name = "user_handling/chairman_form.html"
-    permission_required = "members.add_chairman"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["choices"] = [
-            (x.pk, f"{x.first_name} {x.last_name} ({x.profile.member_num})")
-            for x in User.objects.filter(chairman__id__isnull=True)
-        ]
-        return context
-
-    def form_valid(self, form):
-        self.object = form.save()
-        user = self.object.user
-        try:
-            chairman_group = Permission_group.objects.get(name="Vorstand")
-        except:
-            chairman_group = Permission_group(name="Vorstand")
-            chairman_group.save()
-            for perm in chairman_permissions():
-                chairman_group.permissions.add(perm)
-        finally:
-            chairman_group.user_set.add(user)
-            chairman_group.save()
-            user.save()
-        return super().form_valid(form)
-
-
 class ChairmanDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Chairman
     template_name = "user_handling/chairman_confirm_delete.html"
     permission_required = "members.delete_chairman"
 
-    def delete(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        user = self.object.user
-        success_url = self.get_success_url()
-        try:
-            chairman_group = Permission_group.objects.get(name="Vorstand")
-            chairman_group.user_set.remove(user)
-            chairman_group.save()
-        except:  # if we created chairman via the webiste...
-            pass
-        self.object.delete()
-        return HttpResponseRedirect(success_url)
+    def form_valid(self, form):
+        # deactivate instead of delete, see member_role
+        self.object.active = False
+        self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self, **kwargs):
         return reverse("chairman_list")
@@ -247,7 +210,7 @@ class ChairmanUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView
 
 
 class ChairmanListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
-    queryset = Chairman.objects.select_related("user__profile").order_by("user__last_name")
+    queryset = Chairman.objects.filter(active=True).select_related("user").order_by("user__last_name")
     permission_required = "members.change_chairman"
     template_name = "user_handling/chairman_list.html"
 
@@ -289,9 +252,9 @@ def mailing_lists(request):
 
 
 def trainer_or_chairman(user):
-    if hasattr(user, "trainer"):
+    if is_trainer(user):
         return True
-    if hasattr(user, "chairman"):
+    if is_chairman(user):
         return True
     return False
 
@@ -342,7 +305,7 @@ def get_all_emails(request):
                 emails.append(user.email)
                 add_emails = AdditionalEmail.objects.filter(user=user)
                 emails.extend([x.email for x in add_emails])
-                if hasattr(user, "trainer"):
+                if is_trainer(user):
                     emails.append(user.trainer.trainer_email)
         elif data["id"].startswith("email"):
             _, stat = data["id"].split("_")
@@ -368,6 +331,8 @@ def member_detail_form(request, pk):
             # both fields are only required once something is typed, see has_input()
             "email_form": AdditionalEmailForm(prefix="add_email", use_required_attribute=False),
             "additional_emails": AdditionalEmail.objects.filter(user=user),
+            "chairman": Chairman.objects.filter(user=user, active=True).first(),
+            "trainer": Trainer.objects.filter(user=user, active=True).first(),
         },
     )
 
@@ -379,6 +344,28 @@ def member_activate(request, pk):
     user = get_object_or_404(User, pk=pk)
     user.is_active = True
     user.save(update_fields=["is_active"])
+    return JsonResponse({"data": True})
+
+
+ROLE_MODELS = {"chairman": Chairman, "trainer": Trainer}
+
+
+@login_required
+@require_POST
+def member_role(request, pk, role):
+    """Switches the chairman or trainer role on or off, the signals handle the permissions."""
+    model = ROLE_MODELS.get(role)
+    if model is None:
+        raise Http404
+    active = request.POST.get("active") == "1"
+    action = "add" if active else "delete"
+    if not request.user.has_perm(f"members.{action}_{role}"):
+        raise PermissionDenied
+    user = get_object_or_404(User, pk=pk)
+    # never deleted, so switching a role back on restores its profile and history
+    role = model.objects.filter(user=user).first() or model(user=user)
+    role.active = active
+    role.save()
     return JsonResponse({"data": True})
 
 

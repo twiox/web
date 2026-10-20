@@ -6,6 +6,32 @@ from django.urls import reverse  # to get absolut_urls
 from datetime import datetime, timedelta
 from multiselectfield import MultiSelectField
 from PIL import Image as Img
+from django.templatetags.static import static
+
+PROFILE_PLACEHOLDER = "media/profile_placeholder.svg"
+
+
+def is_trainer(user):
+    trainer = getattr(user, "trainer", None)
+    return trainer is not None and trainer.active
+
+
+def is_chairman(user):
+    chairman = getattr(user, "chairman", None)
+    return chairman is not None and chairman.active
+
+
+def crop_to_square(path):
+    """Crops an image to a centered square of 720x720 px."""
+    img = Img.open(path)
+    if img.height == img.width:
+        return
+    cut = abs(img.height - img.width) // 2
+    if img.height > img.width:
+        img = img.crop((0, cut, img.width, img.height - cut))
+    else:
+        img = img.crop((cut, 0, img.width - cut, img.height))
+    img.resize((720, 720)).save(path)
 
 
 class News(models.Model):
@@ -202,7 +228,9 @@ class Trainer(models.Model):
     trainer_email = models.CharField(
         "Öffentliche Email", max_length=150, blank=True, null=True
     )
-    image = models.ImageField("Profilbild", upload_to="profile_pics/")
+    image = models.ImageField("Profilbild", upload_to="profile_pics/", blank=True)
+    # switched off instead of deleted, so sessions, invoices and documents keep their trainer
+    active = models.BooleanField("Aktiv", default=True)
     salary = models.CharField("Bezahlung", blank=True, null=True, max_length=5)
     license_level = models.CharField(
         "Lizenzstufe", max_length=100, blank=True, null=True
@@ -227,19 +255,14 @@ class Trainer(models.Model):
     def get_absolute_url(self):
         return reverse("trainer_list")
 
-    def save(self):
-        super().save()
-        img = Img.open(self.image.path)
-        if img.height > img.width:
-            cut = int((img.height - img.width) / 2)
-            img = img.crop((0, 0 + cut, img.width, img.height - cut))
-            img2 = img.resize((720, 720))
-            img2.save(self.image.path)
-        elif img.width > img.height:
-            cut = int((img.width - img.height) / 2)
-            img = img.crop((0 + cut, 0, img.width - cut, img.height))
-            img2 = img.resize((720, 720))
-            img2.save(self.image.path)
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.image:
+            crop_to_square(self.image.path)
+
+    @property
+    def image_url(self):
+        return self.image.url if self.image else static(PROFILE_PLACEHOLDER)
 
     def trainer_info(self):
         info = [f"Trainer:\t{self.user.first_name} {self.user.last_name}"]
@@ -388,8 +411,10 @@ class Chairman(models.Model):
     public_email = models.CharField(
         "Öffentliche Email", max_length=150, blank=True, null=True
     )
-    competences = models.TextField("Zuständigkeiten (mit Komma getrennt)")
-    image = models.ImageField("Profilbild", upload_to="profile_pics/")
+    competences = models.TextField("Zuständigkeiten (mit Komma getrennt)", blank=True)
+    image = models.ImageField("Profilbild", upload_to="profile_pics/", blank=True)
+    # switched off instead of deleted, so the public profile is kept for later
+    active = models.BooleanField("Aktiv", default=True)
     show = MultiSelectField(choices=choices, blank=True, max_length=300)
 
     def __str__(self):
@@ -397,24 +422,19 @@ class Chairman(models.Model):
 
     @property
     def complist(self):
-        return self.competences.split(",")
+        return [c.strip() for c in self.competences.split(",") if c.strip()]
 
     def get_absolute_url(self):
         return reverse("chairman_list")
 
-    def save(self):
-        super().save()
-        img = Img.open(self.image.path)
-        if img.height > img.width:
-            cut = int((img.height - img.width) / 2)
-            img = img.crop((0, 0 + cut, img.width, img.height - cut))
-            img2 = img.resize((720, 720))
-            img2.save(self.image.path)
-        elif img.width > img.height:
-            cut = int((img.width - img.height) / 2)
-            img = img.crop((0 + cut, 0, img.width - cut, img.height))
-            img2 = img.resize((720, 720))
-            img2.save(self.image.path)
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.image:
+            crop_to_square(self.image.path)
+
+    @property
+    def image_url(self):
+        return self.image.url if self.image else static(PROFILE_PLACEHOLDER)
 
 
 def calculate_age(birth_date):
@@ -484,9 +504,9 @@ class Profile(models.Model):
     @property
     def privileged(self):
         return (
-            hasattr(self.user, "chairman")
+            is_chairman(self.user)
             or self.user.is_superuser
-            or hasattr(self.user, "trainer")
+            or is_trainer(self.user)
         )
 
     @property

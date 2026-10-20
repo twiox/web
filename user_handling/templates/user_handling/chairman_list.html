@@ -12,9 +12,6 @@
 <section class="member_page">
     <div class="member_toolbar">
         <h1>Vorstandsliste</h1>
-        {% if perms.members.add_chairman %}
-            <a class="more_info_button" href="{% url 'chairman_create' %}#nav"><i class="far fa-plus-square"></i> Neues Vorstandsmitglied</a>
-        {% endif %}
     </div>
 
     <div class="member_table_wrapper tertiary_bg">
@@ -22,7 +19,6 @@
             <thead>
                 <tr>
                     <th></th>
-                    <th>Nr.</th>
                     <th>Name</th>
                     <th>Zuständigkeiten</th>
                     <th>Öffentliche E-Mail</th>
@@ -39,19 +35,18 @@
                             <a href="{% url 'chairman_update' object.pk %}#nav" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
                         {% endif %}
                         {% if perms.members.delete_chairman %}
-                            <a href="{% url 'chairman_delete' object.pk %}#nav" title="Löschen"><i class="far fa-minus-square"></i></a>
+                            <a href="{% url 'chairman_delete' object.pk %}#nav" title="Deaktivieren"><i class="far fa-minus-square"></i></a>
                         {% endif %}
                     </td>
-                    <td>{{ object.user.profile.member_num }}</td>
                     <td>{{ object.user.last_name }}, {{ object.user.first_name }}</td>
                     <td>{{ object.complist|join:", " }}</td>
                     <td>{{ object.public_email|default:"" }}</td>
                     <td>{{ object.public_telnr|default:"" }}</td>
                     <td>{{ object.get_show_display|cut:"Anzeige " }}</td>
-                    <td>{% if object.image %}<a class="more_info_button" href="{{ object.image.url }}">Ansehen</a>{% endif %}</td>
+                    <td><a class="more_info_button" href="{{ object.image_url }}">Ansehen</a></td>
                 </tr>
             {% empty %}
-                <tr><td colspan="8">Noch keine Vorstandsmitglieder.</td></tr>
+                <tr><td colspan="7">Noch keine Vorstandsmitglieder.</td></tr>
             {% endfor %}
             </tbody>
         </table>

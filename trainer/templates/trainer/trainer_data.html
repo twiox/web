@@ -12,7 +12,7 @@
 <div class="padding_all_small">
     <div class="" style="display:flex; justify-content:left; flex-wrap:wrap;">
         <div class="col-20 padding_all_big tertiary_bg">
-            <img src="{{request.user.trainer.image.url}}" class="team_picture" style="border-radius:50%;">
+            <img src="{{ request.user.trainer.image_url }}" class="team_picture" style="border-radius:50%;">
         </div>
         <div class="col-80 padding_all_small tertiary_bg">
             <h3>{{request.user.first_name}} {{request.user.last_name}}</h3>
