@@ -1092,3 +1092,41 @@ footer{
     max-width: 200px;
     cursor: pointer;
 }
+
+/* Vorstand dashboard */
+.dashboard h3{
+    margin: $padding_big 0 $padding_small 0;
+}
+.dashboard_grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: $padding_small;
+}
+.dashboard_card{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: $padding_big;
+    background-color: $tertiary_bg;
+    border-left: 4px solid transparent;
+    border-radius: 4px;
+    color: $font_col;
+    transition: background-color 0.15s, border-color 0.15s;
+    &:hover, &:focus{
+        background-color: $quartiary_bg;
+        border-left-color: $primary;
+    }
+    i{
+        font-size: 1.6rem;
+        color: $primary;
+        margin-bottom: 4px;
+    }
+    strong{
+        color: white;
+        font-size: 1.1rem;
+    }
+    &__text{
+        color: grey;
+        font-size: 0.9rem;
+    }
+}

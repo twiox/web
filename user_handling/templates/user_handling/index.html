@@ -1,79 +1,54 @@
 {% extends "members/base.html" %}
 {% block content %}
-<h1>Vorstandsdokument</h1>
-<section>
+<section class="member_page dashboard">
+    <h1>Vorstandsbereich</h1>
+
     <h3>Benutzerverwaltung</h3>
-    <div style="display:flex; justify-content:flex-start">
-        <a class="padding_all_small" href="{% url 'member_list' %}">
-            <div class=" prim_hover tertiary_bg padding_all_big">
-                <i class="fas fa-user" style="font-size:20px;">
-                    <p style="font-weight:500;padding-top:5px;">Mitglieder</p>
-                </i>
-            </div>
+    <div class="dashboard_grid">
+        <a class="dashboard_card" href="{% url 'member_list' %}">
+            <i class="fas fa-user"></i>
+            <strong>Mitglieder</strong>
+            <span class="dashboard_card__text">Daten bearbeiten, Rollen vergeben, neue Mitglieder anlegen</span>
         </a>
-        <a class=" padding_all_small" href="{% url 'trainer_list' %}">
-            <div class="prim_hover tertiary_bg padding_all_big">
-                <i class="fas fa-user-cog" style="font-size:20px;">
-                    <p style="font-weight:500;padding-top:5px;">Trainer</p>
-                </i>
-            </div>
+        <a class="dashboard_card" href="{% url 'trainer_list' %}">
+            <i class="fas fa-user-cog"></i>
+            <strong>Trainer*innen</strong>
+            <span class="dashboard_card__text">Lizenzen, Verträge und öffentliche Profile</span>
         </a>
-        <a class=" padding_all_small" href="{% url 'chairman_list' %}">
-            <div class="prim_hover tertiary_bg padding_all_big">
-                <i class="fas fa-user-tie" style="font-size:20px;">
-                    <p style="font-weight:500;padding-top:5px;">Vorstände</p>
-                </i>
-            </div>
-        </a>
-    </div>
-</section>
-<br>
-<section>
-<h3>Sonstiges</h3>
-    <div style="display:flex; justify-content:flex-start; flex-wrap:wrap;">
-        <a class="padding_all_small" href="#">
-            <div class="prim_hover tertiary_bg padding_all_big">
-                <i class="fas fa-money-bill" style="font-size:20px;">
-                    <p style="font-weight:500;padding-top:5px;">Abrechnungen</p>
-                </i>
-            </div>
-        </a>
-        <a class="padding_all_small" href="{% url 'group_list' %}">
-            <div class="prim_hover tertiary_bg padding_all_big">
-                <i class="fas fa-users" style="font-size:20px;">
-                    <p style="font-weight:500;padding-top:5px;">Gruppenverwaltung</p>
-                </i>
-            </div>
-        </a>
-        <a class="padding_all_small" href="{% url 'agegroup_list' %}">
-            <div class="prim_hover tertiary_bg padding_all_big">
-                <i class="fas fa-users" style="font-size:20px;">
-                    <p style="font-weight:500;padding-top:5px;">Altersgruppen</p>
-                </i>
-            </div>
-        </a>
-        <a class="padding_all_small" href="{% url 'mailing_lists' %}">
-            <div class="prim_hover tertiary_bg padding_all_big">
-                <i class="fas fa-at" style="font-size:20px;">
-                    <p style="font-weight:500;padding-top:5px;">Email-Verteiler</p>
-                </i>
-             </div>
-        </a>
-        <a class="padding_all_small" href="{% url 'event_list' %}">
-            <div class="prim_hover tertiary_bg padding_all_big">
-                 <i class="far fa-calendar-alt" style="font-size:20px;">
-                     <p style="font-weight:500;padding-top:5px;">Veranstaltungen</p>
-                 </i>
-             </div>
-        </a>
-        <a class="padding_all_small" href="{% url 'tester_list' %}">
-            <div class="prim_hover tertiary_bg padding_all_big">
-                 <i class="fas fa-vial" style="font-size:20px;">
-                     <p style="font-weight:500;padding-top:5px;">Probetrainingsanfragen</p>
-                 </i>
-             </div>
+        <a class="dashboard_card" href="{% url 'chairman_list' %}">
+            <i class="fas fa-user-tie"></i>
+            <strong>Vorstand</strong>
+            <span class="dashboard_card__text">Zuständigkeiten und öffentliche Profile</span>
         </a>
     </div>
 
+    <h3>Verwaltung</h3>
+    <div class="dashboard_grid">
+        <a class="dashboard_card" href="{% url 'event_list' %}">
+            <i class="far fa-calendar-alt"></i>
+            <strong>Veranstaltungen</strong>
+            <span class="dashboard_card__text">Events und Teilnehmende</span>
+        </a>
+        <a class="dashboard_card" href="{% url 'tester_list' %}">
+            <i class="fas fa-vial"></i>
+            <strong>Probetrainingsanfragen</strong>
+            <span class="dashboard_card__text">Anfragen von Interessierten</span>
+        </a>
+        <a class="dashboard_card" href="{% url 'mailing_lists' %}">
+            <i class="fas fa-at"></i>
+            <strong>Email-Verteiler</strong>
+            <span class="dashboard_card__text">Adressen nach Gruppe oder Status kopieren</span>
+        </a>
+        <a class="dashboard_card" href="{% url 'group_list' %}">
+            <i class="fas fa-users"></i>
+            <strong>Gruppen</strong>
+            <span class="dashboard_card__text">Trainingsgruppen verwalten</span>
+        </a>
+        <a class="dashboard_card" href="{% url 'agegroup_list' %}">
+            <i class="fas fa-child"></i>
+            <strong>Altersgruppen</strong>
+            <span class="dashboard_card__text">Altersgruppen verwalten</span>
+        </a>
+    </div>
 </section>
 {% endblock %}
