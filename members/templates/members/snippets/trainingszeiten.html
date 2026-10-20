@@ -48,6 +48,9 @@
                     <!--session hinweise -->
                     <div style="margin-top:10px;">
                         {% if session.visible %}
+                        {% for notice in session.notices %}
+                        <div class="third_session session_notice_block">{{ notice }}</div>
+                        {% endfor %}
                         {% if session.hinweis %}
                         <div class="third_session" style="padding:3px; background-color: darkslategray;">
                             <!-- Hinweise -->
@@ -56,17 +59,30 @@
                         {% endif %}
                         {% endif %}
                         <div class="padding_all_small tertiary_bg" id="container">
-                            <div class="trainer_ui">
-                                {% if perms.members.change_session %}
-                                <a href="{% url 'session_update' session.id  %}" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
-                                {% endif %}
-                                {% if perms.members.delete_session %}
-                                <a href="{% url 'session_delete' session.id  %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
-                                {% endif %}
+                            {# trainers/chairmen: buttons left, warning right; members: age left, warning right #}
+                            {% if perms.members.add_message or perms.members.change_session or perms.members.delete_session %}
+                            <div class="session_card_top">
+                                <span class="session_card_top__actions">
+                                    {% if perms.members.add_message %}
+                                    <a href="{% url 'message_sess_create' %}?session={{ session.pk }}" title="Hinweis zu dieser Trainingszeit"><i class="far fa-sticky-note"></i></a>
+                                    {% endif %}
+                                    {% if perms.members.change_session %}
+                                    <a href="{% url 'session_update' session.id %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
+                                    {% endif %}
+                                    {% if perms.members.delete_session %}
+                                    <a href="{% url 'session_delete' session.id %}" title="Löschen"><i class="far fa-minus-square"></i></a>
+                                    {% endif %}
+                                </span>
+                                {% include "members/snippets/session_notice_icon.html" %}
                             </div>
-
                             {% if session.age_label %}
-                            <span style="font-size: 0.9rem;{% if not session.visible %} color:grey;{% endif %}">Alter: {{ session.age_label }}</span>
+                            <span class="session_card_age{% if not session.visible %} session_card_age--muted{% endif %}">Alter: {{ session.age_label }}</span>
+                            {% endif %}
+                            {% elif session.age_label or session.visible and session.notices %}
+                            <div class="session_card_top">
+                                <span class="session_card_age{% if not session.visible %} session_card_age--muted{% endif %}">{% if session.age_label %}Alter: {{ session.age_label }}{% endif %}</span>
+                                {% include "members/snippets/session_notice_icon.html" %}
+                            </div>
                             {% endif %}
                             {% if session.visible %}
                             <p>{{session.format_start_time}} - {{session.format_end_time}} Uhr</p>

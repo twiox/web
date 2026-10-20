@@ -51,7 +51,7 @@ class SessionForm(MdcFormMixin, forms.ModelForm):
     class Meta:
         model = Session
         fields = ["title", "day", "start_time", "end_time", "spot", "hinweis", "min_age", "max_age", "trainer"]
-        labels = {"title": "Titel", "spot": "Ort", "hinweis": "Hinweis (z.B. fällt aus)", "trainer": "Trainer*innen"}
+        labels = {"title": "Titel", "spot": "Ort", "hinweis": "Hinweis (z.B. Mädchentraining)", "trainer": "Trainer*innen"}
         widgets = {
             "start_time": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
             "end_time": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),

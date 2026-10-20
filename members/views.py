@@ -92,9 +92,11 @@ def index(request):
     posts = News.objects.all().order_by("-id")[:3]
 
     # all sessions are listed, the ones outside the member's age are greyed out
-    sessions = list(Session.objects.order_by("start_time"))
+    sessions = list(Session.objects.prefetch_related("messages").order_by("start_time"))
     for session in sessions:
         session.visible = privileged or session.allows_age(age)
+        # titles of the notices linked to this session, shown as a small warning sign
+        session.notices = [notice.title for notice in session.messages.all()]
     session_days = sorted({(x.day, x.weekday, x.order) for x in sessions}, key=lambda x: x[2])
     grouped_sessions = {short: [x for x in sessions if x.day == short] for short, _, _ in session_days}
 
@@ -537,6 +539,14 @@ class MessageSessCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
         message.display = "sessions"
         message.save()
         return super(MessageSessCreateView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # "Hinweis" button on a training time passes ?session=<pk>, so it starts ticked
+        form = context["form"]
+        selected = form.data.getlist("sessions") if form.is_bound else self.request.GET.getlist("session")
+        context["picked_sessions"] = [int(pk) for pk in selected if pk.isdigit()]
+        return context
 
 
 class MessageDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):

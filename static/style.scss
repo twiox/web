@@ -1495,8 +1495,14 @@ footer{
 .leaflet-container div{
     overflow: visible;
 }
+#spot_toggle{
+    // keeps the training times off the button when there are no notes in between
+    margin-bottom: $padding_big;
+}
 .spot_map_section{
-    margin: $padding_small 0 $padding_big 0;
+    // the button above already provides the gap; sections get extra padding globally
+    margin: 0 0 $padding_big 0;
+    padding: 0;
 }
 .spot_map_layout{
     display: grid;
@@ -1660,4 +1666,43 @@ footer{
             height: 64px;
         }
     }
+}
+
+/* Warning sign on a training time that has a notice */
+// first row of a training time card: buttons or age on the left, warning sign on the right
+.session_card_top{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    &__actions{
+        display: flex;
+        gap: 6px;
+        a{
+            padding: 0;
+            font-size: 17px;
+        }
+    }
+}
+.session_card_age{
+    font-size: 0.9rem;
+    &--muted{
+        color: grey;
+    }
+}
+// span, not a link: the global link colours would override it, and there is nothing to click
+#training .session_notice_icon{
+    padding-left: 4px;
+    color: #c9a227;
+    font-size: 0.9rem;
+    cursor: default;
+    svg, i{
+        color: #c9a227;
+    }
+}
+// red block above a training time, mirrors the title of each linked notice
+.session_notice_block{
+    padding: 3px;
+    background-color: $secondary;
+    color: white;
 }
