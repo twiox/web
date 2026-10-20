@@ -5,25 +5,15 @@ from django.dispatch import receiver
 from members.models import Profile, Trainer, Chairman
 from .permissions import trainer_permissions, chairman_permissions
 
-# sender = User, receiver = Profile
-# this basially means - create profile if user is created
-# dont frorget the ready() method in apps.py
 
-
+# every user has a profile; code that changes user.profile and then saves the
+# user relies on the profile being saved along with it
 @receiver(post_save, sender=User)
-def create_profile(sender, instance, created, **kwargs):
+def create_or_save_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
-
-
-# when User is created (sender), the post_save fires.
-# the receiver runs the function and the instance of the created user
-# is saved for the profile
-
-
-@receiver(post_save, sender=User)
-def save_profile(sender, instance, **kwargs):
-    instance.profile.save()
+    else:
+        instance.profile.save()
 
 
 # Trainer and chairman rights come from these permission groups. Syncing them in

@@ -18,8 +18,8 @@ urlpatterns = [
     path("session/", include('trainer.trainingsession')),
     path("vorstand/", include('user_handling.urls')),
     path("login/", auth_views.LoginView.as_view(template_name="user_handling/login.html"), name="login"),
-    path("logout/", user_views.LogoutView.as_view(template_name="user_handling/logout.html"), name="logout"),
-    path("passwort_zurücksetzen/", user_views.PasswordResetView.as_view(template_name="user_handling/password_reset.html"), name="password_reset"),
-    path("passwort_zurücksetzen/bestätigen/<str:uidb64>/<str:token>/", user_views.PasswordResetConfirmView.as_view(template_name="user_handling/password_reset_confirm.html"), name="password_reset_confirm"),
+    path("logout/", user_views.TwioLogoutView.as_view(), name="logout"),
+    path("passwort_zurücksetzen/", user_views.TwioPasswordResetView.as_view(template_name="user_handling/password_reset.html"), name="password_reset"),
+    path("passwort_zurücksetzen/bestätigen/<str:uidb64>/<str:token>/", user_views.TwioPasswordResetConfirmView.as_view(template_name="user_handling/password_reset_confirm.html"), name="password_reset_confirm"),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

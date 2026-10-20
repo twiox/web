@@ -16,7 +16,7 @@
     <h1>Benutzer löschen</h1>
     <div class="flex_center">
         <div class="tertiary_bg padding_all_big col-5" style="text-align:center;">
-            <p>{{object.first_name}} {{object.last_name}} aus Gruppe {{object.profile.group.group_id}}</p>
+            <p>{{object.first_name}} {{object.last_name}}</p>
             <form class="padding_all_big" method="POST">
                 {% csrf_token %}
                 <button type="submit" class="form_button_sec" style="margin: 0 auto;">Jawoll</button>

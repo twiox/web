@@ -1,5 +1,4 @@
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
 from . import views
 from trainer import views as trainer_views
 from members import views as member_views
@@ -9,7 +8,6 @@ urlpatterns = [
     path("", views.index, name="chairman_index"),
     path('mitglieder/', views.MemberListView.as_view(), name="member_list"),
     path('mitglieder/<int:pk>/entfernen', views.UserDeleteView.as_view(), name="remove_user"),
-    path('mitglieder/<int:pk>/ändern', views.member_update, name="update_user"),
     path('mitglieder/neu/', views.register, name="register"),
     path('liste/', views.ChairmanListView.as_view(), name="chairman_list"),
     path('liste/<int:pk>/entfernen/', views.ChairmanDeleteView.as_view(), name="chairman_delete"),

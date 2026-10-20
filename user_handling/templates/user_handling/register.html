@@ -8,14 +8,14 @@
         Mitgliederliste</a>
     <a class="float_left"> > </a>
     <a class="float_left strong" style="font-size: 1.1rem; color:white;">
-        {% if user_form.instance.pk %}{{ user_form.instance.first_name }} {{ user_form.instance.last_name }}{% else %}Neuer Account{% endif %}
+        Neues Mitglied
     </a>
 </div>
 {% endblock %}
 {% block content %}
 
 <section style="text-align: center;">
-    <h1>{% if user_form.instance.pk %}{{ user_form.instance.first_name }} {{ user_form.instance.last_name }}{% else %}Neuer Account{% endif %}</h1>
+    <h1>Neues Mitglied</h1>
     <form class="form_wrapper tertiary_bg" method="POST">
         <div class="inner_form padding_all_small">
             {% csrf_token %}
@@ -46,9 +46,6 @@
                 <div class="col-5 padding_all_small">
                     <h6>Verwaltung</h6>
                     {% include "user_handling/_field.html" with field=profile_form.membership_start %}
-                    {% if profile_form.membership_end %}
-                        {% include "user_handling/_field.html" with field=profile_form.membership_end %}
-                    {% endif %}
                     {% include "user_handling/_field.html" with field=profile_form.status %}
                     {% include "user_handling/_field.html" with field=profile_form.member_num %}
                 </div>

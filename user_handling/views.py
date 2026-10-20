@@ -7,9 +7,7 @@ from members.models import (
     Trainer,
     Profile,
     AdditionalEmail,
-    Session,
     Event,
-    MemberParticipant,
 )
 from interested.models import PublicEvent, EventParticipant
 from django.shortcuts import render, redirect, get_object_or_404
@@ -46,38 +44,42 @@ import secrets
 logger = logging.getLogger(__name__)
 
 
+@login_required
 @permission_required("auth.add_user", raise_exception=True)
 def index(request):
     return render(request, "user_handling/index.html")
 
 
-def get_ordering(n):
+def member_number(user):
+    """Numeric member number for sorting, 0 if missing or not a number."""
     try:
-        return int(n.profile.member_num)
-    except:
+        return int(user.profile.member_num)
+    except (ValueError, Profile.DoesNotExist):
         return 0
 
 
-def get_mandatsref(old_ref):
+def new_member_initial():
+    """Suggests the next member number and Mandatsreferenz (<number>-<yy>-<counter>)."""
+    numbers = [int(n) for n in Profile.objects.values_list("member_num", flat=True) if n.isdigit()]
+    member_num = max(numbers, default=0) + 1
+    last_ref = (
+        Profile.objects.exclude(mandatsref__isnull=True).exclude(mandatsref="")
+        .order_by("pk").values_list("mandatsref", flat=True).last()
+    )
     try:
-        num, y, n = old_ref.split("-", 2)
-        year = datetime.datetime.now().year
-        return (str(year)[-2:], int(n) + 1)
-    except:
-        return ("NA", "NA")
+        counter = int(last_ref.split("-", 2)[2]) + 1
+    except (AttributeError, IndexError, ValueError):
+        counter = "NA"
+    year = str(datetime.date.today().year)[-2:]
+    return {"member_num": member_num, "mandatsref": f"{member_num}-{year}-{counter}"}
 
 
-# register user
 @login_required
 @permission_required("auth.add_user", raise_exception=True)
 def register(request):
-    current_member = User.objects.latest("pk")
-    y, num = get_mandatsref(current_member.profile.mandatsref)
-    ref = f"{get_ordering(current_member)+1}-{y}-{num}"
-    initial = {"member_num": get_ordering(current_member) + 1, "mandatsref": ref}
     if request.method == "POST":
         user_form = MemberForm(request.POST)
-        profile_form = ProfileForm(request.POST, initial=initial)
+        profile_form = ProfileForm(request.POST)
         if user_form.is_valid() and profile_form.is_valid():
             real_user = user_form.save(commit=False)
             real_user.username = (
@@ -85,7 +87,7 @@ def register(request):
                 + profile_form.cleaned_data["member_num"]
             )
             alphabet = string.ascii_letters + string.digits
-            password = "".join(secrets.choice(alphabet) for i in range(8))
+            password = "".join(secrets.choice(alphabet) for _ in range(8))
             real_user.set_password(password)
             real_user.save()  # fires the signal that creates the profile
             for key, value in profile_form.cleaned_data.items():
@@ -110,7 +112,7 @@ def register(request):
             return redirect("register")
     else:
         user_form = MemberForm()
-        profile_form = ProfileForm(initial=initial)
+        profile_form = ProfileForm(initial=new_member_initial())
     return render(
         request,
         "user_handling/register.html",
@@ -137,12 +139,11 @@ def send_set_password_email(request, user):
 
 
 class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
-    model = User
     permission_required = "auth.add_user"
     template_name = "user_handling/member_list.html"
 
     def get_queryset(self):
-        users = sorted(User.objects.select_related("profile"), key=get_ordering)
+        users = sorted(User.objects.select_related("profile"), key=member_number)
         today = datetime.date.today()
         for user in users:
             birthday = user.profile.birthday
@@ -156,29 +157,10 @@ class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 class UserDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = User
     template_name = "user_handling/user_confirm_delete.html"
-    # who can delete the user?
     permission_required = "auth.delete_user"
 
-    def get_success_url(self, **kwargs):
+    def get_success_url(self):
         return reverse("member_list")
-
-
-@login_required
-@permission_required("auth.add_user", raise_exception=True)
-def member_update(request, pk):
-    real_user = get_object_or_404(User, pk=pk)
-    user_form = MemberForm(request.POST or None, instance=real_user)
-    profile_form = ProfileForm(request.POST or None, instance=real_user.profile)
-    if request.method == "POST" and user_form.is_valid() and profile_form.is_valid():
-        user_form.save()
-        profile_form.save()
-        messages.add_message(request, messages.SUCCESS, "Account erfolgreich bearbeitet")
-        return redirect("member_list")
-    return render(
-        request,
-        "user_handling/register.html",
-        context={"user_form": user_form, "profile_form": profile_form},
-    )
 
 
 class ChairmanDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
@@ -192,12 +174,11 @@ class ChairmanDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView
         self.object.save()
         return HttpResponseRedirect(self.get_success_url())
 
-    def get_success_url(self, **kwargs):
+    def get_success_url(self):
         return reverse("chairman_list")
 
 
 class ChairmanUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    # template: event_form.html
     model = Chairman
     fields = ["public_telnr", "public_email", "competences", "image", "show"]
     template_name = "user_handling/chairman_form.html"
@@ -205,7 +186,7 @@ class ChairmanUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["checked_shows"] = [x for x in self.get_object().show]
+        context["checked_shows"] = list(self.object.show)
         return context
 
 
@@ -215,106 +196,77 @@ class ChairmanListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     template_name = "user_handling/chairman_list.html"
 
 
-class PasswordResetView(PasswordResetView):
+class TwioPasswordResetView(PasswordResetView):
     def get_success_url(self):
-        """Return the URL to redirect to after processing a valid form."""
         messages.add_message(
-            self.request,
-            messages.SUCCESS,
-            "Email verschickt. Bitte schau in deinen Posteingang",
+            self.request, messages.SUCCESS, "Email verschickt. Bitte schau in deinen Posteingang"
         )
         return reverse("login")
 
 
-class LogoutView(LogoutView):
-    def get_next_page(self):
-        next_page = super(LogoutView, self).get_next_page()
-        messages.add_message(self.request, messages.SUCCESS, "Erfolgreich ausgeloggt")
-        return next_page
-
-
-class PasswordResetConfirmView(PasswordResetConfirmView):
+class TwioLogoutView(LogoutView):
     def get_success_url(self):
-        """Return the URL to redirect to after processing a valid form."""
+        # after logout, so the message lands in the new session
+        messages.add_message(self.request, messages.SUCCESS, "Erfolgreich ausgeloggt")
+        return super().get_success_url()
+
+
+class TwioPasswordResetConfirmView(PasswordResetConfirmView):
+    def get_success_url(self):
         messages.add_message(
-            self.request,
-            messages.SUCCESS,
-            "Passwort erstellt. Du kannst dich nun einloggen",
+            self.request, messages.SUCCESS, "Passwort erstellt. Du kannst dich nun einloggen"
         )
         return reverse("index")
 
 
+def trainer_or_chairman(user):
+    return is_trainer(user) or is_chairman(user)
+
+
+@user_passes_test(trainer_or_chairman)
 def mailing_lists(request):
-    groups = Group.objects.all()
     return render(
-        request, "user_handling/mailing-lists.html", context={"groups": groups}
+        request, "user_handling/mailing-lists.html", context={"groups": Group.objects.all()}
     )
 
 
-def trainer_or_chairman(user):
-    if is_trainer(user):
-        return True
-    if is_chairman(user):
-        return True
-    return False
+def emails_of(users):
+    """The users' addresses plus their additional addresses."""
+    emails = set(users.values_list("email", flat=True))
+    emails |= set(AdditionalEmail.objects.filter(user__in=users).values_list("email", flat=True))
+    return emails
 
 
-### AJAX Functions
+def email_list_response(emails):
+    return JsonResponse({"string": ",".join(sorted(e for e in emails if e))})
+
+
 @user_passes_test(trainer_or_chairman)
 def get_participants_emails(request):
-    data = {k: v[0] for (k, v) in dict(request.GET).items()}
-    emails = []
-    if "type" in data:
-        event = PublicEvent.objects.get(pk=int(data["id"]))
-        for part in EventParticipant.objects.filter(event=event).all():
-            emails.append(part.email)
-    else:
-        event = Event.objects.get(pk=int(request.GET.get("id")))
-        for part in MemberParticipant.objects.filter(event=event):
-            emails.append(part.user.email)
-            query = AdditionalEmail.objects.filter(user=part.user)
-            emails.extend([x.email for x in query])
-    string = ",".join(set(emails)) if len(emails) > 0 else ""
-    return JsonResponse({"string": string})
+    if request.GET.get("type"):
+        event = get_object_or_404(PublicEvent, pk=request.GET.get("id"))
+        return email_list_response(EventParticipant.objects.filter(event=event).values_list("email", flat=True))
+    event = get_object_or_404(Event, pk=request.GET.get("id"))
+    return email_list_response(emails_of(User.objects.filter(memberparticipant__event=event)))
 
 
 @user_passes_test(trainer_or_chairman)
 def get_all_emails(request):
-    data = {k: v[0] for (k, v) in dict(request.GET).items()}
-    if data["only_active"] == "true":
-        active_only = True
+    """id is a group pk, "alle", or "email_<status>"."""
+    list_id = request.GET.get("id", "")
+    if list_id == "alle":
+        users = User.objects.all()
+        trainer_emails = Trainer.objects.filter(active=True).values_list("trainer_email", flat=True)
+    elif list_id.startswith("email_"):
+        users = User.objects.filter(profile__status=list_id.removeprefix("email_"))
+        trainer_emails = []
     else:
-        active_only = False
-    emails = []
-    try:  # non-id = status
-        group = Group.objects.get(pk=int(data["id"]))
-        for profile in Profile.objects.filter(group=group):
-            status = profile.status
-            if active_only and status != "Ordentliches Mitglied":
-                continue
-            emails.append(profile.user.email)
-            query = AdditionalEmail.objects.filter(user=profile.user)
-            emails.extend([x.email for x in query])
-        sessions = Session.objects.filter(group=group)
-        for session in sessions:
-            for trainer in session.trainer.all():
-                emails.append(trainer.trainer_email)
-    except:
-        if data["id"] == "alle":
-            for user in User.objects.all():
-                emails.append(user.email)
-                add_emails = AdditionalEmail.objects.filter(user=user)
-                emails.extend([x.email for x in add_emails])
-                if is_trainer(user):
-                    emails.append(user.trainer.trainer_email)
-        elif data["id"].startswith("email"):
-            _, stat = data["id"].split("_")
-            for profile in Profile.objects.filter(status=stat):
-                emails.append(profile.user.email)
-                query = AdditionalEmail.objects.filter(user=profile.user)
-                emails.extend([x.email for x in query])
-    string = ",".join(set(emails)) if len(emails) > 0 else "other"
-    return JsonResponse({"data": data, "string": string})
+        group = get_object_or_404(Group, pk=list_id)
+        users = User.objects.filter(profile__group=group)
+        if request.GET.get("only_active") == "true":
+            users = users.filter(profile__status="Ordentliches Mitglied")
+        trainer_emails = Trainer.objects.filter(session__group=group).values_list("trainer_email", flat=True)
+    return email_list_response(emails_of(users) | set(trainer_emails))
 
 
 @login_required
@@ -363,9 +315,9 @@ def member_role(request, pk, role):
         raise PermissionDenied
     user = get_object_or_404(User, pk=pk)
     # never deleted, so switching a role back on restores its profile and history
-    role = model.objects.filter(user=user).first() or model(user=user)
-    role.active = active
-    role.save()
+    entry = model.objects.filter(user=user).first() or model(user=user)
+    entry.active = active
+    entry.save()
     return JsonResponse({"data": True})
 
 
