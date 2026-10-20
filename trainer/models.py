@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.formats import number_format
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from members.models import Trainer, Session, User
@@ -113,7 +114,7 @@ class TrainingSessionInvoice(models.Model):
         # -----------------------
         # Totals
         # -----------------------
-        elements.append(Paragraph(f"Stunden: {self.total_time} mit TAE/Stunde: {self.trainer.salary} €", normal))
+        elements.append(Paragraph(f"Stunden: {self.total_time} mit TAE/Stunde: {number_format(self.trainer.salary, 2)} €", normal))
         elements.append(Paragraph(f"<b>Gesamt: {self.total_money} €</b>", normal))
 
         # -----------------------

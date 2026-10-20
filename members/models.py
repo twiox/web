@@ -239,7 +239,7 @@ class Trainer(models.Model):
     image = models.ImageField("Profilbild", upload_to="profile_pics/", blank=True)
     # switched off instead of deleted, so sessions, invoices and documents keep their trainer
     active = models.BooleanField("Aktiv", default=True)
-    salary = models.CharField("Bezahlung", blank=True, null=True, max_length=5)
+    salary = models.DecimalField("TAE pro Stunde", max_digits=5, decimal_places=2, blank=True, null=True)
     license_level = models.CharField(
         "Lizenzstufe", max_length=100, blank=True, null=True
     )

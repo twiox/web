@@ -44,7 +44,7 @@
                     <td>{{ object.user.last_name }}, {{ object.user.first_name }}</td>
                     <td>{{ object.trainer_email|default:"" }}</td>
                     <td>{{ object.trainer_telnr|default:"" }}</td>
-                    <td>{{ object.salary|default:"" }}</td>
+                    <td>{% if object.salary %}{{ object.salary|floatformat:2 }} €{% endif %}</td>
                     <td>{{ object.license_level|default:"" }}</td>
                     <td>{{ object.license_number|default:"" }}</td>
                     <td>{{ object.license_valid|date:"d.m.Y" }}</td>

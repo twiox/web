@@ -334,12 +334,8 @@ def session_list_view(request):
 
     
 def hourly_rate(trainer):
-    """The trainer's TAE per hour as a number, None if missing or invalid."""
-    try:
-        rate = float(trainer.salary.replace(",", "."))
-    except (AttributeError, ValueError):
-        return None
-    return rate if rate > 0 else None
+    """The trainer's TAE per hour, None if not set."""
+    return float(trainer.salary) if trainer.salary and trainer.salary > 0 else None
 
 
 def session_hours(session):
