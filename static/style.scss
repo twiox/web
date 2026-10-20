@@ -1570,3 +1570,94 @@ footer{
         color: #888;
     }
 }
+
+/* Contact persons (board, appointees) */
+.contact_section{
+    margin-bottom: 80px;
+    h3{
+        margin: $padding_big 0 $padding_small 0;
+        color: grey;
+        text-transform: uppercase;
+        font-size: 1rem;
+    }
+}
+.contact_grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: $padding_small;
+}
+.contact_card{
+    display: flex;
+    gap: $padding_big;
+    align-items: flex-start;
+    padding: $padding_big;
+    background-color: $secondary_bg;  // subtle on the dark background of this section
+    border-radius: 4px;
+    text-align: left;
+    p{
+        text-align: left;
+    }
+    img{
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+    &__body{
+        min-width: 0;
+        h3{
+            margin: 0 0 4px 0;
+            color: white;
+            font-size: 1.2rem;
+            text-transform: none;
+        }
+    }
+    &__role{
+        margin: 0 0 6px 0;
+        color: $primary_hover;
+    }
+    &__tags{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin: 6px 0;
+        padding: 0;
+        list-style: none;
+        li{
+            padding: 2px 8px;
+            border-radius: 10px;
+            background-color: $tertiary_bg;
+            font-size: 0.85rem;
+        }
+    }
+    &__text{
+        margin: 6px 0;
+        font-size: 0.95rem;
+    }
+    &__contact{
+        margin: 8px 0 0 0;
+        text-align: left;
+        a{
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            padding: 2px 0;
+            text-align: left;
+            overflow-wrap: anywhere;
+        }
+    }
+}
+@media (max-width: 600px){
+    .contact_grid{
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .contact_card{
+        gap: $padding_small;
+        padding: $padding_small;
+        img{
+            width: 64px;
+            height: 64px;
+        }
+    }
+}

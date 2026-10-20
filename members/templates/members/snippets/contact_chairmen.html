@@ -1,0 +1,18 @@
+{% load static %}
+{# "Deine Ansprechpartner*innen": the board members chosen for this page, the appointees only on the member dashboard #}
+<section class="contact_section">
+    <h1>Deine Ansprechpartner*innen</h1>
+    <h3>Vorstand</h3>
+    <div class="contact_grid">
+        {% for object in chairmen %}
+            {% include "members/snippets/contact_card.html" with image=object.image_url name=object.user.get_full_name competences=object.complist phone=object.public_telnr email=object.public_email %}
+        {% endfor %}
+    </div>
+    {% if show_appointees %}
+    <h3>Beauftragte</h3>
+    <div class="contact_grid">
+        {% static 'media/people/Annika.jpg' as annika_image %}
+        {% include "members/snippets/contact_card.html" with image=annika_image name="Annika Cleff" role="Kinderschutz" text="Annika ist eure Ansprechpartnerin für alle Belange des Kinderschutzes. Wenn ihr Fragen oder Probleme habt, meldet euch gerne bei ihr!" email="Kinderschutz@twio-x.de" %}
+    </div>
+    {% endif %}
+</section>

@@ -1,0 +1,18 @@
+{# One contact person: image, name, optional role, competences, text, phone and email (each only if set) #}
+<div class="contact_card">
+    <img src="{{ image }}" alt="">
+    <div class="contact_card__body">
+        <h3>{{ name }}</h3>
+        {% if role %}<p class="contact_card__role">{{ role }}</p>{% endif %}
+        {% if competences %}
+        <ul class="contact_card__tags">
+            {% for item in competences %}<li>{{ item }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+        {% if text %}<p class="contact_card__text">{{ text }}</p>{% endif %}
+        <p class="contact_card__contact">
+            {% if phone %}<a href="tel:{{ phone }}"><i class="fas fa-phone fa-fw"></i> {{ phone }}</a>{% endif %}
+            {% if email %}<a href="mailto:{{ email }}"><i class="far fa-envelope fa-fw"></i> {{ email }}</a>{% endif %}
+        </p>
+    </div>
+</div>
