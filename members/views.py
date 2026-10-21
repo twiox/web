@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django import forms
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.generic import (
     ListView,
@@ -169,9 +169,36 @@ def event_test_func(request, event):
     return Event.visible_for_age(request.user.profile.age).filter(pk=event.pk).exists()
 
 
-class EventListView(LoginRequiredMixin, ListView, UserPassesTestMixin):
+class EventListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """All events for the board, grouped by year (newest year first)."""
+
     model = Event
-    template = "members/event_list.html"
+    template_name = "members/event_list.html"
+
+    def get_queryset(self):
+        active = Q(memberparticipant__storno=False)
+        return Event.objects.annotate(
+            registered=Count("memberparticipant", filter=active),
+            payed=Count("memberparticipant", filter=active & Q(memberparticipant__payed=True)),
+        ).order_by("start_date")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        years = {}
+        for event in context["object_list"]:
+            years.setdefault(event.start_date.year if event.start_date else None, []).append(event)
+        this_year = datetime.now().year
+        context["years"] = [
+            {
+                "year": year,
+                "events": events,
+                "registered": sum(e.registered for e in events),
+                # the current and coming years start opened
+                "open": year is None or year >= this_year,
+            }
+            for year, events in sorted(years.items(), key=lambda item: item[0] or 9999, reverse=True)
+        ]
+        return context
 
     def test_func(self):
         return self.request.user.profile.privileged
@@ -404,7 +431,11 @@ class EventOrgaView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             .order_by("storno", "-responsible", "user__last_name", "user__first_name")
         )
         active = [p for p in participants if not p.storno]
+        registered = {p.user_id for p in active}
         context.update(
+            # for adding members who can't register themselves
+            candidates=User.objects.filter(profile__isnull=False).exclude(pk__in=registered)
+            .select_related("profile").order_by("last_name", "first_name"),
             participants=participants,
             count_responsible=sum(p.responsible for p in active),
             count_active=len(active),
@@ -432,6 +463,46 @@ class EventOrgaView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
     def test_func(self):
         return trainer_check(self.request) or chairman_check(self.request)
+
+
+@login_required
+@require_POST
+def event_add_participant(request, pk):
+    """Orga page: register a member by hand, e.g. when they can't log in."""
+    if not (trainer_check(request) or chairman_check(request)):
+        raise PermissionDenied
+    event = get_object_or_404(Event, pk=pk)
+    user = User.objects.filter(pk=request.POST.get("user")).first() if request.POST.get("user", "").isdigit() else None
+    if user is None:
+        messages.add_message(request, messages.ERROR, "Bitte ein Mitglied aus der Liste auswählen")
+        return redirect("event_participants", pk=pk)
+    part, created = MemberParticipant.objects.get_or_create(event=event, user=user)
+    if not created and not part.storno:
+        text = f"{user.get_full_name()} ist bereits angemeldet"
+    else:
+        part.storno = False  # a cancelled registration is reactivated
+        part.save(update_fields=["storno"])
+        text = f"{user.get_full_name()} angemeldet"
+    messages.add_message(request, messages.SUCCESS, text)
+    return redirect("event_participants", pk=pk)
+
+
+@login_required
+@require_POST
+def event_participant_action(request, pk):
+    """Orga page: cancel, restore or delete a registration."""
+    if not (trainer_check(request) or chairman_check(request)):
+        return JsonResponse({"success": False}, status=403)
+    part = get_object_or_404(MemberParticipant, pk=pk)
+    action = request.POST.get("action")
+    if action == "delete":
+        part.delete()
+    elif action in ("cancel", "restore"):
+        part.storno = action == "cancel"
+        part.save(update_fields=["storno"])
+    else:
+        return JsonResponse({"success": False}, status=400)
+    return JsonResponse({"success": True})
 
 
 @login_required

@@ -1807,6 +1807,16 @@ footer{
     margin-bottom: $padding_small;
 }
 
+/* Board: list of all events, grouped by year */
+.event_table{
+    small, &__status{
+        color: grey;
+    }
+    td{
+        white-space: nowrap;
+    }
+}
+
 /* Event orga page (participants, payments, documents) */
 .orga_summary{
     margin: 0 0 $padding_small 0;
@@ -1820,6 +1830,13 @@ footer{
     }
     &__check{
         text-align: center;
+    }
+    &__actions{
+        white-space: nowrap;
+        .icon_button{
+            padding: 0 4px;
+            font-size: 0.95rem;
+        }
     }
     &__notes{
         width: 100%;
@@ -1847,6 +1864,21 @@ footer{
         &--responsible{
             background-color: $primary;
         }
+    }
+}
+.orga_add{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $padding_small;
+    margin-top: $padding_small;
+    label{
+        color: grey;
+        white-space: nowrap;
+    }
+    .searchbar{
+        flex: 1 1 250px;
+        width: auto;
     }
 }
 .orga_documents{

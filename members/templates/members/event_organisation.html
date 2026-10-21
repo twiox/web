@@ -41,6 +41,7 @@
                     <th>Bezahlt</th>
                     {% if object.ask_ticket %}<th>Ticket</th>{% endif %}
                     <th>Notizen</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody id="participant_rows">
@@ -77,15 +78,37 @@
                         <input class="field_update orga_table__notes" type="text" value="{{ participant.notes|default:'' }}"
                                data-participant="{{ participant.pk }}" data-field="notes" aria-label="Notizen" placeholder="Notiz …">
                     </td>
+                    <td class="orga_table__actions" data-url="{% url 'event_participant_action' participant.pk %}" data-name="{{ user.first_name }} {{ user.last_name }}">
+                        {% if participant.storno %}
+                        <button type="button" class="icon_button" data-action="restore" title="Wiederherstellen"><i class="fas fa-undo"></i></button>
+                        {% else %}
+                        <button type="button" class="icon_button" data-action="cancel" title="Stornieren"><i class="fas fa-user-times"></i></button>
+                        {% endif %}
+                        <button type="button" class="icon_button" data-action="delete" title="Löschen"><i class="far fa-trash-alt"></i></button>
+                    </td>
                 </tr>
                 {% endwith %}
             {% empty %}
-                <tr><td colspan="7">Noch keine Anmeldungen.</td></tr>
+                <tr><td colspan="8">Noch keine Anmeldungen.</td></tr>
             {% endfor %}
             </tbody>
         </table>
         <p id="participant_no_results" class="padding_all_small" hidden>Keine Treffer.</p>
     </div>
+
+    {# members who can't register themselves; the name is matched to its member in the script below #}
+    <form class="orga_add" method="POST" action="{% url 'event_add_participant' object.pk %}">
+        {% csrf_token %}
+        <label for="add_member"><i class="fas fa-user-plus"></i> Mitglied hinzufügen</label>
+        <input class="searchbar" id="add_member" list="add_member_options" placeholder="Name oder Mitgliedsnummer …" autocomplete="off">
+        <input type="hidden" name="user">
+        <datalist id="add_member_options">
+            {% for member in candidates %}
+            <option data-user="{{ member.pk }}" value="{{ member.last_name }}, {{ member.first_name }}{% if member.profile.member_num %} ({{ member.profile.member_num }}){% endif %}"></option>
+            {% endfor %}
+        </datalist>
+        <button type="submit" class="table_action table_action--primary">Hinzufügen</button>
+    </form>
 
     <div class="session_grid orga_documents">
         <div class="session_card" id="file_viewer">
@@ -160,6 +183,24 @@
         }
     });
 
+    // per row: cancel, restore or delete; the page reloads so the counts stay right
+    rows.addEventListener('click', async event => {
+        const button = event.target.closest('[data-action]');
+        if (!button) return;
+        const cell = button.closest('td');
+        const question = {
+            cancel: `Anmeldung von ${cell.dataset.name} stornieren?`,
+            delete: `Anmeldung von ${cell.dataset.name} endgültig löschen?`,
+        }[button.dataset.action];
+        if (question && !confirm(question)) return;
+        const body = new FormData();
+        body.append('csrfmiddlewaretoken', csrf);
+        body.append('action', button.dataset.action);
+        const response = await fetch(cell.dataset.url, { method: 'POST', body });
+        if (response.ok) window.location.reload();
+        else showMessage('Aktion fehlgeschlagen');
+    });
+
     document.getElementById('copy_emails').addEventListener('click', async event => {
         const response = await fetch(event.currentTarget.dataset.url);
         if (!response.ok) return showMessage('E-Mails konnten nicht geladen werden');
@@ -187,6 +228,18 @@
         const fresh = new DOMParser().parseFromString(html, 'text/html').getElementById('file_viewer');
         document.getElementById('file_viewer').replaceWith(fresh);
         showMessage(button.dataset.type === 'delete' ? 'Dokument gelöscht' : 'Sichtbarkeit geändert');
+    });
+
+    // add a member: the typed text has to match one of the suggestions
+    document.querySelector('.orga_add').addEventListener('submit', event => {
+        const form = event.target;
+        const typed = form.querySelector('#add_member').value.trim();
+        const option = [...document.querySelectorAll('#add_member_options option')].find(o => o.value === typed);
+        if (!option) {
+            event.preventDefault();
+            return showMessage('Bitte ein Mitglied aus der Liste auswählen');
+        }
+        form.querySelector('[name=user]').value = option.dataset.user;
     });
 
     // upload form: text field styling and the chosen file name

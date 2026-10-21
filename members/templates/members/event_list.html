@@ -1,56 +1,98 @@
 {% extends "members/base.html" %}
 {% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}">
-        Übersicht </a> <a class="float_left"> > </a> <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Alle Events </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}">Übersicht</a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Veranstaltungen</a>
 </div>
 {% endblock %}
-{%block content %}
-<h1> Vorstandsdokument </h1>
-<section id='container'>
-    <h3>Alle Events</h3>
-    <div>
-        <div style="display:flex">
-            <div class="padding_all_big side_scroll tertiary_bg" style="border: 1px solid; border_color:blue">
-                <table>
-                    <thead>
-                        <tr>
-                            <th nowrap="nowrap"><h5> Nr </h5></th>
-                            <th nowrap="nowrap"><h5> -</h5></th>
-                            <th nowrap="nowrap"><h5> -</h5></th>
-                            <th nowrap="nowrap"><h5> Name </h5></th>
-                            <th nowrap="nowrap"><h5> Von </h5></th>
-                            <th nowrap="nowrap"><h5> Bis </h5></th>
-                            <th nowrap="nowrap"><h5> Ort </h5></th>
-                            <th nowrap="nowrap"><h5> Kosten </h5></th>
-                        </tr>
-                    </thead>
-                    <tbody id="table_body">
-                    {% for event in object_list %}
-                        <tr class="{% cycle 'odd' 'even' %} table_row">
-                            <td nowrap="nowrap" class="counter"> {{forloop.counter}}</td>
-                            <td nowrap="nowrap">
-                                <a href="{% url 'event_update' event.id %}" title="Bearbeiten">
-                                    <i class="fas fa-pen-square" style="font-size:17px;"></i>
-                                </a>
-                            </td>
-                            <td nowrap="nowrap">
-                                <a href="{% url 'event_delete' event.id %}" title="Löschen">
-                                    <i class="far fa-minus-square" style="font-size:17px;"></i>
-                                </a>
-                            </td>
-                            <td nowrap="nowrap"> {%if event.title %} {{event.title}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if event.start_date %} {{event.start_date|date:"d.m.Y"}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if event.end_date %} {{event.end_date|date:"d.m.Y"}} {% endif %}</td>
-                            <td nowrap="nowrap"> {%if event.place %} {{event.place}} {% endif %} </td>
-                            <td nowrap="nowrap"> {%if event.costs %} {{event.costs}} € {% else %} 0,00 € {% endif %}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+
+{% block content %}
+<section class="member_page">
+    <div class="member_toolbar">
+        <h1>Veranstaltungen</h1>
+        <input class="searchbar" id="event_search" type="search" placeholder="Suche nach Name, Ort …">
+        {% if perms.members.add_event %}
+            <a href="{% url 'event_create' %}" class="table_action table_action--primary"><i class="far fa-plus-square"></i> Neue Veranstaltung</a>
+        {% endif %}
     </div>
 
+    {% for group in years %}
+    <details class="archive_month event_year" {% if group.open %}open{% endif %}>
+        <summary>
+            <strong>{{ group.year|default:"Ohne Datum" }}</strong>
+            <span class="member_panel__hint">{{ group.events|length }} Veranstaltung{{ group.events|length|pluralize:"en" }} · {{ group.registered }} Anmeldung{{ group.registered|pluralize:"en" }}</span>
+        </summary>
+        <div class="member_table_wrapper tertiary_bg">
+            <table class="member_table member_table--static event_table">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Name</th>
+                        <th>Ort</th>
+                        <th>Alter</th>
+                        <th>Kosten</th>
+                        <th>Anmeldungen</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for event in group.events %}
+                    <tr>
+                        <td>{% with object=event %}{% include "members/snippets/event_dates.html" %}{% endwith %}</td>
+                        <td><a href="{% url 'event_detail' event.pk %}">{{ event.title }}</a></td>
+                        <td>{{ event.place }}</td>
+                        <td>{{ event.age_label|default:"alle" }}</td>
+                        <td>{% if event.costs %}{{ event.costs|floatformat:"-2" }} €{% else %}kostenlos{% endif %}</td>
+                        <td>
+                            <a href="{% url 'event_participants' event.pk %}" title="Orga: Teilnehmende und Zahlungen">
+                                {{ event.registered }}{% if event.registered %} <small>({{ event.payed }} bezahlt)</small>{% endif %}
+                            </a>
+                        </td>
+                        <td class="event_table__status">
+                            {% if event.is_past_due %}vorbei
+                            {% elif event.info_only %}Ankündigung
+                            {% elif event.deadline_reached %}Anmeldung geschlossen
+                            {% elif event.deadline %}offen bis {{ event.deadline|date:"d.m." }}
+                            {% else %}offen{% endif %}
+                        </td>
+                        <td class="table_actions">
+                            <a href="{% url 'event_detail' event.pk %}" title="Ansehen"><i class="far fa-eye"></i></a>
+                            {% if perms.members.delete_event %}<a href="{% url 'event_delete' event.pk %}" title="Löschen"><i class="far fa-minus-square"></i></a>{% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </details>
+    {% empty %}
+        <p class="member_panel__hint">Noch keine Veranstaltungen.</p>
+    {% endfor %}
+    <p id="event_no_results" class="member_panel__hint" hidden>Keine Treffer.</p>
 </section>
+
+<script>
+(function () {
+    const groups = [...document.querySelectorAll('.event_year')];
+    const initiallyOpen = groups.map(group => group.open);
+    document.getElementById('event_search').addEventListener('input', event => {
+        const value = event.target.value.trim().toLowerCase();
+        let total = 0;
+        groups.forEach((group, i) => {
+            let visible = 0;
+            group.querySelectorAll('tbody tr').forEach(row => {
+                row.hidden = !row.textContent.toLowerCase().includes(value);
+                if (!row.hidden) visible++;
+            });
+            // while searching, show only the years with hits (opened); afterwards the initial state again
+            group.hidden = value !== '' && visible === 0;
+            group.open = value !== '' ? visible > 0 : initiallyOpen[i];
+            total += visible;
+        });
+        document.getElementById('event_no_results').hidden = total > 0;
+    });
+})();
+</script>
 {% endblock %}

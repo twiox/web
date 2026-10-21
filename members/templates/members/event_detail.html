@@ -56,6 +56,25 @@
                 </table>
             </div>
 
+            {% if object.has_meeting_point %}
+            <div class="session_card">
+                <h3>Treffpunkt</h3>
+                {% if show_meeting_point %}
+                    {% if object.meeting_point %}<p>{{ object.meeting_point }}</p>{% endif %}
+                    {% if object.has_meeting_coordinates %}
+                    <div id="meeting_point_map" class="spot_map event_meeting_map"
+                         data-lat="{{ object.meeting_lat|unlocalize }}" data-long="{{ object.meeting_long|unlocalize }}"></div>
+                    <a class="table_action event_route_button" target="_blank" rel="noopener"
+                       href="https://www.google.de/maps/dir//{{ object.meeting_lat|unlocalize }},{{ object.meeting_long|unlocalize }}/@{{ object.meeting_lat|unlocalize }},{{ object.meeting_long|unlocalize }},17z">
+                        <i class="fas fa-route"></i> Route
+                    </a>
+                    {% endif %}
+                {% else %}
+                    <p class="member_panel__hint">Der Treffpunkt wird nach der Anmeldung angezeigt.</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
             {% if responsible %}
             <div class="session_card">
                 <h3>Kontakt</h3>
@@ -125,25 +144,6 @@
                 </div>
                 {% endif %}
             </div>
-
-            {% if object.has_meeting_point %}
-            <div class="session_card">
-                <h3>Treffpunkt</h3>
-                {% if show_meeting_point %}
-                    {% if object.meeting_point %}<p>{{ object.meeting_point }}</p>{% endif %}
-                    {% if object.has_meeting_coordinates %}
-                    <div id="meeting_point_map" class="spot_map event_meeting_map"
-                         data-lat="{{ object.meeting_lat|unlocalize }}" data-long="{{ object.meeting_long|unlocalize }}"></div>
-                    <a class="table_action event_route_button" target="_blank" rel="noopener"
-                       href="https://www.google.de/maps/dir//{{ object.meeting_lat|unlocalize }},{{ object.meeting_long|unlocalize }}/@{{ object.meeting_lat|unlocalize }},{{ object.meeting_long|unlocalize }},17z">
-                        <i class="fas fa-route"></i> Route
-                    </a>
-                    {% endif %}
-                {% else %}
-                    <p class="member_panel__hint">Der Treffpunkt wird nach der Anmeldung angezeigt.</p>
-                {% endif %}
-            </div>
-            {% endif %}
 
             {% if not object.info_only %}
             {% with docs=object.public_docs.all %}
