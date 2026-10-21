@@ -56,6 +56,25 @@
                 </table>
             </div>
 
+            {% if responsible %}
+            <div class="session_card">
+                <h3>Kontakt</h3>
+                <p class="member_panel__hint">Bei Fragen zur Veranstaltung meldet euch bei:</p>
+                {% for person in responsible %}
+                {% with contact=person.contact %}
+                <div class="trainer_chip">
+                    <img src="{{ contact.image }}" alt="">
+                    <div>
+                        <p>{{ contact.name }}</p>
+                        {% if contact.phone %}<a href="tel:{{ contact.phone }}" title="{{ contact.phone }}"><i class="fas fa-phone"></i></a>{% endif %}
+                        {% if contact.email %}<a href="mailto:{{ contact.email }}" title="{{ contact.email }}"><i class="far fa-envelope"></i></a>{% endif %}
+                    </div>
+                </div>
+                {% endwith %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <div class="session_card">
                 <h3>Anmeldung</h3>
                 {% if object.info_only %}
@@ -84,11 +103,26 @@
                     {% endif %}
                     {% if object.deadline_reached %}
                         <p class="member_panel__hint">Die Anmeldung ist vorbei.</p>
-                    {% elif is_participant %}
-                        <a class="form_button_sec event_signup_button" href="{% url 'event_unparticipate' object.id %}">Abmelden</a>
-                    {% else %}
-                        <a class="form_button event_signup_button" href="{% url 'event_participate' object.id %}">Anmelden</a>
                     {% endif %}
+                {% endif %}
+                {% if can_be_responsible or not object.info_only and not object.deadline_reached %}
+                <div class="event_actions">
+                    {% if not object.info_only and not object.deadline_reached %}
+                        {% if is_participant %}
+                        <a class="form_button_sec" href="{% url 'event_unparticipate' object.id %}">Abmelden</a>
+                        {% else %}
+                        <a class="form_button" href="{% url 'event_participate' object.id %}">Anmelden</a>
+                        {% endif %}
+                    {% endif %}
+                    {% if can_be_responsible %}
+                    <form method="POST" action="{% url 'event_responsible_toggle' object.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="form_button">
+                            {% if part.responsible and not part.storno %}<i class="fas fa-user-minus"></i> Nicht mehr verantwortlich{% else %}<i class="fas fa-user-shield"></i> Als Verantwortliche*r eintragen{% endif %}
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
                 {% endif %}
             </div>
 

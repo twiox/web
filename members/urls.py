@@ -11,6 +11,7 @@ urlpatterns = [
     path("veranstaltungen/<int:pk>/teilnehmen/", views.EventParticipateView.as_view(),name="event_participate"),
     path("veranstaltungen/<int:pk>/orga/", views.EventOrgaView.as_view(),name="event_participants"),
     path("veranstaltungen/<int:pk>/orga/teilnehmende.csv", views.event_participants_csv, name="event_participants_csv"),
+    path("veranstaltungen/<int:pk>/verantwortlich/", views.event_responsible_toggle, name="event_responsible_toggle"),
     path("veranstaltungen/<int:pk>/stornieren/", views.EventUnParticipateView.as_view(),name="event_unparticipate"),
     path("veranstaltungen/ajax/update_participant/", views.update_memberparticipant, name="ajax_update_memberparticipant"),
     path("veranstaltungen/hochladen/<str:kind>/", views.event_asset_upload, name="event_asset_upload"),

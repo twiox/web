@@ -1844,6 +1844,9 @@ footer{
         background-color: $secondary;
         color: white;
         font-size: 0.75rem;
+        &--responsible{
+            background-color: $primary;
+        }
     }
 }
 .orga_documents{
@@ -2075,10 +2078,22 @@ footer{
     margin-top: 0;
     padding-top: 0;
 }
-.event_signup_button{
-    display: block;
+// sign-up and "verantwortlich" buttons side by side, wrapping on narrow cards
+.event_actions{
+    display: flex;
+    flex-wrap: wrap;
+    gap: $padding_small;
     margin-top: $padding_small;
-    text-align: center;
+    form{
+        margin: 0;
+    }
+    .form_button, .form_button_sec{
+        width: auto;
+        border: none;
+        font: inherit;
+        text-align: center;
+        cursor: pointer;
+    }
 }
 .event_ticket_toggle{
     cursor: pointer;

@@ -157,9 +157,22 @@ class MemberParticipant(models.Model):
     event = models.ForeignKey("Event", on_delete=models.CASCADE)
     storno = models.BooleanField("Storno", default=False)
     has_ticket = models.BooleanField("Deutschlandticket", default=False)
+    # trainers/chairmen in charge of the event; participants see them as contact
+    responsible = models.BooleanField("Verantwortlich", default=False)
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
+
+    @property
+    def contact(self):
+        """Public photo and contact details: the trainer ones first, else the chairman ones."""
+        trainer, chairman = getattr(self.user, "trainer", None), getattr(self.user, "chairman", None)
+        return {
+            "name": f"{self.user.first_name} {self.user.last_name}",
+            "image": (trainer or chairman).image_url if (trainer or chairman) else static(PROFILE_PLACEHOLDER),
+            "phone": (trainer and trainer.trainer_telnr) or (chairman and chairman.public_telnr) or "",
+            "email": (trainer and trainer.trainer_email) or (chairman and chairman.public_email) or "",
+        }
 
 
 class Event(AgeRange):

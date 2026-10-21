@@ -17,7 +17,7 @@
     </div>
     <p class="member_panel__hint orga_summary">
         {% include "members/snippets/event_dates.html" %} · {{ object.place }}<br>
-        <strong>{{ count_active }}</strong> angemeldet · <strong>{{ count_payed }}</strong> bezahlt
+        <strong>{{ count_active }}</strong> angemeldet{% if count_responsible %} (davon {{ count_responsible }} verantwortlich){% endif %} · <strong>{{ count_payed }}</strong> bezahlt
         {% if object.ask_ticket %} · <strong>{{ count_ticket }}</strong> mit Deutschlandticket{% endif %}
         {% if count_storno %} · {{ count_storno }} storniert{% endif %}
     </p>
@@ -49,6 +49,7 @@
                 <tr class="{% if participant.storno %}orga_table__storno{% endif %}">
                     <td>
                         {{ user.last_name }}, {{ user.first_name }}
+                        {% if participant.responsible and not participant.storno %}<span class="orga_table__badge orga_table__badge--responsible">verantwortlich</span>{% endif %}
                         {% if participant.storno %}<span class="orga_table__badge">storniert</span>{% endif %}
                     </td>
                     <td title="{{ profile.birthday|date:'d.m.Y' }}">{{ profile.age|default:"–" }}</td>

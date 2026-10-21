@@ -186,9 +186,16 @@ class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         user = self.request.user
         part = MemberParticipant.objects.filter(event=self.object, user=user).first()
         is_participant = part is not None and not part.storno
+        responsible = (
+            MemberParticipant.objects.filter(event=self.object, responsible=True, storno=False)
+            .select_related("user__trainer", "user__chairman").order_by("user__first_name")
+        )
         context.update(
             part=part,
             is_participant=is_participant,
+            responsible=responsible,
+            # trainers and chairmen can take charge of an event
+            can_be_responsible=(is_trainer(user) or is_chairman(user)) and not self.object.is_past_due,
             # expired notices are only cleaned up on the members page
             notices=[notice for notice in self.object.messages.all() if not notice.delme],
             # the meeting point is meant for the people who come along
@@ -199,6 +206,23 @@ class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     def test_func(self):
         event = self.get_object()
         return event_test_func(self.request, event)
+
+
+@login_required
+@require_POST
+def event_responsible_toggle(request, pk):
+    """Trainers/chairmen sign in as the person in charge, or step back (and stay registered)."""
+    if not (is_trainer(request.user) or is_chairman(request.user)):
+        raise PermissionDenied
+    event = get_object_or_404(Event, pk=pk)
+    part, _ = MemberParticipant.objects.get_or_create(event=event, user=request.user)
+    part.responsible = not part.responsible
+    if part.responsible:
+        part.storno = False
+    part.save(update_fields=["responsible", "storno"])
+    text = "Du bist als verantwortliche Person eingetragen" if part.responsible else "Du bist nicht mehr als verantwortliche Person eingetragen"
+    messages.add_message(request, messages.SUCCESS, text)
+    return redirect(event)
 
 
 class EventCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
@@ -377,11 +401,12 @@ class EventOrgaView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
         participants = list(
             MemberParticipant.objects.filter(event=event).select_related("user__profile")
-            .order_by("storno", "user__last_name", "user__first_name")
+            .order_by("storno", "-responsible", "user__last_name", "user__first_name")
         )
         active = [p for p in participants if not p.storno]
         context.update(
             participants=participants,
+            count_responsible=sum(p.responsible for p in active),
             count_active=len(active),
             count_payed=sum(p.payed for p in active),
             count_ticket=sum(p.has_ticket for p in active),
@@ -420,9 +445,9 @@ def event_participants_csv(request, pk):
     response.write("\ufeff")  # BOM: Excel recognises the umlauts
     writer = csv.writer(response, delimiter=";")
     writer.writerow(["Nr.", "Nachname", "Vorname", "Geburtsdatum", "Alter", "E-Mail", "Telefon",
-                     "Ansprechpartner*in", "Notfallnummer", "Bezahlt", "Deutschlandticket", "Storniert", "Notizen"])
+                     "Ansprechpartner*in", "Notfallnummer", "Bezahlt", "Deutschlandticket", "Storniert", "Verantwortlich", "Notizen"])
     participants = MemberParticipant.objects.filter(event=event).select_related("user__profile").order_by(
-        "storno", "user__last_name", "user__first_name")
+        "storno", "-responsible", "user__last_name", "user__first_name")
     for p in participants:
         user, profile = p.user, getattr(p.user, "profile", None)
         writer.writerow([
@@ -430,7 +455,8 @@ def event_participants_csv(request, pk):
             profile.birthday.strftime("%d.%m.%Y") if profile and profile.birthday else "", getattr(profile, "age", "") or "",
             user.email, getattr(profile, "telephone", "") or "", getattr(profile, "parent", "") or "",
             getattr(profile, "parent_telnr", "") or "",
-            "ja" if p.payed else "nein", "ja" if p.has_ticket else "nein", "ja" if p.storno else "nein", p.notes or "",
+            "ja" if p.payed else "nein", "ja" if p.has_ticket else "nein", "ja" if p.storno else "nein",
+            "ja" if p.responsible else "nein", p.notes or "",
         ])
     return response
 
