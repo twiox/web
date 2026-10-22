@@ -32,6 +32,11 @@
                         {% include "user_handling/_field.html" with field=form.costs %}
                         {% include "user_handling/_field.html" with field=form.hinweis %}
                     </div>
+                    <div class="member_fields">
+                        {% include "user_handling/_field.html" with field=form.min_age %}
+                        {% include "user_handling/_field.html" with field=form.max_age %}
+                    </div>
+                    <p class="member_panel__hint">Altersbegrenzungen. Leer lassen für keine Grenze.</p><br>
                     <div class="chip_list">
                         <label class="toggle_chip">{{ form.info_only }}<span>{{ form.info_only.label }}</span></label>
                         <label class="toggle_chip">{{ form.ask_ticket }}<span>{{ form.ask_ticket.label }}</span></label>
@@ -45,22 +50,6 @@
                         {% include "user_handling/_field.html" with field=form.end_date %}
                         {% include "user_handling/_field.html" with field=form.deadline %}
                     </div>
-                    <h4>Alter</h4>
-                    <p class="member_panel__hint">Leer lassen für keine Grenze.</p>
-                    <div class="member_fields">
-                        {% include "user_handling/_field.html" with field=form.min_age %}
-                        {% include "user_handling/_field.html" with field=form.max_age %}
-                    </div>
-                </div>
-
-                <div class="session_card">
-                    <h3>Dokumente</h3>
-                    {% if object.pk %}
-                    <p class="member_panel__hint">Dokumente wie Teilnahmebedingungen oder Einverständniserklärung werden auf der Orga-Seite verwaltet.</p>
-                    <a class="table_action" href="{% url 'event_participants' object.pk %}"><i class="fas fa-folder-open"></i> Zur Orga-Seite</a>
-                    {% else %}
-                    <p class="member_panel__hint">Dokumente wie Teilnahmebedingungen oder Einverständniserklärung kannst du nach dem Speichern auf der Orga-Seite hochladen.</p>
-                    {% endif %}
                 </div>
             </div>
 

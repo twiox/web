@@ -37,53 +37,10 @@ $padding_small: 10px;
 select { -webkit-appearance: none; }
 
 /*MESSAGES */
-.message_success{
-    padding:30px;
-    text-align:center;
-    color:$primary;
-}
-.message_error{
-    padding:30px;
-    text-align:center;
-    color:$secondary;
-}
-.message_info{
-    margin-top:15px;
-    padding:10px;
-    text-align:center;
-    border: 3px solid yellow;
-    color:yellow;
-}
-.message_warning{
-    margin-top:15px;
-    padding:10px;
-    text-align:center;
-    border: 3px solid orange;
-    color:orange;
-}
-.message_debug{
-    margin-top:15px;
-    padding:10px;
-    text-align:center;
-    border: 3px solid white;
-    color:white;
-}
 
 /*Some Container-things*/
 #container{
     position:relative;
-}
-#info_position2{
-    position: absolute;
-    top: 3px;
-    left: 5px;
-    z-index:2;
-}
-#info_position3{
-    position: absolute;
-    top: 3px;
-    right: 5px;
-    z-index:2;
 }
 
 /*Structure Stuff*/
@@ -100,11 +57,6 @@ select { -webkit-appearance: none; }
     padding-top: $padding_big;
 }
 .padding_rl_big{
-    padding-right: $padding_big;
-    padding-left: $padding_big;
-}
-.padding_trl_big{
-    padding-top: $padding_big;
     padding-right: $padding_big;
     padding-left: $padding_big;
 }
@@ -131,10 +83,6 @@ select { -webkit-appearance: none; }
 .flex_center{
     display: flex;
     justify-content: center;
-}
-.flex_even{
-    display: flex;
-    justify-content: space-evenly;
 }
 .flex_left{
     display: flex;
@@ -188,33 +136,6 @@ select { -webkit-appearance: none; }
         background-color:$secondary_hover;
     }
 }
-.form_button_simple{
-    color:white;
-    background-color:inherit;
-    padding: $padding_small;
-    display:block;
-    border: 2px solid $primary;
-    border-radius:5px;
-    width: 100px;
-    height:44px;;
-    &:hover{
-        background-color:$primary_hover;
-    }
-
-}
-
-.form_button_simple_big{
-    color:white;
-    background-color:inherit;
-    padding: $padding_big;
-    display:block;
-    border: 2px solid $primary;
-    border-radius:5px;
-    &:hover{
-        background-color:$primary_hover;
-    }
-
-}
 
 .more_info_button{
     color:$primary;
@@ -259,11 +180,6 @@ select { -webkit-appearance: none; }
         background-color:$primary;
     }
 }
-.fade{
-    -webkit-transition: background-color 0.15s ease-in-out;
-    -moz-transition:background-color 0.15s ease-in-out;
-    -ms-transition:background-color 0.15s ease-in-out;
-}
 
 .prim_hover{
     -webkit-transition: background-color 0.15s ease-in-out;
@@ -290,12 +206,6 @@ select { -webkit-appearance: none; }
 .primary{
     background-color: $primary;
 }
-.prim_font{
-    color: $primary;
-    }
-.sec_font{
-    color: $secondary;
-    }
 .strong{
     font-weight:500;
 }
@@ -304,9 +214,6 @@ select { -webkit-appearance: none; }
 }
 .secondary_bg{
     background-color: $secondary_bg;
-}
-.quartiary_bg{
-    background-color: $quartiary_bg;
 }
 .primary_bg{
     background-color: $primary_bg;
@@ -417,20 +324,6 @@ table{
         height:20px;
     }
 }
-#abrechenform{
-    border-collapse: collapse;
-    th, td{
-        border: 1px solid $primary;
-        text-align: left;
-    }
-    tr{
-        border: 1px solid $primary;
-        height:10px;
-    }
-    input{
-        background-color: $secondary_bg;
-    }
-}
 #Kündigung{
     background-color:black;
 }
@@ -481,33 +374,6 @@ strong{
         font-weight: 500;
         &:hover{
             color: $header_col;
-        }
-    }
-}
-.dropdown{
-    .dropbtn{
-        padding: $padding_medium;
-        background-color:$primary_bg;
-        &:hover{
-            i{color: $header_col;}
-        }
-    }
-    &:hover {
-        i{color: $header_col;}
-        .dropdown-content{display: block;}
-    }
-}
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: $primary_bg;
-    z-index:5;
-    a{
-        display: block;
-        text-align: left;
-        &:hover{
-            background-color: black;
-            color:$header_col;
         }
     }
 }
@@ -587,38 +453,9 @@ strong{
         height: 400px;  /* The height is 400 pixels */
        }
 
-.dot_participate {
-  height: 10px;
-  width: 10px;
-  background-color: green;
-  border-radius: 50%;
-}
-.dot_nonparticipate {
-
-  height: 10px;
-  width: 10px;
-  background-color: grey;
-  border-radius: 50%;
-}
-
 /*Event Detail */
-.time_info{
-    color:grey;
-    text-align:center;
-    padding-top:3px;
-    font-size:0.6rem;
-}
 
 /*Trainer/Chairman Overview*/
-.round_profile_pic_chairman{
-    border-radius: 50%;
-    width: 100%;
-    height:100%;
-    max-width: 250px;
-    max-height:250px;
-    object-fit:scale;
-
-}
 .team_picture{
     width: 100%;
     height: 100%;
@@ -708,19 +545,6 @@ footer{
 }
 .form_error{
     color: red;
-}
-
-.select_overwrite{
-    -moz-appearance: none;
-    appearance: none;
-    color:white;
-    border:none;
-    height: auto;
-    resize: none;
-    outline:none;
-    background-color: $tertiary_bg;
-    padding:15px;
-    box-shadow: none;
 }
 
 /*For the Fields*/
@@ -855,26 +679,7 @@ footer{
     }
 }
 /* Visitenkarte */
-.person_wrapper{
-    display: flex;
-    flex-wrap:wrap;
-    justify-content:center;
-}
-.person_info{
-    text-align:center;
-}
 
-
-.absolute_link {
-  position: relative;
-}
-.absolute_link > a {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
 
 /* logout button replaces link */
 #logout-form {
@@ -1802,8 +1607,8 @@ footer{
 }
 .meeting_point_map{
     // about as tall as the three cards on the left
-    height: 560px;
-    max-height: 70vh;
+    height: 360px;
+    max-height: 50vh;
     margin-bottom: $padding_small;
 }
 
