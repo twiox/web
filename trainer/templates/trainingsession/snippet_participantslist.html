@@ -29,6 +29,40 @@
 </form>
 <div id="{{ type }}-search-results"></div>
 {% elif type == 'non-member' %}
+{% if expected_testers %}
+{# trial participants of a group that has this training on its list today #}
+<div class="trial_expected">
+    <h4><i class="fas fa-user-clock"></i> Erwartet zum Probetraining</h4>
+    {% for tester in expected_testers %}
+    <div class="trial_expected__person">
+        <div>
+            <strong>{{ tester.first_name }} {{ tester.last_name }}</strong>
+            <small>{{ tester.age|default_if_none:"" }}{% if tester.age is not None %} J.{% endif %} · {{ tester.trial_group }}</small>
+            <small>
+                {% if tester.contact_person %}{{ tester.contact_person }} · {% endif %}
+                {% if tester.telnr %}<a href="tel:{{ tester.telnr }}">{{ tester.telnr }}</a> · {% endif %}<a href="mailto:{{ tester.email }}">{{ tester.email }}</a>
+            </small>
+            {% if tester.age is not None and tester.age < 18 and not tester.has_consent %}
+            <small class="trial_expected__warn">
+                Einverständniserklärung fehlt –
+                <button type="button" class="trial_expected__consent"
+                        hx-post="{% url 'trainingsession_trial_consent' session.pk %}?type={{ type }}"
+                        hx-vals='{"tester_pk": "{{ tester.pk }}"}'
+                        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                        hx-target="#{{ type }}-list">heute abgegeben</button>
+            </small>
+            {% endif %}
+            {% if tester.board_notes %}<small class="trial_expected__notes"><i class="fas fa-sticky-note"></i> {{ tester.board_notes }}</small>{% endif %}
+        </div>
+        <button type="button" class="table_action table_action--primary"
+                hx-post="{% url 'trainingsession_trial_add' session.pk %}?type={{ type }}"
+                hx-vals='{"tester_pk": "{{ tester.pk }}"}'
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                hx-target="#{{ type }}-list">Ist da</button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 <form class="inline_form"
       hx-post="{% url 'trainingsession_nonmember_add' session.pk %}?type={{ type }}"
       hx-target="#{{ type }}-list">

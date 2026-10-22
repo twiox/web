@@ -1,0 +1,91 @@
+{% extends "members/base.html" %}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'tester_index' %}">Probetraining</a>
+    <a class="float_left"> > </a>
+    {% if object.pk %}
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trial_group_detail' object.pk %}">{{ object }}</a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Bearbeiten</a>
+    {% else %}
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Neue Gruppe</a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="member_page">
+    <div class="member_toolbar">
+        <h1>{% if object.pk %}{{ object }}{% else %}Neue Gruppe{% endif %}</h1>
+    </div>
+
+    <form method="POST" class="trial_group_form">
+        {% csrf_token %}
+        {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+        <div class="session_grid">
+            <div class="session_card">
+                <h3>Gruppe</h3>
+                <div class="member_fields member_fields--wide">
+                    {% include "user_handling/_field.html" with field=form.name %}
+                    {% include "user_handling/_field.html" with field=form.notes %}
+                </div>
+            </div>
+
+            <div class="session_card">
+                <h3>Termine</h3>
+                <p class="member_panel__hint">Jeder Termin hat seine eigene Trainingszeit. Leere Zeilen werden ignoriert. Termine mit erfasster Trainingsstunde (<i class="fas fa-lock"></i>) bleiben fest, damit die Anwesenheit erhalten bleibt.</p>
+                {{ dates.management_form }}
+                {% for error in dates.non_form_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+                <div id="trial_dates">
+                    {% for date_form in dates %}
+                    <div class="trial_date_row">
+                        {% for hidden in date_form.hidden_fields %}{{ hidden }}{% endfor %}
+                        <div class="member_fields">
+                            {% include "user_handling/_field.html" with field=date_form.date %}
+                            {% include "user_handling/_field.html" with field=date_form.session %}
+                        </div>
+                        {% if date_form.locked %}
+                        <span class="trial_date_row__locked" title="Für diesen Termin gibt es schon eine Trainingsstunde mit Anwesenheit – er bleibt deshalb unverändert."><i class="fas fa-lock"></i> erfasst</span>
+                        {% elif date_form.instance.pk %}
+                        <label class="toggle_chip trial_date_row__delete">{{ date_form.DELETE }}<span>entfernen</span></label>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {# copied for "Termin hinzufügen"; __prefix__ is replaced by the next form number #}
+                <template id="trial_date_template">
+                    <div class="trial_date_row">
+                        {% for hidden in dates.empty_form.hidden_fields %}{{ hidden }}{% endfor %}
+                        <div class="member_fields">
+                            {% include "user_handling/_field.html" with field=dates.empty_form.date %}
+                            {% include "user_handling/_field.html" with field=dates.empty_form.session %}
+                        </div>
+                    </div>
+                </template>
+                <button type="button" class="table_action" id="add_trial_date"><i class="far fa-plus-square"></i> Termin hinzufügen</button>
+            </div>
+        </div>
+        <button type="submit" class="form_button member_form__submit">Speichern</button>
+    </form>
+</section>
+
+<script>
+(function () {
+    const attach = root => root.querySelectorAll('.mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));
+    attach(document.querySelector('.trial_group_form'));
+
+    const total = document.getElementById('id_{{ dates.prefix }}-TOTAL_FORMS');
+    document.getElementById('add_trial_date').addEventListener('click', () => {
+        const rows = document.getElementById('trial_dates');
+        const previous = rows.querySelector('.trial_date_row:last-child select');
+        const html = document.getElementById('trial_date_template').innerHTML.replace(/__prefix__/g, total.value);
+        rows.insertAdjacentHTML('beforeend', html);
+        const row = rows.lastElementChild;
+        // most groups come to the same training time: start with the previous one
+        if (previous) row.querySelector('select').value = previous.value;
+        total.value = Number(total.value) + 1;
+        attach(row);
+    });
+})();
+</script>
+{% endblock %}

@@ -2,12 +2,40 @@ from django.db import models
 from PIL import Image
 from django.urls import reverse
 from datetime import datetime, timedelta
-from members.models import User, Session, calculate_age
+from members.models import Session, calculate_age
 from django.template.defaultfilters import slugify
 import markdown
 
 # Create your models here.
 ## Probetrainingsanmeldungen
+class TrialGroup(models.Model):
+    """A group of trial participants that comes to a set of trial dates together."""
+
+    name = models.CharField("Name", max_length=100)
+    notes = models.TextField("Notizen", blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created"]
+
+    def __str__(self):
+        return self.name
+
+
+class TrialDate(models.Model):
+    """One trial date of a group, at a weekly training time (each date can use a different one)."""
+
+    group = models.ForeignKey(TrialGroup, on_delete=models.CASCADE, related_name="trial_dates")
+    session = models.ForeignKey(Session, on_delete=models.PROTECT, related_name="trial_dates", verbose_name="Trainingszeit")
+    date = models.DateField("Datum")
+
+    class Meta:
+        ordering = ["date", "session__start_time"]
+
+    def __str__(self):
+        return f"{self.group}: {self.date:%d.%m.%Y} {self.session.title}"
+
+
 class Tester(models.Model):
     """A trial request; name, birthday and gender are the ones of the person who wants to train."""
 
@@ -20,6 +48,12 @@ class Tester(models.Model):
     notes = models.TextField('Anmerkungen', blank=True, null=True)
     # for minors: the parent who sent the request; email and phone are theirs then
     contact_person = models.CharField("Kontaktperson", max_length=200, blank=True)
+    # empty: still waiting for a trial
+    trial_group = models.ForeignKey(
+        TrialGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name="testers", verbose_name="Probetrainingsgruppe"
+    )
+    # written by the board, read by the trainers (special arrangements, excused dates, …)
+    board_notes = models.TextField("Vorstandsnotizen", blank=True)
     has_consent = models.BooleanField("Einverständniserklärung liegt vor", default=False)
     # when the sign-up form was sent; empty for sign-ups from before this field existed
     created = models.DateTimeField("Anfrage vom", auto_now_add=True, null=True)

@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
 from members.models import Trainer, Session, Profile, AdditionalEmail
 from members.roles import PrivilegedRequiredMixin, is_privileged, is_trainer
+from interested.trials import trainer_trial_groups
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.views.generic import DeleteView, UpdateView, ListView
 from django.urls import reverse, reverse_lazy
@@ -35,6 +36,12 @@ def trainer_index(request):
             "unsent": sum(not e.billed for e in group),
         })
     return render(request, "trainer/trainer_index.html", {"months": months})
+
+
+@user_passes_test(is_trainer)
+def trainer_trials(request):
+    """Trial groups that come to at least one of the trainer's training times, with their people."""
+    return render(request, "trainer/trainer_trials.html", {"groups": trainer_trial_groups(request.user.trainer)})
 
 
 @user_passes_test(is_trainer)

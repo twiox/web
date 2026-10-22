@@ -1760,16 +1760,55 @@ footer{
     }
     // ten columns: tighter padding, and the long ones are capped so the table fits without scrolling
     th, td{
-        padding-left: 6px;
-        padding-right: 6px;
+        padding-left: 5px;
+        padding-right: 5px;
     }
     td.tester_table__notes{
         white-space: normal;  // .member_table td keeps everything on one line
-        min-width: 140px;
-        max-width: 180px;  // long notes wrap; the full text shows on hover
+        min-width: 120px;
+        max-width: 150px;
+    }
+    td.tester_table__contact{
+        white-space: normal;
+        min-width: 90px;
+    }
+    &__sub{
+        display: block;
+        color: grey;
+        font-size: 0.8rem;
+    }
+    // notes edited in place: looks like text until hovered or focused
+    .tester_note{
+        width: 100%;
+        padding: 4px 6px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        background: none;
+        color: $font_col;
+        font: inherit;
+        overflow: hidden;  // grows with the text (script in the list)
+        min-width: 120px;
+        resize: none;
+        &:hover, &:focus{
+            border-color: $quartiary_bg;
+            background-color: $secondary_bg;
+        }
+    }
+    // group dropdown in the dark style of the other inputs
+    .tester_group{
+        max-width: 105px;
+        padding: 4px 6px;
+        border: 1px solid $quartiary_bg;
+        border-radius: 4px;
+        background-color: $secondary_bg;
+        color: $font_col;
+        option{
+            background-color: $secondary_bg;
+            color: $font_col;
+        }
     }
     &__email{
-        max-width: 190px;
+        max-width: 150px;
         overflow: hidden;
         text-overflow: ellipsis;
     }
@@ -1801,6 +1840,181 @@ th.sortable{
     &.sorted_desc::after{
         content: " ↓";
         color: white;
+    }
+}
+
+/* Trial groups: form, detail with attendance, expected trial participants in sessions */
+// date and training time side by side, the "entfernen" chip (existing dates) after them
+.trial_date_row{
+    display: flex;
+    align-items: center;
+    gap: $padding_small;
+    .member_fields{
+        flex: 1;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    }
+}
+// disabled fields (e.g. locked trial dates): MDC's defaults are made for light pages
+label.mdc-text-field--filled.mdc-text-field--disabled{
+    background-color: transparent;
+    .mdc-text-field__input, .mdc-floating-label{
+        color: grey;
+    }
+    select.mdc-text-field__input{
+        background-color: transparent;
+    }
+    .mdc-line-ripple::before{
+        border-bottom-color: $quartiary_bg;
+        border-bottom-style: dotted;
+    }
+}
+.trial_date_row__locked{
+    color: grey;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    cursor: help;
+}
+.trial_group_meta{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: $padding_small;
+    form{
+        margin: 0;
+    }
+}
+.tester_attended{
+    margin-top: $padding_small;
+    p{
+        margin: 4px 0;
+    }
+    .fa-check{
+        color: #6ab04c;
+    }
+}
+// trainer document: the trial groups that come to the trainer's training times
+.trainer_trial_group{
+    margin-bottom: $padding_small;
+    &__head{
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: $padding_small;
+        h3{
+            margin: 0;
+        }
+        h3 a{
+            padding: 0;
+            color: white;
+        }
+        .entry_status{
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+    }
+}
+.trainer_trial_date{
+    padding: 3px 10px;
+    border: 1px solid $quartiary_bg;
+    border-radius: 14px;
+    color: grey;
+    font-size: 0.85rem;
+    &--own{
+        border-color: $primary;
+        color: white;
+    }
+}
+// group detail: even spacing between notes, attendance and participants
+.trial_group_page{
+    h3{
+        margin: $padding_big * 1.5 0 6px 0;
+    }
+    > .member_panel__hint{
+        margin: 0 0 $padding_small 0;
+    }
+    .orga_add{
+        margin-top: $padding_medium;
+    }
+}
+.trial_group_notes{
+    margin: 0 0 $padding_medium 0;
+}
+.trial_attendance{
+    th small{
+        color: $font_col;
+        font-weight: normal;
+    }
+    &__warn, &__warn i{
+        color: #c9a227;
+    }
+    &__cell{
+        text-align: center;
+    }
+    &__entry{
+        padding: 0;
+        color: white;
+        text-decoration: underline;
+        i{
+            font-size: 0.7rem;
+        }
+    }
+    .fa-check{
+        color: #6ab04c;
+    }
+    .fa-times{
+        color: #e06666;
+    }
+}
+.tester_table .fa-check{
+    color: #6ab04c;
+}
+.trial_upcoming__people{
+    white-space: normal;
+    span{
+        cursor: help;
+    }
+}
+.trial_expected{
+    margin: 0 0 $padding_small 0;
+    padding: $padding_small;
+    border-left: 3px solid $primary;
+    background-color: $secondary_bg;
+    h4{
+        margin-top: 0;
+    }
+    &__person{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $padding_small;
+        padding: 6px 0;
+        border-bottom: 1px solid $quartiary_bg;
+        div{
+            display: flex;
+            flex-direction: column;
+        }
+        small{
+            color: grey;
+        }
+        a{
+            padding: 0;
+        }
+    }
+    &__warn{
+        color: #e06666 !important;
+    }
+    &__consent{
+        padding: 0;
+        border: none;
+        background: none;
+        color: $primary_hover;
+        font: inherit;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    &__notes, &__notes i{
+        color: #c9a227 !important;
     }
 }
 

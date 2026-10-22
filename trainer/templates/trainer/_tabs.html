@@ -2,5 +2,5 @@
 <div class="year_tabs">
     <a href="{% url 'trainer_index' %}" {% if active == 'sessions' %}class="here_I_am"{% endif %}>Trainingstabellen</a>
     <a href="{% url 'trainer_data' %}" {% if active == 'data' %}class="here_I_am"{% endif %}>Meine Daten</a>
-    <a href="{% url 'tester_index' %}">Probetraining</a>
+    <a href="{% url 'trainer_trials' %}" {% if active == 'trials' %}class="here_I_am"{% endif %}>Probetraining</a>
 </div>

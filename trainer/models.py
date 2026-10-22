@@ -34,6 +34,10 @@ class TrainingSessionParticipant(models.Model):
         User, on_delete=models.SET_NULL, null=True, blank=True
     )  # set null, so that we still see the number of participants even after user is gone
     name = models.CharField("Name", max_length=200, null=True, blank=True) # in case of Probetraining or non-members
+    # trial participants: the request they belong to, so the trial group sees their attendance
+    tester = models.ForeignKey(
+        "interested.Tester", on_delete=models.SET_NULL, null=True, blank=True, related_name="attendances"
+    )
     notes = models.TextField("Notizen", blank=True, null=True) #add notes, e.g. if left earlier or if needed first aid
 
     def __str__(self):

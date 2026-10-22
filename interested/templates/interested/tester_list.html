@@ -19,6 +19,7 @@
         <label class="toggle_chip"><input type="radio" name="age_group" value="0-13"><span>Kinder (bis 13)</span></label>
         <label class="toggle_chip"><input type="radio" name="age_group" value="14-17"><span>Jugendliche (14–17)</span></label>
         <label class="toggle_chip"><input type="radio" name="age_group" value="18-999"><span>Erwachsene (ab 18)</span></label>
+        <label class="toggle_chip tester_waiting_filter"><input type="checkbox" id="tester_waiting_only"><span>Nur Wartende</span></label>
     </div>
 
     <div class="member_table_wrapper tertiary_bg">
@@ -27,13 +28,14 @@
                 <tr>
                     <th class="sortable" data-sort="name">Name</th>
                     <th class="sortable" data-sort="age">Alter</th>
-                    <th>Geschlecht</th>
                     <th>Kontaktperson</th>
                     <th>E-Mail</th>
                     <th>Telefon</th>
                     <th>Notizen</th>
+                    <th title="Schreibt der Vorstand, sehen die Trainer*innen">Vorstandsnotizen</th>
                     <th title="Einverständniserklärung (nur Minderjährige)">Einv.</th>
                     <th class="sortable sorted_desc" data-sort="created">Anfrage</th>
+                    <th>Gruppe</th>
                     <th></th>
                 </tr>
             </thead>
@@ -41,14 +43,23 @@
             {% for tester in object_list %}
                 {# sort keys: requests without a date (from before it was stored) sort as the oldest, by their order #}
                 <tr data-name="{{ tester.last_name }} {{ tester.first_name }}" data-age="{{ tester.age|default_if_none:'' }}"
-                    data-birthday="{{ tester.birthday|date:'Y-m-d' }}" data-created="{{ tester.created|date:'Y-m-d H:i'|default:'' }}" data-pk="{{ tester.pk }}">
-                    <td>{{ tester.last_name }}, {{ tester.first_name }}</td>
+                    data-birthday="{{ tester.birthday|date:'Y-m-d' }}" data-created="{{ tester.created|date:'Y-m-d H:i'|default:'' }}" data-pk="{{ tester.pk }}" data-waiting="{{ tester.trial_group_id|yesno:'0,1' }}">
+                    <td>{{ tester.last_name }}, {{ tester.first_name }}<small class="tester_table__sub">{{ tester.sex }}{% if tester.visits %} · {{ tester.visits }}× da{% endif %}</small></td>
                     <td title="{{ tester.birthday|date:'d.m.Y' }}">{{ tester.age|default_if_none:"–" }}</td>
-                    <td>{{ tester.sex }}</td>
-                    <td>{{ tester.contact_person|default:"–" }}</td>
+                    <td class="tester_table__contact">{{ tester.contact_person|default:"–" }}</td>
                     <td class="tester_table__email" title="{{ tester.email }}"><a href="mailto:{{ tester.email }}">{{ tester.email }}</a></td>
                     <td>{% if tester.telnr %}<a href="tel:{{ tester.telnr }}">{{ tester.telnr }}</a>{% else %}–{% endif %}</td>
-                    <td class="tester_table__notes" title="{{ tester.notes|default:'' }}">{{ tester.notes|default:"–"|truncatechars:50 }}</td>
+                    {# edited in place, saved when leaving the box #}
+                    <td class="tester_table__notes">
+                        <textarea class="tester_note" rows="2" data-field="notes" data-url="{% url 'tester_note' tester.pk %}" aria-label="Notizen" placeholder="–">{{ tester.notes|default:'' }}</textarea>
+                    </td>
+                    <td class="tester_table__notes">
+                        {% if is_board %}
+                        <textarea class="tester_note" rows="2" data-field="board_notes" data-url="{% url 'tester_note' tester.pk %}" aria-label="Vorstandsnotizen" placeholder="–">{{ tester.board_notes }}</textarea>
+                        {% else %}
+                        {{ tester.board_notes|default:"–"|linebreaksbr }}
+                        {% endif %}
+                    </td>
                     {# only minors need the parents' consent #}
                     <td class="tester_table__consent">
                         {% if tester.age is None or tester.age < 18 %}
@@ -57,6 +68,13 @@
                         {% endif %}
                     </td>
                     <td>{{ tester.created|date:"d.m.Y"|default:"–" }}</td>
+                    {# changing it saves right away: work through the list and push people into groups #}
+                    <td>
+                        <select class="tester_group" data-url="{% url 'tester_set_group' tester.pk %}" aria-label="Gruppe">
+                            <option value="">– wartet –</option>
+                            {% for group in groups %}<option value="{{ group.pk }}" {% if group.pk == tester.trial_group_id %}selected{% endif %}>{{ group.name }}</option>{% endfor %}
+                        </select>
+                    </td>
                     <td class="table_actions">
                         <a href="{% url 'tester_update' tester.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
                         <form method="POST" action="{% url 'tester_delete' tester.pk %}" data-name="{{ tester }}">
@@ -66,7 +84,7 @@
                     </td>
                 </tr>
             {% empty %}
-                <tr><td colspan="10">Keine Anmeldungen.</td></tr>
+                <tr><td colspan="11">Keine Anmeldungen.</td></tr>
             {% endfor %}
             </tbody>
         </table>
@@ -83,18 +101,23 @@
     // search and age group together
     function filter() {
         const value = search.value.trim().toLowerCase();
-        const [min, max] = (ageFilter.querySelector('input:checked').value || '0-999').split('-').map(Number);
+        const [min, max] = (ageFilter.querySelector('input[name=age_group]:checked').value || '0-999').split('-').map(Number);
         let visible = 0;
         rows.querySelectorAll('tr[data-name]').forEach(row => {
             const age = row.dataset.age === '' ? null : Number(row.dataset.age);
-            const inGroup = ageFilter.querySelector('input:checked').value === '' || (age !== null && age >= min && age <= max);
-            row.hidden = !inGroup || !row.textContent.toLowerCase().includes(value);
+            const inGroup = ageFilter.querySelector('input[name=age_group]:checked').value === '' || (age !== null && age >= min && age <= max);
+            const waitingOk = !document.getElementById('tester_waiting_only').checked || row.dataset.waiting === '1';
+            const text = row.textContent + ' ' + [...row.querySelectorAll('textarea')].map(t => t.value).join(' ');
+            row.hidden = !inGroup || !waitingOk || !text.toLowerCase().includes(value);
             if (!row.hidden) visible++;
         });
         document.getElementById('tester_no_results').hidden = visible > 0;
     }
     search.addEventListener('input', filter);
     ageFilter.addEventListener('change', filter);
+    // browsers restore ticked chips and the search text on reload or "back": apply them right away
+    filter();
+    window.addEventListener('pageshow', filter);
 
     // click a column header to sort, again to reverse
     const keys = {
@@ -122,6 +145,37 @@
         const response = await fetch(box.dataset.url, { method: 'POST', body });
         if (!response.ok) box.checked = !box.checked;
         snackbar.labelText = response.ok ? 'Gespeichert' : 'Konnte nicht gespeichert werden';
+        snackbar.open();
+    });
+    // note boxes grow with their text instead of scrolling
+    const fit = box => { box.style.height = 'auto'; box.style.height = box.scrollHeight + 2 + 'px'; };
+    rows.querySelectorAll('.tester_note').forEach(fit);
+    rows.addEventListener('input', event => { if (event.target.matches('.tester_note')) fit(event.target); });
+
+    // notes: saved when the box loses focus after a change
+    rows.addEventListener('change', async event => {
+        const note = event.target.closest('.tester_note');
+        if (!note) return;
+        const body = new FormData();
+        body.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        body.append('field', note.dataset.field);
+        body.append('value', note.value);
+        const response = await fetch(note.dataset.url, { method: 'POST', body });
+        snackbar.labelText = response.ok ? 'Gespeichert' : 'Konnte nicht gespeichert werden';
+        snackbar.open();
+    });
+    rows.addEventListener('change', async event => {
+        const select = event.target.closest('.tester_group');
+        if (!select) return;
+        const body = new FormData();
+        body.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        body.append('group', select.value);
+        const response = await fetch(select.dataset.url, { method: 'POST', body });
+        if (response.ok) {
+            select.closest('tr').dataset.waiting = select.value ? '0' : '1';
+            filter();  // with "Nur Wartende", the person leaves the list
+        }
+        snackbar.labelText = response.ok ? (select.value ? `In Gruppe ${select.selectedOptions[0].text}` : 'Wartet wieder') : 'Konnte nicht gespeichert werden';
         snackbar.open();
     });
     rows.addEventListener('submit', event => {

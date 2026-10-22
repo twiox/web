@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -17,11 +17,11 @@ from django.views.generic import (
     TemplateView,
 )
 from django.contrib import messages
-from django.db.models import F
+from django.db.models import Count, F, Max, Min
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.conf import settings
-from .forms import ProbetrainingForm, PublicEventForm, TesterForm
+from .forms import ProbetrainingForm, PublicEventForm, TesterForm, TrialDateFormSet, TrialGroupForm
 from members.models import Chairman
 from .models import (
     Teamer,
@@ -29,7 +29,9 @@ from .models import (
     EventParticipant,
     EventMerch,
     Tester,
+    TrialGroup,
 )
+from .trials import attended_trainings, group_attendance, upcoming_trial_dates, weekday_matches
 from members.roles import PrivilegedRequiredMixin, is_board, is_privileged
 
 
@@ -143,14 +145,28 @@ def tester_age_groups(testers):
 
 
 class TesterIndexView(LoginRequiredMixin, PrivilegedRequiredMixin, TemplateView):
-    """Probetraining dashboard; for now the people waiting for a trial."""
+    """Probetraining dashboard: who is waiting, the groups, and the next trial dates."""
 
     template_name = "interested/tester_index.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        testers = list(Tester.objects.all())
-        context.update(waiting=len(testers), age_groups=tester_age_groups(testers))
+        waiting = list(Tester.objects.filter(trial_group__isnull=True))
+        board = is_board(self.request.user)
+        context.update(
+            waiting=len(waiting),
+            in_groups=Tester.objects.filter(trial_group__isnull=False).count(),
+            age_groups=tester_age_groups(waiting),
+            groups=TrialGroup.objects.annotate(
+                size=Count("testers", distinct=True),
+                date_count=Count("trial_dates", distinct=True),
+                first_date=Min("trial_dates__date"),
+                last_date=Max("trial_dates__date"),
+            ),
+            # the board sees all dates, trainers the ones at their own training times
+            upcoming=upcoming_trial_dates(self.request.user, board),
+            upcoming_all=board,
+        )
         return context
 
 
@@ -158,7 +174,43 @@ class TesterListView(LoginRequiredMixin, PrivilegedRequiredMixin, ListView):
     """All trial requests, newest first; requests from before the date was stored come last."""
 
     model = Tester
-    queryset = Tester.objects.order_by(F("created").desc(nulls_last=True), "-pk")
+    queryset = (
+        Tester.objects.select_related("trial_group")
+        .annotate(visits=Count("attendances"))  # trial trainings attended, in any group
+        .order_by(F("created").desc(nulls_last=True), "-pk")
+    )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["groups"] = TrialGroup.objects.order_by("name")  # for the group dropdown in each row
+        return context
+
+
+@login_required
+@require_POST
+def tester_note(request, pk):
+    """List: edit the notes in place; the Vorstandsnotizen only by the board."""
+    field = request.POST.get("field")
+    allowed = {"notes": is_privileged, "board_notes": is_board}
+    if field not in allowed or not allowed[field](request.user):
+        return JsonResponse({"success": False}, status=403)
+    tester = get_object_or_404(Tester, pk=pk)
+    setattr(tester, field, request.POST.get("value", "").strip())
+    tester.save(update_fields=[field])
+    return JsonResponse({"success": True})
+
+
+@login_required
+@require_POST
+def tester_set_group(request, pk):
+    """Puts a trial participant into a group (from the list or the group page); empty: waiting again."""
+    if not is_privileged(request.user):
+        return JsonResponse({"success": False}, status=403)
+    tester = get_object_or_404(Tester, pk=pk)
+    group_pk = request.POST.get("group", "")
+    tester.trial_group = get_object_or_404(TrialGroup, pk=group_pk) if group_pk else None
+    tester.save(update_fields=["trial_group"])
+    return JsonResponse({"success": True, "group": str(tester.trial_group or "")})
 
 
 @login_required
@@ -177,6 +229,14 @@ class TesterUpdateView(LoginRequiredMixin, PrivilegedRequiredMixin, UpdateView):
     model = Tester
     form_class = TesterForm
 
+    def get_form_kwargs(self):
+        return {**super().get_form_kwargs(), "board": is_board(self.request.user)}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["attended"] = attended_trainings(self.object)
+        return context
+
     def get_success_url(self):
         messages.add_message(self.request, messages.SUCCESS, f"{self.object} gespeichert")
         return reverse("tester_list")
@@ -194,6 +254,73 @@ class TesterDeleteView(LoginRequiredMixin, PrivilegedRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return reverse("tester_list")
+
+
+class TrialGroupFormMixin:
+    """Create and edit a group together with its dates."""
+
+    model = TrialGroup
+    form_class = TrialGroupForm
+    template_name = "interested/trialgroup_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["dates"] = kwargs.get("dates") or TrialDateFormSet(instance=self.object)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object() if "pk" in kwargs else None
+        form = self.get_form()
+        dates = TrialDateFormSet(request.POST, instance=self.object or TrialGroup())
+        if form.is_valid() and dates.is_valid():
+            self.object = form.save()
+            dates.instance = self.object
+            dates.save()
+            messages.add_message(request, messages.SUCCESS, f"Gruppe {self.object} gespeichert")
+            return redirect("trial_group_detail", pk=self.object.pk)
+        return self.render_to_response(self.get_context_data(form=form, dates=dates))
+
+
+class TrialGroupCreateView(LoginRequiredMixin, PrivilegedRequiredMixin, TrialGroupFormMixin, CreateView):
+    pass
+
+
+class TrialGroupUpdateView(LoginRequiredMixin, PrivilegedRequiredMixin, TrialGroupFormMixin, UpdateView):
+    pass
+
+
+class TrialGroupDetailView(LoginRequiredMixin, PrivilegedRequiredMixin, DetailView):
+    """Dates, participants and their attendance (from the trainers' session entries)."""
+
+    model = TrialGroup
+    template_name = "interested/trialgroup_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        dates, rows = group_attendance(self.object)
+        for trial_date in dates:
+            trial_date.weekday_ok = weekday_matches(trial_date)
+        context.update(
+            dates=dates,
+            rows=rows,
+            # for adding people who are still waiting
+            waiting=Tester.objects.filter(trial_group__isnull=True).order_by("last_name", "first_name"),
+        )
+        return context
+
+
+class TrialGroupDeleteView(LoginRequiredMixin, PrivilegedRequiredMixin, DeleteView):
+    """POST only; the participants go back to waiting, the attendance in the session entries stays."""
+
+    model = TrialGroup
+    http_method_names = ["post"]
+
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, f"Gruppe {self.object} gelöscht")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("tester_index")
 
 
 class TeamerLeipzigCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):

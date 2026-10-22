@@ -1,0 +1,65 @@
+{% extends 'members/base.html' %}
+{% block content %}
+<section class="member_page">
+    {% include "trainer/_tabs.html" with active="trials" %}
+
+    <p class="member_panel__hint">Probetrainingsgruppen, die zu mindestens einer deiner Trainingszeiten kommen. Deine Termine sind hervorgehoben.</p>
+
+    {% for group in groups %}
+    <div class="session_card trainer_trial_group">
+        <div class="trainer_trial_group__head">
+            <h3><a href="{% url 'trial_group_detail' group.pk %}">{{ group.name }}</a></h3>
+            {% if group.next_date %}
+                <span class="entry_status entry_status--payed">nächster Termin {{ group.next_date|date:"d.m." }}</span>
+            {% else %}
+                <span class="member_panel__hint">abgeschlossen</span>
+            {% endif %}
+        </div>
+        {% if group.notes %}<p class="member_panel__hint">{{ group.notes }}</p>{% endif %}
+
+        <ul class="chip_list">
+            {% for trial_date in group.dates %}
+            <li class="trainer_trial_date{% if trial_date.own %} trainer_trial_date--own{% endif %}" title="{% for trainer in trial_date.session.trainer.all %}{% if not forloop.first %}, {% endif %}{{ trainer.user.first_name }}{% endfor %}">
+                {{ trial_date.date|date:"D d.m." }} · {{ trial_date.session.format_start_time }} {{ trial_date.session.title }}
+            </li>
+            {% endfor %}
+        </ul>
+
+        <div class="member_table_wrapper">
+            <table class="member_table member_table--static tester_table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Alter</th>
+                        <th>Kontaktperson</th>
+                        <th>Telefon</th>
+                        <th>E-Mail</th>
+                        <th title="Einverständniserklärung (nur Minderjährige)">Einv.</th>
+                        <th>Vorstandsnotizen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for tester in group.testers.all %}
+                    <tr>
+                        <td>{{ tester.last_name }}, {{ tester.first_name }}</td>
+                        <td title="{{ tester.birthday|date:'d.m.Y' }}">{{ tester.age|default_if_none:"–" }}</td>
+                        <td>{{ tester.contact_person|default:"–" }}</td>
+                        <td>{% if tester.telnr %}<a href="tel:{{ tester.telnr }}">{{ tester.telnr }}</a>{% else %}–{% endif %}</td>
+                        <td class="tester_table__email" title="{{ tester.email }}"><a href="mailto:{{ tester.email }}">{{ tester.email }}</a></td>
+                        <td class="tester_table__consent">
+                            {% if tester.age is None or tester.age < 18 %}{% if tester.has_consent %}<i class="fas fa-check" title="liegt vor"></i>{% else %}<span class="trial_expected__warn">fehlt</span>{% endif %}{% endif %}
+                        </td>
+                        <td class="tester_table__notes">{{ tester.board_notes|default:"–"|linebreaksbr }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="7">Noch niemand in der Gruppe.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% empty %}
+    <p class="member_panel__hint">Zu deinen Trainingszeiten sind keine Probetrainingsgruppen eingeplant.</p>
+    {% endfor %}
+</section>
+{% endblock %}

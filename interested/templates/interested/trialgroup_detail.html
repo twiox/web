@@ -1,0 +1,161 @@
+{% extends "members/base.html" %}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'tester_index' %}">Probetraining</a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{ object }}</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="member_page trial_group_page">
+    {% csrf_token %}
+    <div class="session_header">
+        <h1>{{ object }}</h1>
+    </div>
+    <div class="member_panel__hint event_detail_meta trial_group_meta">
+        <a href="{% url 'trial_group_update' object.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
+        <form method="POST" action="{% url 'trial_group_delete' object.pk %}" class="trial_group_delete" data-name="{{ object }}">
+            {% csrf_token %}
+            <button type="submit" class="icon_button" title="Löschen"><i class="far fa-minus-square"></i></button>
+        </form>
+        {{ rows|length }} Teilnehmende · {{ dates|length }} Termin{{ dates|length|pluralize:"e" }}
+    </div>
+    {% if object.notes %}<p class="trial_group_notes">{{ object.notes|linebreaksbr }}</p>{% endif %}
+
+    <h3>Termine &amp; Anwesenheit</h3>
+    <p class="member_panel__hint">Aus den Trainingsstunden der Trainer*innen: <i class="fas fa-check"></i> war da, <i class="fas fa-times"></i> nicht da, – noch kein Eintrag für den Termin.</p>
+    {% if dates %}
+    <div class="member_table_wrapper tertiary_bg">
+        <table class="member_table member_table--static trial_attendance">
+            <thead>
+                <tr>
+                    <th>Teilnehmende</th>
+                    {% for trial_date in dates %}
+                    <th title="{{ trial_date.session.title }}{% for trainer in trial_date.session.trainer.all %}{% if forloop.first %} · {% else %}, {% endif %}{{ trainer.user.first_name }}{% endfor %}">
+                        {# once a trainer entered the training: link to it #}
+                        {% if trial_date.entry_pk %}
+                        <a class="trial_attendance__entry" href="{% url 'trainingsession_detail' trial_date.entry_pk %}" title="Zur Trainingsstunde">{{ trial_date.date|date:"D d.m." }} <i class="fas fa-external-link-alt"></i></a><br>
+                        {% else %}
+                        {{ trial_date.date|date:"D d.m." }}<br>
+                        {% endif %}
+                        <small>{{ trial_date.session.format_start_time }} {{ trial_date.session.title }}</small>
+                        {% if not trial_date.weekday_ok %}<br><small class="trial_attendance__warn" title="Das Datum ist kein {{ trial_date.session.weekday }}"><i class="fas fa-exclamation-triangle"></i> anderer Wochentag</small>{% endif %}
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for tester, statuses in rows %}
+                <tr>
+                    <td>{{ tester.last_name }}, {{ tester.first_name }}</td>
+                    {% for status in statuses %}
+                    <td class="trial_attendance__cell">
+                        {% if status is None %}<span class="member_panel__hint">–</span>{% elif status %}<i class="fas fa-check" title="war da"></i>{% else %}<i class="fas fa-times" title="nicht da"></i>{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+            {% empty %}
+                <tr><td colspan="{{ dates|length|add:1 }}">Noch niemand in der Gruppe.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="member_panel__hint">Noch keine Termine – über <a href="{% url 'trial_group_update' object.pk %}">Bearbeiten</a> hinzufügen.</p>
+    {% endif %}
+
+    <h3>Teilnehmende</h3>
+    <div class="member_table_wrapper tertiary_bg">
+        <table class="member_table member_table--static tester_table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Alter</th>
+                    <th>Kontaktperson</th>
+                    <th>E-Mail</th>
+                    <th>Telefon</th>
+                    <th>Vorstandsnotizen</th>
+                    <th title="Einverständniserklärung (nur Minderjährige)">Einv.</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="group_rows">
+            {% for tester, statuses in rows %}
+                <tr>
+                    <td>{{ tester.last_name }}, {{ tester.first_name }}</td>
+                    <td title="{{ tester.birthday|date:'d.m.Y' }}">{{ tester.age|default_if_none:"–" }}</td>
+                    <td>{{ tester.contact_person|default:"–" }}</td>
+                    <td class="tester_table__email" title="{{ tester.email }}"><a href="mailto:{{ tester.email }}">{{ tester.email }}</a></td>
+                    <td>{% if tester.telnr %}<a href="tel:{{ tester.telnr }}">{{ tester.telnr }}</a>{% else %}–{% endif %}</td>
+                    <td class="tester_table__notes">{{ tester.board_notes|default:"–"|linebreaksbr }}</td>
+                    <td class="tester_table__consent">
+                        {% if tester.age is None or tester.age < 18 %}
+                        <input type="checkbox" class="tester_consent" {% if tester.has_consent %}checked{% endif %}
+                               data-url="{% url 'tester_consent' tester.pk %}" aria-label="Einverständniserklärung liegt vor">
+                        {% endif %}
+                    </td>
+                    <td class="table_actions">
+                        <a href="{% url 'tester_update' tester.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
+                        <button type="button" class="icon_button" data-remove="{% url 'tester_set_group' tester.pk %}" data-name="{{ tester }}" title="Aus der Gruppe nehmen (wieder wartend)"><i class="fas fa-user-minus"></i></button>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="8">Noch niemand in der Gruppe.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# waiting people; the name is matched to its request in the script below #}
+    <form class="orga_add" id="group_add">
+        <label for="group_add_input"><i class="fas fa-user-plus"></i> Wartende hinzufügen</label>
+        <input class="searchbar" id="group_add_input" list="group_add_options" placeholder="Name …" autocomplete="off">
+        <datalist id="group_add_options">
+            {% for tester in waiting %}
+            <option data-url="{% url 'tester_set_group' tester.pk %}" value="{{ tester.last_name }}, {{ tester.first_name }}{% if tester.age is not None %} ({{ tester.age }} J.){% endif %}"></option>
+            {% endfor %}
+        </datalist>
+        <button type="submit" class="table_action table_action--primary">Hinzufügen</button>
+    </form>
+</section>
+
+<script>
+(function () {
+    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const showMessage = text => { snackbar.labelText = text; snackbar.open(); };
+    async function setGroup(url, group) {
+        const body = new FormData();
+        body.append('csrfmiddlewaretoken', csrf);
+        body.append('group', group);
+        const response = await fetch(url, { method: 'POST', body });
+        if (response.ok) window.location.reload();
+        else showMessage('Konnte nicht gespeichert werden');
+    }
+    document.getElementById('group_add').addEventListener('submit', event => {
+        event.preventDefault();
+        const typed = document.getElementById('group_add_input').value.trim();
+        const option = [...document.querySelectorAll('#group_add_options option')].find(o => o.value === typed);
+        if (!option) return showMessage('Bitte eine wartende Person aus der Liste auswählen');
+        setGroup(option.dataset.url, '{{ object.pk }}');
+    });
+    document.getElementById('group_rows').addEventListener('change', async event => {
+        const box = event.target.closest('.tester_consent');
+        if (!box) return;
+        const body = new FormData();
+        body.append('csrfmiddlewaretoken', csrf);
+        body.append('value', box.checked);
+        const response = await fetch(box.dataset.url, { method: 'POST', body });
+        if (!response.ok) box.checked = !box.checked;
+        showMessage(response.ok ? 'Gespeichert' : 'Konnte nicht gespeichert werden');
+    });
+    document.getElementById('group_rows').addEventListener('click', event => {
+        const button = event.target.closest('[data-remove]');
+        if (button && confirm(`${button.dataset.name} aus der Gruppe nehmen? Die Person wartet dann wieder.`)) setGroup(button.dataset.remove, '');
+    });
+    document.querySelector('.trial_group_delete').addEventListener('submit', event => {
+        if (!confirm(`Gruppe ${event.target.dataset.name} löschen? Die Teilnehmenden warten dann wieder.`)) event.preventDefault();
+    });
+})();
+</script>
+{% endblock %}

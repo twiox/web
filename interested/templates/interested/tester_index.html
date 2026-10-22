@@ -15,27 +15,66 @@
 <section class="member_page">
     <div class="member_toolbar">
         <h1>Probetraining</h1>
+        <a class="table_action" href="{% url 'tester_list' %}"><i class="fas fa-list"></i> Alle Anfragen</a>
+        <a class="table_action table_action--primary" href="{% url 'trial_group_create' %}"><i class="far fa-plus-square"></i> Neue Gruppe</a>
     </div>
 
     <div class="tester_stats">
         <div class="session_card tester_stats__total">
             <span class="tester_stats__number">{{ waiting }}</span>
-            <span>{{ waiting|pluralize:"Person wartet,Personen warten" }} auf ein Probetraining</span>
+            <span>{{ waiting|pluralize:"Person wartet,Personen warten" }} auf eine Gruppe</span>
         </div>
         {% for label, count in age_groups.items %}
         <div class="session_card">
             <span class="tester_stats__number">{{ count }}</span>
-            <span>{{ label }}</span>
+            <span>{{ label }} wartend</span>
         </div>
         {% endfor %}
+        <div class="session_card">
+            <span class="tester_stats__number">{{ in_groups }}</span>
+            <span>in Gruppen eingeteilt</span>
+        </div>
     </div>
 
+    <h3>{% if upcoming_all %}Nächste Probetrainings{% else %}Deine nächsten Probetrainings{% endif %}</h3>
+    {% if upcoming %}
+    <div class="member_table_wrapper tertiary_bg">
+        <table class="member_table member_table--static trial_upcoming">
+            <thead><tr><th>Datum</th><th>Trainingszeit</th><th>Gruppe</th><th>Kommen</th></tr></thead>
+            <tbody>
+            {% for trial_date in upcoming %}
+                <tr>
+                    <td>{{ trial_date.date|date:"D d.m.Y" }}</td>
+                    <td>{{ trial_date.session.day }} {{ trial_date.session.format_start_time }} · {{ trial_date.session.title }}</td>
+                    <td><a href="{% url 'trial_group_detail' trial_date.group.pk %}">{{ trial_date.group }}</a></td>
+                    <td class="trial_upcoming__people">
+                        {% for tester in trial_date.group.testers.all %}
+                            <span title="{{ tester.contact_person|default:tester.email }}{% if tester.telnr %} · {{ tester.telnr }}{% endif %}{% if tester.board_notes %} · {{ tester.board_notes }}{% endif %}">{{ tester.first_name }} {{ tester.last_name }}{% if tester.board_notes %} <i class="fas fa-sticky-note"></i>{% endif %}</span>{% if not forloop.last %}, {% endif %}
+                        {% empty %}<span class="member_panel__hint">noch niemand</span>{% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="member_panel__hint">{% if upcoming_all %}Keine geplanten Probetrainings.{% else %}Zu deinen Trainingszeiten sind keine Probetrainings geplant.{% endif %}</p>
+    {% endif %}
+
+    <h3>Gruppen</h3>
     <div class="dashboard_grid">
-        <a class="dashboard_card" href="{% url 'tester_list' %}">
-            <i class="fas fa-list"></i>
-            <strong>Anmeldungen</strong>
-            <span class="dashboard_card__text">Alle Interessierten ansehen, bearbeiten und löschen</span>
+        {% for group in groups %}
+        <a class="dashboard_card trial_group_card" href="{% url 'trial_group_detail' group.pk %}">
+            <i class="fas fa-users"></i>
+            <strong>{{ group.name }}</strong>
+            <span class="dashboard_card__text">
+                {{ group.size }} Teilnehmende ·
+                {{ group.date_count }} Termin{{ group.date_count|pluralize:"e" }}{% if group.first_date %}, {{ group.first_date|date:"d.m." }}–{{ group.last_date|date:"d.m.Y" }}{% endif %}
+            </span>
         </a>
+        {% empty %}
+        <p class="member_panel__hint">Noch keine Gruppen.</p>
+        {% endfor %}
     </div>
 </section>
 {% endblock %}

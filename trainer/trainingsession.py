@@ -7,6 +7,7 @@ from trainer.forms import TrainingSessionForm
 from trainer.models import TrainingSessionEntry, TrainingSessionParticipant, TrainingSessionInvoice
 from members.models import Trainer, Profile, Session
 from members.roles import is_board, is_privileged, is_trainer
+from interested.trials import expected_testers
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.http import require_POST
@@ -26,7 +27,7 @@ def session_delete(request, pk):
     return HttpResponse("")
 
 ## HTMX snippets
-@user_passes_test(is_trainer)
+@user_passes_test(is_privileged)
 def get_participants_list(request, pk):
     """
     Get the trainer-list snippet for display in session-detail view 
@@ -40,9 +41,12 @@ def get_participants_list(request, pk):
         context.update({'object_list':session.participant.filter(user__isnull=False)})
     else:
         context.update({'object_list':session.participant.filter(user__isnull=True)})
+        # trial participants whose group comes to this training today, not yet entered
+        present = session.participant.filter(tester__isnull=False).values_list('tester_id', flat=True)
+        context.update({'expected_testers': expected_testers(session).exclude(pk__in=present)})
     return render(request,'trainingsession/snippet_participantslist.html',context)
 
-@user_passes_test(is_trainer)
+@user_passes_test(is_privileged)
 def get_participants_table(request, pk):
     """
     Get the participants-table snippet for display in session-detail view 
@@ -53,7 +57,7 @@ def get_participants_table(request, pk):
 
     return render(request,'trainingsession/snippet_participantslist_contact.html',context)
 
-@user_passes_test(is_trainer)
+@user_passes_test(is_privileged)
 def get_trainer_list(request, pk):
     """
     Get the trainer-list snippet for display in session-detail view 
@@ -70,7 +74,7 @@ def get_trainer_list(request, pk):
     return render(request,'trainingsession/snippet_trainerlist.html',context)
 
 @csrf_exempt
-@user_passes_test(is_trainer)
+@user_passes_test(is_privileged)
 @require_POST
 def remove_trainer(request, pk):
     """
@@ -87,7 +91,7 @@ def remove_trainer(request, pk):
     return get_trainer_list(request, pk)
 
 @csrf_exempt
-@user_passes_test(is_trainer)
+@user_passes_test(is_privileged)
 @require_POST
 def add_trainer(request, pk):
     """
@@ -105,7 +109,7 @@ def add_trainer(request, pk):
 
 
 @csrf_exempt
-@user_passes_test(is_trainer)
+@user_passes_test(is_privileged)
 @require_POST
 def add_member(request, pk):
     """
@@ -124,7 +128,7 @@ def add_member(request, pk):
     return get_participants_list(request, pk)
 
 @csrf_exempt
-@user_passes_test(is_trainer)
+@user_passes_test(is_privileged)
 @require_POST
 def add_nonmember(request, pk):
     session = TrainingSessionEntry.objects.get(pk=pk)
@@ -139,8 +143,29 @@ def add_nonmember(request, pk):
 
     return get_participants_list(request, pk)
 
+@user_passes_test(is_privileged)
+@require_POST
+def add_trial_participant(request, pk):
+    """Enter an expected trial participant; the link to the request shows up in their trial group."""
+    session = get_object_or_404(TrainingSessionEntry, pk=pk)
+    tester = get_object_or_404(expected_testers(session), pk=request.POST.get('tester_pk'))
+    TrainingSessionParticipant.objects.get_or_create(session=session, tester=tester, defaults={'name': str(tester)})
+    return get_participants_list(request, pk)
+
+
+@user_passes_test(is_privileged)
+@require_POST
+def trial_consent(request, pk):
+    """Parents handed in the consent form at the training: tick it for the expected trial participant."""
+    session = get_object_or_404(TrainingSessionEntry, pk=pk)
+    tester = get_object_or_404(expected_testers(session), pk=request.POST.get('tester_pk'))
+    tester.has_consent = True
+    tester.save(update_fields=['has_consent'])
+    return get_participants_list(request, pk)
+
+
 @csrf_exempt
-@user_passes_test(is_trainer)
+@user_passes_test(is_privileged)
 @require_POST
 def delete_participant(request, pk):
     """
@@ -150,7 +175,7 @@ def delete_participant(request, pk):
 
     return get_participants_list(request, pk)
 
-@user_passes_test(is_trainer)
+@user_passes_test(is_privileged)
 def search(request, pk):
     """
     search function (trainer or member)
@@ -192,7 +217,7 @@ def fill_session_details(request):
     })
 
 # This is the detail-view
-@user_passes_test(is_trainer)
+@user_passes_test(is_privileged)
 def session_detail_view(request, pk):
     object = TrainingSessionEntry.objects.get(pk=pk)
 
@@ -235,7 +260,7 @@ def session_create_view(request):
     return render(request, "trainingsession/index.html", {"form": form, "values": session_form_values(form)})
 
 
-@user_passes_test(is_trainer)
+@user_passes_test(is_privileged)
 def session_edit_view(request, pk):
     entry = get_object_or_404(TrainingSessionEntry, pk=pk)
     if entry.payed or entry.invoice.exists():
@@ -249,7 +274,7 @@ def session_edit_view(request, pk):
     return render(request, "trainingsession/index.html", {"form": form, "values": session_form_values(form), "entry": entry})
 
 
-@user_passes_test(is_trainer)
+@user_passes_test(is_privileged)
 def session_list_view(request):
     from django.db.models.functions import ExtractYear
 
@@ -346,7 +371,7 @@ def session_hours(session):
     return (end - start).total_seconds() / 3600
 
 
-@user_passes_test(is_trainer)
+@user_passes_test(is_board)  # the button is board-only too
 @require_POST
 def generate_invoices(request):
     """One invoice per trainer for all billed sessions that have no invoice yet.
@@ -433,6 +458,8 @@ urlpatterns = [
     path("<int:pk>/participant/add", add_member, name='trainingsession_add_member'),
     path("<int:pk>/participant/remove/", delete_participant, name='trainingsession_del_participant'),
     path("<int:pk>/participant/non-member/", add_nonmember, name="trainingsession_nonmember_add"),
+    path("<int:pk>/participant/trial/", add_trial_participant, name="trainingsession_trial_add"),
+    path("<int:pk>/participant/trial/consent/", trial_consent, name="trainingsession_trial_consent"),
     path("ajax/session-details/", fill_session_details, name="fill_session_details")
 ]
 
