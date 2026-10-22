@@ -6,7 +6,6 @@ from django.contrib.auth.mixins import (
     PermissionRequiredMixin,
     UserPassesTestMixin,
 )
-from django.contrib.auth.decorators import permission_required
 from django.views.generic import (
     CreateView,
     UpdateView,
@@ -17,7 +16,6 @@ from django.views.generic import (
 from django.contrib import messages
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
-from django.utils.html import strip_tags
 from django.conf import settings
 from .forms import ProbetrainingForm, PublicEventForm
 from members.models import Chairman
@@ -28,7 +26,7 @@ from .models import (
     EventMerch,
     Tester,
 )
-from members.views import chairman_check, trainer_check
+from members.roles import is_board
 
 
 def interested_index(request):
@@ -132,7 +130,7 @@ class TesterListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Tester
 
     def test_func(self):
-        return chairman_check(self.request)
+        return is_board(self.request.user)
 
 
 class TeamerLeipzigCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
@@ -279,7 +277,7 @@ class PublicEventView(DetailView):
 
 
 def event_participant_list_view(request, event_slug):
-    if not chairman_check(request):
+    if not is_board(request.user):
         return render(request, "login")
     event = PublicEvent.objects.get(slug=event_slug)
     object_list = EventParticipant.objects.filter(event=event)
@@ -295,7 +293,7 @@ class EventParticipantDeleteView(UserPassesTestMixin, DeleteView):
     permission_required = "interested_remove_eventparticipant"
 
     def test_func(self):
-        return chairman_check(self.request)
+        return is_board(self.request.user)
 
     def get_success_url(self, **kwargs):
         slug = self.get_object().event.slug
@@ -324,7 +322,7 @@ class EventParticipantUpdateView(UserPassesTestMixin, UpdateView):
     ]
 
     def test_func(self):
-        return chairman_check(self.request)
+        return is_board(self.request.user)
 
     def get_success_url(self, **kwargs):
         slug = self.get_object().event.slug
@@ -339,7 +337,7 @@ class PublicEventDeleteView(UserPassesTestMixin, DeleteView):
     permission_required = "interested_publicevent_delete"
 
     def test_func(self):
-        return chairman_check(self.request)
+        return is_board(self.request.user)
 
     def get_success_url(self, **kwargs):
         slug = self.get_object().slug
@@ -355,7 +353,7 @@ class PublicEventUpdateView(UserPassesTestMixin, UpdateView):
     fields = "__all__"
 
     def test_func(self):
-        return chairman_check(self.request)
+        return is_board(self.request.user)
 
     def get_success_url(self, **kwargs):
         slug = self.get_object().slug
@@ -371,7 +369,7 @@ class EventMerchCreateView(UserPassesTestMixin, CreateView):
     fields = "__all__"
 
     def test_func(self):
-        return chairman_check(self.request)
+        return is_board(self.request.user)
 
     def form_valid(self, form):
         self.object = form.save()
@@ -390,7 +388,7 @@ class EventMerchUpdateView(UserPassesTestMixin, UpdateView):
     fields = "__all__"
 
     def test_func(self):
-        return chairman_check(self.request)
+        return is_board(self.request.user)
 
     def get_success_url(self, **kwargs):
         event_pk = self.get_object().event.pk
@@ -405,7 +403,7 @@ class EventMerchDeleteView(UserPassesTestMixin, DeleteView):
     permission_required = "interested_change_eventmerch"
 
     def test_func(self):
-        return chairman_check(self.request)
+        return is_board(self.request.user)
 
     def get_success_url(self, **kwargs):
         event_pk = self.get_object().event.pk

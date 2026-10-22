@@ -5,7 +5,6 @@ from uuid import uuid4
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse  # to get absolut_urls
 from datetime import datetime, timedelta
@@ -17,16 +16,6 @@ from django.utils.safestring import mark_safe
 from .event_content import render_content
 
 PROFILE_PLACEHOLDER = "media/profile_placeholder.svg"
-
-
-def is_trainer(user):
-    trainer = getattr(user, "trainer", None)
-    return trainer is not None and trainer.active
-
-
-def is_chairman(user):
-    chairman = getattr(user, "chairman", None)
-    return chairman is not None and chairman.active
 
 
 def crop_to_square(path):
@@ -572,14 +561,6 @@ class Profile(models.Model):
 
     class Meta:
         ordering = ["member_num"]
-
-    @property
-    def privileged(self):
-        return (
-            is_chairman(self.user)
-            or self.user.is_superuser
-            or is_trainer(self.user)
-        )
 
     @property
     def age(self):

@@ -12,9 +12,8 @@ from django.views.generic import (
     UpdateView,
     DeleteView,
 )
+from .roles import BoardRequiredMixin, PrivilegedRequiredMixin, is_board, is_chairman, is_privileged, is_trainer
 from .models import (
-    is_trainer,
-    is_chairman,
     Event,
     Profile,
     Chairman,
@@ -64,16 +63,6 @@ import markdown
 import os
 
 
-def chairman_check(request):
-    user = request.user
-    return is_chairman(user) or user.is_superuser
-
-
-def trainer_check(request):
-    user = request.user
-    return is_trainer(user) or user.is_superuser
-
-
 def past_events_q():
     # same rule as Event.is_past_due: over for more than 3 days
     return Q(end_date__lt=datetime.now() - timedelta(days=3))
@@ -81,7 +70,7 @@ def past_events_q():
 
 def prepare_event_cards(request, events):
     """Adds what the event cards need; members see all events, the ones outside their age greyed out."""
-    privileged = is_trainer(request.user) or is_chairman(request.user)
+    privileged = is_privileged(request.user)
     age = request.user.profile.age
     events = list(events)
     for event in events:
@@ -122,7 +111,7 @@ def index(request):
 
     # now the actual view
     age = request.user.profile.age
-    privileged = is_trainer(request.user) or is_chairman(request.user)
+    privileged = is_privileged(request.user)
     notices = Message.objects.all() if privileged else Message.visible_for_age(age)
 
     # all upcoming events are listed, the ones outside the member's age are greyed out
@@ -153,7 +142,6 @@ def index(request):
             "has_past_events": Event.objects.filter(past_events_q()).exists(),
             "training_messags": training_messags,
             "event_messags": event_messags,
-            "chairman": is_chairman(request.user),
             "posts": posts,
             "spots": spot_map_data(sessions, for_editors=request.user.has_perm("members.change_spot")),
         },
@@ -164,12 +152,12 @@ def index(request):
 
 
 def event_test_func(request, event):
-    if bool(trainer_check(request) or chairman_check(request)):
+    if is_privileged(request.user):
         return True
     return Event.visible_for_age(request.user.profile.age).filter(pk=event.pk).exists()
 
 
-class EventListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+class EventListView(LoginRequiredMixin, PrivilegedRequiredMixin, ListView):
     """All events for the board, grouped by year (newest year first)."""
 
     model = Event
@@ -200,8 +188,6 @@ class EventListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         ]
         return context
 
-    def test_func(self):
-        return self.request.user.profile.privileged
 
 
 class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
@@ -226,7 +212,7 @@ class EventDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             # expired notices are only cleaned up on the members page
             notices=[notice for notice in self.object.messages.all() if not notice.delme],
             # the meeting point is meant for the people who come along
-            show_meeting_point=is_participant or trainer_check(self.request) or chairman_check(self.request),
+            show_meeting_point=is_participant or is_privileged(self.request.user),
         )
         return context
 
@@ -421,7 +407,7 @@ class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
 STANDARD_DOCUMENTS = ["Teilnahmebedingungen", "Datenschutzerklärung", "Einverständniserklärung"]
 
 
-class EventOrgaView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+class EventOrgaView(LoginRequiredMixin, PrivilegedRequiredMixin, DetailView):
     """Participants, payments and documents of an event; for trainers and chairmen."""
 
     model = Event
@@ -487,11 +473,9 @@ class EventOrgaView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         messages.add_message(request, messages.SUCCESS, f"{doc.name} hochgeladen")
         return redirect("event_participants", pk=self.object.pk)
 
-    def test_func(self):
-        return trainer_check(self.request) or chairman_check(self.request)
 
 
-class EventCheckinView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+class EventCheckinView(LoginRequiredMixin, PrivilegedRequiredMixin, DetailView):
     """Phone-friendly list for ticking off participants on site."""
 
     model = Event
@@ -506,15 +490,13 @@ class EventCheckinView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         context.update(participants=participants, count_checked_in=sum(p.checked_in for p in participants))
         return context
 
-    def test_func(self):
-        return trainer_check(self.request) or chairman_check(self.request)
 
 
 @login_required
 @require_POST
 def event_add_participant(request, pk):
     """Orga page: register a member by hand, e.g. when they can't log in."""
-    if not (trainer_check(request) or chairman_check(request)):
+    if not is_privileged(request.user):
         raise PermissionDenied
     event = get_object_or_404(Event, pk=pk)
     user = User.objects.filter(pk=request.POST.get("user")).first() if request.POST.get("user", "").isdigit() else None
@@ -536,7 +518,7 @@ def event_add_participant(request, pk):
 @require_POST
 def event_participant_action(request, pk):
     """Orga page: cancel, restore or delete a registration."""
-    if not (trainer_check(request) or chairman_check(request)):
+    if not is_privileged(request.user):
         return JsonResponse({"success": False}, status=403)
     part = get_object_or_404(MemberParticipant, pk=pk)
     action = request.POST.get("action")
@@ -553,7 +535,7 @@ def event_participant_action(request, pk):
 @login_required
 def event_participants_csv(request, pk):
     """Participant list as CSV (semicolons, so Excel opens it directly)."""
-    if not (trainer_check(request) or chairman_check(request)):
+    if not is_privileged(request.user):
         raise PermissionDenied
     event = get_object_or_404(Event, pk=pk)
     response = HttpResponse(content_type="text/csv; charset=utf-8")
@@ -581,7 +563,7 @@ def event_participants_csv(request, pk):
 @require_POST
 def ajax_event_filehandle(request):
     """Orga page: switch a document between public and orga-only, require consent to it, or delete it."""
-    if not (trainer_check(request) or chairman_check(request)):
+    if not is_privileged(request.user):
         return JsonResponse({"success": False}, status=403)
     doc = get_object_or_404(Document, pk=request.POST.get("id"))
     if request.POST.get("type") == "toggle":
@@ -602,7 +584,7 @@ def update_memberparticipant(request):
     """Orga page: trainers/chairmen edit payed, notes, ticket and check-in; participants only their own ticket."""
     part = get_object_or_404(MemberParticipant, pk=request.POST.get("id"))
     field = request.POST.get("field")
-    is_orga = trainer_check(request) or chairman_check(request)
+    is_orga = is_privileged(request.user)
     own_ticket = field == "has_ticket" and part.user == request.user and not part.event.deadline_reached
     if field not in ["payed", "has_ticket", "checked_in", "notes"] or not (is_orga or own_ticket):
         return JsonResponse({"success": False}, status=403)
@@ -991,11 +973,9 @@ class AddressChangeView(LoginRequiredMixin, UpdateView):
         return reverse("profile_detail")
 
 
-class ShopItemDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+class ShopItemDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
     model = ShopItem
 
-    def test_func(self):
-        return chairman_check(self.request)
 
     def get_success_url(self):
         return reverse("shop")
@@ -1004,14 +984,9 @@ class ShopItemDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class ShopItemListView(LoginRequiredMixin, ListView):
     model = ShopItem
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["privileged"] = chairman_check(self.request)
-        return context
-
     def get_queryset(self):
         user = self.request.user
-        if chairman_check(self.request):
+        if is_board(self.request.user):
             object_list = ShopItem.objects.all().order_by("priority")
         else:
             object_list = ShopItem.objects.filter(visible=True).order_by("priority")
@@ -1020,7 +995,7 @@ class ShopItemListView(LoginRequiredMixin, ListView):
 
 @login_required
 def create_shopitem(request):
-    if chairman_check(request):
+    if is_board(request.user):
         gallery = Gallery()
         gallery.save()
         gallery.refresh_from_db()
@@ -1032,12 +1007,10 @@ def create_shopitem(request):
         return HttpResponseRedirect(reverse("shop"))
 
 
-class ShopItemUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class ShopItemUpdateView(LoginRequiredMixin, BoardRequiredMixin, UpdateView):
     model = ShopItem
     fields = ["title", "description", "price", "visible", "priority"]
 
-    def test_func(self):
-        return chairman_check(self.request)
 
     def get_success_url(self):
         return reverse("shop")
@@ -1060,7 +1033,7 @@ def get_image_data(request):
 
 @login_required
 def set_image_data(request):
-    if chairman_check(request):
+    if is_board(request.user):
         data = {x: v[0] for (x, v) in dict(request.GET).items()}
         image = Image.objects.get(pk=data["id"])
         image.alt = data["alt"]
@@ -1082,7 +1055,7 @@ def set_image_data(request):
 
 @login_required
 def delete_image(request):
-    if chairman_check(request):
+    if is_board(request.user):
         data = {x: v[0] for (x, v) in dict(request.GET).items()}
         image = Image.objects.get(pk=data["id"])
         image.delete()

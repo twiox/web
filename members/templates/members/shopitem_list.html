@@ -14,7 +14,7 @@
 
 <div class="padding_all_big flex_left" style="gap:30px;position: relative;">
     <div style="position: absolute; top: 0; right: 0;">
-        {% if privileged %}
+        {% if is_board %}
                 <a href="{% url 'shopitem_create' %}" title="Shop Item hinzufügen"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
         {% endif %}
     </div>
@@ -28,7 +28,7 @@
             </div>
             {% endif %}
             <div class="trainer_ui">
-                {% if privileged %}
+                {% if is_board %}
                 <a href="{% url 'shopitem_update' obj.id  %}" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
                 <a href="{% url 'shopitem_delete' obj.id  %}" title="Löschen"><i class="fas fa-minus-square" style="font-size:17px;"></i></a>
                 {% endif %}

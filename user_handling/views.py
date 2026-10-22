@@ -1,7 +1,6 @@
 from .forms import MemberForm, ProfileForm, AdditionalEmailForm
+from members.roles import is_privileged
 from members.models import (
-    is_trainer,
-    is_chairman,
     Chairman,
     Trainer,
     Profile,
@@ -218,11 +217,7 @@ class TwioPasswordResetConfirmView(PasswordResetConfirmView):
         return reverse("index")
 
 
-def trainer_or_chairman(user):
-    return is_trainer(user) or is_chairman(user)
-
-
-@user_passes_test(trainer_or_chairman)
+@user_passes_test(is_privileged)
 def mailing_lists(request):
     return render(request, "user_handling/mailing-lists.html")
 
@@ -238,7 +233,7 @@ def email_list_response(emails):
     return JsonResponse({"string": ",".join(sorted(e for e in emails if e))})
 
 
-@user_passes_test(trainer_or_chairman)
+@user_passes_test(is_privileged)
 def get_participants_emails(request):
     if request.GET.get("type"):
         event = get_object_or_404(PublicEvent, pk=request.GET.get("id"))
@@ -248,7 +243,7 @@ def get_participants_emails(request):
     return email_list_response(emails_of(User.objects.filter(memberparticipant__event=event, memberparticipant__storno=False)))
 
 
-@user_passes_test(trainer_or_chairman)
+@user_passes_test(is_privileged)
 def get_all_emails(request):
     """id is "alle" or "email_<status>"."""
     list_id = request.GET.get("id", "")

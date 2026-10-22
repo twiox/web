@@ -5,7 +5,8 @@ from datetime import datetime
 from itertools import groupby
 from trainer.forms import TrainingSessionForm
 from trainer.models import TrainingSessionEntry, TrainingSessionParticipant, TrainingSessionInvoice
-from members.models import Trainer, Profile, Session, is_trainer, is_chairman
+from members.models import Trainer, Profile, Session
+from members.roles import is_board, is_privileged, is_trainer
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.http import require_POST
@@ -13,11 +14,8 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.contrib import messages
 
-def chairman_check(user):
-    return is_chairman(user) or user.is_superuser
-
 @csrf_exempt
-@user_passes_test(is_trainer)
+@user_passes_test(is_privileged)  # trainers, and chairmen for the billing
 @require_POST
 def session_delete(request, pk):
     entry = get_object_or_404(TrainingSessionEntry, pk=pk)
@@ -396,7 +394,7 @@ def generate_invoices(request):
     return redirect('trainingsession_list')
 
 
-@user_passes_test(chairman_check)
+@user_passes_test(is_board)
 @require_POST
 def mark_invoice_as_payed(request, pk):
     invoice = get_object_or_404(TrainingSessionInvoice, pk=pk)
@@ -406,7 +404,7 @@ def mark_invoice_as_payed(request, pk):
     return redirect('trainingsession_list')
 
 
-@user_passes_test(chairman_check)
+@user_passes_test(is_board)
 @require_POST
 def delete_invoice(request, pk):
     """Deletes an unpaid invoice; its sessions are open again for the next run."""

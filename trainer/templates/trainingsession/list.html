@@ -54,7 +54,7 @@
 
     <div class="member_toolbar invoice_heading">
         <h3>Offene Rechnungen</h3>
-        {% if request.user.chairman.active %}
+        {% if is_board %}
         <form method="POST" action="{% url 'generate_invoices' %}">
             {% csrf_token %}
             <button type="submit" class="table_action table_action--primary">Rechnungen erstellen</button>
@@ -72,7 +72,7 @@
                     <th>Stunden</th>
                     <th>Betrag</th>
                     <th>Rechnung</th>
-                    {% if request.user.chairman.active %}<th></th>{% endif %}
+                    {% if is_board %}<th></th>{% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -84,7 +84,7 @@
                     <td>{{ invoice.total_time|floatformat:"-2"|default:"–" }}</td>
                     <td>{% if invoice.total_money is not None %}{{ invoice.total_money|floatformat:2 }} €{% else %}–{% endif %}</td>
                     <td>{% if invoice.invoice_pdf %}<a href="{{ invoice.invoice_pdf.url }}" class="more_info_button">PDF</a>{% else %}fehlt{% endif %}</td>
-                    {% if request.user.chairman.active %}
+                    {% if is_board %}
                     <td class="table_actions">
                         <form method="POST" action="{% url 'trainingsession_mark_invoice_as_payed' invoice.pk %}">
                             {% csrf_token %}

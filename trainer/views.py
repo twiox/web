@@ -2,11 +2,11 @@ from .forms import TrainerForm, TrainerSelfForm
 from .models import TrainingSessionEntry
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
-from members.models import Trainer, Session, Profile, AdditionalEmail, is_trainer, is_chairman
+from members.models import Trainer, Session, Profile, AdditionalEmail
+from members.roles import PrivilegedRequiredMixin, is_privileged, is_trainer
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.views.generic import DeleteView, UpdateView, ListView
 from django.urls import reverse, reverse_lazy
-from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth.decorators import user_passes_test
 from datetime import date
@@ -54,9 +54,6 @@ def trainer_data(request):
     })
 
 ### JQUERY AJAX STUFF ###
-def is_privileged(user):
-    return user.profile.privileged
-
 @user_passes_test(is_privileged)
 def get_session_emails(request, sessionid):
     """
@@ -71,13 +68,9 @@ def get_session_emails(request, sessionid):
     return JsonResponse({'emailstring': ','.join(sorted(e for e in emails if e))})
 
 
-class TrainerListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+class TrainerListView(LoginRequiredMixin, PrivilegedRequiredMixin, ListView):
     queryset = Trainer.objects.filter(active=True).select_related("user").order_by("user__last_name")
     template_name = "user_handling/trainer_list.html"
-
-    def test_func(self):
-        user = self.request.user
-        return is_trainer(user) or is_chairman(user) or user.is_superuser
 
 class TrainerDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Trainer
