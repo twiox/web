@@ -342,6 +342,12 @@ class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     form_class = EventUpdateParticipantForm
     model = Event
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # public documents members have to accept before signing up
+        context["consent_docs"] = self.object.public_docs.filter(requires_consent=True)
+        return context
+
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():
@@ -365,9 +371,10 @@ class EventParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             return HttpResponseRedirect(
                 reverse("event_detail", kwargs={"pk": event.id})
             )
-        return render(
-            request, self.template_name, {"form": form, "object": self.get_object()}
-        )
+        event = self.get_object()
+        return render(request, self.template_name, {
+            "form": form, "object": event, "consent_docs": event.public_docs.filter(requires_consent=True),
+        })
 
     def test_func(self):
         event = self.get_object()
@@ -410,6 +417,10 @@ class EventUnParticipateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
         return event_test_func(self.request, event)
 
 
+# offered as buttons on the orga page; members have to accept them when signing up
+STANDARD_DOCUMENTS = ["Teilnahmebedingungen", "Datenschutzerklärung", "Einverständniserklärung"]
+
+
 class EventOrgaView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     """Participants, payments and documents of an event; for trainers and chairmen."""
 
@@ -433,11 +444,13 @@ class EventOrgaView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         active = [p for p in participants if not p.storno]
         registered = {p.user_id for p in active}
         context.update(
+            standard_docs=[(name, event.public_docs.filter(name=name).first()) for name in STANDARD_DOCUMENTS],
             # for adding members who can't register themselves
             candidates=User.objects.filter(profile__isnull=False).exclude(pk__in=registered)
             .select_related("profile").order_by("last_name", "first_name"),
             participants=participants,
             count_responsible=sum(p.responsible for p in active),
+            count_checked_in=sum(p.checked_in for p in active),
             count_active=len(active),
             count_payed=sum(p.payed for p in active),
             count_ticket=sum(p.has_ticket for p in active),
@@ -447,9 +460,18 @@ class EventOrgaView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         return context
 
     def post(self, request, *args, **kwargs):
-        """Uploads a document: public (shown on the event page) or only for the orga."""
+        """Uploads a document: public (shown on the event page) or only for the orga.
+
+        The standard documents have a fixed name, are public, must be accepted when signing up
+        and replace an earlier upload of the same document.
+        """
         self.object = self.get_object()
-        form = EventFileForm(request.POST, request.FILES)
+        data = request.POST.copy()
+        standard = data.get("standard")
+        if standard in STANDARD_DOCUMENTS:
+            data["name"], data["requires_consent"] = standard, "on"
+            data.pop("orga", None)
+        form = EventFileForm(data, request.FILES)
         if not form.is_valid():
             return self.render_to_response(self.get_context_data(form=form))
         doc = form.save(commit=False)
@@ -457,9 +479,32 @@ class EventOrgaView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             doc.event_orga = self.object
         else:
             doc.event_public = self.object
+        if standard in STANDARD_DOCUMENTS:
+            for old in self.object.public_docs.filter(name=standard):
+                old.file.delete(save=False)
+                old.delete()
         doc.save()
-        messages.add_message(request, messages.SUCCESS, "Dokument hochgeladen")
+        messages.add_message(request, messages.SUCCESS, f"{doc.name} hochgeladen")
         return redirect("event_participants", pk=self.object.pk)
+
+    def test_func(self):
+        return trainer_check(self.request) or chairman_check(self.request)
+
+
+class EventCheckinView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    """Phone-friendly list for ticking off participants on site."""
+
+    model = Event
+    template_name = "members/event_checkin.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        participants = list(
+            MemberParticipant.objects.filter(event=self.object, storno=False)
+            .select_related("user__profile").order_by("user__first_name", "user__last_name")
+        )
+        context.update(participants=participants, count_checked_in=sum(p.checked_in for p in participants))
+        return context
 
     def test_func(self):
         return trainer_check(self.request) or chairman_check(self.request)
@@ -516,7 +561,7 @@ def event_participants_csv(request, pk):
     response.write("\ufeff")  # BOM: Excel recognises the umlauts
     writer = csv.writer(response, delimiter=";")
     writer.writerow(["Nr.", "Nachname", "Vorname", "Geburtsdatum", "Alter", "E-Mail", "Telefon",
-                     "Ansprechpartner*in", "Notfallnummer", "Bezahlt", "Deutschlandticket", "Storniert", "Verantwortlich", "Notizen"])
+                     "Ansprechpartner*in", "Notfallnummer", "Bezahlt", "Deutschlandticket", "Storniert", "Verantwortlich", "Eingecheckt", "Notizen"])
     participants = MemberParticipant.objects.filter(event=event).select_related("user__profile").order_by(
         "storno", "-responsible", "user__last_name", "user__first_name")
     for p in participants:
@@ -527,7 +572,7 @@ def event_participants_csv(request, pk):
             user.email, getattr(profile, "telephone", "") or "", getattr(profile, "parent", "") or "",
             getattr(profile, "parent_telnr", "") or "",
             "ja" if p.payed else "nein", "ja" if p.has_ticket else "nein", "ja" if p.storno else "nein",
-            "ja" if p.responsible else "nein", p.notes or "",
+            "ja" if p.responsible else "nein", "ja" if p.checked_in else "nein", p.notes or "",
         ])
     return response
 
@@ -535,12 +580,15 @@ def event_participants_csv(request, pk):
 @login_required
 @require_POST
 def ajax_event_filehandle(request):
-    """Orga page: switch a document between public and orga-only, or delete it."""
+    """Orga page: switch a document between public and orga-only, require consent to it, or delete it."""
     if not (trainer_check(request) or chairman_check(request)):
         return JsonResponse({"success": False}, status=403)
     doc = get_object_or_404(Document, pk=request.POST.get("id"))
     if request.POST.get("type") == "toggle":
         doc.event_toggle()
+    elif request.POST.get("type") == "consent":
+        doc.requires_consent = not doc.requires_consent
+        doc.save(update_fields=["requires_consent"])
     elif request.POST.get("type") == "delete":
         doc.file.delete(save=False)
         doc.delete()
@@ -551,16 +599,16 @@ def ajax_event_filehandle(request):
 @login_required
 @require_POST
 def update_memberparticipant(request):
-    """Orga page: trainers/chairmen edit payed, notes and ticket; participants only their own ticket."""
+    """Orga page: trainers/chairmen edit payed, notes, ticket and check-in; participants only their own ticket."""
     part = get_object_or_404(MemberParticipant, pk=request.POST.get("id"))
     field = request.POST.get("field")
     is_orga = trainer_check(request) or chairman_check(request)
     own_ticket = field == "has_ticket" and part.user == request.user and not part.event.deadline_reached
-    if field not in ["payed", "has_ticket", "notes"] or not (is_orga or own_ticket):
+    if field not in ["payed", "has_ticket", "checked_in", "notes"] or not (is_orga or own_ticket):
         return JsonResponse({"success": False}, status=403)
 
     check, text = request.POST.get("value", "").split(",", 1)
-    setattr(part, field, check == "true" if field in ["payed", "has_ticket"] else text)
+    setattr(part, field, text if field == "notes" else check == "true")
     part.save(update_fields=[field])
     return JsonResponse({"success": True})
 

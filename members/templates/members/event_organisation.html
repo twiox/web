@@ -20,6 +20,7 @@
         <strong>{{ count_active }}</strong> angemeldet{% if count_responsible %} (davon {{ count_responsible }} verantwortlich){% endif %} · <strong>{{ count_payed }}</strong> bezahlt
         {% if object.ask_ticket %} · <strong>{{ count_ticket }}</strong> mit Deutschlandticket{% endif %}
         {% if count_storno %} · {{ count_storno }} storniert{% endif %}
+        <span id="checked_in" {% if not count_checked_in %}hidden{% endif %}> · <strong>{{ count_checked_in }}</strong> eingecheckt</span>
     </p>
 
     <div class="member_toolbar">
@@ -27,6 +28,7 @@
         <button type="button" class="table_action" id="copy_emails" data-url="{% url 'get_participants_emails' %}?id={{ object.pk }}">
             <i class="far fa-envelope"></i> E-Mails kopieren
         </button>
+        <a class="table_action table_action--primary" href="{% url 'event_checkin' object.pk %}"><i class="fas fa-clipboard-check"></i> Check-in</a>
         <a class="table_action" href="{% url 'event_participants_csv' object.pk %}"><i class="fas fa-file-csv"></i> CSV herunterladen</a>
     </div>
 
@@ -34,6 +36,7 @@
         <table class="member_table member_table--static orga_table">
             <thead>
                 <tr>
+                    <th title="Eingecheckt">Da</th>
                     <th>Name</th>
                     <th>Alter</th>
                     <th>Kontakt</th>
@@ -48,6 +51,12 @@
             {% for participant in participants %}
                 {% with user=participant.user profile=participant.user.profile %}
                 <tr class="{% if participant.storno %}orga_table__storno{% endif %}">
+                    <td class="orga_table__check">
+                        {% if not participant.storno %}
+                        <input class="field_update" type="checkbox" {% if participant.checked_in %}checked{% endif %}
+                               data-participant="{{ participant.pk }}" data-field="checked_in" aria-label="Eingecheckt">
+                        {% endif %}
+                    </td>
                     <td>
                         {{ user.last_name }}, {{ user.first_name }}
                         {% if participant.responsible and not participant.storno %}<span class="orga_table__badge orga_table__badge--responsible">verantwortlich</span>{% endif %}
@@ -89,7 +98,7 @@
                 </tr>
                 {% endwith %}
             {% empty %}
-                <tr><td colspan="8">Noch keine Anmeldungen.</td></tr>
+                <tr><td colspan="9">Noch keine Anmeldungen.</td></tr>
             {% endfor %}
             </tbody>
         </table>
@@ -113,7 +122,7 @@
     <div class="session_grid orga_documents">
         <div class="session_card" id="file_viewer">
             <h3>Dokumente</h3>
-            <p class="member_panel__hint">Öffentliche Dokumente stehen auf der Veranstaltungsseite, die anderen sieht nur die Orga.</p>
+            <p class="member_panel__hint">Öffentliche Dokumente stehen auf der Veranstaltungsseite, die anderen sieht nur die Orga. Dokumente mit „bestätigen“ müssen bei der Anmeldung akzeptiert werden.</p>
             {% for doc in object.public_docs.all %}
                 {% include "members/snippets/orga_document.html" with public=True %}
             {% endfor %}
@@ -125,25 +134,45 @@
             {% endif %}
         </div>
 
-        <form class="session_card orga_upload" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
+        <div class="session_card">
             <h3>Dokument hinzufügen</h3>
-            {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
-            <div class="member_fields member_fields--wide">
-                {% include "user_handling/_field.html" with field=form.name %}
-            </div>
-            <div class="file_field">
-                {% for error in form.file.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
-                <span class="file_field__label">Datei</span>
-                <span></span>
-                <label class="table_action">Datei wählen {{ form.file }}</label>
-                <span class="file_field__name"></span>
-            </div>
-            <div class="chip_list orga_upload__options">
-                <label class="toggle_chip">{{ form.orga }}<span>{{ form.orga.label }}</span></label>
-            </div>
-            <button type="submit" class="form_button member_form__submit">Hochladen</button>
-        </form>
+            <h4>Standarddokumente</h4>
+            {# picking a file uploads it right away (script below) #}
+            {% for name, doc in standard_docs %}
+            <form class="file_field orga_standard" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="standard" value="{{ name }}">
+                <span class="file_field__label">{{ name }}</span>
+                {% if doc %}
+                    <a class="more_info_button" href="{{ doc.file.url }}" target="_blank">ansehen</a>
+                {% else %}
+                    <span class="member_panel__hint">fehlt</span>
+                {% endif %}
+                <label class="table_action">{% if doc %}Ersetzen{% else %}Hochladen{% endif %}<input type="file" name="file" hidden></label>
+            </form>
+            {% endfor %}
+
+            <h4>Weiteres Dokument</h4>
+            <form class="orga_upload" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+                <div class="member_fields member_fields--wide">
+                    {% include "user_handling/_field.html" with field=form.name %}
+                </div>
+                <div class="file_field">
+                    {% for error in form.file.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+                    <span class="file_field__label">Datei</span>
+                    <span></span>
+                    <label class="table_action">Datei wählen {{ form.file }}</label>
+                    <span class="file_field__name"></span>
+                </div>
+                <div class="chip_list orga_upload__options">
+                    <label class="toggle_chip">{{ form.orga }}<span>{{ form.orga.label }}</span></label>
+                    <label class="toggle_chip">{{ form.requires_consent }}<span>Bei der Anmeldung bestätigen</span></label>
+                </div>
+                <button type="submit" class="form_button member_form__submit">Hochladen</button>
+            </form>
+        </div>
     </div>
 </section>
 
@@ -176,6 +205,12 @@
         body.append('value', `${input.checked},${input.value}`);
         const response = await fetch('{% url "ajax_update_memberparticipant" %}', { method: 'POST', body });
         if (response.ok) {
+            if (input.dataset.field === 'checked_in') {
+                const count = rows.querySelectorAll('[data-field=checked_in]:checked').length;
+                const counter = document.getElementById('checked_in');
+                counter.querySelector('strong').textContent = count;
+                counter.hidden = count === 0;
+            }
             showMessage('Gespeichert');
         } else {
             if (input.type === 'checkbox') input.checked = !input.checked;
@@ -227,7 +262,7 @@
         const html = await (await fetch(window.location.href)).text();
         const fresh = new DOMParser().parseFromString(html, 'text/html').getElementById('file_viewer');
         document.getElementById('file_viewer').replaceWith(fresh);
-        showMessage(button.dataset.type === 'delete' ? 'Dokument gelöscht' : 'Sichtbarkeit geändert');
+        showMessage({ delete: 'Dokument gelöscht', consent: 'Bestätigung geändert' }[button.dataset.type] || 'Sichtbarkeit geändert');
     });
 
     // add a member: the typed text has to match one of the suggestions
@@ -241,6 +276,8 @@
         }
         form.querySelector('[name=user]').value = option.dataset.user;
     });
+
+    document.querySelectorAll('.orga_standard').forEach(form => form.addEventListener('change', () => form.submit()));
 
     // upload form: text field styling and the chosen file name
     document.querySelectorAll('.orga_upload .mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));

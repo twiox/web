@@ -23,7 +23,7 @@
                     <p class="padding_tb_small" style="color:red;">{{error}}</p>
                     {% endfor %}
                 {% endif %}
-                {% if object.datenschutz or object.teilnahmebedingungen %}
+                {% if consent_docs %}
                 <div class="mdc-form-field padding_all_big">
                     <div class="mdc-checkbox">
                       <input type="checkbox" class="mdc-checkbox__native-control" id="speicherung" name="confirm" required>
@@ -37,15 +37,9 @@
                     <label for="speicherung" >
                         <strong>Wichtige Dokumente</strong>
                         <ul>
-                          {% if object.datenschutz %}
-                          <li><a class="more_info_button" href="{{object.datenschutz.url}}">Datenschutzerklärung</a></li>
-                          {% endif %}
-                          {% if object.teilnahmebedingungen %}
-                          <li><a class="more_info_button" href="{{object.teilnahmebedingungen.url}}">Teilnahmebedingungen</a></li>
-                          {% endif %}
-                          {% if object.einverstaendnis %}
-                          <li><a class="more_info_button" href="{{object.einverstaendnis.url}}">Einverständniserklärung</a></li>
-                          {% endif %}
+                          {% for doc in consent_docs %}
+                          <li><a class="more_info_button" href="{{ doc.file.url }}" target="_blank">{{ doc.name }}</a></li>
+                          {% endfor %}
                         </ul>
                         <div align="left">Ich habe die Dokumente gelesen und akzeptiere sie.
                           Ich willige ein, dass die von mir hinterlegten Daten für die Drurchführung der Veranstaltung an die notwendigen Stellen übermittelt werden. 

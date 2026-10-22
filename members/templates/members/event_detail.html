@@ -147,18 +147,9 @@
 
             {% if not object.info_only %}
             {% with docs=object.public_docs.all %}
-            {% if object.teilnahmebedingungen or object.datenschutz or object.einverstaendnis or docs %}
+            {% if docs %}
             <div class="session_card">
                 <h3>Dokumente</h3>
-                {% if object.teilnahmebedingungen %}
-                <a class="document_link" href="{{ object.teilnahmebedingungen.url }}" target="_blank"><i class="fas fa-file-download"></i> Teilnahmebedingungen</a>
-                {% endif %}
-                {% if object.datenschutz %}
-                <a class="document_link" href="{{ object.datenschutz.url }}" target="_blank"><i class="fas fa-file-download"></i> Datenschutzerklärung</a>
-                {% endif %}
-                {% if object.einverstaendnis %}
-                <a class="document_link" href="{{ object.einverstaendnis.url }}" target="_blank"><i class="fas fa-file-download"></i> Einverständniserklärung</a>
-                {% endif %}
                 {% for doc in docs %}
                 <a class="document_link" href="{{ doc.file.url }}" target="_blank"><i class="fas fa-file-download"></i> {{ doc.name }}</a>
                 {% endfor %}

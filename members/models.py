@@ -117,6 +117,8 @@ class Document(models.Model):
     file = models.FileField(
         "File", upload_to=f"Events/Docs/etc/", null=True, blank=True
     )
+    # public documents members have to accept when they sign up (e.g. Datenschutz, Einverständnis)
+    requires_consent = models.BooleanField("Muss bei der Anmeldung bestätigt werden", default=False)
     # foreign key relationships to where files can be saved
     member_participants = models.ForeignKey(
         "MemberParticipant", on_delete=models.CASCADE, null=True, blank=True
@@ -159,6 +161,8 @@ class MemberParticipant(models.Model):
     has_ticket = models.BooleanField("Deutschlandticket", default=False)
     # trainers/chairmen in charge of the event; participants see them as contact
     responsible = models.BooleanField("Verantwortlich", default=False)
+    # ticked by the orga on site
+    checked_in = models.BooleanField("Eingecheckt", default=False)
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
@@ -198,16 +202,6 @@ class Event(AgeRange):
     )
     info_only = models.BooleanField("Nur Ankündigung?", default=False)
     ask_ticket = models.BooleanField("Deutschlandticket Abfragen", default=False)
-
-    teilnahmebedingungen = models.FileField(
-        "Teilnahmebedingungen", upload_to=f"Events/Docs/", null=True, blank=True
-    )
-    datenschutz = models.FileField(
-        "Datenschutzerklärung", upload_to=f"Events/Docs/", null=True, blank=True
-    )
-    einverstaendnis = models.FileField(
-        "Einverständnis", upload_to=f"Events/Docs/", null=True, blank=True
-    )
 
     participants = models.ManyToManyField(User)
 

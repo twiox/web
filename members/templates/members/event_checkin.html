@@ -1,0 +1,99 @@
+{% extends "members/base.html" %}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_detail' object.pk %}">{{ object.title }}</a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_participants' object.pk %}">Orga</a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Check-in</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="member_page checkin">
+    {% csrf_token %}
+    <div class="checkin__bar">
+        <div class="checkin__head">
+            <h1>Check-in</h1>
+            <span class="checkin__count"><strong id="checkin_count">{{ count_checked_in }}</strong> / {{ participants|length }} da</span>
+        </div>
+        <input class="searchbar" id="checkin_search" type="search" placeholder="Name suchen …">
+        <label class="toggle_chip"><input type="checkbox" id="checkin_open_only"><span>Nur noch nicht da</span></label>
+    </div>
+
+    <ul class="checkin__list" id="checkin_list">
+    {% for participant in participants %}
+        {% with user=participant.user profile=participant.user.profile %}
+        <li class="checkin__row{% if participant.checked_in %} checkin__row--done{% endif %}" data-participant="{{ participant.pk }}" tabindex="0" role="button" aria-pressed="{{ participant.checked_in|yesno:'true,false' }}">
+            <span class="checkin__mark"><i class="fas fa-check"></i></span>
+            <span class="checkin__person">
+                <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+                <small>
+                    {% if profile.age is not None %}{{ profile.age }} J.{% endif %}
+                    {% if participant.responsible %}<span class="checkin__tag">verantwortlich</span>{% endif %}
+                    {% if not participant.payed %}<span class="checkin__tag checkin__tag--warn">nicht bezahlt</span>{% endif %}
+                </small>
+                {% if participant.notes %}<small class="checkin__notes">{{ participant.notes }}</small>{% endif %}
+            </span>
+            {% if profile.age is not None and profile.age < 18 and profile.parent_telnr %}
+            <a class="checkin__call" href="tel:{{ profile.parent_telnr }}" title="Notfallnummer {{ profile.parent|default:'' }}"><i class="fas fa-phone"></i></a>
+            {% endif %}
+        </li>
+        {% endwith %}
+    {% empty %}
+        <li class="member_panel__hint">Noch keine Anmeldungen.</li>
+    {% endfor %}
+    </ul>
+    <p id="checkin_no_results" class="member_panel__hint" hidden>Keine Treffer.</p>
+</section>
+
+<script>
+(function () {
+    const list = document.getElementById('checkin_list');
+    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const search = document.getElementById('checkin_search');
+    const openOnly = document.getElementById('checkin_open_only');
+
+    function filter() {
+        const value = search.value.trim().toLowerCase();
+        let visible = 0;
+        list.querySelectorAll('.checkin__row').forEach(row => {
+            row.hidden = !row.textContent.toLowerCase().includes(value) || (openOnly.checked && row.classList.contains('checkin__row--done'));
+            if (!row.hidden) visible++;
+        });
+        document.getElementById('checkin_no_results').hidden = visible > 0;
+    }
+
+    async function toggle(row) {
+        const done = !row.classList.contains('checkin__row--done');
+        row.classList.toggle('checkin__row--done', done);  // right away, so it feels instant
+        const body = new FormData();
+        body.append('csrfmiddlewaretoken', csrf);
+        body.append('id', row.dataset.participant);
+        body.append('field', 'checked_in');
+        body.append('value', `${done},`);
+        const response = await fetch('{% url "ajax_update_memberparticipant" %}', { method: 'POST', body });
+        if (!response.ok) {
+            row.classList.toggle('checkin__row--done', !done);
+            snackbar.labelText = 'Konnte nicht gespeichert werden';
+            snackbar.open();
+        }
+        row.setAttribute('aria-pressed', row.classList.contains('checkin__row--done'));
+        document.getElementById('checkin_count').textContent = list.querySelectorAll('.checkin__row--done').length;
+        filter();
+    }
+
+    list.addEventListener('click', event => {
+        if (event.target.closest('.checkin__call')) return;  // calling must not check in
+        const row = event.target.closest('.checkin__row');
+        if (row) toggle(row);
+    });
+    list.addEventListener('keydown', event => {
+        const row = event.target.closest('.checkin__row');
+        if (row && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); toggle(row); }
+    });
+    search.addEventListener('input', filter);
+    openOnly.addEventListener('change', filter);
+})();
+</script>
+{% endblock %}

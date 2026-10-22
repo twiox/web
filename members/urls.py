@@ -10,6 +10,7 @@ urlpatterns = [
     path("veranstaltungen/<int:pk>/löschen/", views.EventDeleteView.as_view(),name="event_delete"),
     path("veranstaltungen/<int:pk>/teilnehmen/", views.EventParticipateView.as_view(),name="event_participate"),
     path("veranstaltungen/<int:pk>/orga/", views.EventOrgaView.as_view(),name="event_participants"),
+    path("veranstaltungen/<int:pk>/orga/checkin/", views.EventCheckinView.as_view(), name="event_checkin"),
     path("veranstaltungen/<int:pk>/orga/hinzufuegen/", views.event_add_participant, name="event_add_participant"),
     path("veranstaltungen/<int:pk>/orga/teilnehmende.csv", views.event_participants_csv, name="event_participants_csv"),
     path("veranstaltungen/<int:pk>/verantwortlich/", views.event_responsible_toggle, name="event_responsible_toggle"),

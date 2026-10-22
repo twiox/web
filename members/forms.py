@@ -16,13 +16,13 @@ class EventFileForm(MdcFormMixin, forms.ModelForm):
 
     class Meta:
         model = Document
-        fields = ["name", "file", "orga"]
+        fields = ["name", "file", "orga", "requires_consent"]
         widgets = {"file": forms.FileInput}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["file"].required = True
-        for name in ["file", "orga"]:
+        for name in ["file", "orga", "requires_consent"]:
             self.fields[name].widget.attrs.pop("class", None)  # not rendered as text fields
         self.fields["file"].widget.attrs["hidden"] = True  # opened by the "Datei wählen" button
 
@@ -159,7 +159,6 @@ class EventForm(MdcFormMixin, forms.ModelForm):
             "title", "place", "costs", "start_date", "end_date", "deadline", "hinweis",
             "info_only", "ask_ticket", "min_age", "max_age", "content",
             "meeting_point", "meeting_lat", "meeting_long",
-            "teilnahmebedingungen", "datenschutz", "einverstaendnis",
         ]
         labels = {
             "title": "Titel",
@@ -167,31 +166,17 @@ class EventForm(MdcFormMixin, forms.ModelForm):
             "hinweis": "Warnhinweis",
             "info_only": "Nur Ankündigung",
             "ask_ticket": "Deutschlandticket abfragen",
-            "einverstaendnis": "Einverständniserklärung",
             "meeting_point": "Beschreibung (z.B. Haupteingang)",
-        }
-        widgets = {
-            "teilnahmebedingungen": forms.FileInput,
-            "datenschutz": forms.FileInput,
-            "einverstaendnis": forms.FileInput,
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["costs"].required = True
-        for name in ["info_only", "ask_ticket", "content", *self.file_field_names]:
+        for name in ["info_only", "ask_ticket", "content"]:
             self.fields[name].widget.attrs.pop("class", None)  # not rendered as text fields
-        for name in self.file_field_names:
-            self.fields[name].widget.attrs["hidden"] = True  # opened by the "Datei wählen" button
         if self.instance.has_legacy_description:
             del self.fields["content"]  # the old Markdown text stays as it is
         self.used_assets = []
-
-    file_field_names = ["teilnahmebedingungen", "datenschutz", "einverstaendnis"]
-
-    @property
-    def file_fields(self):
-        return [self[name] for name in self.file_field_names]
 
     def clean_content(self):
         # uploads not yet linked to an event, plus the ones of this event

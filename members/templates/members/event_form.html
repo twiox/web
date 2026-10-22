@@ -19,7 +19,7 @@
         <h1>{% if object.pk %}{{ object.title }}{% else %}Neue Veranstaltung{% endif %}</h1>
     </div>
 
-    <form method="POST" enctype="multipart/form-data" class="event_form_page">
+    <form method="POST" class="event_form_page">
         {% csrf_token %}
         {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
         <div class="event_form_columns">
@@ -55,22 +55,12 @@
 
                 <div class="session_card">
                     <h3>Dokumente</h3>
-                    {% for field in form.file_fields %}
-                    <div class="file_field">
-                        {% for error in field.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
-                        <span class="file_field__label">{{ field.label }}</span>
-                        {% if field.value %}
-                            <a class="more_info_button" href="{{ field.value.url }}" target="_blank">ansehen</a>
-                        {% else %}
-                            <span class="member_panel__hint">fehlt</span>
-                        {% endif %}
-                        <label class="table_action">
-                            Datei wählen
-                            {{ field }}
-                        </label>
-                        <span class="file_field__name"></span>
-                    </div>
-                    {% endfor %}
+                    {% if object.pk %}
+                    <p class="member_panel__hint">Dokumente wie Teilnahmebedingungen oder Einverständniserklärung werden auf der Orga-Seite verwaltet.</p>
+                    <a class="table_action" href="{% url 'event_participants' object.pk %}"><i class="fas fa-folder-open"></i> Zur Orga-Seite</a>
+                    {% else %}
+                    <p class="member_panel__hint">Dokumente wie Teilnahmebedingungen oder Einverständniserklärung kannst du nach dem Speichern auf der Orga-Seite hochladen.</p>
+                    {% endif %}
                 </div>
             </div>
 
@@ -107,12 +97,6 @@
 
 <script>
     document.querySelectorAll('.event_form_page .mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));
-    // show the chosen file name next to its button
-    document.querySelector('.event_form_page').addEventListener('change', function (event) {
-        if (event.target.type !== 'file') return;
-        const name = event.target.files[0] ? event.target.files[0].name : '';
-        event.target.closest('.file_field').querySelector('.file_field__name').textContent = name;
-    });
 </script>
 {% include "members/snippets/leaflet.html" %}
 <script>

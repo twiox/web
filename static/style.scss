@@ -1807,6 +1807,122 @@ footer{
     margin-bottom: $padding_small;
 }
 
+/* Check-in on site: big rows for phones, tap to tick off */
+.checkin{
+    max-width: 700px;
+    margin: 0 auto;
+    // not sticky: the global section/div{overflow:hidden} would make it cover the first rows
+    &__bar{
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: $padding_small;
+        padding: $padding_small 0;
+        background-color: $secondary_bg;
+        .searchbar{
+            flex: 1 1 200px;
+            width: auto;
+            height: 38px;
+        }
+    }
+    &__head{
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        width: 100%;
+        h1{
+            margin: 0;
+            padding: 0;
+        }
+    }
+    &__count{
+        color: grey;
+        strong{
+            color: white;
+            font-size: 1.4rem;
+        }
+    }
+    &__list{
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    &__row{
+        display: flex;
+        align-items: center;
+        gap: $padding_medium;
+        margin-bottom: 6px;
+        padding: $padding_medium;
+        border-left: 4px solid transparent;
+        border-radius: 4px;
+        background-color: $tertiary_bg;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.2s ease;
+        &[hidden]{
+            display: none;
+        }
+        &--done{
+            border-left-color: #6ab04c;
+            background-color: rgba(106, 176, 76, 0.15);
+            .checkin__mark{
+                border-color: #6ab04c;
+                background-color: #6ab04c;
+                i{
+                    color: white;
+                }
+            }
+        }
+    }
+    &__mark{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 34px;
+        height: 34px;
+        border: 2px solid $quartiary_bg;
+        border-radius: 50%;
+        i{
+            color: $quartiary_bg;  // faint until checked in
+        }
+    }
+    &__person{
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        strong{
+            color: white;
+            font-size: 1.05rem;
+        }
+        small{
+            color: grey;
+        }
+    }
+    &__tag{
+        margin-left: 6px;
+        padding: 0 6px;
+        border-radius: 4px;
+        background-color: $primary;
+        color: white;
+        font-size: 0.75rem;
+        &--warn{
+            background-color: $secondary;
+        }
+    }
+    &__notes{
+        font-style: italic;
+    }
+    &__call{
+        padding: $padding_small;
+        border-radius: 50%;
+        background-color: $quartiary_bg;
+        color: white;
+        line-height: 1;
+    }
+}
+
 /* Board: list of all events, grouped by year */
 .event_table{
     small, &__status{
@@ -1910,6 +2026,10 @@ footer{
             color: grey;
         }
     }
+}
+// the standard document names are long: label column grows, status and button stay compact
+.orga_standard{
+    grid-template-columns: 1fr auto auto;
 }
 .orga_upload__options{
     margin-top: $padding_small;

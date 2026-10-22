@@ -5,5 +5,11 @@
             data-type="toggle" data-file="{{ doc.pk }}" title="Sichtbarkeit umschalten">
         {% if public %}<i class="fas fa-eye"></i> öffentlich{% else %}<i class="fas fa-eye-slash"></i> nur Orga{% endif %}
     </button>
+    {% if public %}
+    <button type="button" class="orga_document__visibility{% if not doc.requires_consent %} orga_document__visibility--orga{% endif %}"
+            data-type="consent" data-file="{{ doc.pk }}" title="Muss bei der Anmeldung bestätigt werden – umschalten">
+        <i class="fas fa-file-signature"></i> {% if doc.requires_consent %}bestätigen{% else %}nur Info{% endif %}
+    </button>
+    {% endif %}
     <button type="button" class="icon_button" data-type="delete" data-file="{{ doc.pk }}" title="Löschen"><i class="far fa-trash-alt"></i></button>
 </div>
