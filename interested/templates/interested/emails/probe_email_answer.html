@@ -1,4 +1,4 @@
-<p>Hallo {{object.first_name}} {{object.last_name}}</p>
+<p>Hallo {% if object.contact_person %}{{ object.contact_person }}{% else %}{{object.first_name}} {{object.last_name}}{% endif %}</p>
 
 <p>Schön, dass du dich für ein Probetraining bei Twio X interessierst, wir freuen uns sehr!<br>
 
@@ -6,6 +6,7 @@
 
 <ul>
     <li>Name: {{object.first_name}} {{object.last_name}}</li>
+    {% if object.contact_person %}<li>Kontaktperson: {{ object.contact_person }}</li>{% endif %}
     <li>Geburtsdatum: {{object.birthday|date:'d.m.Y'}}</li>
     <li>Geschlecht: {{object.sex}}</li>
     <li>E-Mail: {{object.email}},

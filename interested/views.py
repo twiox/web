@@ -1,6 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib.auth.mixins import (
     LoginRequiredMixin,
     PermissionRequiredMixin,
@@ -12,12 +14,14 @@ from django.views.generic import (
     DeleteView,
     DetailView,
     ListView,
+    TemplateView,
 )
 from django.contrib import messages
+from django.db.models import F
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.conf import settings
-from .forms import ProbetrainingForm, PublicEventForm
+from .forms import ProbetrainingForm, PublicEventForm, TesterForm
 from members.models import Chairman
 from .models import (
     Teamer,
@@ -26,7 +30,7 @@ from .models import (
     EventMerch,
     Tester,
 )
-from members.roles import is_board
+from members.roles import PrivilegedRequiredMixin, is_board, is_privileged
 
 
 def interested_index(request):
@@ -126,11 +130,70 @@ def interested_team(request):
     )
 
 
-class TesterListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-    model = Tester
+def tester_age_groups(testers):
+    """Children / teenagers / adults / without birthday, for the dashboard."""
+    groups = {"Kinder (bis 13)": 0, "Jugendliche (14–17)": 0, "Erwachsene (ab 18)": 0}
+    for tester in testers:
+        age = tester.age
+        if age is None:
+            continue
+        key = "Kinder (bis 13)" if age < 14 else "Jugendliche (14–17)" if age < 18 else "Erwachsene (ab 18)"
+        groups[key] += 1
+    return groups
 
-    def test_func(self):
-        return is_board(self.request.user)
+
+class TesterIndexView(LoginRequiredMixin, PrivilegedRequiredMixin, TemplateView):
+    """Probetraining dashboard; for now the people waiting for a trial."""
+
+    template_name = "interested/tester_index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        testers = list(Tester.objects.all())
+        context.update(waiting=len(testers), age_groups=tester_age_groups(testers))
+        return context
+
+
+class TesterListView(LoginRequiredMixin, PrivilegedRequiredMixin, ListView):
+    """All trial requests, newest first; requests from before the date was stored come last."""
+
+    model = Tester
+    queryset = Tester.objects.order_by(F("created").desc(nulls_last=True), "-pk")
+
+
+@login_required
+@require_POST
+def tester_consent(request, pk):
+    """List checkbox: the parents' consent for a minor is there (or not)."""
+    if not is_privileged(request.user):
+        return JsonResponse({"success": False}, status=403)
+    tester = get_object_or_404(Tester, pk=pk)
+    tester.has_consent = request.POST.get("value") == "true"
+    tester.save(update_fields=["has_consent"])
+    return JsonResponse({"success": True})
+
+
+class TesterUpdateView(LoginRequiredMixin, PrivilegedRequiredMixin, UpdateView):
+    model = Tester
+    form_class = TesterForm
+
+    def get_success_url(self):
+        messages.add_message(self.request, messages.SUCCESS, f"{self.object} gespeichert")
+        return reverse("tester_list")
+
+
+class TesterDeleteView(LoginRequiredMixin, PrivilegedRequiredMixin, DeleteView):
+    """POST only (the list asks first)."""
+
+    model = Tester
+    http_method_names = ["post"]
+
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, f"{self.object} gelöscht")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("tester_list")
 
 
 class TeamerLeipzigCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):

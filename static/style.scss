@@ -1728,6 +1728,82 @@ footer{
     }
 }
 
+/* Probetraining dashboard and list */
+.tester_stats{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: $padding_small;
+    margin-bottom: $padding_big;
+    .session_card{
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        color: grey;
+    }
+    &__total{
+        border-left: 4px solid $primary;
+    }
+    &__number{
+        color: white;
+        font-size: 2rem;
+        line-height: 1;
+    }
+}
+.tester_table{
+    // e-mail and phone as plain text links (.member_table--static makes links icon-sized)
+    &.member_table--static tbody td > a{
+        padding: 0;
+        font-size: inherit;
+    }
+    &__consent{
+        text-align: center;
+    }
+    // ten columns: tighter padding, and the long ones are capped so the table fits without scrolling
+    th, td{
+        padding-left: 6px;
+        padding-right: 6px;
+    }
+    td.tester_table__notes{
+        white-space: normal;  // .member_table td keeps everything on one line
+        min-width: 140px;
+        max-width: 180px;  // long notes wrap; the full text shows on hover
+    }
+    &__email{
+        max-width: 190px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    // a real table cell (not flex), so the icons stay centred in rows with wrapped notes
+    td.table_actions{
+        display: table-cell;
+        white-space: nowrap;
+        vertical-align: middle;
+        form{
+            display: inline;
+        }
+    }
+}
+.tester_form__consent{
+    margin-top: $padding_small;
+}
+// sortable table headers (tester list)
+th.sortable{
+    cursor: pointer;
+    user-select: none;
+    &::after{
+        content: " ↕";
+        color: grey;
+    }
+    &.sorted_asc::after{
+        content: " ↑";
+        color: white;
+    }
+    &.sorted_desc::after{
+        content: " ↓";
+        color: white;
+    }
+}
+
 /* Board: list of all events, grouped by year */
 .event_table{
     small, &__status{

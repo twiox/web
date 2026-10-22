@@ -187,8 +187,9 @@
                             in welcher Du deine Probetrainings-Termine bekommst. Mit dem Trainer besprichst Du im Anschluss an das Training den weiteren Ablauf.
                             Nach vier absolvierten Trainings kannst Du eine Mitgliedschaft beantragen.</p>
                             <br>
-                            <strong>Wenn Du unter 18 Jahre alt bist, sende uns bitte mit Deiner Anfrage auch die nachfolgende,
-                            von deinen Eltern ausgefüllte, Einverständniserklärung.</strong><br>
+                            <strong>Für Minderjährige: Bitte tragt unten Name, Geburtsdatum und Geschlecht der teilnehmenden Person ein und gebt ein Elternteil
+                            als Kontaktperson an – E-Mail und Telefonnummer sind dann die der Kontaktperson.
+                            Sendet uns außerdem die nachfolgende, von den Eltern ausgefüllte Einverständniserklärung.</strong><br>
                             <br>
                             <ul>
                                 <li style="width:100%;">
@@ -219,8 +220,8 @@
                                         {% endif %}
                                         <label class="mdc-text-field mdc-text-field--filled first_name">
                                             <span class="mdc-text-field__ripple"></span>
-                                            <input type="text" class="mdc-text-field__input" aria-labelledby="first_name-label" name="first_name" required>
-                                            <span class="mdc-floating-label" id="first_name-label">Vorname</span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="first_name-label" name="first_name" required value="{{ form.first_name.value|default:'' }}">
+                                            <span class="mdc-floating-label" id="first_name-label">Vorname (teilnehmende Person)</span>
                                             <span class="mdc-line-ripple"></span>
                                         </label>
                                     </div>
@@ -232,8 +233,8 @@
                                         {% endif %}
                                         <label class="mdc-text-field mdc-text-field--filled last_name">
                                             <span class="mdc-text-field__ripple"></span>
-                                            <input type="text" class="mdc-text-field__input" aria-labelledby="last_name-label" name="last_name" required>
-                                            <span class="mdc-floating-label" id="last_name-label">Nachname</span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="last_name-label" name="last_name" required value="{{ form.last_name.value|default:'' }}">
+                                            <span class="mdc-floating-label" id="last_name-label">Nachname (teilnehmende Person)</span>
                                             <span class="mdc-line-ripple"></span>
                                         </label>
                                     </div>
@@ -245,8 +246,20 @@
                                         {% endif %}
                                         <label class="mdc-text-field mdc-text-field--filled birthday">
                                             <span class="mdc-text-field__ripple"></span>
-                                            <input type="text" class="mdc-text-field__input" aria-labelledby="birthday-label" name="birthday" required>
-                                            <span class="mdc-floating-label" id="birthday-label">Geburtsdatum</span>
+                                            <input type="date" class="mdc-text-field__input" aria-labelledby="birthday-label" name="birthday" id="prob_birthday" required value="{{ form.birthday.value|date:'Y-m-d'|default:form.birthday.value|default:'' }}">
+                                            <span class="mdc-floating-label mdc-floating-label--float-above" id="birthday-label">Geburtsdatum (teilnehmende Person)</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    {# shown for minors (script below), required for them by the form #}
+                                    <div class="chair_col-5 float_left padding_rl_small" id="prob_contact" {% if not form.contact_person.errors and not form.contact_person.value %}hidden{% endif %}>
+                                        {% for error in form.contact_person.errors %}
+                                            <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                        <label class="mdc-text-field mdc-text-field--filled contact_person">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="contact_person-label" name="contact_person" value="{{ form.contact_person.value|default:'' }}">
+                                            <span class="mdc-floating-label" id="contact_person-label">Kontaktperson (Elternteil)</span>
                                             <span class="mdc-line-ripple"></span>
                                         </label>
                                     </div>
@@ -258,7 +271,7 @@
                                         {% endif %}
                                         <label class="mdc-text-field mdc-text-field--filled telnr">
                                             <span class="mdc-text-field__ripple"></span>
-                                            <input type="text" class="mdc-text-field__input" aria-labelledby="telnr-label" name="telnr">
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="telnr-label" name="telnr" value="{{ form.telnr.value|default:'' }}">
                                             <span class="mdc-floating-label" id="telnr-label">Telefonnummer</span>
                                             <span class="mdc-line-ripple"></span>
                                         </label>
@@ -270,7 +283,7 @@
                                         {% endfor %}
                                         {% endif %}
                                         <label class="mdc-text-field mdc-text-field--filled email">
-                                            <input type="text" class="mdc-text-field__input" aria-labelledby="email-label" name="email" required>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="email-label" name="email" required value="{{ form.email.value|default:'' }}">
                                             <span class="mdc-floating-label" id="email-label">E-Mail-Adresse</span>
                                             <span class="mdc-line-ripple"></span>
                                         </label>
@@ -283,7 +296,7 @@
                                         {% endif %}
                                         <label class="mdc-text-field mdc-text-field--filled notes">
                                             <span class="mdc-text-field__ripple"></span>
-                                            <input type="text" class="mdc-text-field__input" aria-labelledby="notes-label" name="notes">
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="notes-label" name="notes" value="{{ form.notes.value|default:'' }}">
                                             <span class="mdc-floating-label" id="notes-label">Anmerkungen</span>
                                             <span class="mdc-line-ripple"></span>
                                         </label>
@@ -299,12 +312,12 @@
                                             <span class="mdc-text-field__ripple"></span>
                                             <select id="select-sex" class="mdc-text-field__input" style="background-color:#333333;" name="sex" required>
                                                 <option value="" selected></option>
-                                                <option style="color:grey;" value="weiblich">weiblich</option>
-                                                <option style="color:grey;" value="divers">divers</option>
-                                                <option style="color:grey;" value="männlich">männlich</option>
-                                                <option style="color:grey;" value="keine Angabe">keine Angabe</option>
+                                                <option style="color:grey;" value="weiblich" {% if form.sex.value == "weiblich" %}selected{% endif %}>weiblich</option>
+                                                <option style="color:grey;" value="divers" {% if form.sex.value == "divers" %}selected{% endif %}>divers</option>
+                                                <option style="color:grey;" value="männlich" {% if form.sex.value == "männlich" %}selected{% endif %}>männlich</option>
+                                                <option style="color:grey;" value="keine Angabe" {% if form.sex.value == "keine Angabe" %}selected{% endif %}>keine Angabe</option>
                                             </select>
-                                            <span class="mdc-floating-label" id="sex-label">Dein Geschlecht</span>
+                                            <span class="mdc-floating-label" id="sex-label">Geschlecht</span>
                                             <span class="mdc-line-ripple"></span>
                                         </label>
                                     </div>
@@ -339,6 +352,22 @@
                                 </div>
                             </form>
                             <script>
+                                // minors: ask for the parent as contact person
+                                (function () {
+                                    const birthday = document.getElementById('prob_birthday');
+                                    const contact = document.getElementById('prob_contact');
+                                    const input = contact.querySelector('input');
+                                    function update() {
+                                        if (!birthday.value) return;
+                                        const born = new Date(birthday.value), today = new Date();
+                                        let age = today.getFullYear() - born.getFullYear();
+                                        if (today < new Date(today.getFullYear(), born.getMonth(), born.getDate())) age--;
+                                        contact.hidden = age >= 18;
+                                        input.required = age < 18;
+                                    }
+                                    birthday.addEventListener('change', update);
+                                    update();
+                                })();
                                 $(document).ready(function(){
                                     $("#prob_button").click(function(){
                                         $(this).html('<i class="fas fa-spinner fa-pulse"></i>');

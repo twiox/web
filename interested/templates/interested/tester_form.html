@@ -1,0 +1,59 @@
+{% extends "members/base.html" %}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'tester_index' %}">Probetraining</a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'tester_list' %}">Anmeldungen</a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{ object }}</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="member_page">
+    <div class="member_toolbar">
+        <h1>{{ object }}</h1>
+    </div>
+    {% if object.created %}<p class="member_panel__hint">Anfrage vom {{ object.created|date:"d.m.Y, H:i" }} Uhr</p>{% endif %}
+
+    <form method="POST" class="tester_form">
+        {% csrf_token %}
+        {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+        <div class="session_grid">
+            <div class="session_card">
+                <h3>Person</h3>
+                <div class="member_fields">
+                    {% include "user_handling/_field.html" with field=form.first_name %}
+                    {% include "user_handling/_field.html" with field=form.last_name %}
+                    {% include "user_handling/_field.html" with field=form.birthday %}
+                    {% include "user_handling/_field.html" with field=form.sex %}
+                </div>
+            </div>
+            <div class="session_card">
+                <h3>Kontakt</h3>
+                <p class="member_panel__hint">Bei Minderjährigen gehören E-Mail und Telefon zur Kontaktperson.</p>
+                <div class="member_fields">
+                    {% include "user_handling/_field.html" with field=form.contact_person %}
+                    {% include "user_handling/_field.html" with field=form.email %}
+                    {% include "user_handling/_field.html" with field=form.telnr %}
+                </div>
+                {% if form.has_consent %}
+                <div class="chip_list tester_form__consent">
+                    <label class="toggle_chip">{{ form.has_consent }}<span>Einverständniserklärung liegt vor</span></label>
+                </div>
+                {% endif %}
+            </div>
+            <div class="session_card">
+                <div class="member_fields member_fields--wide">
+                    {% include "user_handling/_field.html" with field=form.notes %}
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="form_button member_form__submit">Speichern</button>
+    </form>
+</section>
+
+<script>
+    document.querySelectorAll('.tester_form .mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));
+</script>
+{% endblock %}

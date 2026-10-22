@@ -1,0 +1,41 @@
+{% extends "members/base.html" %}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    {% if is_board %}
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}">Übersicht</a>
+    {% else %}
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_index' %}">Trainerdokument</a>
+    {% endif %}
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Probetraining</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="member_page">
+    <div class="member_toolbar">
+        <h1>Probetraining</h1>
+    </div>
+
+    <div class="tester_stats">
+        <div class="session_card tester_stats__total">
+            <span class="tester_stats__number">{{ waiting }}</span>
+            <span>{{ waiting|pluralize:"Person wartet,Personen warten" }} auf ein Probetraining</span>
+        </div>
+        {% for label, count in age_groups.items %}
+        <div class="session_card">
+            <span class="tester_stats__number">{{ count }}</span>
+            <span>{{ label }}</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="dashboard_grid">
+        <a class="dashboard_card" href="{% url 'tester_list' %}">
+            <i class="fas fa-list"></i>
+            <strong>Anmeldungen</strong>
+            <span class="dashboard_card__text">Alle Interessierten ansehen, bearbeiten und löschen</span>
+        </a>
+    </div>
+</section>
+{% endblock %}

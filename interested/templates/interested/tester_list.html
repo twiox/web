@@ -1,50 +1,132 @@
 {% extends "members/base.html" %}
 {% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}">
-        Übersicht</a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'tester_index' %}">Probetraining</a>
     <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Probetrainingsanfragen</a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Anmeldungen</a>
 </div>
 {% endblock %}
 
-{%block content %}
-<section style="display: flex; flex-wrap:wrap">
-    <section class="chair_col-5 padding_all_small">
-        <h1>Alle Anmeldungen</h1>
-        <div class="tertiary_bg padding_all_small side_scroll">
-            <table style="width: 100%;">
-                <thead>
-                    <tr>
-                        <th nowrap="nowrap"><h5> Nr </h5></th>
-                        <th nowrap="nowrap"><h5> Vorname </h5></th>
-                        <th nowrap="nowrap"><h5> Nachname </h5></th>
-                        <th nowrap="nowrap"><h5> Geb.-Datum </h5></th>
-                        <th nowrap="nowrap"><h5> E-Mail-Adresse </h5></th>
-                        <th nowrap="nowrap"><h5> Telefonnummer </h5></th>
-                        <th nowrap="nowrap"><h5> Notizen </h5></th>
-                    </tr>
-                </thead>
-                <tbody id="table_body">
-                {% for tester in object_list %}
-                    <tr class="{% cycle 'odd' 'even' %} table_row" id="{{forloop.counter}}_row">
-                        <td nowrap="nowrap" class="counter"> {{forloop.counter}}</td>
-                        <td nowrap="nowrap"> {{tester.first_name}}</td>
-                        <td nowrap="nowrap"> {{tester.last_name}}</td>
-                        <td nowrap="nowrap"> {{tester.birthday|date:'d.m.Y'}}</td>
-                        <td nowrap="nowrap"> {{tester.email}}</td>
-                        <td nowrap="nowrap"> {{tester.telnr}}</td>
-                        <td nowrap="nowrap"> {%if tester.notes %} {{tester.notes}} {%else%} - {%endif%}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </section>
-    <section class="chair_col-5 padding_all_small">
-        <div>
-        <h1>Probetrainingsgruppen</h1>
-        </div>
-    </section>
+{% block content %}
+<section class="member_page">
+    <div class="member_toolbar">
+        <h1>Anmeldungen</h1>
+        <input class="searchbar" id="tester_search" type="search" placeholder="Suche nach Name, E-Mail, Notiz …">
+    </div>
+    {# same age groups as on the dashboard #}
+    <div class="chip_list" id="tester_age_filter">
+        <label class="toggle_chip"><input type="radio" name="age_group" value="" checked><span>Alle</span></label>
+        <label class="toggle_chip"><input type="radio" name="age_group" value="0-13"><span>Kinder (bis 13)</span></label>
+        <label class="toggle_chip"><input type="radio" name="age_group" value="14-17"><span>Jugendliche (14–17)</span></label>
+        <label class="toggle_chip"><input type="radio" name="age_group" value="18-999"><span>Erwachsene (ab 18)</span></label>
+    </div>
+
+    <div class="member_table_wrapper tertiary_bg">
+        <table class="member_table member_table--static tester_table">
+            <thead>
+                <tr>
+                    <th class="sortable" data-sort="name">Name</th>
+                    <th class="sortable" data-sort="age">Alter</th>
+                    <th>Geschlecht</th>
+                    <th>Kontaktperson</th>
+                    <th>E-Mail</th>
+                    <th>Telefon</th>
+                    <th>Notizen</th>
+                    <th title="Einverständniserklärung (nur Minderjährige)">Einv.</th>
+                    <th class="sortable sorted_desc" data-sort="created">Anfrage</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="tester_rows">
+            {% for tester in object_list %}
+                {# sort keys: requests without a date (from before it was stored) sort as the oldest, by their order #}
+                <tr data-name="{{ tester.last_name }} {{ tester.first_name }}" data-age="{{ tester.age|default_if_none:'' }}"
+                    data-birthday="{{ tester.birthday|date:'Y-m-d' }}" data-created="{{ tester.created|date:'Y-m-d H:i'|default:'' }}" data-pk="{{ tester.pk }}">
+                    <td>{{ tester.last_name }}, {{ tester.first_name }}</td>
+                    <td title="{{ tester.birthday|date:'d.m.Y' }}">{{ tester.age|default_if_none:"–" }}</td>
+                    <td>{{ tester.sex }}</td>
+                    <td>{{ tester.contact_person|default:"–" }}</td>
+                    <td class="tester_table__email" title="{{ tester.email }}"><a href="mailto:{{ tester.email }}">{{ tester.email }}</a></td>
+                    <td>{% if tester.telnr %}<a href="tel:{{ tester.telnr }}">{{ tester.telnr }}</a>{% else %}–{% endif %}</td>
+                    <td class="tester_table__notes" title="{{ tester.notes|default:'' }}">{{ tester.notes|default:"–"|truncatechars:50 }}</td>
+                    {# only minors need the parents' consent #}
+                    <td class="tester_table__consent">
+                        {% if tester.age is None or tester.age < 18 %}
+                        <input type="checkbox" class="tester_consent" {% if tester.has_consent %}checked{% endif %}
+                               data-url="{% url 'tester_consent' tester.pk %}" aria-label="Einverständniserklärung liegt vor">
+                        {% endif %}
+                    </td>
+                    <td>{{ tester.created|date:"d.m.Y"|default:"–" }}</td>
+                    <td class="table_actions">
+                        <a href="{% url 'tester_update' tester.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
+                        <form method="POST" action="{% url 'tester_delete' tester.pk %}" data-name="{{ tester }}">
+                            {% csrf_token %}
+                            <button type="submit" class="icon_button" title="Löschen"><i class="far fa-minus-square"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="10">Keine Anmeldungen.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <p id="tester_no_results" class="padding_all_small" hidden>Keine Treffer.</p>
+    </div>
 </section>
+
+<script>
+(function () {
+    const rows = document.getElementById('tester_rows');
+    const search = document.getElementById('tester_search');
+    const ageFilter = document.getElementById('tester_age_filter');
+
+    // search and age group together
+    function filter() {
+        const value = search.value.trim().toLowerCase();
+        const [min, max] = (ageFilter.querySelector('input:checked').value || '0-999').split('-').map(Number);
+        let visible = 0;
+        rows.querySelectorAll('tr[data-name]').forEach(row => {
+            const age = row.dataset.age === '' ? null : Number(row.dataset.age);
+            const inGroup = ageFilter.querySelector('input:checked').value === '' || (age !== null && age >= min && age <= max);
+            row.hidden = !inGroup || !row.textContent.toLowerCase().includes(value);
+            if (!row.hidden) visible++;
+        });
+        document.getElementById('tester_no_results').hidden = visible > 0;
+    }
+    search.addEventListener('input', filter);
+    ageFilter.addEventListener('change', filter);
+
+    // click a column header to sort, again to reverse
+    const keys = {
+        name: row => row.dataset.name.toLowerCase(),
+        age: row => row.dataset.birthday ? -Date.parse(row.dataset.birthday) : Infinity,  // the birthday sorts finer than the age
+        created: row => row.dataset.created || '0000-' + String(row.dataset.pk).padStart(8, '0'),
+    };
+    document.querySelectorAll('.tester_table th[data-sort]').forEach(th => th.addEventListener('click', () => {
+        const ascending = !th.classList.contains('sorted_asc');
+        document.querySelectorAll('.tester_table th[data-sort]').forEach(h => h.classList.remove('sorted_asc', 'sorted_desc'));
+        th.classList.add(ascending ? 'sorted_asc' : 'sorted_desc');
+        const key = keys[th.dataset.sort];
+        const sorted = [...rows.querySelectorAll('tr[data-name]')].sort((a, b) => {
+            const x = key(a), y = key(b);
+            return (x < y ? -1 : x > y ? 1 : 0) * (ascending ? 1 : -1);
+        });
+        sorted.forEach(row => rows.appendChild(row));
+    }));
+    rows.addEventListener('change', async event => {
+        const box = event.target.closest('.tester_consent');
+        if (!box) return;
+        const body = new FormData();
+        body.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        body.append('value', box.checked);
+        const response = await fetch(box.dataset.url, { method: 'POST', body });
+        if (!response.ok) box.checked = !box.checked;
+        snackbar.labelText = response.ok ? 'Gespeichert' : 'Konnte nicht gespeichert werden';
+        snackbar.open();
+    });
+    rows.addEventListener('submit', event => {
+        if (!confirm(`${event.target.dataset.name} wirklich löschen?`)) event.preventDefault();
+    });
+})();
+</script>
 {% endblock %}

@@ -2,13 +2,15 @@ from django.db import models
 from PIL import Image
 from django.urls import reverse
 from datetime import datetime, timedelta
-from members.models import User, Session
+from members.models import User, Session, calculate_age
 from django.template.defaultfilters import slugify
 import markdown
 
 # Create your models here.
 ## Probetrainingsanmeldungen
 class Tester(models.Model):
+    """A trial request; name, birthday and gender are the ones of the person who wants to train."""
+
     first_name = models.CharField('Vorname', max_length=400)
     last_name = models.CharField('Nachname', max_length=400)
     email = models.CharField('Email', max_length=300)
@@ -16,10 +18,18 @@ class Tester(models.Model):
     telnr = models.CharField('Telefonnummer', max_length=300, blank=True, null=True)
     sex = models.CharField('Geschlecht', max_length=30)
     notes = models.TextField('Anmerkungen', blank=True, null=True)
-    einverstaendnis = models.FileField('Einverständniserklärung',upload_to=f"Probetrainings/Einverständnis/",null=True,blank=True)
+    # for minors: the parent who sent the request; email and phone are theirs then
+    contact_person = models.CharField("Kontaktperson", max_length=200, blank=True)
+    has_consent = models.BooleanField("Einverständniserklärung liegt vor", default=False)
+    # when the sign-up form was sent; empty for sign-ups from before this field existed
+    created = models.DateTimeField("Anfrage vom", auto_now_add=True, null=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+    @property
+    def age(self):
+        return calculate_age(self.birthday) if self.birthday else None
 
 
 class Teamer(models.Model):
