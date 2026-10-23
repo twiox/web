@@ -7,9 +7,12 @@ training time on that day.
 """
 from datetime import date
 
+from django.db.models import Count
+
 from trainer.models import TrainingSessionEntry, TrainingSessionParticipant
 
 from .models import Tester, TrialDate, TrialGroup
+
 
 
 def weekday_matches(trial_date):
@@ -94,3 +97,14 @@ def trainer_trial_groups(trainer):
         group.last_date = max(d.date for d in group.dates)
     # groups that still come first (by their next date), then finished ones (latest first)
     return sorted(groups, key=lambda g: (g.next_date is None, g.next_date or date.min, -g.last_date.toordinal()))
+
+
+def finished_testers():
+    """Everyone in a group whose trial dates are all over, with .visits; the ones without outcome first."""
+    finished = TrialGroup.objects.filter(trial_dates__isnull=False).exclude(trial_dates__date__gte=date.today())
+    return (
+        Tester.objects.filter(trial_group__in=finished)
+        .annotate(visits=Count("attendances"))
+        .select_related("trial_group")
+        .order_by("outcome", "last_name", "first_name")  # empty (open) sorts first
+    )

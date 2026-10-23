@@ -1816,6 +1816,27 @@ footer{
     .tester_stats{
         margin-bottom: 0;
     }
+    // the outcome labels are longer than group names
+    .tester_table .tester_group{
+        max-width: none;
+    }
+}
+// group card: share of the trial dates that are over
+.trial_progress{
+    display: block;
+    height: 6px;
+    margin-top: 4px;
+    border-radius: 3px;
+    background-color: $quartiary_bg;
+    overflow: hidden;
+    &__bar{
+        display: block;
+        height: 100%;
+        background-color: $primary;
+    }
+}
+.trial_group_card:hover .trial_progress, .trial_group_card:focus .trial_progress{
+    background-color: $secondary_bg;  // the card turns $quartiary_bg on hover
 }
 .tester_table{
     // e-mail and phone as plain text links (.member_table--static makes links icon-sized)
@@ -1862,7 +1883,7 @@ footer{
             background-color: $secondary_bg;
         }
     }
-    // group dropdown in the dark style of the other inputs
+    // group / outcome dropdown in the dark style of the other inputs
     .tester_group{
         max-width: 105px;
         padding: 4px 6px;

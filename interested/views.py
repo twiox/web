@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.http import HttpResponseRedirect, JsonResponse
@@ -17,7 +19,7 @@ from django.views.generic import (
     TemplateView,
 )
 from django.contrib import messages
-from django.db.models import Count, F, Max, Min
+from django.db.models import Count, F, Max, Min, Q
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.conf import settings
@@ -31,7 +33,7 @@ from .models import (
     Tester,
     TrialGroup,
 )
-from .trials import attended_trainings, group_attendance, upcoming_trial_dates, weekday_matches
+from .trials import attended_trainings, finished_testers, group_attendance, upcoming_trial_dates, weekday_matches
 from members.roles import PrivilegedRequiredMixin, is_board, is_privileged
 
 
@@ -160,12 +162,15 @@ class TesterIndexView(LoginRequiredMixin, PrivilegedRequiredMixin, TemplateView)
             groups=TrialGroup.objects.annotate(
                 size=Count("testers", distinct=True),
                 date_count=Count("trial_dates", distinct=True),
+                past_count=Count("trial_dates", filter=Q(trial_dates__date__lt=date.today()), distinct=True),
                 first_date=Min("trial_dates__date"),
                 last_date=Max("trial_dates__date"),
             ),
             # the board sees all dates, trainers the ones at their own training times
             upcoming=upcoming_trial_dates(self.request.user, board),
             upcoming_all=board,
+            finished=finished_testers(),
+            outcomes=Tester.OUTCOMES,
         )
         return context
 
@@ -211,6 +216,21 @@ def tester_set_group(request, pk):
     tester.trial_group = get_object_or_404(TrialGroup, pk=group_pk) if group_pk else None
     tester.save(update_fields=["trial_group"])
     return JsonResponse({"success": True, "group": str(tester.trial_group or "")})
+
+
+@login_required
+@require_POST
+def tester_outcome(request, pk):
+    """Dashboard dropdown: what came of the trial (joined or not); empty: still open."""
+    if not is_privileged(request.user):
+        return JsonResponse({"success": False}, status=403)
+    tester = get_object_or_404(Tester, pk=pk)
+    outcome = request.POST.get("outcome", "")
+    if outcome not in dict(Tester.OUTCOMES):
+        return JsonResponse({"success": False}, status=400)
+    tester.outcome = outcome
+    tester.save(update_fields=["outcome"])
+    return JsonResponse({"success": True})
 
 
 @login_required

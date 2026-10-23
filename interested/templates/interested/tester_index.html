@@ -52,6 +52,12 @@
                 {{ group.size }} Teilnehmende ·
                 {{ group.date_count }} Termin{{ group.date_count|pluralize:"e" }}{% if group.first_date %}, {{ group.first_date|date:"d.m." }}–{{ group.last_date|date:"d.m.Y" }}{% endif %}
             </span>
+            {% if group.date_count %}
+            <span class="trial_progress" title="{{ group.past_count }} von {{ group.date_count }} Terminen vorbei">
+                <span class="trial_progress__bar" style="width: {% widthratio group.past_count group.date_count 100 %}%"></span>
+            </span>
+            <span class="dashboard_card__text">{{ group.past_count }} von {{ group.date_count }} Terminen vorbei</span>
+            {% endif %}
         </a>
         {% empty %}
         <p class="member_panel__hint">Noch keine Gruppen.</p>
@@ -84,5 +90,79 @@
     {% else %}
     <p class="member_panel__hint">{% if upcoming_all %}Keine geplanten Probetrainings.{% else %}Zu deinen Trainingszeiten sind keine Probetrainings geplant.{% endif %}</p>
     {% endif %}
+
+    <div class="member_toolbar tester_dashboard__head">
+        <h3>Abgeschlossene Probetrainings</h3>
+    </div>
+    <p class="member_panel__hint">Alle Probetrainingsmenschen, deren Termine vorbei sind.</p>
+    {% if finished %}
+    {% csrf_token %}
+    <div class="member_table_wrapper tertiary_bg">
+        <table class="member_table member_table--static tester_table">
+            <thead><tr><th class="sortable" data-sort="name">Name</th><th class="sortable" data-sort="age">Alter</th><th class="sortable" data-sort="group">Gruppe</th><th>Besuche</th><th>Kontaktperson</th><th>E-Mail</th><th>Telefon</th><th class="sortable" data-sort="outcome">Ergebnis</th></tr></thead>
+            <tbody id="finished_rows">
+            {% for tester in finished %}
+                <tr data-name="{{ tester.last_name }} {{ tester.first_name }}" data-birthday="{{ tester.birthday|date:'Y-m-d' }}" data-group="{{ tester.trial_group }}">
+                    <td>{{ tester.last_name }}, {{ tester.first_name }}</td>
+                    <td title="{{ tester.birthday|date:'d.m.Y' }}">{{ tester.age|default_if_none:"–" }}</td>
+                    <td>{% if tester.trial_group %}<a href="{% url 'trial_group_detail' tester.trial_group.pk %}">{{ tester.trial_group }}</a>{% else %}–{% endif %}</td>
+                    <td>{{ tester.visits }}×</td>
+                    <td>{{ tester.contact_person|default:"–" }}</td>
+                    <td class="tester_table__email" title="{{ tester.email }}"><a href="mailto:{{ tester.email }}">{{ tester.email }}</a></td>
+                    <td>{% if tester.telnr %}<a href="tel:{{ tester.telnr }}">{{ tester.telnr }}</a>{% else %}–{% endif %}</td>
+                    <td>
+                        <select class="tester_group" data-url="{% url 'tester_outcome' tester.pk %}" aria-label="Ergebnis">
+                            {% for value, label in outcomes %}<option value="{{ value }}" {% if value == tester.outcome %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                        </select>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="member_panel__hint">Noch keine Gruppe ist fertig.</p>
+    {% endif %}
 </section>
+
+{% if finished %}
+<script>
+(function () {
+    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    document.getElementById('finished_rows').addEventListener('change', async event => {
+        const select = event.target.closest('select');
+        if (!select) return;
+        const body = new FormData();
+        body.append('csrfmiddlewaretoken', csrf);
+        body.append('outcome', select.value);
+        const response = await fetch(select.dataset.url, { method: 'POST', body });
+        snackbar.labelText = response.ok ? 'Gespeichert' : 'Konnte nicht gespeichert werden';
+        snackbar.open();
+    });
+
+    // click a column header to sort, again to reverse (as in the list of all requests)
+    const rows = document.getElementById('finished_rows');
+    const keys = {
+        name: row => row.dataset.name.toLowerCase(),
+        age: row => row.dataset.birthday ? -Date.parse(row.dataset.birthday) : Infinity,  // the birthday sorts finer than the age
+        group: row => row.dataset.group.toLowerCase(),
+        outcome: row => row.querySelector('select').selectedIndex,  // offen, Mitglied geworden, nicht Mitglied geworden
+    };
+    const headers = rows.closest('table').querySelectorAll('th[data-sort]');
+    headers.forEach(th => th.addEventListener('click', () => {
+        const ascending = !th.classList.contains('sorted_asc');
+        headers.forEach(h => h.classList.remove('sorted_asc', 'sorted_desc'));
+        th.classList.add(ascending ? 'sorted_asc' : 'sorted_desc');
+        const key = keys[th.dataset.sort];
+        const sorted = [...rows.querySelectorAll('tr')].sort((a, b) => {
+            const x = key(a), y = key(b);
+            // names and groups in German order (Schäfer before Schubert)
+            const order = typeof x === 'string' ? x.localeCompare(y, 'de') : x < y ? -1 : x > y ? 1 : 0;
+            return order * (ascending ? 1 : -1);
+        });
+        sorted.forEach(row => rows.appendChild(row));
+    }));
+})();
+</script>
+{% endif %}
 {% endblock %}

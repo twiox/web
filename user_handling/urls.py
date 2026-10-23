@@ -20,6 +20,7 @@ urlpatterns = [
     path("verwaltung/probetraining/<int:pk>/bearbeiten/", interested_views.TesterUpdateView.as_view(), name="tester_update"),
     path("verwaltung/probetraining/<int:pk>/loeschen/", interested_views.TesterDeleteView.as_view(), name="tester_delete"),
     path("verwaltung/probetraining/<int:pk>/einverstaendnis/", interested_views.tester_consent, name="tester_consent"),
+    path("verwaltung/probetraining/<int:pk>/ergebnis/", interested_views.tester_outcome, name="tester_outcome"),
     path("verwaltung/probetraining/<int:pk>/gruppe/", interested_views.tester_set_group, name="tester_set_group"),
     path("verwaltung/probetraining/<int:pk>/notiz/", interested_views.tester_note, name="tester_note"),
     path("verwaltung/probetraining/gruppen/neu/", interested_views.TrialGroupCreateView.as_view(), name="trial_group_create"),

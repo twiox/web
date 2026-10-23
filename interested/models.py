@@ -55,6 +55,9 @@ class Tester(models.Model):
     # written by the board, read by the trainers (special arrangements, excused dates, …)
     board_notes = models.TextField("Vorstandsnotizen", blank=True)
     has_consent = models.BooleanField("Einverständniserklärung liegt vor", default=False)
+    # after the trial: did the person join? (empty: not decided yet)
+    OUTCOMES = [("", "offen"), ("joined", "Mitglied geworden"), ("declined", "nicht Mitglied geworden")]
+    outcome = models.CharField("Ergebnis", max_length=20, choices=OUTCOMES, blank=True)
     # when the sign-up form was sent; empty for sign-ups from before this field existed
     created = models.DateTimeField("Anfrage vom", auto_now_add=True, null=True)
 
