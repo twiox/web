@@ -38,24 +38,25 @@ def get_participants_list(request, pk):
     context = {'session':session, 'type':type}
 
     if type=='member':
-        context.update({'object_list':session.participant.filter(user__isnull=False)})
+        present = list(session.participant.filter(user__isnull=False).select_related('user__profile'))
+        # registered for this training time, not entered yet: quick-select chips
+        registered = list(
+            session.session.participants.exclude(user__in=[p.user_id for p in present]).select_related('user')
+        ) if session.session else []
+        context.update({
+            'object_list': present,
+            'registered': registered,
+            'contacts': registered + [p.user.profile for p in present],
+        })
+    elif type=='trial':
+        # trial participants: the ones entered, and the ones whose group comes to this training but are not entered yet
+        entered = list(session.participant.filter(tester__isnull=False).select_related('tester__trial_group'))
+        expected = list(expected_testers(session).exclude(pk__in=[p.tester_id for p in entered]))
+        context.update({'object_list': entered, 'expected_testers': expected, 'contact_count': len(entered) + len(expected)})
+        return render(request, 'trainingsession/snippet_trial_list.html', context)
     else:
-        context.update({'object_list':session.participant.filter(user__isnull=True)})
-        # trial participants whose group comes to this training today, not yet entered
-        present = session.participant.filter(tester__isnull=False).values_list('tester_id', flat=True)
-        context.update({'expected_testers': expected_testers(session).exclude(pk__in=present)})
+        context.update({'object_list':session.participant.filter(user__isnull=True, tester__isnull=True)})
     return render(request,'trainingsession/snippet_participantslist.html',context)
-
-@user_passes_test(is_privileged)
-def get_participants_table(request, pk):
-    """
-    Get the participants-table snippet for display in session-detail view 
-    """
-    session = TrainingSessionEntry.objects.get(pk=pk)
-    context = {'session':session}
-    context.update({'object_list':session.participant.filter(user__isnull=False)})
-
-    return render(request,'trainingsession/snippet_participantslist_contact.html',context)
 
 @user_passes_test(is_privileged)
 def get_trainer_list(request, pk):
@@ -119,11 +120,8 @@ def add_member(request, pk):
     member = Profile.objects.get(pk=int(request.POST.get('member_pk')))
     type = request.GET.get('type')
 
-    # create the participant
-    TrainingSessionParticipant(
-        session = session,
-        user = member.user
-    ).save()
+    # once per member, even if the chip is clicked twice
+    TrainingSessionParticipant.objects.get_or_create(session=session, user=member.user)
 
     return get_participants_list(request, pk)
 
@@ -454,7 +452,6 @@ urlpatterns = [
     path("<int:pk>/trainer/add", add_trainer, name='trainingsession_add_trainer'),
     path("<int:pk>/trainer/remove", remove_trainer, name='trainingsession_del_trainer'),
     path("<int:pk>/participant/list", get_participants_list, name='trainingsession_get_participants'),
-    path("<int:pk>/participant/table", get_participants_table, name='trainingsession_get_participants_table'),
     path("<int:pk>/participant/add", add_member, name='trainingsession_add_member'),
     path("<int:pk>/participant/remove/", delete_participant, name='trainingsession_del_participant'),
     path("<int:pk>/participant/non-member/", add_nonmember, name="trainingsession_nonmember_add"),

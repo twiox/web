@@ -1,3 +1,21 @@
+{% if type == 'member' %}
+{% if registered %}
+<h4>Angemeldet für diese Trainingszeit</h4>
+<ul class="chip_list">
+    {% for member in registered %}
+    <li class="person_chip person_chip--add">
+        {{ member.user.first_name }} {{ member.user.last_name }} <small>{{ member.age|default:"" }}</small>
+        {% if member.notes_trainer %}<span class="person_chip__note" title="{{ member.notes_trainer }}"><i class="fas fa-sticky-note"></i></span>{% endif %}
+        <button type="button" title="Als anwesend eintragen"
+                hx-post="{% url 'trainingsession_add_member' session.pk %}?type=member"
+                hx-vals='{"member_pk":"{{ member.pk }}"}'
+                hx-target="#member-list"><i class="far fa-plus-square"></i></button>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+<h4>Mitglieder</h4>
+{% endif %}
 <ul class="chip_list">
     {% for participant in object_list %}
     <li class="person_chip" id="{{ type }}-participant-{{ participant.pk }}">
@@ -6,17 +24,37 @@
         {% else %}
             {{ participant.name }}
         {% endif %}
+        {# reloads the whole list, so the contacts below stay in sync #}
         <button type="button" title="Entfernen"
-                hx-post="{% url 'trainingsession_del_participant' session.pk %}"
+                hx-post="{% url 'trainingsession_del_participant' session.pk %}?type={{ type }}"
                 hx-vals='{"part_pk":"{{ participant.pk }}"}'
-                hx-target="closest li"
-                hx-swap="delete"><i class="far fa-minus-square"></i></button>
+                hx-target="#{{ type }}-list"><i class="far fa-minus-square"></i></button>
     </li>
     {% empty %}
     <li class="chip_empty">Noch niemand eingetragen</li>
     {% endfor %}
 </ul>
 {% if type == 'member' %}
+{% if contacts %}
+{# registered and present members; closed by default, like the trial contacts #}
+<details class="contacts_toggle">
+    <summary>Kontakte ({{ contacts|length }})</summary>
+    <table class="data_list contact_list">
+        {% for profile in contacts %}
+        <tr>
+            <th>{{ profile.user.first_name }} {{ profile.user.last_name }}</th>
+            <td>
+                {% if profile.telephone %}<a href="tel:{{ profile.telephone }}"><i class="fas fa-phone"></i> {{ profile.telephone }}</a>{% endif %}
+                {% if profile.parent %}{{ profile.parent }}{% endif %}
+                {% if profile.parent_telnr %}<a href="tel:{{ profile.parent_telnr }}" title="Notfallnummer"><i class="fas fa-phone-square"></i> {{ profile.parent_telnr }}</a>{% endif %}
+                {% if not profile.telephone and not profile.parent_telnr %}<span class="chip_empty">keine Nummer hinterlegt</span>{% endif %}
+                {% if profile.notes_trainer %}<div class="contact_list__note"><i class="fas fa-sticky-note"></i> {{ profile.notes_trainer }}</div>{% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</details>
+{% endif %}
 <form hx-get="{% url 'trainingsession_search' session.pk %}?type={{ type }}"
       hx-target="#{{ type }}-search-results"
       hx-trigger="input changed delay:250ms">
@@ -29,47 +67,13 @@
 </form>
 <div id="{{ type }}-search-results"></div>
 {% elif type == 'non-member' %}
-{% if expected_testers %}
-{# trial participants of a group that has this training on its list today #}
-<div class="trial_expected">
-    <h4><i class="fas fa-user-clock"></i> Erwartet zum Probetraining</h4>
-    {% for tester in expected_testers %}
-    <div class="trial_expected__person">
-        <div>
-            <strong>{{ tester.first_name }} {{ tester.last_name }}</strong>
-            <small>{{ tester.age|default_if_none:"" }}{% if tester.age is not None %} J.{% endif %} · {{ tester.trial_group }}</small>
-            <small>
-                {% if tester.contact_person %}{{ tester.contact_person }} · {% endif %}
-                {% if tester.telnr %}<a href="tel:{{ tester.telnr }}">{{ tester.telnr }}</a> · {% endif %}<a href="mailto:{{ tester.email }}">{{ tester.email }}</a>
-            </small>
-            {% if tester.age is not None and tester.age < 18 and not tester.has_consent %}
-            <small class="trial_expected__warn">
-                Einverständniserklärung fehlt –
-                <button type="button" class="trial_expected__consent"
-                        hx-post="{% url 'trainingsession_trial_consent' session.pk %}?type={{ type }}"
-                        hx-vals='{"tester_pk": "{{ tester.pk }}"}'
-                        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                        hx-target="#{{ type }}-list">heute abgegeben</button>
-            </small>
-            {% endif %}
-            {% if tester.board_notes %}<small class="trial_expected__notes"><i class="fas fa-sticky-note"></i> {{ tester.board_notes }}</small>{% endif %}
-        </div>
-        <button type="button" class="table_action table_action--primary"
-                hx-post="{% url 'trainingsession_trial_add' session.pk %}?type={{ type }}"
-                hx-vals='{"tester_pk": "{{ tester.pk }}"}'
-                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                hx-target="#{{ type }}-list">Ist da</button>
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
 <form class="inline_form"
       hx-post="{% url 'trainingsession_nonmember_add' session.pk %}?type={{ type }}"
       hx-target="#{{ type }}-list">
     <label class="mdc-text-field mdc-text-field--filled">
         <span class="mdc-text-field__ripple"></span>
         <input type="text" class="mdc-text-field__input" name="name" aria-labelledby="nonmember-name-label" autocomplete="off" required>
-        <span class="mdc-floating-label" id="nonmember-name-label">Name (z.B. Probetraining)</span>
+        <span class="mdc-floating-label" id="nonmember-name-label">Name (z.B. Gast)</span>
         <span class="mdc-line-ripple"></span>
     </label>
     <button type="submit" class="table_action table_action--primary">Hinzufügen</button>

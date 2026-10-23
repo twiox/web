@@ -1,0 +1,53 @@
+{# trial participants of this training: expected (their group has this date), entered, and how to reach them #}
+{% if expected_testers or object_list %}
+    {% if expected_testers %}
+    <h4>Erwartet</h4>
+    <ul class="chip_list">
+        {% for tester in expected_testers %}
+        <li class="person_chip person_chip--add">
+            {{ tester.first_name }} {{ tester.last_name }} <small>{{ tester.age|default_if_none:"" }}</small>
+            {% if tester.age is not None and tester.age < 18 and not tester.has_consent %}
+            <button type="button" class="person_chip__warn" title="Einverständniserklärung fehlt – klicken, wenn sie heute abgegeben wurde"
+                    hx-post="{% url 'trainingsession_trial_consent' session.pk %}?type=trial"
+                    hx-vals='{"tester_pk": "{{ tester.pk }}"}'
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                    hx-target="#trial-list"><i class="fas fa-file-signature"></i></button>
+            {% endif %}
+            {% if tester.board_notes %}<span class="person_chip__note" title="{{ tester.board_notes }}"><i class="fas fa-sticky-note"></i></span>{% endif %}
+            <button type="button" title="Als anwesend eintragen"
+                    hx-post="{% url 'trainingsession_trial_add' session.pk %}?type=trial"
+                    hx-vals='{"tester_pk": "{{ tester.pk }}"}'
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                    hx-target="#trial-list"><i class="far fa-plus-square"></i></button>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <h4>Eingetragen</h4>
+    <ul class="chip_list">
+        {% for participant in object_list %}
+        <li class="person_chip">
+            {{ participant.tester.first_name }} {{ participant.tester.last_name }} <small>{{ participant.tester.age|default_if_none:"" }}</small>
+            {% if participant.tester.board_notes %}<span class="person_chip__note" title="{{ participant.tester.board_notes }}"><i class="fas fa-sticky-note"></i></span>{% endif %}
+            <button type="button" title="Entfernen"
+                    hx-post="{% url 'trainingsession_del_participant' session.pk %}?type=trial"
+                    hx-vals='{"part_pk":"{{ participant.pk }}"}'
+                    hx-target="#trial-list"><i class="far fa-minus-square"></i></button>
+        </li>
+        {% empty %}
+        <li class="chip_empty">Noch niemand eingetragen</li>
+        {% endfor %}
+    </ul>
+
+    {# closed by default, so a long list does not stretch the card #}
+    <details class="contacts_toggle">
+        <summary>Kontakte ({{ contact_count }})</summary>
+        <table class="data_list contact_list">
+            {% for tester in expected_testers %}{% include "trainingsession/snippet_trial_contact.html" %}{% endfor %}
+            {% for participant in object_list %}{% include "trainingsession/snippet_trial_contact.html" with tester=participant.tester %}{% endfor %}
+        </table>
+    </details>
+{% else %}
+    <p class="chip_empty">Zu diesem Training ist kein Probetraining eingeplant.</p>
+{% endif %}

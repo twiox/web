@@ -28,7 +28,7 @@
         {{ object.date|date:"l, d.m.Y" }} · {{ object.start }}–{{ object.end }} Uhr
     </p>
 
-    <div class="session_grid">
+    <div class="session_grid session_grid--flow">
         <div class="session_card">
             <h3>Trainer*innen</h3>
             <h4>Trainer*innen</h4>
@@ -39,25 +39,16 @@
 
         <div class="session_card">
             <h3>Anwesenheit</h3>
-            {% with registered=object.session.participants.all %}
-            {% if registered %}
-            <h4>Angemeldet für diese Trainingszeit</h4>
-            <ul class="chip_list">
-                {% for member in registered %}
-                <li class="person_chip person_chip--add">
-                    {{ member.user.first_name }} {{ member.user.last_name }} <small>{{ member.age|default:"" }}</small>
-                    <button type="button" title="Als anwesend eintragen"
-                            hx-post="{% url 'trainingsession_add_member' object.pk %}?type=member"
-                            hx-vals='{"member_pk":"{{ member.pk }}"}'
-                            hx-target="#member-list"><i class="far fa-plus-square"></i></button>
-                </li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-            {% endwith %}
-            <h4>Mitglieder</h4>
             <div id="member-list" hx-get="{% url 'trainingsession_get_participants' object.pk %}?type=member" hx-trigger="load once"></div>
-            <h4>Nichtmitglieder</h4>
+        </div>
+
+        <div class="session_card">
+            <h3>Probetraining</h3>
+            <div id="trial-list" hx-get="{% url 'trainingsession_get_participants' object.pk %}?type=trial" hx-trigger="load once"></div>
+        </div>
+
+        <div class="session_card">
+            <h3>Nichtmitglieder</h3>
             <div id="non-member-list" hx-get="{% url 'trainingsession_get_participants' object.pk %}?type=non-member" hx-trigger="load once"></div>
         </div>
 
@@ -83,7 +74,7 @@
                 </div>
                 <h4>Anmerkungen</h4>
                 <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
-                    <textarea class="mdc-text-field__input" rows="3" aria-label="Anmerkungen" name="comment">{{ object.notes }}</textarea>
+                    <textarea class="mdc-text-field__input" rows="3" aria-label="Anmerkungen" name="comment">{{ object.notes|default:'' }}</textarea>
                     <span class="mdc-notched-outline mdc-notched-outline--no-label">
                         <span class="mdc-notched-outline__leading"></span>
                         <span class="mdc-notched-outline__trailing"></span>
@@ -95,9 +86,6 @@
         </div>
     </div>
 
-    <div id="member-table"
-         hx-get="{% url 'trainingsession_get_participants_table' object.pk %}"
-         hx-trigger="load once, htmx:afterSwap from:#member-list"></div>
 </section>
 
 <script>

@@ -47,7 +47,7 @@
                         <td>{% if tester.telnr %}<a href="tel:{{ tester.telnr }}">{{ tester.telnr }}</a>{% else %}–{% endif %}</td>
                         <td class="tester_table__email" title="{{ tester.email }}"><a href="mailto:{{ tester.email }}">{{ tester.email }}</a></td>
                         <td class="tester_table__consent">
-                            {% if tester.age is None or tester.age < 18 %}{% if tester.has_consent %}<i class="fas fa-check" title="liegt vor"></i>{% else %}<span class="trial_expected__warn">fehlt</span>{% endif %}{% endif %}
+                            {% if tester.age is None or tester.age < 18 %}{% if tester.has_consent %}<i class="fas fa-check" title="liegt vor"></i>{% else %}<span class="trainer_trial_group__missing">fehlt</span>{% endif %}{% endif %}
                         </td>
                         <td class="tester_table__notes">{{ tester.board_notes|default:"–"|linebreaksbr }}</td>
                     </tr>

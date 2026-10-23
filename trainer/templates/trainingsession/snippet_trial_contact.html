@@ -1,0 +1,9 @@
+<tr>
+    <th>{{ tester.first_name }} {{ tester.last_name }}</th>
+    <td>
+        {% if tester.contact_person %}{{ tester.contact_person }}<br>{% endif %}
+        {% if tester.telnr %}<a href="tel:{{ tester.telnr }}"><i class="fas fa-phone"></i> {{ tester.telnr }}</a>{% endif %}
+        <a href="mailto:{{ tester.email }}" title="{{ tester.email }}"><i class="far fa-envelope"></i> {{ tester.email }}</a>
+        {% if tester.board_notes %}<div class="contact_list__note"><i class="fas fa-sticky-note"></i> {{ tester.board_notes }}</div>{% endif %}
+    </td>
+</tr>

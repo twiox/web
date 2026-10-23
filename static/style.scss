@@ -1068,6 +1068,16 @@ footer{
     align-items: start;
     margin-bottom: $padding_small;
 }
+// cards of different heights: stacked in columns instead of grid rows, so a long card leaves no gaps
+.session_grid--flow{
+    display: block;
+    columns: 3 320px;
+    column-gap: $padding_small;
+    > .session_card{
+        break-inside: avoid;
+        margin-bottom: $padding_small;
+    }
+}
 .session_card{
     background-color: $tertiary_bg;
     padding: $padding_big;
@@ -1120,6 +1130,52 @@ footer{
     &--add{
         background-color: transparent;
         border: 1px dashed $primary;
+    }
+    // trial participants: missing consent (click: handed in today) and board notes (hover)
+    button.person_chip__warn, button.person_chip__warn i{
+        color: #e06666;
+    }
+    &__note, &__note i{
+        color: #c9a227;
+        cursor: help;
+    }
+}
+.contacts_toggle{
+    margin-top: $padding_small;
+    summary{
+        color: grey;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        cursor: pointer;
+        list-style: none;
+        &::before{
+            content: "▸ ";
+        }
+    }
+    &[open] summary::before{
+        content: "▾ ";
+    }
+}
+.contact_list{
+    table-layout: fixed;
+    th{
+        width: 35%;
+    }
+    td{
+        font-size: 0.9rem;
+    }
+    // icon and number/address stay on one line; long addresses end in "…"
+    a{
+        display: block;
+        overflow: hidden;
+        padding: 0;
+        color: $primary_hover;
+        text-align: left;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    &__note, &__note i{
+        color: #c9a227;
     }
 }
 .chip_empty{
@@ -1895,6 +1951,9 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
 // trainer document: the trial groups that come to the trainer's training times
 .trainer_trial_group{
     margin-bottom: $padding_small;
+    &__missing{
+        color: #e06666;
+    }
     &__head{
         display: flex;
         flex-wrap: wrap;
@@ -1973,48 +2032,6 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
     white-space: normal;
     span{
         cursor: help;
-    }
-}
-.trial_expected{
-    margin: 0 0 $padding_small 0;
-    padding: $padding_small;
-    border-left: 3px solid $primary;
-    background-color: $secondary_bg;
-    h4{
-        margin-top: 0;
-    }
-    &__person{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: $padding_small;
-        padding: 6px 0;
-        border-bottom: 1px solid $quartiary_bg;
-        div{
-            display: flex;
-            flex-direction: column;
-        }
-        small{
-            color: grey;
-        }
-        a{
-            padding: 0;
-        }
-    }
-    &__warn{
-        color: #e06666 !important;
-    }
-    &__consent{
-        padding: 0;
-        border: none;
-        background: none;
-        color: $primary_hover;
-        font: inherit;
-        text-decoration: underline;
-        cursor: pointer;
-    }
-    &__notes, &__notes i{
-        color: #c9a227 !important;
     }
 }
 
