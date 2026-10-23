@@ -16,6 +16,18 @@
 
 <section style="text-align: center;">
     <h1>Neues Mitglied</h1>
+    {% if applicants %}
+    {# outside the form: the radios only mark which request filled it #}
+    <div class="register_applicants">
+        <p class="member_panel__hint">Antrag aus dem Probetraining übernehmen:</p>
+        <div class="chip_list">
+            {% for applicant in applicants %}
+            <label class="toggle_chip"><input type="radio" name="applicant" value="{{ forloop.counter0 }}"><span>{{ applicant.name }}</span></label>
+            {% endfor %}
+        </div>
+        {{ applicants|json_script:"applicants" }}
+    </div>
+    {% endif %}
     <form class="form_wrapper tertiary_bg" method="POST">
         <div class="inner_form padding_all_small">
             {% csrf_token %}
@@ -67,7 +79,17 @@
         </div>
     </form>
     <script>
-        document.querySelectorAll('.mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));
+        const textFields = [...document.querySelectorAll('.form_wrapper .mdc-text-field')].map(field => mdc.textField.MDCTextField.attachTo(field));
+        // a chip fills the matching fields from the trial request (empty values clear what another chip filled)
+        document.querySelector('.register_applicants')?.addEventListener('change', event => {
+            const applicant = JSON.parse(document.getElementById('applicants').textContent)[event.target.value];
+            Object.entries(applicant.fields).forEach(([name, value]) => {
+                const input = document.getElementById('id_' + name);
+                const textField = textFields.find(field => field.root.contains(input));
+                if (textField) textField.value = value;  // also floats the label
+                else input.value = value;
+            });
+        });
     </script>
 </section>
 

@@ -146,7 +146,7 @@
         name: row => row.dataset.name.toLowerCase(),
         age: row => row.dataset.birthday ? -Date.parse(row.dataset.birthday) : Infinity,  // the birthday sorts finer than the age
         group: row => row.dataset.group.toLowerCase(),
-        outcome: row => row.querySelector('select').selectedIndex,  // offen, Mitglied geworden, nicht Mitglied geworden
+        outcome: row => row.querySelector('select').selectedIndex,  // offen, Antrag abgegeben, Mitglied, nicht Mitglied geworden
     };
     const headers = rows.closest('table').querySelectorAll('th[data-sort]');
     headers.forEach(th => th.addEventListener('click', () => {

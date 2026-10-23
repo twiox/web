@@ -221,7 +221,7 @@ def tester_set_group(request, pk):
 @login_required
 @require_POST
 def tester_outcome(request, pk):
-    """Dashboard dropdown: what came of the trial (joined or not); empty: still open."""
+    """Dashboard dropdown: what came of the trial (membership application or not); empty: still open."""
     if not is_privileged(request.user):
         return JsonResponse({"success": False}, status=403)
     tester = get_object_or_404(Tester, pk=pk)

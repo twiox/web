@@ -7,7 +7,7 @@ from members.models import (
     AdditionalEmail,
     Event,
 )
-from interested.models import PublicEvent, EventParticipant
+from interested.models import PublicEvent, EventParticipant, Tester
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
 from django.core.exceptions import PermissionDenied
@@ -72,6 +72,24 @@ def new_member_initial():
     return {"member_num": member_num, "mandatsref": f"{member_num}-{year}-{counter}"}
 
 
+TESTER_SEX = {"männlich": "m", "weiblich": "w", "divers": "d"}
+
+
+def member_fields_from_tester(tester):
+    """Form values for a new member from their trial request; for minors, contact and phone are the parent's."""
+    minor = tester.age is not None and tester.age < 18
+    return {
+        "first_name": tester.first_name,
+        "last_name": tester.last_name,
+        "email": tester.email,
+        "birthday": tester.birthday.strftime("%Y-%m-%d") if tester.birthday else "",
+        "sex": TESTER_SEX.get(tester.sex, ""),
+        "telephone": "" if minor else tester.telnr or "",
+        "parent": tester.contact_person if minor else "",
+        "parent_telnr": (tester.telnr or "") if minor else "",
+    }
+
+
 @login_required
 @permission_required("auth.add_user", raise_exception=True)
 def register(request):
@@ -114,7 +132,15 @@ def register(request):
     return render(
         request,
         "user_handling/register.html",
-        context={"user_form": user_form, "profile_form": profile_form},
+        context={
+            "user_form": user_form,
+            "profile_form": profile_form,
+            # trial participants who handed in their application: one click fills the form
+            "applicants": [
+                {"name": str(tester), "fields": member_fields_from_tester(tester)}
+                for tester in Tester.objects.filter(outcome="applied").order_by("last_name", "first_name")
+            ],
+        },
     )
 
 

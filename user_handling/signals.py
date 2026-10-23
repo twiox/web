@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import Group as PermissionGroup
 from django.dispatch import receiver
 from members.models import Profile, Trainer, Chairman
+from interested.trials import mark_member
 from .permissions import trainer_permissions, chairman_permissions
 
 
@@ -14,6 +15,13 @@ def create_or_save_profile(sender, instance, created, **kwargs):
         Profile.objects.create(user=instance)
     else:
         instance.profile.save()
+
+
+# a new (or corrected) member who did a trial training: their request is done.
+# Saving the user saves the profile too (above), so name changes land here as well.
+@receiver(post_save, sender=Profile)
+def mark_trial_member(sender, instance, **kwargs):
+    mark_member(instance.user.first_name, instance.user.last_name, instance.birthday)
 
 
 # Trainer and chairman rights come from these permission groups. Syncing them in

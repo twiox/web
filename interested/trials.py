@@ -5,7 +5,7 @@ trainers fill in. A trial participant counts as present on a trial date when the
 a participant (linked via TrainingSessionParticipant.tester) of an entry for that
 training time on that day.
 """
-from datetime import date
+from datetime import date, datetime
 
 from django.db.models import Count
 
@@ -108,3 +108,14 @@ def finished_testers():
         .select_related("trial_group")
         .order_by("outcome", "last_name", "first_name")  # empty (open) sorts first
     )
+
+
+def mark_member(first_name, last_name, birthday):
+    """Trial requests of someone who is a member now (same name and birthday) get the outcome "Mitglied"."""
+    if not (first_name and last_name and birthday):
+        return
+    if isinstance(birthday, datetime):  # Profile.birthday is a datetime, but forms set a plain date
+        birthday = birthday.date()
+    Tester.objects.filter(
+        first_name__iexact=first_name.strip(), last_name__iexact=last_name.strip(), birthday__date=birthday
+    ).exclude(outcome="member").update(outcome="member")
