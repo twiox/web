@@ -12,11 +12,14 @@
 {% endblock %}
 
 {% block content %}
-<section class="member_page">
+<section class="member_page tester_dashboard">
     <div class="member_toolbar">
         <h1>Probetraining</h1>
+    </div>
+
+    <div class="member_toolbar tester_dashboard__head">
+        <h3>Anfragen</h3>
         <a class="table_action" href="{% url 'tester_list' %}"><i class="fas fa-list"></i> Alle Anfragen</a>
-        <a class="table_action table_action--primary" href="{% url 'trial_group_create' %}"><i class="far fa-plus-square"></i> Neue Gruppe</a>
     </div>
 
     <div class="tester_stats">
@@ -36,7 +39,28 @@
         </div>
     </div>
 
-    <h3>{% if upcoming_all %}Nächste Probetrainings{% else %}Deine nächsten Probetrainings{% endif %}</h3>
+    <div class="member_toolbar tester_dashboard__head">
+        <h3>Gruppen</h3>
+        <a class="table_action table_action--primary" href="{% url 'trial_group_create' %}"><i class="far fa-plus-square"></i> Neue Gruppe</a>
+    </div>
+    <div class="dashboard_grid">
+        {% for group in groups %}
+        <a class="dashboard_card trial_group_card" href="{% url 'trial_group_detail' group.pk %}">
+            <i class="fas fa-users"></i>
+            <strong>{{ group.name }}</strong>
+            <span class="dashboard_card__text">
+                {{ group.size }} Teilnehmende ·
+                {{ group.date_count }} Termin{{ group.date_count|pluralize:"e" }}{% if group.first_date %}, {{ group.first_date|date:"d.m." }}–{{ group.last_date|date:"d.m.Y" }}{% endif %}
+            </span>
+        </a>
+        {% empty %}
+        <p class="member_panel__hint">Noch keine Gruppen.</p>
+        {% endfor %}
+    </div>
+
+    <div class="member_toolbar tester_dashboard__head">
+        <h3>{% if upcoming_all %}Nächste Probetrainings{% else %}Deine nächsten Probetrainings{% endif %}</h3>
+    </div>
     {% if upcoming %}
     <div class="member_table_wrapper tertiary_bg">
         <table class="member_table member_table--static trial_upcoming">
@@ -60,21 +84,5 @@
     {% else %}
     <p class="member_panel__hint">{% if upcoming_all %}Keine geplanten Probetrainings.{% else %}Zu deinen Trainingszeiten sind keine Probetrainings geplant.{% endif %}</p>
     {% endif %}
-
-    <h3>Gruppen</h3>
-    <div class="dashboard_grid">
-        {% for group in groups %}
-        <a class="dashboard_card trial_group_card" href="{% url 'trial_group_detail' group.pk %}">
-            <i class="fas fa-users"></i>
-            <strong>{{ group.name }}</strong>
-            <span class="dashboard_card__text">
-                {{ group.size }} Teilnehmende ·
-                {{ group.date_count }} Termin{{ group.date_count|pluralize:"e" }}{% if group.first_date %}, {{ group.first_date|date:"d.m." }}–{{ group.last_date|date:"d.m.Y" }}{% endif %}
-            </span>
-        </a>
-        {% empty %}
-        <p class="member_panel__hint">Noch keine Gruppen.</p>
-        {% endfor %}
-    </div>
 </section>
 {% endblock %}

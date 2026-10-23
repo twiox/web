@@ -98,6 +98,11 @@
                     <td class="table_actions">
                         <a href="{% url 'tester_update' tester.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
                         <button type="button" class="icon_button" data-remove="{% url 'tester_set_group' tester.pk %}" data-name="{{ tester }}" title="Aus der Gruppe nehmen (wieder wartend)"><i class="fas fa-user-minus"></i></button>
+                        <form method="POST" action="{% url 'tester_delete' tester.pk %}" class="tester_delete" data-name="{{ tester }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="from_group">
+                            <button type="submit" class="icon_button" title="Löschen"><i class="far fa-minus-square"></i></button>
+                        </form>
                     </td>
                 </tr>
             {% empty %}
@@ -153,6 +158,9 @@
         const button = event.target.closest('[data-remove]');
         if (button && confirm(`${button.dataset.name} aus der Gruppe nehmen? Die Person wartet dann wieder.`)) setGroup(button.dataset.remove, '');
     });
+    document.querySelectorAll('.tester_delete').forEach(form => form.addEventListener('submit', event => {
+        if (!confirm(`${form.dataset.name} wirklich löschen?`)) event.preventDefault();
+    }));
     document.querySelector('.trial_group_delete').addEventListener('submit', event => {
         if (!confirm(`Gruppe ${event.target.dataset.name} löschen? Die Teilnehmenden warten dann wieder.`)) event.preventDefault();
     });

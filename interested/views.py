@@ -243,7 +243,7 @@ class TesterUpdateView(LoginRequiredMixin, PrivilegedRequiredMixin, UpdateView):
 
 
 class TesterDeleteView(LoginRequiredMixin, PrivilegedRequiredMixin, DeleteView):
-    """POST only (the list asks first)."""
+    """POST only (the list and the group page ask first)."""
 
     model = Tester
     http_method_names = ["post"]
@@ -253,6 +253,9 @@ class TesterDeleteView(LoginRequiredMixin, PrivilegedRequiredMixin, DeleteView):
         return super().form_valid(form)
 
     def get_success_url(self):
+        # deleted from the group page: back to the group
+        if "from_group" in self.request.POST and self.object.trial_group_id:
+            return reverse("trial_group_detail", args=[self.object.trial_group_id])
         return reverse("tester_list")
 
 
