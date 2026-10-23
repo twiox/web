@@ -1832,20 +1832,23 @@ footer{
 }
 // group card: share of the trial dates that are over
 .trial_progress{
-    display: block;
+    display: flex;  // the outcome bar stacks one part per outcome
     height: 6px;
     margin-top: 4px;
     border-radius: 3px;
-    background-color: $quartiary_bg;
+    background-color: rgba(255, 255, 255, 0.12);  // see-through: stays visible when the card lightens on hover
     overflow: hidden;
     &__bar{
-        display: block;
         height: 100%;
         background-color: $primary;
+        // outcomes, in the colours of the attendance table
+        &--member{
+            background-color: #6ab04c;
+        }
+        &--declined{
+            background-color: #e06666;
+        }
     }
-}
-.trial_group_card:hover .trial_progress, .trial_group_card:focus .trial_progress{
-    background-color: $secondary_bg;  // the card turns $quartiary_bg on hover
 }
 .tester_table{
     // e-mail and phone as plain text links (.member_table--static makes links icon-sized)

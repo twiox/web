@@ -161,6 +161,10 @@ class TesterIndexView(LoginRequiredMixin, PrivilegedRequiredMixin, TemplateView)
             age_groups=tester_age_groups(waiting),
             groups=TrialGroup.objects.annotate(
                 size=Count("testers", distinct=True),
+                decided_count=Count("testers", filter=~Q(testers__outcome=""), distinct=True),
+                applied_count=Count("testers", filter=Q(testers__outcome="applied"), distinct=True),
+                member_count=Count("testers", filter=Q(testers__outcome="member"), distinct=True),
+                declined_count=Count("testers", filter=Q(testers__outcome="declined"), distinct=True),
                 date_count=Count("trial_dates", distinct=True),
                 past_count=Count("trial_dates", filter=Q(trial_dates__date__lt=date.today()), distinct=True),
                 first_date=Min("trial_dates__date"),

@@ -57,6 +57,15 @@
                 <span class="trial_progress__bar" style="width: {% widthratio group.past_count group.date_count 100 %}%"></span>
             </span>
             <span class="dashboard_card__text">{{ group.past_count }} von {{ group.date_count }} Terminen vorbei</span>
+            {# once all dates are over: how many have an outcome #}
+            {% if group.past_count == group.date_count and group.size %}
+            <span class="trial_progress" title="{{ group.applied_count }} Antrag abgegeben · {{ group.member_count }} Mitglied · {{ group.declined_count }} nicht Mitglied geworden">
+                <span class="trial_progress__bar trial_progress__bar--applied" style="width: {% widthratio group.applied_count group.size 100 %}%"></span>
+                <span class="trial_progress__bar trial_progress__bar--member" style="width: {% widthratio group.member_count group.size 100 %}%"></span>
+                <span class="trial_progress__bar trial_progress__bar--declined" style="width: {% widthratio group.declined_count group.size 100 %}%"></span>
+            </span>
+            <span class="dashboard_card__text">{{ group.decided_count }} von {{ group.size }} mit Ergebnis</span>
+            {% endif %}
             {% endif %}
         </a>
         {% empty %}
@@ -97,6 +106,12 @@
     <p class="member_panel__hint">Alle Probetrainingsmenschen, deren Termine vorbei sind.</p>
     {% if finished %}
     {% csrf_token %}
+    <div class="chip_list" id="finished_filter">
+        <label class="toggle_chip"><input type="radio" name="finished_outcome" value="all" checked><span>Alle</span></label>
+        {% for value, label in outcomes %}
+        <label class="toggle_chip"><input type="radio" name="finished_outcome" value="{{ value }}"><span>{{ label }}</span></label>
+        {% endfor %}
+    </div>
     <div class="member_table_wrapper tertiary_bg">
         <table class="member_table member_table--static tester_table">
             <thead><tr><th class="sortable" data-sort="name">Name</th><th class="sortable" data-sort="age">Alter</th><th class="sortable" data-sort="group">Gruppe</th><th>Besuche</th><th>Kontaktperson</th><th>E-Mail</th><th>Telefon</th><th class="sortable" data-sort="outcome">Ergebnis</th></tr></thead>
@@ -119,6 +134,7 @@
             {% endfor %}
             </tbody>
         </table>
+        <p id="finished_no_results" class="padding_all_small" hidden>Keine Treffer.</p>
     </div>
     {% else %}
     <p class="member_panel__hint">Noch keine Gruppe ist fertig.</p>
@@ -140,8 +156,24 @@
         snackbar.open();
     });
 
-    // click a column header to sort, again to reverse (as in the list of all requests)
     const rows = document.getElementById('finished_rows');
+    // status chips; only applied on a chip click, so changing a result does not hide the row right away
+    const filter = document.getElementById('finished_filter');
+    function applyFilter() {
+        const outcome = filter.querySelector('input:checked').value;
+        let visible = 0;
+        rows.querySelectorAll('tr').forEach(row => {
+            row.hidden = outcome !== 'all' && row.querySelector('select').value !== outcome;
+            if (!row.hidden) visible++;
+        });
+        document.getElementById('finished_no_results').hidden = visible > 0;
+    }
+    filter.addEventListener('change', applyFilter);
+    // browsers restore the ticked chip on reload or "back"
+    applyFilter();
+    window.addEventListener('pageshow', applyFilter);
+
+    // click a column header to sort, again to reverse (as in the list of all requests)
     const keys = {
         name: row => row.dataset.name.toLowerCase(),
         age: row => row.dataset.birthday ? -Date.parse(row.dataset.birthday) : Infinity,  // the birthday sorts finer than the age
