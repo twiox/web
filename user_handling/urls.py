@@ -27,6 +27,7 @@ urlpatterns = [
     path("verwaltung/probetraining/gruppen/<int:pk>/", interested_views.TrialGroupDetailView.as_view(), name="trial_group_detail"),
     path("verwaltung/probetraining/gruppen/<int:pk>/bearbeiten/", interested_views.TrialGroupUpdateView.as_view(), name="trial_group_update"),
     path("verwaltung/probetraining/gruppen/<int:pk>/loeschen/", interested_views.TrialGroupDeleteView.as_view(), name="trial_group_delete"),
+    path("verwaltung/probetraining/gruppen/<int:pk>/archivieren/", interested_views.trial_group_archive, name="trial_group_archive"),
     path("verwaltung/events/", member_views.EventListView.as_view(),name="event_list"),
     path("verwaltung/mailing-lists/", views.mailing_lists,name="mailing_lists"),
     path("ajax/kopiere-email-listen", views.get_all_emails, name="get_all_emails"),

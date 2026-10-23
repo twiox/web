@@ -1,0 +1,19 @@
+{# warning before archiving a group; opened by a button with data-archive="archive_dialog_<pk>" #}
+<dialog class="confirm_dialog" id="archive_dialog_{{ group.pk }}">
+    <h3><i class="fas fa-exclamation-triangle"></i> Gruppe {{ group }} archivieren?</h3>
+    <p><strong>Das lässt sich nicht rückgängig machen.</strong> Für alle {{ size }} Teilnehmenden werden die persönlichen Daten gelöscht:</p>
+    <ul>
+        <li>Vor- und Nachname – sie heißen danach „Archiviert 1“, „Archiviert 2“ …</li>
+        <li>das Geburtsdatum – nur der Jahrgang bleibt</li>
+        <li>E-Mail, Telefon, Kontaktperson, Anmerkungen, Vorstandsnotizen und die Einverständniserklärung</li>
+        <li>Name und Notizen in den Trainingsstunden der Trainer*innen</li>
+    </ul>
+    <p>Erhalten bleiben Gruppe, Termine, Geschlecht, Jahrgang und das Ergebnis.
+        {% if members %}Wer Mitglied geworden ist ({{ members }}), behält die Probetrainings in den Trainingsstunden – sie wandern zum Mitgliedskonto, sofern es eins mit gleichem Namen und Geburtsdatum gibt.{% endif %}</p>
+    <p>Danach taucht die Gruppe in keiner Liste und Zählung mehr auf, nur noch unter „Archivierte Gruppen“ im Probetraining.</p>
+    <form method="POST" action="{% url 'trial_group_archive' group.pk %}" class="confirm_dialog__actions">
+        {% csrf_token %}
+        <button type="button" class="table_action" data-close>Abbrechen</button>
+        <button type="submit" class="table_action table_action--danger"><i class="fas fa-archive"></i> Endgültig archivieren</button>
+    </form>
+</dialog>

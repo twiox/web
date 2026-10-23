@@ -19,6 +19,7 @@ from django.views.generic import (
     TemplateView,
 )
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from django.db.models import Count, F, Max, Min, Q
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
@@ -33,7 +34,10 @@ from .models import (
     Tester,
     TrialGroup,
 )
-from .trials import attended_trainings, finished_testers, group_attendance, upcoming_trial_dates, weekday_matches
+from .trials import (
+    archive_group, attended_trainings, can_archive, current_testers, finished_testers, group_attendance,
+    upcoming_trial_dates, weekday_matches,
+)
 from members.roles import PrivilegedRequiredMixin, is_board, is_privileged
 
 
@@ -147,7 +151,7 @@ def tester_age_groups(testers):
 
 
 class TesterIndexView(LoginRequiredMixin, PrivilegedRequiredMixin, TemplateView):
-    """Probetraining dashboard: who is waiting, the groups, and the next trial dates."""
+    """Probetraining dashboard: who is waiting, the groups, and the next trial dates (archived groups only in their overview)."""
 
     template_name = "interested/tester_index.html"
 
@@ -155,21 +159,26 @@ class TesterIndexView(LoginRequiredMixin, PrivilegedRequiredMixin, TemplateView)
         context = super().get_context_data(**kwargs)
         waiting = list(Tester.objects.filter(trial_group__isnull=True))
         board = is_board(self.request.user)
+        groups = TrialGroup.objects.annotate(
+            size=Count("testers", distinct=True),
+            decided_count=Count("testers", filter=~Q(testers__outcome=""), distinct=True),
+            applied_count=Count("testers", filter=Q(testers__outcome="applied"), distinct=True),
+            member_count=Count("testers", filter=Q(testers__outcome="member"), distinct=True),
+            declined_count=Count("testers", filter=Q(testers__outcome="declined"), distinct=True),
+            date_count=Count("trial_dates", distinct=True),
+            past_count=Count("trial_dates", filter=Q(trial_dates__date__lt=date.today()), distinct=True),
+            first_date=Min("trial_dates__date"),
+            last_date=Max("trial_dates__date"),
+        )
+        archived = list(groups.filter(archived__isnull=False).order_by("-archived", "-pk"))
         context.update(
             waiting=len(waiting),
-            in_groups=Tester.objects.filter(trial_group__isnull=False).count(),
+            in_groups=current_testers().filter(trial_group__isnull=False).count(),
             age_groups=tester_age_groups(waiting),
-            groups=TrialGroup.objects.annotate(
-                size=Count("testers", distinct=True),
-                decided_count=Count("testers", filter=~Q(testers__outcome=""), distinct=True),
-                applied_count=Count("testers", filter=Q(testers__outcome="applied"), distinct=True),
-                member_count=Count("testers", filter=Q(testers__outcome="member"), distinct=True),
-                declined_count=Count("testers", filter=Q(testers__outcome="declined"), distinct=True),
-                date_count=Count("trial_dates", distinct=True),
-                past_count=Count("trial_dates", filter=Q(trial_dates__date__lt=date.today()), distinct=True),
-                first_date=Min("trial_dates__date"),
-                last_date=Max("trial_dates__date"),
-            ),
+            groups=groups.filter(archived__isnull=True),
+            archived_groups=archived,
+            archived_members=sum(g.member_count for g in archived),
+            archived_declined=sum(g.declined_count for g in archived),
             # the board sees all dates, trainers the ones at their own training times
             upcoming=upcoming_trial_dates(self.request.user, board),
             upcoming_all=board,
@@ -180,18 +189,18 @@ class TesterIndexView(LoginRequiredMixin, PrivilegedRequiredMixin, TemplateView)
 
 
 class TesterListView(LoginRequiredMixin, PrivilegedRequiredMixin, ListView):
-    """All trial requests, newest first; requests from before the date was stored come last."""
+    """All trial requests outside archived groups, newest first; requests from before the date was stored come last."""
 
     model = Tester
     queryset = (
-        Tester.objects.select_related("trial_group")
+        current_testers().select_related("trial_group")
         .annotate(visits=Count("attendances"))  # trial trainings attended, in any group
         .order_by(F("created").desc(nulls_last=True), "-pk")
     )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["groups"] = TrialGroup.objects.order_by("name")  # for the group dropdown in each row
+        context["groups"] = TrialGroup.objects.filter(archived__isnull=True).order_by("name")  # for the group dropdown in each row
         return context
 
 
@@ -203,7 +212,7 @@ def tester_note(request, pk):
     allowed = {"notes": is_privileged, "board_notes": is_board}
     if field not in allowed or not allowed[field](request.user):
         return JsonResponse({"success": False}, status=403)
-    tester = get_object_or_404(Tester, pk=pk)
+    tester = get_object_or_404(current_testers(), pk=pk)
     setattr(tester, field, request.POST.get("value", "").strip())
     tester.save(update_fields=[field])
     return JsonResponse({"success": True})
@@ -215,9 +224,9 @@ def tester_set_group(request, pk):
     """Puts a trial participant into a group (from the list or the group page); empty: waiting again."""
     if not is_privileged(request.user):
         return JsonResponse({"success": False}, status=403)
-    tester = get_object_or_404(Tester, pk=pk)
+    tester = get_object_or_404(current_testers(), pk=pk)
     group_pk = request.POST.get("group", "")
-    tester.trial_group = get_object_or_404(TrialGroup, pk=group_pk) if group_pk else None
+    tester.trial_group = get_object_or_404(TrialGroup, pk=group_pk, archived__isnull=True) if group_pk else None
     tester.save(update_fields=["trial_group"])
     return JsonResponse({"success": True, "group": str(tester.trial_group or "")})
 
@@ -228,7 +237,7 @@ def tester_outcome(request, pk):
     """Dashboard dropdown: what came of the trial (membership application or not); empty: still open."""
     if not is_privileged(request.user):
         return JsonResponse({"success": False}, status=403)
-    tester = get_object_or_404(Tester, pk=pk)
+    tester = get_object_or_404(current_testers(), pk=pk)
     outcome = request.POST.get("outcome", "")
     if outcome not in dict(Tester.OUTCOMES):
         return JsonResponse({"success": False}, status=400)
@@ -243,7 +252,7 @@ def tester_consent(request, pk):
     """List checkbox: the parents' consent for a minor is there (or not)."""
     if not is_privileged(request.user):
         return JsonResponse({"success": False}, status=403)
-    tester = get_object_or_404(Tester, pk=pk)
+    tester = get_object_or_404(current_testers(), pk=pk)
     tester.has_consent = request.POST.get("value") == "true"
     tester.save(update_fields=["has_consent"])
     return JsonResponse({"success": True})
@@ -252,6 +261,9 @@ def tester_consent(request, pk):
 class TesterUpdateView(LoginRequiredMixin, PrivilegedRequiredMixin, UpdateView):
     model = Tester
     form_class = TesterForm
+
+    def get_queryset(self):
+        return current_testers()  # archived requests have nothing left to edit
 
     def get_form_kwargs(self):
         return {**super().get_form_kwargs(), "board": is_board(self.request.user)}
@@ -313,7 +325,8 @@ class TrialGroupCreateView(LoginRequiredMixin, PrivilegedRequiredMixin, TrialGro
 
 
 class TrialGroupUpdateView(LoginRequiredMixin, PrivilegedRequiredMixin, TrialGroupFormMixin, UpdateView):
-    pass
+    def get_queryset(self):
+        return TrialGroup.objects.filter(archived__isnull=True)
 
 
 class TrialGroupDetailView(LoginRequiredMixin, PrivilegedRequiredMixin, DetailView):
@@ -330,6 +343,8 @@ class TrialGroupDetailView(LoginRequiredMixin, PrivilegedRequiredMixin, DetailVi
         context.update(
             dates=dates,
             rows=rows,
+            can_archive=can_archive(self.object),
+            archive_members=sum(1 for tester, _ in rows if tester.outcome == "member"),
             # for adding people who are still waiting
             waiting=Tester.objects.filter(trial_group__isnull=True).order_by("last_name", "first_name"),
         )
@@ -337,17 +352,39 @@ class TrialGroupDetailView(LoginRequiredMixin, PrivilegedRequiredMixin, DetailVi
 
 
 class TrialGroupDeleteView(LoginRequiredMixin, PrivilegedRequiredMixin, DeleteView):
-    """POST only; the participants go back to waiting, the attendance in the session entries stays."""
+    """POST only; the participants go back to waiting, the attendance in the session entries stays.
+
+    An archived group (board only) takes its anonymised participants with it.
+    """
 
     model = TrialGroup
     http_method_names = ["post"]
 
     def form_valid(self, form):
+        if self.object.archived:
+            if not is_board(self.request.user):
+                raise PermissionDenied
+            self.object.testers.all().delete()
         messages.add_message(self.request, messages.SUCCESS, f"Gruppe {self.object} gelöscht")
         return super().form_valid(form)
 
     def get_success_url(self):
         return reverse("tester_index")
+
+
+@login_required
+@require_POST
+def trial_group_archive(request, pk):
+    """Board only: archives a group whose participants all have a final outcome (see trials.archive_group)."""
+    if not is_board(request.user):
+        raise PermissionDenied
+    group = get_object_or_404(TrialGroup, pk=pk)
+    if not can_archive(group):
+        messages.add_message(request, messages.ERROR, "Archivieren geht erst, wenn alle Mitglied oder nicht Mitglied geworden sind.")
+        return redirect("trial_group_detail", pk=group.pk)
+    archive_group(group)
+    messages.add_message(request, messages.SUCCESS, f"Gruppe {group} archiviert")
+    return redirect("tester_index")
 
 
 class TeamerLeipzigCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):

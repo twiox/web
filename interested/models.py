@@ -14,6 +14,8 @@ class TrialGroup(models.Model):
     name = models.CharField("Name", max_length=100)
     notes = models.TextField("Notizen", blank=True)
     created = models.DateTimeField(auto_now_add=True)
+    # set when the board archives the finished group: its participants' personal data is gone then (trials.archive_group)
+    archived = models.DateField("Archiviert am", null=True, blank=True)
 
     class Meta:
         ordering = ["-created"]

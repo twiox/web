@@ -1975,6 +1975,80 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
     white-space: nowrap;
     cursor: help;
 }
+// group page: archive button (board), disabled until everyone has a final outcome
+.trial_group_archive{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $padding_small;
+    margin-bottom: $padding_medium;
+    .table_action:disabled{
+        opacity: 0.5;
+        cursor: not-allowed;
+        &:hover{
+            background: none;
+            color: $font_col;
+        }
+    }
+}
+// warning before something that cannot be undone (native <dialog>)
+.confirm_dialog{
+    max-width: 560px;
+    padding: $padding_big;
+    border: none;
+    border-left: 4px solid #e06666;
+    border-radius: 4px;
+    background-color: $tertiary_bg;
+    color: $font_col;
+    &::backdrop{
+        background-color: rgba(0, 0, 0, 0.6);
+    }
+    h3{
+        margin-top: 0;
+        color: white;
+        i{
+            color: #e06666;
+        }
+    }
+    margin: auto;  // centred; a global reset removes the browser's default
+    ul{
+        padding-left: 20px;
+    }
+    li{
+        margin-bottom: 4px;
+        list-style: disc;  // the global reset removes the bullets
+    }
+    &__actions{
+        display: flex;
+        justify-content: flex-end;
+        gap: $padding_small;
+        margin-top: $padding_medium;
+    }
+}
+// dashboard: group card with the archive button in its corner (outside the card's link)
+.trial_group_card_wrap{
+    position: relative;
+    display: flex;
+    > .trial_group_card{
+        flex: 1;
+    }
+}
+.trial_group_card__archive{
+    position: absolute;
+    top: $padding_small;
+    right: $padding_small;
+    background-color: $tertiary_bg;
+    font-size: 0.85rem;
+}
+// dashboard: archived groups, collapsed below the group cards
+.archived_groups{
+    margin-top: $padding_medium;
+    summary{
+        cursor: pointer;
+        color: white;
+        margin-bottom: $padding_small;
+    }
+}
 .trial_group_meta{
     display: flex;
     align-items: center;

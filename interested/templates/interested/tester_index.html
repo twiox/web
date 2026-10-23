@@ -45,33 +45,65 @@
     </div>
     <div class="dashboard_grid">
         {% for group in groups %}
-        <a class="dashboard_card trial_group_card" href="{% url 'trial_group_detail' group.pk %}">
-            <i class="fas fa-users"></i>
-            <strong>{{ group.name }}</strong>
-            <span class="dashboard_card__text">
-                {{ group.size }} Teilnehmende ·
-                {{ group.date_count }} Termin{{ group.date_count|pluralize:"e" }}{% if group.first_date %}, {{ group.first_date|date:"d.m." }}–{{ group.last_date|date:"d.m.Y" }}{% endif %}
-            </span>
-            {% if group.date_count %}
-            <span class="trial_progress" title="{{ group.past_count }} von {{ group.date_count }} Terminen vorbei">
-                <span class="trial_progress__bar" style="width: {% widthratio group.past_count group.date_count 100 %}%"></span>
-            </span>
-            <span class="dashboard_card__text">{{ group.past_count }} von {{ group.date_count }} Terminen vorbei</span>
-            {# once all dates are over: how many have an outcome #}
-            {% if group.past_count == group.date_count and group.size %}
-            <span class="trial_progress" title="{{ group.applied_count }} Antrag abgegeben · {{ group.member_count }} Mitglied · {{ group.declined_count }} nicht Mitglied geworden">
-                <span class="trial_progress__bar trial_progress__bar--applied" style="width: {% widthratio group.applied_count group.size 100 %}%"></span>
-                <span class="trial_progress__bar trial_progress__bar--member" style="width: {% widthratio group.member_count group.size 100 %}%"></span>
-                <span class="trial_progress__bar trial_progress__bar--declined" style="width: {% widthratio group.declined_count group.size 100 %}%"></span>
-            </span>
-            <span class="dashboard_card__text">{{ group.decided_count }} von {{ group.size }} mit Ergebnis</span>
+        {# a wrapper, so the archive button can sit on the card without being inside its link #}
+        <div class="trial_group_card_wrap">
+            <a class="dashboard_card trial_group_card" href="{% url 'trial_group_detail' group.pk %}">
+                <i class="fas fa-users"></i>
+                <strong>{{ group.name }}</strong>
+                <span class="dashboard_card__text">
+                    {{ group.size }} Teilnehmende ·
+                    {{ group.date_count }} Termin{{ group.date_count|pluralize:"e" }}{% if group.first_date %}, {{ group.first_date|date:"d.m." }}–{{ group.last_date|date:"d.m.Y" }}{% endif %}
+                </span>
+                {% if group.date_count %}
+                <span class="trial_progress" title="{{ group.past_count }} von {{ group.date_count }} Terminen vorbei">
+                    <span class="trial_progress__bar" style="width: {% widthratio group.past_count group.date_count 100 %}%"></span>
+                </span>
+                <span class="dashboard_card__text">{{ group.past_count }} von {{ group.date_count }} Terminen vorbei</span>
+                {# once all dates are over: how many have an outcome #}
+                {% if group.past_count == group.date_count and group.size %}
+                <span class="trial_progress" title="{{ group.applied_count }} Antrag abgegeben · {{ group.member_count }} Mitglied · {{ group.declined_count }} nicht Mitglied geworden">
+                    <span class="trial_progress__bar trial_progress__bar--applied" style="width: {% widthratio group.applied_count group.size 100 %}%"></span>
+                    <span class="trial_progress__bar trial_progress__bar--member" style="width: {% widthratio group.member_count group.size 100 %}%"></span>
+                    <span class="trial_progress__bar trial_progress__bar--declined" style="width: {% widthratio group.declined_count group.size 100 %}%"></span>
+                </span>
+                <span class="dashboard_card__text">{{ group.decided_count }} von {{ group.size }} mit Ergebnis</span>
+                {% endif %}
+                {% endif %}
+            </a>
+            {% if is_board and group.size and group.member_count|add:group.declined_count == group.size %}
+            <button type="button" class="table_action trial_group_card__archive" data-archive="archive_dialog_{{ group.pk }}" title="Alle sind Mitglied oder nicht Mitglied geworden"><i class="fas fa-archive"></i> Archivieren</button>
+            {% include "interested/_archive_dialog.html" with size=group.size members=group.member_count %}
             {% endif %}
-            {% endif %}
-        </a>
+        </div>
         {% empty %}
         <p class="member_panel__hint">Noch keine Gruppen.</p>
         {% endfor %}
     </div>
+    {% if archived_groups %}
+    <details class="archived_groups">
+        <summary>
+            Archivierte Gruppen ({{ archived_groups|length }})
+            <span class="member_panel__hint">· {{ archived_members }} Mitglied{{ archived_members|pluralize:"er" }} geworden · {{ archived_declined }} nicht</span>
+        </summary>
+        <div class="member_table_wrapper tertiary_bg">
+            <table class="member_table member_table--static tester_table">
+                <thead><tr><th>Gruppe</th><th>Zeitraum</th><th>Teilnehmende</th><th>Mitglied geworden</th><th>Nicht Mitglied geworden</th><th>Archiviert am</th></tr></thead>
+                <tbody>
+                {% for group in archived_groups %}
+                    <tr>
+                        <td><a href="{% url 'trial_group_detail' group.pk %}">{{ group.name }}</a></td>
+                        <td>{% if group.first_date %}{{ group.first_date|date:"d.m." }}–{{ group.last_date|date:"d.m.Y" }}{% else %}–{% endif %}</td>
+                        <td>{{ group.size }}</td>
+                        <td>{{ group.member_count }}</td>
+                        <td>{{ group.declined_count }}</td>
+                        <td>{{ group.archived|date:"d.m.Y" }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </details>
+    {% endif %}
 
     <div class="member_toolbar tester_dashboard__head">
         <h3>{% if upcoming_all %}Nächste Probetrainings{% else %}Deine nächsten Probetrainings{% endif %}</h3>
@@ -141,6 +173,11 @@
     {% endif %}
 </section>
 
+<script>
+// archive button on the group cards: the warning first
+document.querySelectorAll('[data-archive]').forEach(button => button.addEventListener('click', () => document.getElementById(button.dataset.archive).showModal()));
+document.querySelectorAll('.confirm_dialog [data-close]').forEach(button => button.addEventListener('click', () => button.closest('dialog').close()));
+</script>
 {% if finished %}
 <script>
 (function () {

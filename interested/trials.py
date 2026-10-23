@@ -4,15 +4,27 @@ Attendance is not stored separately: it comes from the training session entries 
 trainers fill in. A trial participant counts as present on a trial date when they are
 a participant (linked via TrainingSessionParticipant.tester) of an entry for that
 training time on that day.
+
+Archived groups are done: their participants are anonymised and left out of every list
+and count, except the overview of archived groups and the group page itself.
 """
 from datetime import date, datetime
 
+from django.db import transaction
 from django.db.models import Count
 
+from members.models import Profile
 from trainer.models import TrainingSessionEntry, TrainingSessionParticipant
 
 from .models import Tester, TrialDate, TrialGroup
 
+# a group can be archived once everyone in it has one of these outcomes
+FINAL_OUTCOMES = ["member", "declined"]
+
+
+def current_testers():
+    """Trial requests that are not in an archived group."""
+    return Tester.objects.filter(trial_group__archived__isnull=True)
 
 
 def weekday_matches(trial_date):
@@ -24,7 +36,7 @@ def expected_testers(entry):
     """Trial participants whose group has a trial date for this training session entry."""
     if not entry.session_id or not entry.date:
         return Tester.objects.none()
-    return Tester.objects.filter(
+    return current_testers().filter(
         trial_group__trial_dates__session=entry.session_id,
         trial_group__trial_dates__date=entry.date.date(),
     ).distinct().order_by("first_name", "last_name")
@@ -71,7 +83,7 @@ def attended_trainings(tester):
 
 def upcoming_trial_dates(user, board):
     """Trial dates from today on: all of them for the board, a trainer only sees their own training times."""
-    dates = TrialDate.objects.filter(date__gte=date.today()).select_related("group", "session").prefetch_related("group__testers")
+    dates = TrialDate.objects.filter(date__gte=date.today(), group__archived__isnull=True).select_related("group", "session").prefetch_related("group__testers")
     if not board:
         trainer = getattr(user, "trainer", None)
         dates = dates.filter(session__trainer=trainer) if trainer else dates.none()
@@ -84,7 +96,7 @@ def trainer_trial_groups(trainer):
     Every date gets .own (at one of the trainer's training times), the group .next_date (next date from today on).
     """
     groups = list(
-        TrialGroup.objects.filter(trial_dates__session__trainer=trainer).distinct()
+        TrialGroup.objects.filter(trial_dates__session__trainer=trainer, archived__isnull=True).distinct()
         .prefetch_related("trial_dates__session__trainer", "testers")
     )
     today = date.today()
@@ -101,7 +113,10 @@ def trainer_trial_groups(trainer):
 
 def finished_testers():
     """Everyone in a group whose trial dates are all over, with .visits; the ones without outcome first."""
-    finished = TrialGroup.objects.filter(trial_dates__isnull=False).exclude(trial_dates__date__gte=date.today())
+    finished = (
+        TrialGroup.objects.filter(trial_dates__isnull=False, archived__isnull=True)
+        .exclude(trial_dates__date__gte=date.today())
+    )
     return (
         Tester.objects.filter(trial_group__in=finished)
         .annotate(visits=Count("attendances"))
@@ -116,6 +131,50 @@ def mark_member(first_name, last_name, birthday):
         return
     if isinstance(birthday, datetime):  # Profile.birthday is a datetime, but forms set a plain date
         birthday = birthday.date()
-    Tester.objects.filter(
+    current_testers().filter(
         first_name__iexact=first_name.strip(), last_name__iexact=last_name.strip(), birthday__date=birthday
     ).exclude(outcome="member").update(outcome="member")
+
+
+def can_archive(group):
+    """Not archived yet, has participants, and every one of them became a member or decided against it."""
+    testers = group.testers.all()
+    return group.archived is None and testers.exists() and not testers.exclude(outcome__in=FINAL_OUTCOMES).exists()
+
+
+def find_member(tester):
+    """The member account of a trial participant (same name and birthday), if there is one."""
+    profile = Profile.objects.filter(
+        user__first_name__iexact=tester.first_name.strip(),
+        user__last_name__iexact=tester.last_name.strip(),
+        birthday__date=tester.birthday.date(),
+    ).select_related("user").first()
+    return profile.user if profile else None
+
+
+@transaction.atomic
+def archive_group(group):
+    """Archives a finished group and removes its participants' personal data.
+
+    Every request keeps its group, outcome, gender and year of birth (birthday: 1 January),
+    the rest is replaced by "Archiviert <n>" or emptied. Their entries in the training sessions
+    lose name and notes the same way, except for members: that attendance moves to their
+    member account, so it still counts as their participation.
+    """
+    for number, tester in enumerate(group.testers.order_by("pk"), start=1):
+        member = find_member(tester) if tester.outcome == "member" else None
+        if member:
+            for participant in TrainingSessionParticipant.objects.filter(tester=tester):
+                if participant.session.participant.filter(user=member).exists():
+                    participant.delete()  # already entered as member in that training
+                else:
+                    participant.user, participant.tester, participant.name = member, None, None
+                    participant.save()
+        tester.first_name, tester.last_name = "Archiviert", str(number)
+        tester.email, tester.telnr, tester.contact_person = "", None, ""
+        tester.notes, tester.board_notes, tester.has_consent = None, "", False
+        tester.birthday = tester.birthday.replace(month=1, day=1)
+        tester.save()
+        TrainingSessionParticipant.objects.filter(tester=tester).update(name=str(tester), notes=None)
+    group.archived = date.today()
+    group.save(update_fields=["archived"])

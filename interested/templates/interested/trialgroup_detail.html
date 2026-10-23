@@ -14,15 +14,56 @@
         <h1>{{ object }}</h1>
     </div>
     <div class="member_panel__hint event_detail_meta trial_group_meta">
-        <a href="{% url 'trial_group_update' object.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
-        <form method="POST" action="{% url 'trial_group_delete' object.pk %}" class="trial_group_delete" data-name="{{ object }}">
+        {% if not object.archived %}<a href="{% url 'trial_group_update' object.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>{% endif %}
+        {% if is_board or not object.archived %}
+        <form method="POST" action="{% url 'trial_group_delete' object.pk %}" class="trial_group_delete" data-name="{{ object }}" data-archived="{{ object.archived|yesno:'1,' }}">
             {% csrf_token %}
             <button type="submit" class="icon_button" title="Löschen"><i class="far fa-minus-square"></i></button>
         </form>
+        {% endif %}
         {{ rows|length }} Teilnehmende · {{ dates|length }} Termin{{ dates|length|pluralize:"e" }}
+        {% if object.archived %}· <strong>archiviert am {{ object.archived|date:"d.m.Y" }}</strong>{% endif %}
     </div>
     {% if object.notes %}<p class="trial_group_notes">{{ object.notes|linebreaksbr }}</p>{% endif %}
 
+    {% if is_board and not object.archived %}
+    <div class="trial_group_archive">
+        <button type="button" class="table_action" data-archive="archive_dialog_{{ object.pk }}" {% if not can_archive %}disabled{% endif %}><i class="fas fa-archive"></i> Gruppe archivieren</button>
+        {% if not can_archive %}<span class="member_panel__hint">Geht, sobald alle Mitglied oder nicht Mitglied geworden sind.</span>{% endif %}
+    </div>
+    {% if can_archive %}{% include "interested/_archive_dialog.html" with group=object size=rows|length members=archive_members %}{% endif %}
+    {% endif %}
+
+    {% if object.archived %}
+    <h3>Teilnehmende</h3>
+    <p class="member_panel__hint">Archiviert: ohne persönliche Daten. Die Probetrainings der Mitglieder sind in den Trainingsstunden jetzt bei ihren Mitgliedskonten erfasst.</p>
+    <div class="member_table_wrapper tertiary_bg">
+        <table class="member_table member_table--static tester_table">
+            <thead><tr><th>Name</th><th>Jahrgang</th><th>Geschlecht</th><th>Ergebnis</th><th></th></tr></thead>
+            <tbody id="group_rows">
+            {% for tester, statuses in rows %}
+                <tr>
+                    <td>{{ tester }}</td>
+                    <td>{{ tester.birthday|date:"Y" }}</td>
+                    <td>{{ tester.sex }}</td>
+                    <td>{{ tester.get_outcome_display }}</td>
+                    <td class="table_actions">
+                        {% if is_board %}
+                        <form method="POST" action="{% url 'tester_delete' tester.pk %}" class="tester_delete" data-name="{{ tester }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="from_group">
+                            <button type="submit" class="icon_button" title="Endgültig löschen"><i class="far fa-minus-square"></i></button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5">Niemand mehr in der Gruppe.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
     <h3>Termine &amp; Anwesenheit</h3>
     <p class="member_panel__hint">Aus den Trainingsstunden der Trainer*innen: <i class="fas fa-check"></i> war da, <i class="fas fa-times"></i> nicht da, – noch kein Eintrag für den Termin.</p>
     {% if dates %}
@@ -123,6 +164,7 @@
         </datalist>
         <button type="submit" class="table_action table_action--primary">Hinzufügen</button>
     </form>
+    {% endif %}
 </section>
 
 <script>
@@ -137,7 +179,7 @@
         if (response.ok) window.location.reload();
         else showMessage('Konnte nicht gespeichert werden');
     }
-    document.getElementById('group_add').addEventListener('submit', event => {
+    document.getElementById('group_add')?.addEventListener('submit', event => {
         event.preventDefault();
         const typed = document.getElementById('group_add_input').value.trim();
         const option = [...document.querySelectorAll('#group_add_options option')].find(o => o.value === typed);
@@ -161,9 +203,14 @@
     document.querySelectorAll('.tester_delete').forEach(form => form.addEventListener('submit', event => {
         if (!confirm(`${form.dataset.name} wirklich löschen?`)) event.preventDefault();
     }));
-    document.querySelector('.trial_group_delete').addEventListener('submit', event => {
-        if (!confirm(`Gruppe ${event.target.dataset.name} löschen? Die Teilnehmenden warten dann wieder.`)) event.preventDefault();
+    document.querySelector('.trial_group_delete')?.addEventListener('submit', event => {
+        const question = event.target.dataset.archived
+            ? `Gruppe ${event.target.dataset.name} mit allen archivierten Teilnehmenden endgültig löschen? Sie fehlen dann auch in der Übersicht der archivierten Gruppen.`
+            : `Gruppe ${event.target.dataset.name} löschen? Die Teilnehmenden warten dann wieder.`;
+        if (!confirm(question)) event.preventDefault();
     });
+    document.querySelectorAll('[data-archive]').forEach(button => button.addEventListener('click', () => document.getElementById(button.dataset.archive).showModal()));
+    document.querySelectorAll('.confirm_dialog [data-close]').forEach(button => button.addEventListener('click', () => button.closest('dialog').close()));
 })();
 </script>
 {% endblock %}
