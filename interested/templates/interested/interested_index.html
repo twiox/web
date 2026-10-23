@@ -300,6 +300,8 @@
                                             <span class="mdc-floating-label" id="notes-label">Anmerkungen</span>
                                             <span class="mdc-line-ripple"></span>
                                         </label>
+                                        {# we do not want health data: tell the trainers in person instead #}
+                                        <p class="probe_notes_hint">Bitte keine Angaben zur Gesundheit (z.&nbsp;B. Verletzungen oder Krankheiten). Was fürs Training wichtig ist, besprich gern direkt mit den Trainer*innen.</p>
                                     </div>
                                     <div class="chair_col-5 float_left padding_rl_small">
                                         {% if form.city.errors %}

@@ -1793,6 +1793,14 @@ footer{
     }
 }
 
+// public trial sign-up: below the notes field
+.probe_notes_hint{
+    margin: 4px 0 0 0;
+    color: grey;
+    font-size: 0.8rem;
+    text-align: left;
+}
+
 /* Probetraining dashboard and list */
 .tester_stats{
     display: grid;

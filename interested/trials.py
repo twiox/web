@@ -8,7 +8,7 @@ training time on that day.
 Archived groups are done: their participants are anonymised and left out of every list
 and count, except the overview of archived groups and the group page itself.
 """
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from django.db import transaction
 from django.db.models import Count
@@ -178,3 +178,15 @@ def archive_group(group):
         TrainingSessionParticipant.objects.filter(tester=tester).update(name=str(tester), notes=None)
     group.archived = date.today()
     group.save(update_fields=["archived"])
+
+
+# requests that never got a trial group are deleted after this long (promised in the data protection statement)
+STALE_REQUEST_AGE = timedelta(days=365)
+
+
+def delete_stale_requests():
+    """Deletes requests that waited longer than STALE_REQUEST_AGE without a group.
+
+    Requests from before the request date was stored (created is empty) are left alone: their age is unknown.
+    """
+    Tester.objects.filter(trial_group__isnull=True, created__lt=datetime.now() - STALE_REQUEST_AGE).delete()

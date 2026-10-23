@@ -35,7 +35,7 @@ from .models import (
     TrialGroup,
 )
 from .trials import (
-    archive_group, attended_trainings, can_archive, current_testers, finished_testers, group_attendance,
+    archive_group, attended_trainings, can_archive, current_testers, delete_stale_requests, finished_testers, group_attendance,
     upcoming_trial_dates, weekday_matches,
 )
 from members.roles import PrivilegedRequiredMixin, is_board, is_privileged
@@ -157,6 +157,8 @@ class TesterIndexView(LoginRequiredMixin, PrivilegedRequiredMixin, TemplateView)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # no cron here (see members.views.index): old requests are cleaned up whenever the dashboard is opened
+        delete_stale_requests()
         waiting = list(Tester.objects.filter(trial_group__isnull=True))
         board = is_board(self.request.user)
         groups = TrialGroup.objects.annotate(
