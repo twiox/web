@@ -173,18 +173,30 @@ class TesterIndexView(LoginRequiredMixin, PrivilegedRequiredMixin, TemplateView)
             last_date=Max("trial_dates__date"),
         )
         archived = list(groups.filter(archived__isnull=False).order_by("-archived", "-pk"))
+        # running and upcoming groups first, finished ones last; groups without dates yet are new, so on top
+        active = list(groups.filter(archived__isnull=True).order_by(F("last_date").desc(nulls_first=True), "-created"))
+        # finished trials, one collapsible table per group (same order as the cards)
+        finished = {}
+        for tester in finished_testers():
+            finished.setdefault(tester.trial_group_id, []).append(tester)
+        finished_groups = []
+        for group in active:
+            if group.pk in finished:
+                group.finished = finished[group.pk]
+                group.open = any(not tester.outcome for tester in group.finished)  # someone still without outcome
+                finished_groups.append(group)
         context.update(
             waiting=len(waiting),
             in_groups=current_testers().filter(trial_group__isnull=False).count(),
             age_groups=tester_age_groups(waiting),
-            groups=groups.filter(archived__isnull=True),
+            groups=active,
             archived_groups=archived,
             archived_members=sum(g.member_count for g in archived),
             archived_declined=sum(g.declined_count for g in archived),
             # the board sees all dates, trainers the ones at their own training times
             upcoming=upcoming_trial_dates(self.request.user, board),
             upcoming_all=board,
-            finished=finished_testers(),
+            finished_groups=finished_groups,
             outcomes=Tester.OUTCOMES,
         )
         return context
@@ -347,6 +359,7 @@ class TrialGroupDetailView(LoginRequiredMixin, PrivilegedRequiredMixin, DetailVi
             rows=rows,
             can_archive=can_archive(self.object),
             archive_members=sum(1 for tester, _ in rows if tester.outcome == "member"),
+            outcomes=Tester.OUTCOMES,
             # for adding people who are still waiting
             waiting=Tester.objects.filter(trial_group__isnull=True).order_by("last_name", "first_name"),
         )

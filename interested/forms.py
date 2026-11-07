@@ -2,7 +2,7 @@ from django import forms
 from user_handling.forms import MdcFormMixin, date_widget
 from members.models import calculate_age
 from members.models import Session
-from trainer.models import TrainingSessionEntry
+from trainer.models import TrainingSessionParticipant
 from .models import Tester, TrialDate, TrialGroup
 
 # the choices of the trial sign-up form on the interested page
@@ -95,14 +95,19 @@ class TrialDateForm(MdcFormMixin, forms.ModelForm):
 
 
 class BaseTrialDateFormSet(forms.BaseInlineFormSet):
-    """Dates that trainers already entered a training for are locked: their attendance hangs on date and time."""
+    """Dates someone of the group attended are locked: their attendance hangs on date and time.
+
+    Dates nobody of the group came to (e.g. entered wrongly) can still be changed or removed, also past ones.
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for form in self.forms:
             trial_date = form.instance
-            form.locked = bool(trial_date.pk) and TrainingSessionEntry.objects.filter(
-                session=trial_date.session_id, date__date=trial_date.date
+            form.locked = bool(trial_date.pk) and TrainingSessionParticipant.objects.filter(
+                tester__trial_group=trial_date.group_id,
+                session__session=trial_date.session_id,
+                session__date__date=trial_date.date,
             ).exists()
             if form.locked:
                 form.fields["date"].disabled = True  # the posted values are ignored, the stored ones kept
@@ -113,7 +118,7 @@ class BaseTrialDateFormSet(forms.BaseInlineFormSet):
         for form in self.forms:
             if form.locked and self._should_delete_form(form):
                 raise forms.ValidationError(
-                    f"Am {form.instance.date:%d.%m.%Y} wurde bereits eine Trainingsstunde erfasst – der Termin kann nicht entfernt werden."
+                    f"Am {form.instance.date:%d.%m.%Y} war schon jemand aus der Gruppe da – der Termin kann nicht entfernt werden."
                 )
 
 

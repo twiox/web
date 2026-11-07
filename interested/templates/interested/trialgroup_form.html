@@ -33,7 +33,7 @@
 
             <div class="session_card">
                 <h3>Termine</h3>
-                <p class="member_panel__hint">Jeder Termin hat seine eigene Trainingszeit. Leere Zeilen werden ignoriert. Termine mit erfasster Trainingsstunde (<i class="fas fa-lock"></i>) bleiben fest, damit die Anwesenheit erhalten bleibt.</p>
+                <p class="member_panel__hint">Jeder Termin hat seine eigene Trainingszeit. Leere Zeilen werden ignoriert. Termine, an denen schon jemand aus der Gruppe da war (<i class="fas fa-lock"></i>), bleiben fest, damit die Anwesenheit erhalten bleibt.</p>
                 {{ dates.management_form }}
                 {% for error in dates.non_form_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
                 <div id="trial_dates">
@@ -45,7 +45,7 @@
                             {% include "user_handling/_field.html" with field=date_form.session %}
                         </div>
                         {% if date_form.locked %}
-                        <span class="trial_date_row__locked" title="Für diesen Termin gibt es schon eine Trainingsstunde mit Anwesenheit – er bleibt deshalb unverändert."><i class="fas fa-lock"></i> erfasst</span>
+                        <span class="trial_date_row__locked" title="An diesem Termin war schon jemand aus der Gruppe da – er bleibt deshalb unverändert."><i class="fas fa-lock"></i> besucht</span>
                         {% elif date_form.instance.pk %}
                         <label class="toggle_chip trial_date_row__delete">{{ date_form.DELETE }}<span>entfernen</span></label>
                         {% endif %}

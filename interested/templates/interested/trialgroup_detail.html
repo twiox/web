@@ -66,14 +66,17 @@
     {% else %}
     <h3>Termine &amp; Anwesenheit</h3>
     <p class="member_panel__hint">Aus den Trainingsstunden der Trainer*innen: <i class="fas fa-check"></i> war da, <i class="fas fa-times"></i> nicht da, – noch kein Eintrag für den Termin.</p>
-    {% if dates %}
+    {% if not dates %}
+    <p class="member_panel__hint">Noch keine Termine – über <a href="{% url 'trial_group_update' object.pk %}">Bearbeiten</a> hinzufügen.</p>
+    {% endif %}
+    {% if dates or rows %}
     <div class="member_table_wrapper tertiary_bg">
         <table class="member_table member_table--static trial_attendance">
             <thead>
                 <tr>
                     <th>Teilnehmende</th>
                     {% for trial_date in dates %}
-                    <th title="{{ trial_date.session.title }}{% for trainer in trial_date.session.trainer.all %}{% if forloop.first %} · {% else %}, {% endif %}{{ trainer.user.first_name }}{% endfor %}">
+                    <th class="trial_attendance__date" title="{{ trial_date.session.title }}{% for trainer in trial_date.session.trainer.all %}{% if forloop.first %} · {% else %}, {% endif %}{{ trainer.user.first_name }}{% endfor %}">
                         {# once a trainer entered the training: link to it #}
                         {% if trial_date.entry_pk %}
                         <a class="trial_attendance__entry" href="{% url 'trainingsession_detail' trial_date.entry_pk %}" title="Zur Trainingsstunde">{{ trial_date.date|date:"D d.m." }} <i class="fas fa-external-link-alt"></i></a><br>
@@ -84,6 +87,7 @@
                         {% if not trial_date.weekday_ok %}<br><small class="trial_attendance__warn" title="Das Datum ist kein {{ trial_date.session.weekday }}"><i class="fas fa-exclamation-triangle"></i> anderer Wochentag</small>{% endif %}
                     </th>
                     {% endfor %}
+                    <th>Ergebnis</th>
                 </tr>
             </thead>
             <tbody>
@@ -95,15 +99,18 @@
                         {% if status is None %}<span class="member_panel__hint">–</span>{% elif status %}<i class="fas fa-check" title="war da"></i>{% else %}<i class="fas fa-times" title="nicht da"></i>{% endif %}
                     </td>
                     {% endfor %}
+                    <td>
+                        <select class="tester_group tester_outcome" data-url="{% url 'tester_outcome' tester.pk %}" aria-label="Ergebnis">
+                            {% for value, label in outcomes %}<option value="{{ value }}" {% if value == tester.outcome %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                        </select>
+                    </td>
                 </tr>
             {% empty %}
-                <tr><td colspan="{{ dates|length|add:1 }}">Noch niemand in der Gruppe.</td></tr>
+                <tr><td colspan="{{ dates|length|add:2 }}">Noch niemand in der Gruppe.</td></tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
-    {% else %}
-    <p class="member_panel__hint">Noch keine Termine – über <a href="{% url 'trial_group_update' object.pk %}">Bearbeiten</a> hinzufügen.</p>
     {% endif %}
 
     <h3>Teilnehmende</h3>
@@ -185,6 +192,17 @@
         const option = [...document.querySelectorAll('#group_add_options option')].find(o => o.value === typed);
         if (!option) return showMessage('Bitte eine wartende Person aus der Liste auswählen');
         setGroup(option.dataset.url, '{{ object.pk }}');
+    });
+    document.querySelector('.trial_attendance')?.addEventListener('change', async event => {
+        const select = event.target.closest('.tester_outcome');
+        if (!select) return;
+        const body = new FormData();
+        body.append('csrfmiddlewaretoken', csrf);
+        body.append('outcome', select.value);
+        const response = await fetch(select.dataset.url, { method: 'POST', body });
+        // the archive button depends on everyone's outcome
+        if (response.ok && document.querySelector('.trial_group_archive')) return window.location.reload();
+        showMessage(response.ok ? 'Gespeichert' : 'Konnte nicht gespeichert werden');
     });
     document.getElementById('group_rows').addEventListener('change', async event => {
         const box = event.target.closest('.tester_consent');

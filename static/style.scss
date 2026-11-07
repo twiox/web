@@ -1858,6 +1858,19 @@ footer{
         }
     }
 }
+// group / outcome dropdown in the dark style of the other inputs (request tables and the group's attendance table)
+%tester_select{
+    max-width: 105px;
+    padding: 4px 6px;
+    border: 1px solid $quartiary_bg;
+    border-radius: 4px;
+    background-color: $secondary_bg;
+    color: $font_col;
+    option{
+        background-color: $secondary_bg;
+        color: $font_col;
+    }
+}
 .tester_table{
     // e-mail and phone as plain text links (.member_table--static makes links icon-sized)
     &.member_table--static tbody td > a{
@@ -1905,16 +1918,7 @@ footer{
     }
     // group / outcome dropdown in the dark style of the other inputs
     .tester_group{
-        max-width: 105px;
-        padding: 4px 6px;
-        border: 1px solid $quartiary_bg;
-        border-radius: 4px;
-        background-color: $secondary_bg;
-        color: $font_col;
-        option{
-            background-color: $secondary_bg;
-            color: $font_col;
-        }
+        @extend %tester_select;
     }
     &__email{
         max-width: 150px;
@@ -2127,6 +2131,9 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
     margin: 0 0 $padding_medium 0;
 }
 .trial_attendance{
+    .tester_group{
+        @extend %tester_select;
+    }
     th small{
         color: $font_col;
         font-weight: normal;
@@ -2134,7 +2141,8 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
     &__warn, &__warn i{
         color: #c9a227;
     }
-    &__cell{
+    // the date headers above the centred ticks
+    &__cell, &__date{
         text-align: center;
     }
     &__entry{
@@ -2155,10 +2163,40 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
 .tester_table .fa-check{
     color: #6ab04c;
 }
-.trial_upcoming__people{
-    white-space: normal;
-    span{
-        cursor: help;
+// dashboard: finished trials, one collapsible table per group; the link sits at the right of the summary
+.finished_group__link{
+    margin-left: auto;
+    padding: 0;
+    font-size: 0.8rem;
+}
+// dashboard: the next trial dates as day cards (like the training times)
+.trial_calendar{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+    &__day > .primary{
+        opacity: 0.75;
+    }
+    &__entry{
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        margin-top: 6px;
+        padding: 8px 10px;
+        border-left: 4px solid transparent;
+        color: $font_col;
+        transition: background-color 0.15s, border-color 0.15s;
+        &:hover, &:focus{
+            background-color: $quartiary_bg;
+            border-left-color: $primary;
+        }
+        strong{
+            color: white;
+        }
+    }
+    &__time, &__text{
+        color: grey;
+        font-size: 0.85rem;
     }
 }
 
