@@ -4,7 +4,8 @@ from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
 from members.models import Trainer, Session, Profile, AdditionalEmail
 from members.roles import PrivilegedRequiredMixin, is_privileged, is_trainer
-from interested.trials import trainer_trial_groups
+from interested.models import TrialGroup
+from interested.trials import ACTIVE_GROUP_ORDER, annotate_groups, upcoming_trial_dates
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.views.generic import DeleteView, UpdateView, ListView
 from django.urls import reverse, reverse_lazy
@@ -40,8 +41,16 @@ def trainer_index(request):
 
 @user_passes_test(is_trainer)
 def trainer_trials(request):
-    """Trial groups that come to at least one of the trainer's training times, with their people."""
-    return render(request, "trainer/trainer_trials.html", {"groups": trainer_trial_groups(request.user.trainer)})
+    """The next trial dates at the trainer's own training times (as on the trial dashboard), and the groups
+    in progress (not archived) with a date at one of them – e.g. to upload an application after the last date.
+    People and contacts are on the group page."""
+    own = TrialGroup.objects.filter(trial_dates__session__trainer=request.user.trainer).values("pk")
+    # pk__in instead of filtering the dates directly, so the card numbers count all dates of the group
+    groups = annotate_groups(TrialGroup.objects.filter(pk__in=own, archived__isnull=True)).order_by(*ACTIVE_GROUP_ORDER)
+    return render(request, "trainer/trainer_trials.html", {
+        "upcoming": upcoming_trial_dates(request.user, board=False),
+        "groups": groups,
+    })
 
 
 @user_passes_test(is_trainer)

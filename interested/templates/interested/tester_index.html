@@ -47,29 +47,7 @@
         {% for group in groups %}
         {# a wrapper, so the archive button can sit on the card without being inside its link #}
         <div class="trial_group_card_wrap">
-            <a class="dashboard_card trial_group_card" href="{% url 'trial_group_detail' group.pk %}">
-                <i class="fas fa-users"></i>
-                <strong>{{ group.name }}</strong>
-                <span class="dashboard_card__text">
-                    {{ group.size }} Teilnehmende ·
-                    {{ group.date_count }} Termin{{ group.date_count|pluralize:"e" }}{% if group.first_date %}, {{ group.first_date|date:"d.m." }}–{{ group.last_date|date:"d.m.Y" }}{% endif %}
-                </span>
-                {% if group.date_count %}
-                <span class="trial_progress" title="{{ group.past_count }} von {{ group.date_count }} Terminen vorbei">
-                    <span class="trial_progress__bar" style="width: {% widthratio group.past_count group.date_count 100 %}%"></span>
-                </span>
-                <span class="dashboard_card__text">{{ group.past_count }} von {{ group.date_count }} Terminen vorbei</span>
-                {% endif %}
-                {# once all dates are over (or there are none, e.g. placeholder groups) or someone has an outcome already: how many have one #}
-                {% if group.decided_count or group.past_count == group.date_count and group.size %}
-                <span class="trial_progress" title="{{ group.applied_count }} Antrag abgegeben · {{ group.member_count }} Mitglied · {{ group.declined_count }} nicht Mitglied geworden">
-                    <span class="trial_progress__bar trial_progress__bar--applied" style="width: {% widthratio group.applied_count group.size 100 %}%"></span>
-                    <span class="trial_progress__bar trial_progress__bar--member" style="width: {% widthratio group.member_count group.size 100 %}%"></span>
-                    <span class="trial_progress__bar trial_progress__bar--declined" style="width: {% widthratio group.declined_count group.size 100 %}%"></span>
-                </span>
-                <span class="dashboard_card__text">{{ group.decided_count }} von {{ group.size }} mit Ergebnis</span>
-                {% endif %}
-            </a>
+            {% include "interested/_trial_group_card.html" %}
             {% if is_board and group.size and group.member_count|add:group.declined_count == group.size %}
             <button type="button" class="table_action trial_group_card__archive" data-archive="archive_dialog_{{ group.pk }}" title="Alle sind Mitglied oder nicht Mitglied geworden"><i class="fas fa-archive"></i> Archivieren</button>
             {% include "interested/_archive_dialog.html" with size=group.size members=group.member_count %}
@@ -106,30 +84,9 @@
     {% endif %}
 
     <div class="member_toolbar tester_dashboard__head">
-        <h3>{% if upcoming_all %}Nächste Probetrainings{% else %}Deine nächsten Probetrainings{% endif %}</h3>
+        <h3>{% if upcoming_all %}Nächste Probetrainings{% else %}Deine nächsten Einheiten{% endif %}</h3>
     </div>
-    {% if upcoming %}
-    {# one card per day, like the training times: the trials of that day, each links to its group #}
-    <div class="trial_calendar">
-        {% regroup upcoming by date as days %}
-        {% for day in days %}
-        <div class="trial_calendar__day">
-            <div class="primary padding_all_small flex_center"><strong>{{ day.grouper|date:"D d.m." }}</strong></div>
-            {% for trial_date in day.list %}
-            <a class="trial_calendar__entry tertiary_bg" href="{% url 'trial_group_detail' trial_date.group.pk %}">
-                <span class="trial_calendar__time">{{ trial_date.session.format_start_time }} · {{ trial_date.session.title }}</span>
-                <strong>{{ trial_date.group }}</strong>
-                {% with count=trial_date.group.testers.all|length %}
-                <span class="trial_calendar__text">{{ count }} Teilnehmende</span>
-                {% endwith %}
-            </a>
-            {% endfor %}
-        </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <p class="member_panel__hint">{% if upcoming_all %}Keine geplanten Probetrainings.{% else %}Zu deinen Trainingszeiten sind keine Probetrainings geplant.{% endif %}</p>
-    {% endif %}
+    {% include "interested/_trial_calendar.html" %}
 
     <div class="member_toolbar tester_dashboard__head">
         <h3>Abgeschlossene Probetrainings</h3>
@@ -164,7 +121,7 @@
                         <td class="tester_table__email" title="{{ tester.email }}"><a href="mailto:{{ tester.email }}">{{ tester.email }}</a></td>
                         <td>{% if tester.telnr %}<a href="tel:{{ tester.telnr }}">{{ tester.telnr }}</a>{% else %}–{% endif %}</td>
                         <td>
-                            <select class="tester_group" data-url="{% url 'tester_outcome' tester.pk %}" aria-label="Ergebnis">
+                            <select class="tester_group" data-url="{% url 'tester_outcome' tester.pk %}" aria-label="Ergebnis" autocomplete="off">
                                 {% for value, label in outcomes %}<option value="{{ value }}" {% if value == tester.outcome %}selected{% endif %}>{{ label }}</option>{% endfor %}
                             </select>
                         </td>

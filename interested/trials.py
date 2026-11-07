@@ -8,10 +8,15 @@ training time on that day.
 Archived groups are done: their participants are anonymised and left out of every list
 and count, except the overview of archived groups and the group page itself.
 """
+import logging
 from datetime import date, datetime, timedelta
+from io import BytesIO
 
+from django.conf import settings
+from django.core.mail import EmailMessage
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, F, Max, Min, Q
+from PIL import Image, ImageOps
 
 from members.models import Profile
 from trainer.models import TrainingSessionEntry, TrainingSessionParticipant
@@ -20,6 +25,72 @@ from .models import Tester, TrialDate, TrialGroup
 
 # a group can be archived once everyone in it has one of these outcomes
 FINAL_OUTCOMES = ["member", "declined"]
+
+logger = logging.getLogger(__name__)
+
+# photos of paper forms (consent, membership application) taken by trainers; shrunk in the browser
+# (static/photo_upload.js), so this only stops files that are no photos at all
+PHOTO_MAX_BYTES = 15 * 1024 * 1024
+
+
+def is_photo(upload):
+    return (upload.content_type or "").startswith("image/") and upload.size <= PHOTO_MAX_BYTES
+
+
+A4_WIDTH_INCH = 8.27
+
+
+def photos_to_pdf(photos):
+    """One PDF page per photo, in order; the resolution makes the widest page about A4 wide."""
+    images = [ImageOps.exif_transpose(Image.open(photo)).convert("RGB") for photo in photos]
+    pdf = BytesIO()
+    images[0].save(
+        pdf, "PDF", save_all=True, append_images=images[1:],
+        resolution=max(image.width for image in images) / A4_WIDTH_INCH,
+    )
+    return pdf.getvalue()
+
+
+def email_board(subject, body, filename=None, photos=()):
+    """Mail to the board (TO_EMAIL); the photos go in as one PDF <filename>.pdf, built in memory, never stored.
+
+    If a photo cannot be read as an image, the files are attached as they are instead.
+    Returns False if sending failed (logged), so the caller can ask the trainer to hand in the paper.
+    """
+    email = EmailMessage(subject, body, to=[settings.TO_EMAIL])
+    if photos:
+        try:
+            email.attach(f"{filename}.pdf", photos_to_pdf(photos), "application/pdf")
+        except Exception:
+            logger.exception("PDF from photos failed, attaching the photos: %s", subject)
+            for number, photo in enumerate(photos, 1):
+                photo.seek(0)
+                email.attach(f"{filename}-{number}.jpg", photo.read(), photo.content_type)
+    try:
+        email.send()
+        return True
+    except Exception:
+        logger.exception("email to the board failed: %s", subject)
+        return False
+
+
+def annotate_groups(groups):
+    """Numbers for the group cards (dashboard, trainer document): size, outcomes, dates done, first and last date."""
+    return groups.annotate(
+        size=Count("testers", distinct=True),
+        decided_count=Count("testers", filter=~Q(testers__outcome=""), distinct=True),
+        applied_count=Count("testers", filter=Q(testers__outcome="applied"), distinct=True),
+        member_count=Count("testers", filter=Q(testers__outcome="member"), distinct=True),
+        declined_count=Count("testers", filter=Q(testers__outcome="declined"), distinct=True),
+        date_count=Count("trial_dates", distinct=True),
+        past_count=Count("trial_dates", filter=Q(trial_dates__date__lt=date.today()), distinct=True),
+        first_date=Min("trial_dates__date"),
+        last_date=Max("trial_dates__date"),
+    )
+
+
+# running and upcoming groups first, finished ones last; groups without dates yet are new, so on top
+ACTIVE_GROUP_ORDER = [F("last_date").desc(nulls_first=True), "-created"]
 
 
 def current_testers():
@@ -88,27 +159,6 @@ def upcoming_trial_dates(user, board):
         trainer = getattr(user, "trainer", None)
         dates = dates.filter(session__trainer=trainer) if trainer else dates.none()
     return dates.distinct()
-
-
-def trainer_trial_groups(trainer):
-    """Groups with at least one date at one of the trainer's training times, latest first.
-
-    Every date gets .own (at one of the trainer's training times), the group .next_date (next date from today on).
-    """
-    groups = list(
-        TrialGroup.objects.filter(trial_dates__session__trainer=trainer, archived__isnull=True).distinct()
-        .prefetch_related("trial_dates__session__trainer", "testers")
-    )
-    today = date.today()
-    for group in groups:
-        group.dates = list(group.trial_dates.all())
-        for d in group.dates:
-            d.own = trainer in d.session.trainer.all()
-        upcoming = [d.date for d in group.dates if d.date >= today]
-        group.next_date = min(upcoming) if upcoming else None
-        group.last_date = max(d.date for d in group.dates)
-    # groups that still come first (by their next date), then finished ones (latest first)
-    return sorted(groups, key=lambda g: (g.next_date is None, g.next_date or date.min, -g.last_date.toordinal()))
 
 
 def finished_testers():

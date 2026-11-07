@@ -1,0 +1,25 @@
+{% comment %}
+The next trial dates as day cards, each entry links to its group; on the trial dashboard and in the trainer document.
+upcoming: trials.upcoming_trial_dates(); upcoming_all: all dates (board) or only the viewer's own training times.
+{% endcomment %}
+{% if upcoming %}
+<div class="trial_calendar">
+    {% regroup upcoming by date as days %}
+    {% for day in days %}
+    <div class="trial_calendar__day">
+        <div class="primary padding_all_small flex_center"><strong>{{ day.grouper|date:"D d.m." }}</strong></div>
+        {% for trial_date in day.list %}
+        <a class="trial_calendar__entry tertiary_bg" href="{% url 'trial_group_detail' trial_date.group.pk %}">
+            <span class="trial_calendar__time">{{ trial_date.session.format_start_time }} · {{ trial_date.session.title }}</span>
+            <strong>{{ trial_date.group }}</strong>
+            {% with count=trial_date.group.testers.all|length %}
+            <span class="trial_calendar__text">{{ count }} Teilnehmende</span>
+            {% endwith %}
+        </a>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="member_panel__hint">{% if upcoming_all %}Keine geplanten Probetrainings.{% else %}Zu deinen Trainingszeiten sind keine Probetrainings geplant.{% endif %}</p>
+{% endif %}

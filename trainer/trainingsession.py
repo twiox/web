@@ -7,6 +7,7 @@ from trainer.forms import TrainingSessionForm
 from trainer.models import TrainingSessionEntry, TrainingSessionParticipant, TrainingSessionInvoice
 from members.models import Trainer, Profile, Session
 from members.roles import is_board, is_privileged, is_trainer
+from interested.models import TrialGroup
 from interested.trials import expected_testers
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import user_passes_test
@@ -51,8 +52,22 @@ def get_participants_list(request, pk):
     elif type=='trial':
         # trial participants: the ones entered, and the ones whose group comes to this training but are not entered yet
         entered = list(session.participant.filter(tester__isnull=False).select_related('tester__trial_group'))
-        expected = list(expected_testers(session).exclude(pk__in=[p.tester_id for p in entered]))
-        context.update({'object_list': entered, 'expected_testers': expected, 'contact_count': len(entered) + len(expected)})
+        expected = list(expected_testers(session).exclude(pk__in=[p.tester_id for p in entered]).select_related('trial_group'))
+        # one block per trial group that has a trial date at this training (several can come; archived ones too)
+        scheduled = TrialGroup.objects.filter(
+            trial_dates__session=session.session_id, trial_dates__date=session.date.date()
+        ).distinct().order_by('name') if session.session_id and session.date else TrialGroup.objects.none()
+        blocks = {group.pk: {'group': group, 'expected': [], 'entered': []} for group in scheduled}
+        for tester in expected:
+            blocks[tester.trial_group_id]['expected'].append(tester)
+        # entered, but moved to another group (or back to waiting) since then: listed below the blocks
+        moved = []
+        for participant in entered:
+            block = blocks.get(participant.tester.trial_group_id)
+            (block['entered'] if block else moved).append(participant)
+        context.update({
+            'object_list': entered, 'trial_groups': list(blocks.values()), 'moved': moved,
+        })
         return render(request, 'trainingsession/snippet_trial_list.html', context)
     else:
         context.update({'object_list':session.participant.filter(user__isnull=True, tester__isnull=True)})
@@ -148,17 +163,6 @@ def add_trial_participant(request, pk):
     session = get_object_or_404(TrainingSessionEntry, pk=pk)
     tester = get_object_or_404(expected_testers(session), pk=request.POST.get('tester_pk'))
     TrainingSessionParticipant.objects.get_or_create(session=session, tester=tester, defaults={'name': str(tester)})
-    return get_participants_list(request, pk)
-
-
-@user_passes_test(is_privileged)
-@require_POST
-def trial_consent(request, pk):
-    """Parents handed in the consent form at the training: tick it for the expected trial participant."""
-    session = get_object_or_404(TrainingSessionEntry, pk=pk)
-    tester = get_object_or_404(expected_testers(session), pk=request.POST.get('tester_pk'))
-    tester.has_consent = True
-    tester.save(update_fields=['has_consent'])
     return get_participants_list(request, pk)
 
 
@@ -456,7 +460,6 @@ urlpatterns = [
     path("<int:pk>/participant/remove/", delete_participant, name='trainingsession_del_participant'),
     path("<int:pk>/participant/non-member/", add_nonmember, name="trainingsession_nonmember_add"),
     path("<int:pk>/participant/trial/", add_trial_participant, name="trainingsession_trial_add"),
-    path("<int:pk>/participant/trial/consent/", trial_consent, name="trainingsession_trial_consent"),
     path("ajax/session-details/", fill_session_details, name="fill_session_details")
 ]
 
