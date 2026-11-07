@@ -1131,13 +1131,43 @@ footer{
         background-color: transparent;
         border: 1px dashed $primary;
     }
-    // trial participants: missing consent (click: handed in today) and board notes (hover)
-    button.person_chip__warn, button.person_chip__warn i{
-        color: #e06666;
-    }
+    // member notes for the trainers (hover)
     &__note, &__note i{
         color: #c9a227;
         cursor: help;
+    }
+}
+// "Antrag hochladen" dialog: the photographed pages as numbered thumbnails
+.confirm_dialog .application_pages{
+    display: flex;
+    flex-wrap: wrap;
+    gap: $padding_small;
+    padding: 0;
+    li{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        margin: 0;
+        list-style: none;
+        font-size: 0.85rem;
+    }
+    img{
+        height: 90px;
+        border-radius: 4px;
+    }
+}
+// training page: trial participants, one block per trial group (its button links to the group page)
+.trial_block{
+    margin-bottom: $padding_small;
+    // a link outside a flex toolbar: inline-block, so its padding takes up space
+    > .table_action{
+        display: inline-block;
+    }
+    &__label{
+        margin: 6px 0 2px;
+        color: grey;
+        font-size: 0.85rem;
     }
 }
 .contacts_toggle{
@@ -2005,6 +2035,13 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
 }
 // warning before something that cannot be undone (native <dialog>)
 .confirm_dialog{
+    // not a warning: e.g. the consent photo on the training page
+    &.confirm_dialog--info{
+        border-left-color: $primary;
+        h3 i{
+            color: $primary;
+        }
+    }
     max-width: 560px;
     padding: $padding_big;
     border: none;
@@ -2032,6 +2069,7 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
     }
     &__actions{
         display: flex;
+        flex-wrap: wrap;  // several buttons on a phone
         justify-content: flex-end;
         gap: $padding_small;
         margin-top: $padding_medium;
@@ -2079,42 +2117,6 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
         color: #6ab04c;
     }
 }
-// trainer document: the trial groups that come to the trainer's training times
-.trainer_trial_group{
-    margin-bottom: $padding_small;
-    &__missing{
-        color: #e06666;
-    }
-    &__head{
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: space-between;
-        gap: $padding_small;
-        h3{
-            margin: 0;
-        }
-        h3 a{
-            padding: 0;
-            color: white;
-        }
-        .entry_status{
-            padding: 2px 8px;
-            border-radius: 4px;
-        }
-    }
-}
-.trainer_trial_date{
-    padding: 3px 10px;
-    border: 1px solid $quartiary_bg;
-    border-radius: 14px;
-    color: grey;
-    font-size: 0.85rem;
-    &--own{
-        border-color: $primary;
-        color: white;
-    }
-}
 // group detail: even spacing between notes, attendance and participants
 .trial_group_page{
     h3{
@@ -2144,6 +2146,14 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
     // the date headers above the centred ticks
     &__cell, &__date{
         text-align: center;
+    }
+    // outcome dropdown and "Antrag hochladen" side by side; the column only as wide as that, the dates take the rest
+    &__outcome{
+        width: 1%;
+        white-space: nowrap;
+        .table_action{
+            margin-left: 6px;
+        }
     }
     &__entry{
         padding: 0;

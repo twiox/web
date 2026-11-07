@@ -1,4 +1,3 @@
-from datetime import date
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -20,7 +19,7 @@ from django.views.generic import (
 )
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, F, Max, Min, Q
+from django.db.models import Count, F
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.conf import settings
@@ -35,8 +34,8 @@ from .models import (
     TrialGroup,
 )
 from .trials import (
-    archive_group, attended_trainings, can_archive, current_testers, delete_stale_requests, finished_testers, group_attendance,
-    upcoming_trial_dates, weekday_matches,
+    ACTIVE_GROUP_ORDER, FINAL_OUTCOMES, annotate_groups, archive_group, attended_trainings, can_archive, current_testers, delete_stale_requests, email_board,
+    finished_testers, group_attendance, is_photo, upcoming_trial_dates, weekday_matches,
 )
 from members.roles import PrivilegedRequiredMixin, is_board, is_privileged
 
@@ -161,20 +160,9 @@ class TesterIndexView(LoginRequiredMixin, PrivilegedRequiredMixin, TemplateView)
         delete_stale_requests()
         waiting = list(Tester.objects.filter(trial_group__isnull=True))
         board = is_board(self.request.user)
-        groups = TrialGroup.objects.annotate(
-            size=Count("testers", distinct=True),
-            decided_count=Count("testers", filter=~Q(testers__outcome=""), distinct=True),
-            applied_count=Count("testers", filter=Q(testers__outcome="applied"), distinct=True),
-            member_count=Count("testers", filter=Q(testers__outcome="member"), distinct=True),
-            declined_count=Count("testers", filter=Q(testers__outcome="declined"), distinct=True),
-            date_count=Count("trial_dates", distinct=True),
-            past_count=Count("trial_dates", filter=Q(trial_dates__date__lt=date.today()), distinct=True),
-            first_date=Min("trial_dates__date"),
-            last_date=Max("trial_dates__date"),
-        )
+        groups = annotate_groups(TrialGroup.objects.all())
         archived = list(groups.filter(archived__isnull=False).order_by("-archived", "-pk"))
-        # running and upcoming groups first, finished ones last; groups without dates yet are new, so on top
-        active = list(groups.filter(archived__isnull=True).order_by(F("last_date").desc(nulls_first=True), "-created"))
+        active = list(groups.filter(archived__isnull=True).order_by(*ACTIVE_GROUP_ORDER))
         # finished trials, one collapsible table per group (same order as the cards)
         finished = {}
         for tester in finished_testers():
@@ -260,6 +248,49 @@ def tester_outcome(request, pk):
     return JsonResponse({"success": True})
 
 
+APPLICATION_MAX_PAGES = 10
+
+
+@login_required
+@require_POST
+def tester_application(request, pk):
+    """Group page: a trainer photographed the membership application (one photo per page).
+
+    The pages go to the board by email (attached from memory, never stored) and the outcome becomes
+    "Antrag abgegeben" – also if the email fails; the trainer then hands in the paper.
+    Errors with the photos come back as {"error": ...}, nothing is changed then.
+    """
+    if not is_privileged(request.user):
+        return JsonResponse({"success": False}, status=403)
+    tester = get_object_or_404(current_testers().select_related("trial_group").exclude(outcome__in=FINAL_OUTCOMES), pk=pk)
+    pages = request.FILES.getlist("pages")
+    if not pages:
+        return JsonResponse({"error": "Bitte mindestens eine Seite fotografieren."}, status=400)
+    if len(pages) > APPLICATION_MAX_PAGES:
+        return JsonResponse({"error": f"Höchstens {APPLICATION_MAX_PAGES} Seiten."}, status=400)
+    if not all(is_photo(page) for page in pages):
+        return JsonResponse({"error": "Mindestens eine Datei ist kein Foto – bitte die Seite neu fotografieren."}, status=400)
+
+    tester.outcome = "applied"
+    tester.save(update_fields=["outcome"])
+
+    trainer = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
+    # only name and group: everything else about the person is on the server
+    body = (
+        f"{trainer} hat den Mitgliedsantrag von {tester} (Probetrainingsgruppe {tester.trial_group or '–'}) hochgeladen.\n\n"
+        f"Im Anhang: {len(pages)} Seite{'n' if len(pages) != 1 else ''}. "
+    )
+    sent = email_board(
+        f"Mitgliedsantrag: {tester} ({tester.trial_group or 'ohne Gruppe'})", body,
+        f"antrag-{tester.first_name}-{tester.last_name}", pages,
+    )
+    if sent:
+        messages.success(request, f"Antrag von {tester} ist per E-Mail an den Vorstand gegangen – Ergebnis: Antrag abgegeben.")
+    else:
+        messages.warning(request, f"Antrag von {tester} eingetragen, aber die E-Mail ging nicht raus – bitte gib die Papiere so bald wie möglich beim Vorstand ab.")
+    return JsonResponse({"success": True})
+
+
 @login_required
 @require_POST
 def tester_consent(request, pk):
@@ -269,6 +300,39 @@ def tester_consent(request, pk):
     tester = get_object_or_404(current_testers(), pk=pk)
     tester.has_consent = request.POST.get("value") == "true"
     tester.save(update_fields=["has_consent"])
+    return JsonResponse({"success": True})
+
+
+@login_required
+@require_POST
+def tester_consent_upload(request, pk):
+    """Group page, for trainers: the parents handed in the consent form – with a photo of it, or without.
+
+    The board gets an email (the photo as PDF, built in memory, never stored). The box is ticked also if
+    the email fails; the trainer then hands in the paper. Errors with the photo come back as {"error": ...}.
+    """
+    if not is_privileged(request.user):
+        return JsonResponse({"success": False}, status=403)
+    tester = get_object_or_404(current_testers().select_related("trial_group"), pk=pk)
+    photo = request.FILES.get("photo")
+    if photo and not is_photo(photo):
+        return JsonResponse({"error": "Das ist kein Foto – bitte ein Foto der Erklärung aufnehmen oder ohne Foto bestätigen."}, status=400)
+    tester.has_consent = True
+    tester.save(update_fields=["has_consent"])
+
+    trainer = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
+    body = (
+        f"{trainer} hat die Einverständniserklärung für {tester} (Probetrainingsgruppe {tester.trial_group or '–'}) als abgegeben markiert.\n\n"
+        + ("Das Foto der Erklärung ist angehängt." if photo else "Es wurde kein Foto gemacht – das Papier soll so bald wie möglich beim Vorstand abgegeben werden.")
+    )
+    sent = email_board(
+        f"Einverständniserklärung: {tester} ({tester.trial_group or 'ohne Gruppe'})", body,
+        f"einverstaendnis-{tester.first_name}-{tester.last_name}", [photo] if photo else [],
+    )
+    if sent and photo:
+        messages.success(request, f"Einverständniserklärung von {tester} gespeichert – das Foto ist per E-Mail an den Vorstand gegangen.")
+    else:
+        messages.info(request, f"Einverständniserklärung von {tester} gespeichert. Bitte gib sie so bald wie möglich beim Vorstand ab.")
     return JsonResponse({"success": True})
 
 

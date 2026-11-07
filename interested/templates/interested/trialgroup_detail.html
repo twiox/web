@@ -1,4 +1,5 @@
 {% extends "members/base.html" %}
+{% load static %}
 {% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'tester_index' %}">Probetraining</a>
@@ -99,10 +100,14 @@
                         {% if status is None %}<span class="member_panel__hint">–</span>{% elif status %}<i class="fas fa-check" title="war da"></i>{% else %}<i class="fas fa-times" title="nicht da"></i>{% endif %}
                     </td>
                     {% endfor %}
-                    <td>
-                        <select class="tester_group tester_outcome" data-url="{% url 'tester_outcome' tester.pk %}" aria-label="Ergebnis">
+                    <td class="trial_attendance__outcome">
+                        <select class="tester_group tester_outcome" data-url="{% url 'tester_outcome' tester.pk %}" aria-label="Ergebnis" autocomplete="off">
                             {% for value, label in outcomes %}<option value="{{ value }}" {% if value == tester.outcome %}selected{% endif %}>{{ label }}</option>{% endfor %}
                         </select>
+                        {% if tester.outcome != "member" and tester.outcome != "declined" %}
+                        <button type="button" class="table_action table_action--primary" data-application="{% url 'tester_application' tester.pk %}"
+                                data-name="{{ tester.first_name }} {{ tester.last_name }}"><i class="fas fa-camera"></i> Antrag hochladen</button>
+                        {% endif %}
                     </td>
                 </tr>
             {% empty %}
@@ -139,8 +144,16 @@
                     <td class="tester_table__notes">{{ tester.board_notes|default:"–"|linebreaksbr }}</td>
                     <td class="tester_table__consent">
                         {% if tester.age is None or tester.age < 18 %}
+                        {% if is_board %}
                         <input type="checkbox" class="tester_consent" {% if tester.has_consent %}checked{% endif %}
                                data-url="{% url 'tester_consent' tester.pk %}" aria-label="Einverständniserklärung liegt vor">
+                        {% elif tester.has_consent %}
+                        <i class="fas fa-check" title="Einverständniserklärung liegt vor"></i>
+                        {% else %}
+                        {# trainers: photo of the form (or without), emailed to the board #}
+                        <button type="button" class="table_action table_action--primary" data-consent-upload="{% url 'tester_consent_upload' tester.pk %}"
+                                data-name="{{ tester.first_name }} {{ tester.last_name }}"><i class="fas fa-file-signature"></i> Hochladen</button>
+                        {% endif %}
                         {% endif %}
                     </td>
                     <td class="table_actions">
@@ -172,8 +185,184 @@
         <button type="submit" class="table_action table_action--primary">Hinzufügen</button>
     </form>
     {% endif %}
+
+    {# trainers: the consent form was handed in – photo of it (emailed to the board) or without #}
+    <dialog class="confirm_dialog confirm_dialog--info" id="consent_dialog">
+        <h3><i class="fas fa-file-signature"></i> Einverständniserklärung <span id="consent_name"></span></h3>
+        <p>Mach ein Foto der unterschriebenen Erklärung – es geht per E-Mail an den Vorstand und wird hier nicht gespeichert.</p>
+        <p class="member_panel__hint">Ohne Foto wird der Vorstand nur informiert; gib das Papier dann so bald wie möglich beim Vorstand ab.</p>
+        <p class="form_error" id="consent_error" hidden></p>
+        <p class="member_panel__hint" id="consent_status" hidden><i class="fas fa-spinner fa-spin"></i> Wird gesendet …</p>
+        <div class="confirm_dialog__actions" id="consent_actions">
+            <button type="button" class="table_action" data-close>Abbrechen</button>
+            <button type="button" class="table_action" id="consent_without">Ohne Foto bestätigen</button>
+            <label class="table_action table_action--primary"><i class="fas fa-camera"></i> Foto aufnehmen
+                <input type="file" accept="image/*" capture="environment" id="consent_photo" hidden>
+            </label>
+        </div>
+    </dialog>
+
+    {# "Antrag hochladen": one photo per page of the membership application, emailed to the board #}
+    <dialog class="confirm_dialog confirm_dialog--info" id="application_dialog">
+        <h3><i class="fas fa-file-alt"></i> Mitgliedsantrag <span id="application_name"></span></h3>
+        <p>Fotografiere jede Seite des Antrags einzeln (meist 3–5). Die Fotos gehen per E-Mail an den Vorstand und werden hier nicht gespeichert; das Ergebnis wird auf „Antrag abgegeben“ gesetzt.</p>
+        <ol class="application_pages" id="application_pages"></ol>
+        <p class="form_error" id="application_error" hidden></p>
+        <p class="member_panel__hint" id="application_status" hidden><i class="fas fa-spinner fa-spin"></i> Wird gesendet …</p>
+        <div class="confirm_dialog__actions" id="application_actions">
+            <button type="button" class="table_action" data-close>Abbrechen</button>
+            <label class="table_action"><i class="fas fa-camera"></i> Seite fotografieren
+                <input type="file" accept="image/*" capture="environment" id="application_camera" hidden>
+            </label>
+            <label class="table_action"><i class="fas fa-images"></i> Aus Galerie
+                <input type="file" accept="image/*" multiple id="application_gallery" hidden>
+            </label>
+            <button type="button" class="table_action table_action--primary" id="application_send" disabled><i class="fas fa-paper-plane"></i> Senden</button>
+        </div>
+    </dialog>
 </section>
 
+<script src="{% static 'photo_upload.js' %}"></script>
+<script>
+// consent form: one optional photo (shrunk here), then the page reloads with the tick and a message
+(function () {
+    const dialog = document.getElementById('consent_dialog');
+    if (!dialog) return;
+    const error = document.getElementById('consent_error');
+    const status = document.getElementById('consent_status');
+    const actions = document.getElementById('consent_actions');
+    const photoInput = document.getElementById('consent_photo');
+    let url = null;
+
+    function busy(on) {
+        status.hidden = !on;
+        actions.hidden = on;  // no second tap while it is sending
+    }
+    function showError(text) {
+        busy(false);
+        photoInput.value = '';
+        error.textContent = text;
+        error.hidden = !text;
+    }
+    document.querySelectorAll('[data-consent-upload]').forEach(button => button.addEventListener('click', () => {
+        url = button.dataset.consentUpload;
+        document.getElementById('consent_name').textContent = button.dataset.name;
+        showError('');
+        dialog.showModal();
+    }));
+    dialog.querySelector('[data-close]').addEventListener('click', () => dialog.close());
+
+    async function send(photo) {
+        error.hidden = true;
+        busy(true);
+        const body = new FormData();
+        body.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        if (photo) body.append('photo', photo, 'einverstaendnis.jpg');
+        try {
+            const response = await fetch(url, { method: 'POST', body });
+            if (response.ok) return window.location.reload();  // the message comes with the page
+            const data = await response.json().catch(() => ({}));
+            showError(data.error || 'Konnte nicht gespeichert werden – bitte nochmal versuchen.');
+        } catch (err) {
+            showError('Keine Verbindung – bitte nochmal versuchen.');
+        }
+    }
+    document.getElementById('consent_without').addEventListener('click', () => send(null));
+    photoInput.addEventListener('change', async () => {
+        const file = photoInput.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) return showError('Das ist kein Foto – bitte ein Foto der Erklärung aufnehmen oder ohne Foto bestätigen.');
+        busy(true);
+        send(await shrinkPhoto(file));
+    });
+})();
+</script>
+<script>
+// membership application: collect the pages (shrunk right away), then send them in one go
+(function () {
+    const dialog = document.getElementById('application_dialog');
+    if (!dialog) return;
+    const MAX_PAGES = 10;
+    const list = document.getElementById('application_pages');
+    const error = document.getElementById('application_error');
+    const status = document.getElementById('application_status');
+    const actions = document.getElementById('application_actions');
+    const sendButton = document.getElementById('application_send');
+    let url = null;
+    let pages = [];  // [{blob, preview}]
+
+    function showError(text) {
+        error.textContent = text;
+        error.hidden = !text;
+    }
+    function render() {
+        list.innerHTML = '';
+        pages.forEach((page, index) => {
+            const item = document.createElement('li');
+            item.innerHTML = `<img alt=""><span>Seite ${index + 1}</span><button type="button" class="icon_button" title="Seite entfernen"><i class="far fa-minus-square"></i></button>`;
+            item.querySelector('img').src = page.preview;
+            item.querySelector('button').addEventListener('click', () => {
+                URL.revokeObjectURL(page.preview);
+                pages.splice(index, 1);
+                render();
+            });
+            list.appendChild(item);
+        });
+        sendButton.disabled = pages.length === 0;
+        sendButton.lastChild.textContent = pages.length ? ` ${pages.length} Seite${pages.length === 1 ? '' : 'n'} senden` : ' Senden';
+    }
+    function reset() {
+        pages.forEach(page => URL.revokeObjectURL(page.preview));
+        pages = [];
+        showError('');
+        status.hidden = true;
+        actions.hidden = false;
+        render();
+    }
+
+    document.querySelectorAll('[data-application]').forEach(button => button.addEventListener('click', () => {
+        url = button.dataset.application;
+        document.getElementById('application_name').textContent = button.dataset.name;
+        reset();
+        dialog.showModal();
+    }));
+    dialog.querySelector('[data-close]').addEventListener('click', () => { reset(); dialog.close(); });
+
+    async function addFiles(input) {
+        const files = [...input.files];
+        input.value = '';  // the same photo can be chosen again
+        showError('');
+        for (const file of files) {
+            if (!file.type.startsWith('image/')) { showError('Das ist kein Foto – bitte die Seite fotografieren.'); continue; }
+            if (pages.length >= MAX_PAGES) { showError(`Höchstens ${MAX_PAGES} Seiten.`); break; }
+            const blob = await shrinkPhoto(file);
+            pages.push({ blob, preview: URL.createObjectURL(blob) });
+        }
+        render();
+    }
+    document.getElementById('application_camera').addEventListener('change', event => addFiles(event.target));
+    document.getElementById('application_gallery').addEventListener('change', event => addFiles(event.target));
+
+    sendButton.addEventListener('click', async () => {
+        showError('');
+        status.hidden = false;
+        actions.hidden = true;  // no second tap while it is sending
+        const body = new FormData();
+        body.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        pages.forEach((page, index) => body.append('pages', page.blob, `seite-${index + 1}.jpg`));
+        try {
+            const response = await fetch(url, { method: 'POST', body });
+            if (response.ok) return window.location.reload();  // new outcome; the message comes with the page
+            const data = await response.json().catch(() => ({}));
+            showError(data.error || 'Konnte nicht gesendet werden – bitte nochmal versuchen.');
+        } catch (err) {
+            showError('Keine Verbindung – bitte nochmal versuchen.');
+        }
+        status.hidden = true;
+        actions.hidden = false;
+    });
+})();
+</script>
 <script>
 (function () {
     const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
