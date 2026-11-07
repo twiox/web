@@ -25,6 +25,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from .forms import ProbetrainingForm, PublicEventForm, TesterForm, TrialDateFormSet, TrialGroupForm
 from members.models import Chairman
+from members.telegram import notify_telegram
 from .models import (
     Teamer,
     PublicEvent,
@@ -390,12 +391,26 @@ class TrialGroupFormMixin:
         form = self.get_form()
         dates = TrialDateFormSet(request.POST, instance=self.object or TrialGroup())
         if form.is_valid() and dates.is_valid():
+            is_new = self.object is None
             self.object = form.save()
             dates.instance = self.object
             dates.save()
+            if dates.new_objects:
+                self.notify_new_dates(dates.new_objects, is_new)
             messages.add_message(request, messages.SUCCESS, f"Gruppe {self.object} gespeichert")
             return redirect("trial_group_detail", pk=self.object.pk)
         return self.render_to_response(self.get_context_data(form=form, dates=dates))
+
+
+    def notify_new_dates(self, new_dates, is_new):
+        """Telegram group: which dates were added, with a link to the group (no names of participants)."""
+        lines = [
+            f"• {d.date:%d.%m.%Y} · {d.session.day} {d.session.format_start_time} {d.session.title}"
+            for d in sorted(new_dates, key=lambda d: (d.date, d.session.start_time))
+        ]
+        head = f"Neue Probetrainingsgruppe „{self.object}“" if is_new else f"Neue Probetrainings-Termine für „{self.object}“"
+        url = self.request.build_absolute_uri(reverse("trial_group_detail", args=[self.object.pk]))
+        notify_telegram(f"{head}:\n" + "\n".join(lines) + f"\n\n{url}", "trainers")
 
 
 class TrialGroupCreateView(LoginRequiredMixin, PrivilegedRequiredMixin, TrialGroupFormMixin, CreateView):

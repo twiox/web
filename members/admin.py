@@ -12,3 +12,9 @@ admin.site.register(ShopItem)
 admin.site.register(Gallery)
 admin.site.register(Image)
 admin.site.register(MemberParticipant)
+
+
+@admin.register(TelegramTarget)
+class TelegramTargetAdmin(admin.ModelAdmin):
+    list_display = ["name", "description", "chat_id", "topic_id", "active"]
+    list_editable = ["active"]

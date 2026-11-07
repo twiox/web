@@ -10,11 +10,11 @@ services:
         - EMAIL_HOST_USER=${EMAIL_HOST_USER}
         - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
         - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
-        - GOOGLE_API_KEY=${GOOGLE_API_KEY}
         - DB_NAME=${DB_NAME}
         - DB_USER=${DB_USER}
         - DB_PW=${DB_PW}
         - DB_HOST=db
+        - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
     links:
       - db:db
     volumes:

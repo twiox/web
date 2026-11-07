@@ -147,7 +147,9 @@ EMAIL_HOST_PASSWORD = secrets.EMAIL_HOST_PASSWORD
 EMAIL_HOST_USER = secrets.EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = secrets.DEFAULT_FROM_EMAIL
 
-GOOGLE_API_KEY = secrets.GOOGLE_API_KEY
+# Telegram notifications (members/telegram.py); optional – without a token nothing is sent.
+# Where they go (groups, topics) is set in the admin: Telegram-Ziele
+TELEGRAM_BOT_TOKEN = getattr(secrets, "TELEGRAM_BOT_TOKEN", "")
 
 AUTHENTICATION_BACKENDS = ["user_handling.backends.EmailBackend"]
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

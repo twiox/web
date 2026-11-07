@@ -140,7 +140,9 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 EMAIL_PORT = 587
 
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
+# Telegram notifications (members/telegram.py); optional – without a token nothing is sent.
+# Where they go (groups, topics) is set in the admin: Telegram-Ziele
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 
 AUTHENTICATION_BACKENDS = ["user_handling.backends.EmailBackend"]
 

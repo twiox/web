@@ -637,3 +637,31 @@ class ShopItem(models.Model):
     @property
     def n_images(self):
         return len(Image.objects.filter(gallery=self.gallery))
+
+
+class TelegramTarget(models.Model):
+    """Where a kind of notification goes in Telegram (members/telegram.py), maintained in the admin.
+
+    The code only names the target ("trainers", "board", …); unknown or inactive targets are skipped.
+    The bot has to be a member of the group (in a channel: an admin allowed to post).
+    """
+
+    name = models.SlugField("Name", unique=True, help_text="So heißt das Ziel im Code, z.B. trainers, board, members.")
+    description = models.CharField("Beschreibung", max_length=200, blank=True)
+    chat_id = models.CharField(
+        "Chat-ID", max_length=50,
+        help_text="Gruppen und Kanäle: -100…; öffentliche Kanäle auch @name.",
+    )
+    topic_id = models.PositiveIntegerField(
+        "Thema-ID", null=True, blank=True,
+        help_text="Nur in Gruppen mit Themen: die mittlere Zahl im Link einer Nachricht (t.me/c/…/THEMA/…). Leer: „Allgemein“.",
+    )
+    active = models.BooleanField("Aktiv", default=True, help_text="Aus: zu diesem Ziel wird vorübergehend nichts gesendet.")
+
+    class Meta:
+        verbose_name = "Telegram-Ziel"
+        verbose_name_plural = "Telegram-Ziele"
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
