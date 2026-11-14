@@ -12,7 +12,9 @@ from .permissions import trainer_permissions, chairman_permissions
 # every user has a profile; code that changes user.profile and then saves the
 # user relies on the profile being saved along with it
 @receiver(post_save, sender=User)
-def create_or_save_profile(sender, instance, created, **kwargs):
+def create_or_save_profile(sender, instance, created, raw=False, **kwargs):
+    if raw:  # loaddata: the fixture brings its own profiles
+        return
     if created:
         Profile.objects.create(user=instance)
     else:
@@ -22,7 +24,9 @@ def create_or_save_profile(sender, instance, created, **kwargs):
 # a new (or corrected) member who did a trial training: their request is done.
 # Saving the user saves the profile too (above), so name changes land here as well.
 @receiver(post_save, sender=Profile)
-def mark_trial_member(sender, instance, **kwargs):
+def mark_trial_member(sender, instance, raw=False, **kwargs):
+    if raw:
+        return
     mark_member(instance.user.first_name, instance.user.last_name, instance.birthday)
 
 
@@ -41,7 +45,9 @@ ROLE_GROUPS = {Trainer: "Trainer", Chairman: "Vorstand"}
 
 @receiver(post_save, sender=Trainer)
 @receiver(post_save, sender=Chairman)
-def sync_role_permissions(sender, instance, **kwargs):
+def sync_role_permissions(sender, instance, raw=False, **kwargs):
+    if raw:  # loaddata: group memberships come with the users
+        return
     group = PermissionGroup.objects.get(name=ROLE_GROUPS[sender])
     if instance.active:
         group.user_set.add(instance.user)
