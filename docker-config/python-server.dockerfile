@@ -24,7 +24,6 @@ COPY static static
 COPY trainer trainer
 COPY twio_web twio_web
 COPY user_handling user_handling
-COPY docker-config/settings-server.py ./twio_web/settings.py
 RUN uv run manage.py compress --force
 COPY docker-config/start-server.sh ./start.sh
 

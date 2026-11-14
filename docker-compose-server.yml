@@ -4,7 +4,8 @@ services:
       context: ./
       dockerfile: docker-config/python-server.dockerfile
     environment:
-      - DEBUG=${DEBUG}
+      - DEBUG=${DEBUG:-False}
+      - SECRET_KEY=${SECRET_KEY}
       - TO_EMAIL=${TO_EMAIL}
       - EMAIL_HOST=${EMAIL_HOST}
       - EMAIL_HOST_USER=${EMAIL_HOST_USER}
