@@ -15,11 +15,14 @@ services:
         - DB_USER=${DB_USER}
         - DB_PW=${DB_PW}
         - DB_HOST=db
+    environment:
+      - SQLITE_PATH=${SQLITE_PATH:-}
     links:
       - db:db
     volumes:
       - file-volume:/opt/twio_web/media
       - cache-volume:/opt/static
+      - sqlite-volume:/opt/data
     restart: always
 
   twio-nginx:
@@ -51,5 +54,6 @@ services:
 
 volumes:
   db-volume:
+  sqlite-volume:
   file-volume:
   cache-volume:
