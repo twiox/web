@@ -69,15 +69,32 @@ WSGI_APPLICATION = "twio_web.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ.get("DB_NAME"),
-        "USER": os.environ.get("DB_USER"),
-        "PASSWORD": os.environ.get("DB_PW"),
-        "HOST": os.environ.get("DB_HOST"),
-    },
-}
+# SQLITE_PATH set: SQLite on the sqlite volume; unset: MariaDB
+# (kept for rollback, can be removed later)
+if os.environ.get("SQLITE_PATH"):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.environ["SQLITE_PATH"],
+            "OPTIONS": {
+                # take the write lock at BEGIN, wait for it instead of failing with "database is locked"
+                "transaction_mode": "IMMEDIATE",
+                "timeout": 20,
+                # WAL: readers don't block the writer; NORMAL is safe with WAL
+                "init_command": "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;",
+            },
+        },
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": os.environ.get("DB_NAME"),
+            "USER": os.environ.get("DB_USER"),
+            "PASSWORD": os.environ.get("DB_PW"),
+            "HOST": os.environ.get("DB_HOST"),
+        },
+    }
 
 CONN_MAX_AGE = 300
 
