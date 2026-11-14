@@ -1,65 +1,35 @@
 ## Twio X Website ##
 This Repo contains the codebase for our current website at https://twio-x.de/.
 
-### 1. Set Up ###
+### Requirements ###
 
-#### Option 1: local setup ####
+- [uv](https://docs.astral.sh/uv/) – installs Python and all dependencies
+- SQLite – the local database; Python ships with it, the `sqlite3` CLI is optional
+- MySQL client library and `pkg-config` – needed to build `mysqlclient`
+  - macOS: `brew install mysql-client pkgconf` and `export PKG_CONFIG_PATH="$(brew --prefix mysql-client)/lib/pkgconfig"`
+  - Debian/Ubuntu: `apt install default-libmysqlclient-dev pkg-config`
 
-Requirements:
-- Conda
+### Local setup ###
 
-To run a version of the webapp on your local machine, run:\
-`git clone https://github.com/twiox/web`
+```bash
+git clone https://github.com/twiox/web
+cd web
+uv sync
+uv run manage.py migrate
+uv run manage.py createsuperuser
+uv run manage.py runserver
+```
 
-change into the project directory. Using conda you can now create an environment with all the requirements by typing: 
+Open http://localhost:8000 and log in with your superuser.
 
-`conda env create -f django.yml &&
-conda activate django`
+No configuration needed: `twio_web/settings.py` defaults to local development (debug on, `db.sqlite3`, emails printed to the console). Every value can be overridden with an environment variable.
 
-create a file **twio_web/secrets.py** (use the secrets_example.py as template)
-update the following lines
+### Tests ###
 
-EMAIL_USE_TLS = True\
-EMAIL_HOST ="smtp.gmail.com"\
-EMAIL_HOST_USER="your_email@gmail.com"\
-EMAIL_HOST_PASSWORD="your_pw"
+```bash
+uv run manage.py test
+```
 
-We currently use a mysql database. To use a sqlite database in the local setup (for testing purposes),
-replace in the **twio_web/settings.py** the 
+### Production ###
 
-DATABASES = {...} parameter with:
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-go back to the base-directory. To initiate the models run\
-`python3 manage.py makemigrations`\
-`python3 manage.py migrate`
-
-to access the site and the admin-panel, you should create a super-user:\
-`python3 manage.py createsuperuser`
-
-To run the server:\
-`python3 manage.py runserver`
-
-#### Option 2: Docker ####
-
-Requirements: docker and docker-compose are installed.
-
-Run `docker-compose up` to build and start the python server.
-
-### 2. Use the current version ###
-
-Now open your browser and navigate to:\
-**localhost:8000**\
-you can log in with your superuser credentials
-
-At first, make yourself a chairman
-http://127.0.0.1:8000/vorstand/liste/neu
-
-Then explore what you can do :)
-
+Deployed with Coolify from `docker-compose-server.yml`. The values come from environment variables set in Coolify. `SECRET_KEY` is required. The SQLite database lives at `SQLITE_PATH` on the `sqlite-volume`.
