@@ -46,7 +46,6 @@ to access the site and the admin-panel, you should create a super-user:\
 To run the server:\
 `python3 manage.py runserver`
 
-#### Option 2: Docker ####
 
 Requirements: docker and docker-compose are installed.
 
@@ -62,4 +61,3 @@ At first, make yourself a chairman
 http://127.0.0.1:8000/vorstand/liste/neu
 
 Then explore what you can do :)
-
