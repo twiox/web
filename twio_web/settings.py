@@ -147,8 +147,6 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 if not EMAIL_HOST:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
-
 AUTHENTICATION_BACKENDS = ["user_handling.backends.EmailBackend"]
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
