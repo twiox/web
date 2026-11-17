@@ -252,14 +252,22 @@ def session_form_values(form):
     }
 
 
-@user_passes_test(is_trainer)
+def session_form_context(form):
+    # min_date limits the date picker; the form itself enforces the limit
+    min_date = None if form.allow_old_dates else form.min_date().strftime("%Y-%m-%d")
+    return {"form": form, "values": session_form_values(form), "min_date": min_date}
+
+
+@user_passes_test(lambda user: is_trainer(user) or is_board(user))
 def session_create_view(request):
-    form = TrainingSessionForm(request.POST or None)
+    form = TrainingSessionForm(request.POST or None, allow_old_dates=is_board(request.user))
     if request.method == "POST" and form.is_valid():
         session = form.save()
-        session.trainer.add(request.user.trainer)
+        # chairmen who aren't trainers add the trainers on the detail page
+        if is_trainer(request.user):
+            session.trainer.add(request.user.trainer)
         return redirect('trainingsession_detail', pk=session.pk)
-    return render(request, "trainingsession/index.html", {"form": form, "values": session_form_values(form)})
+    return render(request, "trainingsession/index.html", session_form_context(form))
 
 
 @user_passes_test(is_privileged)
@@ -268,12 +276,12 @@ def session_edit_view(request, pk):
     if entry.payed or entry.invoice.exists():
         messages.add_message(request, messages.WARNING, "Diese Stunde ist bereits abgerechnet und kann nicht mehr geändert werden.")
         return redirect('trainingsession_detail', pk=pk)
-    form = TrainingSessionForm(request.POST or None, instance=entry)
+    form = TrainingSessionForm(request.POST or None, instance=entry, allow_old_dates=is_board(request.user))
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.add_message(request, messages.SUCCESS, "Gespeichert")
         return redirect('trainingsession_detail', pk=pk)
-    return render(request, "trainingsession/index.html", {"form": form, "values": session_form_values(form), "entry": entry})
+    return render(request, "trainingsession/index.html", {**session_form_context(form), "entry": entry})
 
 
 @user_passes_test(is_privileged)

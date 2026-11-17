@@ -1,9 +1,31 @@
+from datetime import date, timedelta
 from django import forms
 from members.models import Trainer
 from user_handling.forms import MdcFormMixin, date_widget
 from .models import TrainingSessionEntry
 
 class TrainingSessionForm(forms.ModelForm):
+    # trainers may only enter sessions up to this far back; chairmen may enter any date
+    MAX_AGE = timedelta(weeks=4)
+
+    def __init__(self, *args, allow_old_dates=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.allow_old_dates = allow_old_dates
+
+    @classmethod
+    def min_date(cls):
+        return date.today() - cls.MAX_AGE
+
+    def clean_date(self):
+        value = self.cleaned_data["date"]
+        # an unchanged date stays editable, so trainers can still fix e.g. the group of an older entry
+        date_set = self.instance.pk is None or "date" in self.changed_data
+        if value and date_set and not self.allow_old_dates and value.date() < self.min_date():
+            raise forms.ValidationError(
+                "Einheiten, die länger als 4 Wochen zurückliegen, kann nur der Vorstand eintragen."
+            )
+        return value
+
     class Meta:
         model = TrainingSessionEntry
         fields = [
