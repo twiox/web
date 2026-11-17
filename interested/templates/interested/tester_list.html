@@ -12,6 +12,9 @@
     <div class="member_toolbar">
         <h1>Anmeldungen</h1>
         <input class="searchbar" id="tester_search" type="search" placeholder="Suche nach Name, E-Mail, Notiz …">
+        {% if is_board %}
+            <a href="{% url 'tester_create' %}" class="table_action table_action--primary"><i class="far fa-plus-square"></i> Manueller Eintrag</a>
+        {% endif %}
     </div>
     {# same age groups as on the dashboard #}
     <div class="chip_list" id="tester_age_filter">
@@ -44,7 +47,7 @@
                 {# sort keys: requests without a date (from before it was stored) sort as the oldest, by their order #}
                 <tr data-name="{{ tester.last_name }} {{ tester.first_name }}" data-age="{{ tester.age|default_if_none:'' }}"
                     data-birthday="{{ tester.birthday|date:'Y-m-d' }}" data-created="{{ tester.created|date:'Y-m-d H:i'|default:'' }}" data-pk="{{ tester.pk }}" data-waiting="{{ tester.trial_group_id|yesno:'0,1' }}">
-                    <td>{{ tester.last_name }}, {{ tester.first_name }}<small class="tester_table__sub">{{ tester.sex }}{% if tester.visits %} · {{ tester.visits }}× da{% endif %}</small></td>
+                    <td>{{ tester.last_name }}, {{ tester.first_name }}{% if tester.duplicates %} <span class="tester_table__duplicate" title="Gleicher Name wie {{ tester.duplicates }} weitere Anfrage{{ tester.duplicates|pluralize:'n' }} – doppelt angemeldet?"><i class="fas fa-exclamation-triangle"></i></span>{% endif %}<small class="tester_table__sub">{{ tester.sex }}{% if tester.visits %} · {{ tester.visits }}× da{% endif %}</small></td>
                     <td title="{{ tester.birthday|date:'d.m.Y' }}">{{ tester.age|default_if_none:"–" }}</td>
                     <td class="tester_table__contact">{{ tester.contact_person|default:"–" }}</td>
                     <td class="tester_table__email" title="{{ tester.email }}"><a href="mailto:{{ tester.email }}">{{ tester.email }}</a></td>

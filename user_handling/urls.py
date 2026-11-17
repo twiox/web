@@ -17,6 +17,7 @@ urlpatterns = [
     path('trainer/<int:pk>/entfernen/', trainer_views.TrainerDeleteView.as_view(), name="trainer_delete"),
     path("verwaltung/probetraining/", interested_views.TesterIndexView.as_view(), name="tester_index"),
     path("verwaltung/probetraining/liste/", interested_views.TesterListView.as_view(), name="tester_list"),
+    path("verwaltung/probetraining/neu/", interested_views.TesterCreateView.as_view(), name="tester_create"),
     path("verwaltung/probetraining/<int:pk>/bearbeiten/", interested_views.TesterUpdateView.as_view(), name="tester_update"),
     path("verwaltung/probetraining/<int:pk>/loeschen/", interested_views.TesterDeleteView.as_view(), name="tester_delete"),
     path("verwaltung/probetraining/<int:pk>/einverstaendnis/", interested_views.tester_consent, name="tester_consent"),

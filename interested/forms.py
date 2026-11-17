@@ -59,6 +59,8 @@ class TesterForm(MdcFormMixin, forms.ModelForm):
     def __init__(self, *args, board=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["notes"].widget.attrs["rows"] = 4
+        # archived groups are closed (the edit page only opens testers outside them)
+        self.fields["trial_group"].queryset = TrialGroup.objects.filter(archived__isnull=True).order_by("name")
         self.fields["trial_group"].empty_label = "– wartet –"
         if board:
             self.fields["board_notes"].widget.attrs["rows"] = 4

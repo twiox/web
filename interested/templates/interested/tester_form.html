@@ -5,14 +5,14 @@
     <a class="float_left"> > </a>
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'tester_list' %}">Anmeldungen</a>
     <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{ object }}</a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{ object|default:"Neue Person" }}</a>
 </div>
 {% endblock %}
 
 {% block content %}
 <section class="member_page">
     <div class="member_toolbar">
-        <h1>{{ object }}</h1>
+        <h1>{{ object|default:"Neue Person" }}</h1>
     </div>
     {% if object.created %}<p class="member_panel__hint">Anfrage vom {{ object.created|date:"d.m.Y, H:i" }} Uhr</p>{% endif %}
 
@@ -57,6 +57,7 @@
                 </div>
             </div>
         </div>
+        {% if object %}
         <div class="session_card tester_attended">
             <h3>Besuchte Probetrainings</h3>
             <p class="member_panel__hint">Aus den Trainingsstunden der Trainer*innen, unabhängig von der Gruppe.</p>
@@ -66,6 +67,7 @@
                 <p class="member_panel__hint">Noch bei keinem Training eingetragen.</p>
             {% endfor %}
         </div>
+        {% endif %}
         <button type="submit" class="form_button member_form__submit">Speichern</button>
     </form>
 </section>

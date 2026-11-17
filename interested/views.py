@@ -1,3 +1,4 @@
+from collections import Counter
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -37,7 +38,7 @@ from .trials import (
     ACTIVE_GROUP_ORDER, FINAL_OUTCOMES, annotate_groups, archive_group, attended_trainings, can_archive, current_testers, delete_stale_requests, email_board,
     finished_testers, group_attendance, is_photo, upcoming_trial_dates, weekday_matches,
 )
-from members.roles import PrivilegedRequiredMixin, is_board, is_privileged
+from members.roles import BoardRequiredMixin, PrivilegedRequiredMixin, is_board, is_privileged
 
 
 def interested_index(request):
@@ -203,7 +204,18 @@ class TesterListView(LoginRequiredMixin, PrivilegedRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["groups"] = TrialGroup.objects.filter(archived__isnull=True).order_by("name")  # for the group dropdown in each row
+        context["object_list"] = flag_duplicates(context["object_list"])
         return context
+
+
+def flag_duplicates(testers):
+    """Sets tester.duplicates: how many other listed requests have the same name (case and spaces ignored)."""
+    testers = list(testers)
+    key = lambda tester: (" ".join(tester.first_name.lower().split()), " ".join(tester.last_name.lower().split()))
+    counts = Counter(key(tester) for tester in testers)
+    for tester in testers:
+        tester.duplicates = counts[key(tester)] - 1
+    return testers
 
 
 @login_required
@@ -334,6 +346,20 @@ def tester_consent_upload(request, pk):
     else:
         messages.info(request, f"Einverständniserklärung von {tester} gespeichert. Bitte gib sie so bald wie möglich beim Vorstand ab.")
     return JsonResponse({"success": True})
+
+
+class TesterCreateView(LoginRequiredMixin, BoardRequiredMixin, CreateView):
+    """The board enters someone by hand, e.g. after a phone call, without the public form."""
+
+    model = Tester
+    form_class = TesterForm
+
+    def get_form_kwargs(self):
+        return {**super().get_form_kwargs(), "board": True}
+
+    def get_success_url(self):
+        messages.add_message(self.request, messages.SUCCESS, f"{self.object} eingetragen")
+        return reverse("tester_list")
 
 
 class TesterUpdateView(LoginRequiredMixin, PrivilegedRequiredMixin, UpdateView):

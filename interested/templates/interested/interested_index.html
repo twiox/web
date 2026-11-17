@@ -211,104 +211,37 @@
                                     <p class="padding_tb_small" style="color:red;">{{error}}</p>
                                     {% endfor %}
                                 {% endif %}
-                                <div>
-                                    <div class="chair_col-5 float_left padding_rl_small">
-                                        {% if form.first_name.errors %}
-                                        {% for error in form.first_name.errors %}
-                                            <p style="color:red;">{{error}}</p>
-                                        {% endfor %}
-                                        {% endif %}
+                                {# grid instead of floats: hiding the contact field for adults leaves no gap #}
+                                <div class="probe_form">
+                                    <div>
+                                        {% for error in form.first_name.errors %}<p class="probe_form__error">{{ error }}</p>{% endfor %}
                                         <label class="mdc-text-field mdc-text-field--filled first_name">
                                             <span class="mdc-text-field__ripple"></span>
                                             <input type="text" class="mdc-text-field__input" aria-labelledby="first_name-label" name="first_name" required value="{{ form.first_name.value|default:'' }}">
-                                            <span class="mdc-floating-label" id="first_name-label">Vorname (teilnehmende Person)</span>
+                                            <span class="mdc-floating-label" id="first_name-label">Vorname (Teilnehmende)</span>
                                             <span class="mdc-line-ripple"></span>
                                         </label>
                                     </div>
-                                    <div class="chair_col-5 float_left padding_rl_small">
-                                        {% if form.last_name.errors %}
-                                        {% for error in form.last_name.errors %}
-                                            <p style="color:red;">{{error}}</p>
-                                        {% endfor %}
-                                        {% endif %}
+                                    <div>
+                                        {% for error in form.last_name.errors %}<p class="probe_form__error">{{ error }}</p>{% endfor %}
                                         <label class="mdc-text-field mdc-text-field--filled last_name">
                                             <span class="mdc-text-field__ripple"></span>
                                             <input type="text" class="mdc-text-field__input" aria-labelledby="last_name-label" name="last_name" required value="{{ form.last_name.value|default:'' }}">
-                                            <span class="mdc-floating-label" id="last_name-label">Nachname (teilnehmende Person)</span>
+                                            <span class="mdc-floating-label" id="last_name-label">Nachname (Teilnehmende)</span>
                                             <span class="mdc-line-ripple"></span>
                                         </label>
                                     </div>
-                                    <div class="chair_col-5 float_left padding_rl_small">
-                                        {% if form.birthday.errors %}
-                                        {% for error in form.birthday.errors %}
-                                            <p style="color:red;">{{error}}</p>
-                                        {% endfor %}
-                                        {% endif %}
+                                    <div>
+                                        {% for error in form.birthday.errors %}<p class="probe_form__error">{{ error }}</p>{% endfor %}
                                         <label class="mdc-text-field mdc-text-field--filled birthday">
                                             <span class="mdc-text-field__ripple"></span>
                                             <input type="date" class="mdc-text-field__input" aria-labelledby="birthday-label" name="birthday" id="prob_birthday" required value="{{ form.birthday.value|date:'Y-m-d'|default:form.birthday.value|default:'' }}">
-                                            <span class="mdc-floating-label mdc-floating-label--float-above" id="birthday-label">Geburtsdatum (teilnehmende Person)</span>
+                                            <span class="mdc-floating-label mdc-floating-label--float-above" id="birthday-label">Geburtsdatum (Teilnehmende)</span>
                                             <span class="mdc-line-ripple"></span>
                                         </label>
                                     </div>
-                                    {# shown for minors (script below), required for them by the form #}
-                                    <div class="chair_col-5 float_left padding_rl_small" id="prob_contact" {% if not form.contact_person.errors and not form.contact_person.value %}hidden{% endif %}>
-                                        {% for error in form.contact_person.errors %}
-                                            <p style="color:red;">{{ error }}</p>
-                                        {% endfor %}
-                                        <label class="mdc-text-field mdc-text-field--filled contact_person">
-                                            <span class="mdc-text-field__ripple"></span>
-                                            <input type="text" class="mdc-text-field__input" aria-labelledby="contact_person-label" name="contact_person" value="{{ form.contact_person.value|default:'' }}">
-                                            <span class="mdc-floating-label" id="contact_person-label">Kontaktperson (Erziehungsberechtigte)</span>
-                                            <span class="mdc-line-ripple"></span>
-                                        </label>
-                                    </div>
-                                    <div class="chair_col-5 float_left padding_rl_small">
-                                        {% if form.telnr.errors %}
-                                        {% for error in form.telnr.errors %}
-                                            <p style="color:red;">{{error}}</p>
-                                        {% endfor %}
-                                        {% endif %}
-                                        <label class="mdc-text-field mdc-text-field--filled telnr">
-                                            <span class="mdc-text-field__ripple"></span>
-                                            <input type="text" class="mdc-text-field__input" aria-labelledby="telnr-label" name="telnr" value="{{ form.telnr.value|default:'' }}">
-                                            <span class="mdc-floating-label" id="telnr-label">Telefonnummer</span>
-                                            <span class="mdc-line-ripple"></span>
-                                        </label>
-                                    </div>
-                                    <div class="chair_col-5 float_left padding_rl_small">
-                                        {% if form.email.errors %}
-                                        {% for error in form.email.errors %}
-                                            <p style="color:red;">{{error}}</p>
-                                        {% endfor %}
-                                        {% endif %}
-                                        <label class="mdc-text-field mdc-text-field--filled email">
-                                            <input type="text" class="mdc-text-field__input" aria-labelledby="email-label" name="email" required value="{{ form.email.value|default:'' }}">
-                                            <span class="mdc-floating-label" id="email-label">E-Mail-Adresse</span>
-                                            <span class="mdc-line-ripple"></span>
-                                        </label>
-                                    </div>
-                                    <div class="chair_col-5 float_left padding_rl_small">
-                                        {% if form.notes.errors %}
-                                        {% for error in form.notes.errors %}
-                                            <p style="color:red;">{{error}}</p>
-                                        {% endfor %}
-                                        {% endif %}
-                                        <label class="mdc-text-field mdc-text-field--filled notes">
-                                            <span class="mdc-text-field__ripple"></span>
-                                            <input type="text" class="mdc-text-field__input" aria-labelledby="notes-label" name="notes" value="{{ form.notes.value|default:'' }}">
-                                            <span class="mdc-floating-label" id="notes-label">Anmerkungen</span>
-                                            <span class="mdc-line-ripple"></span>
-                                        </label>
-                                        {# we do not want health data: tell the trainers in person instead #}
-                                        <p class="probe_notes_hint">Bitte keine Angaben zur Gesundheit (z.&nbsp;B. Verletzungen oder Krankheiten). Was fürs Training wichtig ist, besprich gern direkt mit den Trainer*innen.</p>
-                                    </div>
-                                    <div class="chair_col-5 float_left padding_rl_small">
-                                        {% if form.city.errors %}
-                                        {% for error in form.city.errors %}
-                                            <p style="color:red;">{{error}}</p>
-                                        {% endfor %}
-                                        {% endif %}
+                                    <div>
+                                        {% for error in form.sex.errors %}<p class="probe_form__error">{{ error }}</p>{% endfor %}
                                         <label class="mdc-text-field mdc-text-field--filled sex">
                                             <i class="mdc-select__dropdown-icon"></i>
                                             <span class="mdc-text-field__ripple"></span>
@@ -323,8 +256,48 @@
                                             <span class="mdc-line-ripple"></span>
                                         </label>
                                     </div>
-                                    <div class="chair_col-5 float_left padding_rl_small">
-                                        <div class="mdc-form-field padding_all_big">
+                                    {# shown for minors (script below), required for them by the form #}
+                                    <div class="probe_form__wide" id="prob_contact" {% if not form.contact_person.errors and not form.contact_person.value %}hidden{% endif %}>
+                                        {% for error in form.contact_person.errors %}<p class="probe_form__error">{{ error }}</p>{% endfor %}
+                                        <label class="mdc-text-field mdc-text-field--filled contact_person">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="contact_person-label" name="contact_person" value="{{ form.contact_person.value|default:'' }}">
+                                            <span class="mdc-floating-label" id="contact_person-label">Kontaktperson (Erziehungsberechtigte)</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div>
+                                        {% for error in form.email.errors %}<p class="probe_form__error">{{ error }}</p>{% endfor %}
+                                        <label class="mdc-text-field mdc-text-field--filled email">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="email-label" name="email" required value="{{ form.email.value|default:'' }}">
+                                            <span class="mdc-floating-label" id="email-label">E-Mail-Adresse</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div>
+                                        {% for error in form.telnr.errors %}<p class="probe_form__error">{{ error }}</p>{% endfor %}
+                                        <label class="mdc-text-field mdc-text-field--filled telnr">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="telnr-label" name="telnr" value="{{ form.telnr.value|default:'' }}">
+                                            <span class="mdc-floating-label" id="telnr-label">Telefonnummer</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                    </div>
+                                    <div class="probe_form__wide">
+                                        {% for error in form.notes.errors %}<p class="probe_form__error">{{ error }}</p>{% endfor %}
+                                        <label class="mdc-text-field mdc-text-field--filled notes">
+                                            <span class="mdc-text-field__ripple"></span>
+                                            <input type="text" class="mdc-text-field__input" aria-labelledby="notes-label" name="notes" value="{{ form.notes.value|default:'' }}">
+                                            <span class="mdc-floating-label" id="notes-label">Anmerkungen</span>
+                                            <span class="mdc-line-ripple"></span>
+                                        </label>
+                                        {# we do not want health data: tell the trainers in person instead #}
+                                        <p class="probe_notes_hint">Bitte keine Gesundheitsdaten (z.&nbsp;B. Verletzungen oder Krankheiten). Was für das Training wichtig ist, kannst du später direkt mit den Trainer*innen absprechen</p>
+                                    </div>
+                                    <div class="probe_form__wide">
+                                        {% for error in form.confirm.errors %}<p class="probe_form__error">{{ error }}</p>{% endfor %}
+                                        <div class="mdc-form-field">
                                             <div class="mdc-checkbox">
                                               <input type="checkbox" class="mdc-checkbox__native-control" id="speicherung" name="confirm" required>
                                               <div class="mdc-checkbox__background">
@@ -334,22 +307,14 @@
                                                 <div class="mdc-checkbox__mixedmark"></div>
                                               </div>
                                             </div>
-
-                                            <label for="speicherung" >
+                                            <label for="speicherung">
                                                 <div>Ich stimme der <a class="more_info_button" style="padding:0px;" href="{% url 'dataprotection' %}">Datenschutzerklärung</a> zu </div>
                                             </label>
                                         </div>
                                     </div>
-
-                                    <div style="clear:both;">
-                                        <div class="flex_center_vertical">
-                                            <div class="flex_center padding_all_big">
-                                                <button type="submit" class="form_button" id="prob_button">Absenden</button>
-                                            </div>
-                                            <div class="flex_center">
-                                                <span class="padding_all_small secondary"><strong>Achtung:</strong> Aktuell ist eine Anmeldung nur für Jugendliche und Erwachsene ab 14 Jahre möglich, sowie für die Mädchengruppe ab 9 Jahren</span>
-                                            </div>
-                                        </div>
+                                    <div class="probe_form__wide probe_form__submit">
+                                        <button type="submit" class="form_button" id="prob_button">Absenden</button>
+                                        <span class="secondary padding_all_small"><strong>Achtung:</strong> Aktuell ist eine Anmeldung nur für Jugendliche und Erwachsene ab 14 Jahre möglich, sowie für die Mädchengruppe ab 9 Jahren</span>
                                     </div>
                                 </div>
                             </form>

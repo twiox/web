@@ -1823,6 +1823,36 @@ footer{
     }
 }
 
+// public trial sign-up: two columns, one on phones; a grid so hidden fields leave no gap
+.probe_form{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: $padding_small $padding_medium;
+    align-items: end;
+    @media (min-width: 600px){
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    > [hidden]{
+        display: none;
+    }
+    .mdc-text-field{
+        width: 100%;
+    }
+    &__wide{
+        grid-column: 1 / -1;
+    }
+    &__error{
+        margin: 0 0 4px 0;
+        color: red;
+    }
+    &__submit{
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: $padding_small $padding_big;
+        padding-top: $padding_small;
+    }
+}
 // public trial sign-up: below the notes field
 .probe_notes_hint{
     margin: 4px 0 0 0;
@@ -1928,6 +1958,15 @@ footer{
         display: block;
         color: grey;
         font-size: 0.8rem;
+    }
+    // same name as another request: probably signed up twice (same yellow as the training notices)
+    &__duplicate{
+        color: #c9a227;
+        font-size: 0.8rem;
+        cursor: help;
+        svg, i{
+            color: #c9a227;
+        }
     }
     // notes edited in place: looks like text until hovered or focused
     .tester_note{
