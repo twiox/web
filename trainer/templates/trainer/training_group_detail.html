@@ -22,6 +22,7 @@
     </div>
     {% if object.hinweis %}<p class="trial_group_notes">{{ object.hinweis }}</p>{% endif %}
 
+    {% csrf_token %}
     <h3>Teilnehmende</h3>
     <p class="member_panel__hint">Alle, die bei dieser Trainingszeit „Teilnahme“ angehakt haben.</p>
     <div class="member_table_wrapper tertiary_bg">
@@ -32,8 +33,10 @@
                     <th>Alter</th>
                     <th>E-Mail</th>
                     <th>Telefon</th>
+                    {% if show_parent %}
                     <th title="Bei Minderjährigen">Ansprechpartner*in</th>
                     <th title="Bei Minderjährigen">Notfallnummer</th>
+                    {% endif %}
                     <th>Trainernotizen</th>
                     <th></th>
                 </tr>
@@ -45,9 +48,14 @@
                     <td title="{{ profile.birthday|date:'d.m.Y' }}">{{ profile.age|default_if_none:"–" }}</td>
                     <td class="tester_table__email" title="{{ profile.user.email }}">{% if profile.user.email %}<a href="mailto:{{ profile.user.email }}">{{ profile.user.email }}</a>{% else %}–{% endif %}</td>
                     <td>{% if profile.telephone %}<a href="tel:{{ profile.telephone }}">{{ profile.telephone }}</a>{% else %}–{% endif %}</td>
+                    {% if show_parent %}
                     <td class="tester_table__contact">{{ profile.parent|default:"–" }}</td>
                     <td>{% if profile.parent_telnr %}<a href="tel:{{ profile.parent_telnr }}">{{ profile.parent_telnr }}</a>{% else %}–{% endif %}</td>
-                    <td class="tester_table__notes">{{ profile.notes_trainer|default:"–"|linebreaksbr }}</td>
+                    {% endif %}
+                    {# edited in place, saved when leaving the box (as in the trial request list) #}
+                    <td class="tester_table__notes">
+                        <textarea class="tester_note group_note" rows="1" data-url="{% url 'trainer_group_note' object.pk profile.pk %}" aria-label="Trainernotizen für {{ profile.user.first_name }}" placeholder="–" title="{{ profile.notes_trainer|default:'' }}">{{ profile.notes_trainer|default:'' }}</textarea>
+                    </td>
                     <td class="table_actions">
                         {# e.g. "Teilnahme" ticked by accident; they can tick it again on the dashboard #}
                         <form method="POST" action="{% url 'trainer_group_remove' object.pk profile.pk %}" class="group_remove"
@@ -58,14 +66,63 @@
                     </td>
                 </tr>
             {% empty %}
-                <tr><td colspan="8">Noch niemand hat „Teilnahme“ angehakt.</td></tr>
+                <tr><td colspan="{% if show_parent %}8{% else %}6{% endif %}">Noch niemand hat „Teilnahme“ angehakt.</td></tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
+
+    {# members who came to this training at least once (from the trainers' session entries), as on the trial group page #}
+    {% if candidates %}
+    <form class="orga_add" id="group_add" method="POST" action="{% url 'trainer_group_add' object.pk %}">
+        {% csrf_token %}
+        <label for="group_add_input"><i class="fas fa-user-plus"></i> Hinzufügen</label>
+        <input class="searchbar" id="group_add_input" list="group_add_options" placeholder="Name …" autocomplete="off">
+        <input type="hidden" name="profile" id="group_add_profile">
+        <datalist id="group_add_options">
+            {% for profile in candidates %}
+            <option data-pk="{{ profile.pk }}" value="{{ profile.user.last_name }}, {{ profile.user.first_name }} ({{ profile.visits }}× da{% if profile.last_visit %}, zuletzt {{ profile.last_visit|date:'d.m.Y' }}{% endif %})"></option>
+            {% endfor %}
+        </datalist>
+        <button type="submit" class="table_action table_action--primary">Hinzufügen</button>
+    </form>
+    <p class="member_panel__hint">Vorgeschlagen werden alle, die laut den Trainingsstunden schon einmal bei dieser Trainingszeit waren.</p>
+    {% else %}
+    <p class="member_panel__hint">Alle, die laut den Trainingsstunden schon einmal bei dieser Trainingszeit waren, stehen auf der Liste.</p>
+    {% endif %}
 </section>
 
 <script>
+    // trainer notes: one line in the table (full text on hover), opened to full height while editing,
+    // saved when the box loses focus after a change
+    (function () {
+        const fit = box => { box.style.height = 'auto'; box.style.height = box.scrollHeight + 2 + 'px'; };
+        document.querySelectorAll('.group_note').forEach(box => {
+            box.addEventListener('focus', () => fit(box));
+            box.addEventListener('input', () => fit(box));
+            box.addEventListener('blur', () => { box.style.height = ''; box.scrollTop = 0; box.title = box.value; });
+            box.addEventListener('change', async () => {
+                const body = new FormData();
+                body.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+                body.append('value', box.value);
+                const response = await fetch(box.dataset.url, { method: 'POST', body });
+                snackbar.labelText = response.ok ? 'Gespeichert' : 'Konnte nicht gespeichert werden';
+                snackbar.open();
+            });
+        });
+    })();
+    // the typed name must be one of the suggestions; its member goes into the hidden field
+    document.getElementById('group_add')?.addEventListener('submit', event => {
+        const typed = document.getElementById('group_add_input').value.trim();
+        const option = [...document.querySelectorAll('#group_add_options option')].find(o => o.value === typed);
+        if (!option) {
+            event.preventDefault();
+            snackbar.labelText = 'Bitte eine Person aus der Liste auswählen';
+            snackbar.open();
+            return;
+        }
+        document.getElementById('group_add_profile').value = option.dataset.pk;
+    });
     document.querySelectorAll('.group_remove').forEach(form => form.addEventListener('submit', event => {
         if (!confirm(`${form.dataset.name} von der Liste von {{ object.title|escapejs }} nehmen? Sie*er kann „Teilnahme“ jederzeit wieder anhaken.`)) event.preventDefault();
     }));

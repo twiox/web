@@ -1,19 +1,19 @@
 from .forms import TrainerForm, TrainerSelfForm
-from .models import TrainingSessionEntry
+from .models import TrainingSessionEntry, TrainingSessionParticipant
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
-from members.models import Trainer, Session
+from members.models import Trainer, Session, Profile
 from members.roles import PrivilegedRequiredMixin, is_privileged, is_trainer
 from interested.models import TrialGroup
 from interested.trials import ACTIVE_GROUP_ORDER, annotate_groups, upcoming_trial_dates
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.views.generic import DeleteView, UpdateView, ListView
 from django.urls import reverse, reverse_lazy
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.http import require_POST
 from datetime import date
-from django.db.models import Count, Q
+from django.db.models import Count, Max, Q
 from itertools import groupby
 
 
@@ -73,8 +73,45 @@ def trainer_group_detail(request, pk):
     Built like the trial group page, without dates, attendance and outcomes. Open to every trainer
     (e.g. a substitute) and the board, like the trial groups."""
     session = get_object_or_404(Session.objects.select_related("spot").prefetch_related("trainer__user"), pk=pk)
-    participants = session.participants.select_related("user").order_by("user__last_name", "user__first_name")
-    return render(request, "trainer/training_group_detail.html", {"object": session, "participants": participants})
+    participants = list(session.participants.select_related("user").order_by("user__last_name", "user__first_name"))
+    # contact person and emergency number are columns only if a minor here has one of them
+    show_parent = any(p.age is not None and p.age < 18 and (p.parent or p.parent_telnr) for p in participants)
+    return render(request, "trainer/training_group_detail.html", {
+        "object": session,
+        "participants": participants,
+        "show_parent": show_parent,
+        "candidates": group_candidates(session),
+    })
+
+
+def group_candidates(session):
+    """Members who were at a training of this training time at least once (recorded in the trainers'
+    session entries) but are not on its list, with how often and when they were there last."""
+    visits = {
+        row["user"]: row
+        for row in TrainingSessionParticipant.objects.filter(session__session=session, user__isnull=False)
+        .values("user").annotate(count=Count("session", distinct=True), last=Max("session__date"))
+    }
+    candidates = (
+        Profile.objects.filter(user__in=visits, user__is_active=True)
+        .exclude(pk__in=session.participants.values("pk"))
+        .select_related("user").order_by("user__last_name", "user__first_name")
+    )
+    for profile in candidates:
+        profile.visits = visits[profile.user_id]["count"]
+        profile.last_visit = visits[profile.user_id]["last"]
+    return candidates
+
+
+@user_passes_test(is_privileged)
+@require_POST
+def trainer_group_add(request, pk):
+    """Puts someone on a training time's list who was there at least once (see group_candidates)."""
+    session = get_object_or_404(Session, pk=pk)
+    profile = get_object_or_404(group_candidates(session), pk=request.POST.get("profile") or 0)
+    session.participants.add(profile)
+    messages.add_message(request, messages.SUCCESS, f"{profile.user.get_full_name()} zu {session.title} hinzugefügt")
+    return HttpResponseRedirect(reverse("trainer_group_detail", args=[session.pk]))
 
 
 @user_passes_test(is_privileged)
@@ -87,6 +124,17 @@ def trainer_group_remove(request, pk, profile_pk):
     session.participants.remove(profile)
     messages.add_message(request, messages.SUCCESS, f"{profile.user.get_full_name()} aus {session.title} entfernt")
     return HttpResponseRedirect(reverse("trainer_group_detail", args=[session.pk]))
+
+
+@user_passes_test(is_privileged)
+@require_POST
+def trainer_group_note(request, pk, profile_pk):
+    """The trainer notes of someone on the list, edited in place on the group page (saved on leaving the box)."""
+    session = get_object_or_404(Session, pk=pk)
+    profile = get_object_or_404(session.participants, pk=profile_pk)
+    profile.notes_trainer = request.POST.get("value", "").strip()
+    profile.save(update_fields=["notes_trainer"])
+    return JsonResponse({"success": True})
 
 
 @user_passes_test(is_trainer)

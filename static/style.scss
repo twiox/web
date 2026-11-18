@@ -971,6 +971,16 @@ footer{
     }
 }
 
+// group page: the trainer notes stay one line in the table; the script opens them while editing
+.tester_table .group_note{
+    display: block;  // no extra space below the inline textarea
+    padding: 1px 6px;  // as tall as the text in the other cells
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    &:focus{
+        white-space: pre-wrap;
+    }
+}
 // trainer document, Trainingsgruppen: the subsections of "Probetraining"
 .trainer_groups__sub{
     margin: $padding_big 0 4px 0;
