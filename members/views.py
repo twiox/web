@@ -1,6 +1,6 @@
 import csv
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django import forms
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Count, Q
@@ -11,6 +11,7 @@ from django.views.generic import (
     CreateView,
     UpdateView,
     DeleteView,
+    FormView,
 )
 from .roles import BoardRequiredMixin, PrivilegedRequiredMixin, is_board, is_chairman, is_privileged, is_trainer
 from .models import (
@@ -39,6 +40,9 @@ from django.contrib.auth.mixins import (
     PermissionRequiredMixin,
 )
 from .forms import (
+    UsernameForm,
+    MemberPasswordChangeForm,
+    ProfileSelfForm,
     EventUpdateParticipantForm,
     EventUpdateParticipantForm2,
     SessionForm,
@@ -53,7 +57,7 @@ from django.contrib import messages
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
-from django.contrib.auth import update_session_auth_hash
+from user_handling.forms import AdditionalEmailForm
 from django.contrib.auth.views import PasswordChangeView
 from django.conf import settings
 from django.utils.text import slugify
@@ -821,134 +825,85 @@ class UserDetailView(LoginRequiredMixin, UpdateView):
         context["additional_emails"] = AdditionalEmail.objects.filter(user=self.object)
         return super().get_context_data(**context)
 
-    def handle_uploaded_file(self, f, name):
-        try:
-            os.mkdir("media/user_uploads")
-        except:
-            pass
-
-        with open(f"media/user_uploads/{name}", "wb+") as destination:
-            for chunk in f.chunks():
-                destination.write(chunk)
-
     def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            mail_subject = (
-                f"Mitteilung von {request.user.first_name} {request.user.last_name}"
-            )
-            message = form.cleaned_data.get("comment")
-            to_email = settings.TO_EMAIL
-            email = EmailMessage(
-                mail_subject, message, to=[to_email], cc=[request.user.email]
-            )
-            if request.FILES.get("attachment"):
-                document = request.FILES.get("attachment")
-                self.handle_uploaded_file(document, str(document))
-                email.attach_file("media/user_uploads/" + str(document))
-            email.send()
-            messages.add_message(
-                request, messages.SUCCESS, "Nachricht erfolgreich versendet"
-            )
+        self.object = request.user
+        form = self.form_class(request.POST, request.FILES)
+        if not form.is_valid():
+            for errors in form.errors.values():
+                for error in errors:
+                    messages.add_message(request, messages.ERROR, error)
             return HttpResponseRedirect(reverse("profile_detail"))
-        return render(request, self.template_name, {"form": form})
-
-
-class EmailUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    model = User
-    template_name = "members/update_email.html"
-    form_class = UpdateMemberEmailForm
-
-    def get_object(self, queryset=None):
-        obj = self.request.user
-        return obj
-
-    def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            # check the password
-            if request.user.check_password(form.cleaned_data.get("password")):
-                # check, if both mails are the same
-                if form.cleaned_data.get("email1") == form.cleaned_data.get("email2"):
-                    request.user.email = form.cleaned_data.get("email1")
-                    request.user.save()
-                    messages.add_message(
-                        request, messages.SUCCESS, "E-Mail erfolgreich geändert"
-                    )
-                    return HttpResponseRedirect(reverse("profile_detail"))
-                form.add_error("email1", "Die E-Mails stimmen nicht überein")
-                return render(
-                    request, self.template_name, {"form": form, "object": request.user}
-                )
-            form.add_error("password", "Das Passwort stimmt nicht")
-            return render(
-                request, self.template_name, {"form": form, "object": request.user}
-            )
-        return render(
-            request, self.template_name, {"form": form, "object": request.user}
+        email = EmailMessage(
+            f"Mitteilung von {request.user.first_name} {request.user.last_name}",
+            form.cleaned_data["comment"],
+            to=[settings.TO_EMAIL],
+            cc=[request.user.email],
         )
-
-    def test_func(self):
-        user = self.request.user
-        person = self.get_object()
-        return user == person
-
-
-class PasswordChangeView(LoginRequiredMixin, PasswordChangeView):
-    template_name = "members/update_pw.html"
-
-    def get_object(self, queryset=None):
-        obj = self.request.user
-        return obj
-
-    def post(self, request, *args, **kwargs):
-        form = self.get_form()
-        if form.is_valid():
-            request.user = form.save()
-            update_session_auth_hash(request, request.user)
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
-
-    def get_context_data(self, **kwargs):
-        context = {}
-        context["object"] = self.request.user
-        context.update(kwargs)
-        return super().get_context_data(**context)
-
-    def form_valid(self, form):
-        messages.add_message(
-            self.request, messages.SUCCESS, "Passwort erfolgreich geändert"
-        )
+        # attached straight from the upload: nothing is stored on the server (media/ is public)
+        attachment = form.cleaned_data.get("attachment")
+        if attachment:
+            email.attach(attachment.name, attachment.read(), attachment.content_type)
+        email.send()
+        messages.add_message(request, messages.SUCCESS, "Nachricht erfolgreich versendet")
         return HttpResponseRedirect(reverse("profile_detail"))
 
 
+class EmailUpdateView(LoginRequiredMixin, FormView):
+    template_name = "members/profile_form.html"
+    form_class = UpdateMemberEmailForm
+    extra_context = {"title": "E-Mail-Adresse ändern"}
+
+    def get_form_kwargs(self):
+        return {**super().get_form_kwargs(), "user": self.request.user}
+
+    def get_context_data(self, **kwargs):
+        hint = f"Aktuell: {self.request.user.email or 'keine'}. Mit der neuen Adresse meldest du dich auch an."
+        return super().get_context_data(hint=hint, **kwargs)
+
+    def form_valid(self, form):
+        self.request.user.email = form.cleaned_data["email1"]
+        self.request.user.save(update_fields=["email"])
+        messages.add_message(self.request, messages.SUCCESS, "E-Mail erfolgreich geändert")
+        return HttpResponseRedirect(reverse("profile_detail"))
+
+
+class PasswordChangeView(LoginRequiredMixin, PasswordChangeView):
+    """Django's view: saves the password and keeps the member logged in."""
+
+    template_name = "members/profile_form.html"
+    form_class = MemberPasswordChangeForm
+    success_url = reverse_lazy("profile_detail")
+    extra_context = {"title": "Passwort ändern", "hint": "Mindestens 8 Zeichen, nicht nur Ziffern und nicht zu ähnlich zu deinem Namen."}
+
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, "Passwort erfolgreich geändert")
+        return super().form_valid(form)
+
+
 class UsernameUpdateView(LoginRequiredMixin, UpdateView):
-    model = User
-    template_name = "members/update_username.html"
-    fields = ["username"]
+    template_name = "members/profile_form.html"
+    form_class = UsernameForm
+    extra_context = {"title": "Nutzername ändern", "hint": "Du kannst dich mit dem Nutzernamen oder deiner E-Mail-Adresse anmelden."}
 
     def get_object(self, queryset=None):
-        obj = self.request.user
-        return obj
+        return self.request.user
 
     def get_success_url(self):
-        messages.add_message(
-            self.request, messages.SUCCESS, "Nutzername erfolgreich geändert"
-        )
+        messages.add_message(self.request, messages.SUCCESS, "Nutzername erfolgreich geändert")
         return reverse("profile_detail")
 
 
 class AddressChangeView(LoginRequiredMixin, UpdateView):
     model = Profile
     template_name = "members/update_address.html"
-    fields = ["address", "telephone", "parent", "parent_telnr"]
+    form_class = ProfileSelfForm
 
     def get_object(self, queryset=None):
         obj = self.request.user.profile
         return obj
 
     def get_success_url(self):
+        messages.add_message(self.request, messages.SUCCESS, "Daten erfolgreich geändert")
         return reverse("profile_detail")
 
 
@@ -1056,24 +1011,27 @@ def add_image(request):
 
 
 @login_required
+@require_POST
 def add_another_email(request):
-    data = request.POST
-    user = request.user
-    data = {k: v[0] for (k, v) in dict(request.POST).items()}
-    email = AdditionalEmail.objects.create(
-        user=user, title=data["title"], email=data["email"]
-    )
-    email.save()
-    return JsonResponse({"data": data})
+    """A further address on the own profile (e.g. a parent's), for the info mails."""
+    form = AdditionalEmailForm(request.POST)
+    if not form.is_valid():
+        return JsonResponse({"errors": " ".join(e for errors in form.errors.values() for e in errors)}, status=400)
+    form.instance.user = request.user
+    form.save()
+    return JsonResponse({"pk": form.instance.pk})
 
 
 @login_required
+@require_POST
 def delete_additional_email(request):
-    data = {x: v[0] for (x, v) in dict(request.GET).items()}
-    user = request.user
-    email = AdditionalEmail.objects.get(user=user, pk=int(data["id"]))
-    email.delete()
-    return JsonResponse({"data": data})
+    """Only the own addresses; anything else is not found."""
+    try:
+        pk = int(request.POST.get("id", ""))
+    except ValueError:
+        return JsonResponse({"errors": "Keine Adresse angegeben."}, status=400)
+    get_object_or_404(AdditionalEmail, user=request.user, pk=pk).delete()
+    return JsonResponse({"deleted": pk})
 
 
 @permission_required("auth.add_user", raise_exception=True)

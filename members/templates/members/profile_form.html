@@ -1,0 +1,38 @@
+{% extends "members/base.html" %}
+{# shared page for the small profile forms: e-mail, username, password #}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}">Mitglieder</a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'profile_detail' %}">Dein Profil</a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{ title }}</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="member_page">
+    <div class="member_toolbar">
+        <h1>{{ title }}</h1>
+    </div>
+
+    <form method="POST" class="profile_form">
+        {% csrf_token %}
+        <div class="session_card profile_form__card">
+            {% if hint %}<p class="member_panel__hint">{{ hint }}</p>{% endif %}
+            {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+            <div class="member_fields member_fields--wide">
+                {% for field in form %}
+                    {% include "user_handling/_field.html" %}
+                {% endfor %}
+            </div>
+        </div>
+        <button type="submit" class="form_button member_form__submit">Speichern</button>
+        <p style="text-align: center;"><a class="more_info_button" href="{% url 'profile_detail' %}">Abbrechen</a></p>
+    </form>
+</section>
+
+<script>
+    document.querySelectorAll('.profile_form .mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));
+</script>
+{% endblock %}

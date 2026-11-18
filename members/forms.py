@@ -4,9 +4,10 @@ from decimal import Decimal, InvalidOperation
 from django import forms
 from django.db.models import Q
 from user_handling.forms import MdcFormMixin, date_widget
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.models import User
 from .event_content import clean_content
-from .models import Event, EventAsset, Message, Session, Spot, Document, Trainer
+from .models import Event, EventAsset, Message, Profile, Session, Spot, Document, Trainer
 
 
 class EventFileForm(MdcFormMixin, forms.ModelForm):
@@ -224,20 +225,84 @@ class EventUpdateParticipantForm2(forms.ModelForm):
         fields = []
 
 
+class ProfileSelfForm(MdcFormMixin, forms.ModelForm):
+    """The data a member keeps up to date on their own profile page."""
+
+    birthday = forms.DateField(label="Geburtsdatum", required=False, widget=date_widget())
+
+    class Meta:
+        model = Profile
+        fields = ["birthday", "address", "telephone", "parent", "parent_telnr"]
+        labels = {
+            "address": "Adresse",
+            "telephone": "Telefonnummer",
+            "parent": "Ansprechpartner*in",
+            "parent_telnr": "Notfallnummer",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # optional on the model, but every member needs them
+        self.fields["address"].required = True
+        self.fields["telephone"].required = True
+        self.fields["birthday"].widget.attrs["max"] = datetime.now().strftime("%Y-%m-%d")
+
+    def clean_birthday(self):
+        birthday = self.cleaned_data.get("birthday")
+        if birthday and birthday > datetime.now().date():
+            raise forms.ValidationError("Das Geburtsdatum liegt in der Zukunft.")
+        return birthday
+
+
 class UpdateMemberInformationForm(forms.ModelForm):
-    comment = forms.CharField(label="Kommentar", widget=forms.Textarea, required=False)
-    attachment = forms.FileField(label="Anhänge", required=False)
+    """Message from a member to the board, optionally with one attachment (e.g. a new SEPA mandate)."""
+
+    MAX_ATTACHMENT = 5 * 1024 * 1024  # the page says 5 MB
+
+    comment = forms.CharField(label="Nachricht", widget=forms.Textarea, error_messages={"required": "Bitte schreib eine Nachricht."})
+    attachment = forms.FileField(label="Anhang", required=False)
 
     class Meta:
         model = User
         fields = ["comment", "attachment"]
 
+    def clean_attachment(self):
+        attachment = self.cleaned_data.get("attachment")
+        if attachment and attachment.size > self.MAX_ATTACHMENT:
+            raise forms.ValidationError("Der Anhang ist zu groß (höchstens 5 MB).")
+        return attachment
 
-class UpdateMemberEmailForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput)
-    email1 = forms.EmailField()
-    email2 = forms.EmailField()
 
+class UpdateMemberEmailForm(MdcFormMixin, forms.Form):
+    """New login and contact address; the password confirms it's really the member."""
+
+    password = forms.CharField(label="Dein Passwort", widget=forms.PasswordInput(attrs={"autocomplete": "current-password"}))
+    email1 = forms.EmailField(label="Neue E-Mail-Adresse", widget=forms.EmailInput(attrs={"autocomplete": "email"}))
+    email2 = forms.EmailField(label="Neue E-Mail-Adresse wiederholen", widget=forms.EmailInput(attrs={"autocomplete": "email"}))
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_password(self):
+        password = self.cleaned_data["password"]
+        if not self.user.check_password(password):
+            raise forms.ValidationError("Das Passwort stimmt nicht.")
+        return password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get("email1") and cleaned_data.get("email2") and cleaned_data["email1"] != cleaned_data["email2"]:
+            self.add_error("email2", "Die E-Mail-Adressen stimmen nicht überein.")
+        return cleaned_data
+
+
+class UsernameForm(MdcFormMixin, forms.ModelForm):
     class Meta:
         model = User
-        fields = ["password", "email1", "email2"]
+        fields = ["username"]
+        labels = {"username": "Nutzername"}
+
+
+class MemberPasswordChangeForm(MdcFormMixin, PasswordChangeForm):
+    """Django's password change form in the site's field style."""

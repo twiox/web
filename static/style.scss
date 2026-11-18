@@ -1958,6 +1958,11 @@ footer{
     }
 }
 
+// small profile forms (e-mail, username, password): one narrow card
+.profile_form__card{
+    max-width: 480px;
+    margin: 0 auto;
+}
 // public trial sign-up: two columns, one on phones; a grid so hidden fields leave no gap
 .probe_form{
     display: grid;
