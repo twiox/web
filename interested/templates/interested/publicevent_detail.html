@@ -293,8 +293,6 @@
 <script>
     $(document).ready(function(){
         $('input[name="birthday"]').mask('09.09.0099', {placeholder: "__.__.____"});
-        $("#members").removeClass("here_I_am");
-        $("#interested").addClass("here_I_am");
         $("#kosten").html("{{event.base_costs|floatformat:2}}")
         $("#real_costs").attr("value", (parseFloat("{{event.base_costs|floatformat:2}}".replace(',', '.'))).toFixed(2))
         if(document.getElementById('merch_yes').checked){

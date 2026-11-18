@@ -184,12 +184,6 @@
     {% include "members/snippets/contact_chairmen.html" %}
     {% endif %}
     <script>
-        $(document).ready(function(){
-            $("#members").removeClass("here_I_am");
-            $("#organizers").addClass("here_I_am");
-        });
-    </script>
-    <script>
         const fields = document.querySelectorAll('.mdc-text-field');
         fields.forEach(field => mdc.textField.MDCTextField.attachTo(field));
     </script>
