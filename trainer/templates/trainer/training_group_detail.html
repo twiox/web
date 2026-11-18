@@ -1,4 +1,5 @@
 {% extends "members/base.html" %}
+{% load static %}
 {# a weekly training time as a group; built like interested/trialgroup_detail.html #}
 {% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
@@ -23,6 +24,13 @@
     {% if object.hinweis %}<p class="trial_group_notes">{{ object.hinweis }}</p>{% endif %}
 
     {% csrf_token %}
+    {# functions for the trainers, above the list #}
+    <div class="member_toolbar group_toolbar">
+        {% if perms.members.change_session %}
+        <a class="table_action table_action--primary" href="{% url 'session_update' object.pk %}?next={{ request.path|urlencode }}"><i class="fas fa-pen-square"></i> Trainingszeit bearbeiten</a>
+        {% endif %}
+        <a class="table_action table_action--primary" href="{% url 'trainer_group_email' object.pk %}"><i class="far fa-envelope"></i> E-Mail an alle</a>
+    </div>
     <h3>Teilnehmende</h3>
     <p class="member_panel__hint">Alle, die bei dieser Trainingszeit „Teilnahme“ angehakt haben.</p>
     <div class="member_table_wrapper tertiary_bg">
@@ -90,6 +98,87 @@
     {% else %}
     <p class="member_panel__hint">Alle, die laut den Trainingsstunden schon einmal bei dieser Trainingszeit waren, stehen auf der Liste.</p>
     {% endif %}
+
+    {# group dashboard: from the trainers' session entries (Trainingsstunden) of this training time #}
+    <h3>Gruppen-Dashboard</h3>
+    <p class="member_panel__hint">Aus den Trainingsstunden der Trainer*innen zu dieser Trainingszeit.</p>
+    {% if entries %}
+    {# one table, so both charts share the x-axis (one column per Trainingsstunde) and scroll together #}
+    <div class="group_dash">
+        <div class="group_dash__panel">
+            <div class="heatmap_legend">
+                <span><i class="group_dash__line_key"></i> Teilnehmende pro Training</span>
+                <span><i class="heat heat--2"></i> bei diesem Training da</span>
+                <span><i class="heat heat--1"></i> bei einem anderen Training derselben Woche</span>
+                <span><i class="heat heat--0"></i> nicht da</span>
+                {% if has_others %}<span><i class="heat heat--other heat--key"></i> Andere: Anzahl, Namen beim Darüberfahren</span>{% endif %}
+            </div>
+            {# shown by the script when older trainings are hidden for lack of width #}
+            <p class="member_panel__hint group_dash__restricted" id="dash_restricted" hidden>Zu viele Trainingsstunden für die Breite: angezeigt werden die letzten 6 Monate. <a href="#" id="dash_show_all">Alle anzeigen</a></p>
+            <div class="heatmap_wrap" id="heatmap_wrap">
+                <table class="heatmap">
+                    <tbody>
+                        {# 1) the line chart; the script draws it over the date columns, the y labels go into the name column #}
+                        <tr class="heatmap__chart_row">
+                            <th class="heatmap__name heatmap__yaxis" id="timeline_yaxis"></th>
+                            <td colspan="{{ entries|length|add:1 }}" class="heatmap__chart">
+                                <div class="group_dash__chart" id="timeline_chart" tabindex="0" role="img"
+                                     aria-label="Liniendiagramm: Teilnehmende pro Trainingsstunde, {{ entries|length }} Trainingsstunden. Werte auch in der Tabelle darunter."></div>
+                            </td>
+                        </tr>
+                        {# 2) the shared x-axis #}
+                        <tr class="heatmap__axis">
+                            <th class="heatmap__name"></th>
+                            {% for entry in entries %}
+                            <th class="heatmap__date" data-col="{{ forloop.counter0 }}" data-date="{{ entry.date|date:'Y-m-d' }}"><a href="{% url 'trainingsession_detail' entry.pk %}" title="Zur Trainingsstunde vom {{ entry.date|date:'d.m.Y' }}">{{ entry.date|date:"d.m." }}</a></th>
+                            {% endfor %}
+                            <th class="heatmap__last">Zuletzt hier</th>
+                        </tr>
+                        {# 3) participation per person #}
+                        {% for row in heatmap %}
+                        <tr>
+                            <th class="heatmap__name">{{ row.profile.user.last_name }}, {{ row.profile.user.first_name }}</th>
+                            {% for entry, state in row.cells %}
+                            {% with name=row.profile.user.first_name|add:" "|add:row.profile.user.last_name %}
+                            <td data-col="{{ forloop.counter0 }}"><i class="heat heat--{{ state }}" aria-label="{{ name }}, {{ entry.date|date:'d.m.Y' }}: {% if state == 2 %}da{% elif state == 1 %}bei einem anderen Training dieser Woche{% else %}nicht da{% endif %}"
+                                   data-tip="{% if state == 2 %}da{% elif state == 1 %}anderes Training in der Woche{% else %}nicht da{% endif %}|{{ name }}|{{ entry.date|date:'D d.m.Y' }}"></i></td>
+                            {% endwith %}
+                            {% endfor %}
+                            <td class="heatmap__last">{% if row.last_seen %}{{ row.last_seen|date:"d.m.Y" }}{% else %}<span class="member_panel__hint">noch nie</span>{% endif %}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><th class="heatmap__name member_panel__hint">Noch niemand auf der Liste.</th></tr>
+                        {% endfor %}
+                        {# 4) everyone else who was there: the count, the names on hovering (members can be added above) #}
+                        {% if has_others %}
+                        <tr class="heatmap__others">
+                            <th class="heatmap__name">Andere</th>
+                            {% for entry, names in other_cells %}
+                            <td data-col="{{ forloop.counter0 }}">{% if names %}<i class="heat heat--other" aria-label="{{ entry.date|date:'d.m.Y' }}, nicht auf der Liste: {{ names|join:', ' }}"
+                                   data-tip="{{ names|length }} nicht auf der Liste|{{ names|join:'|' }}|{{ entry.date|date:'D d.m.Y' }}">{{ names|length }}</i>{% else %}<i class="heat heat--0" aria-label="{{ entry.date|date:'d.m.Y' }}: alle auf der Liste"></i>{% endif %}</td>
+                            {% endfor %}
+                            <td class="heatmap__last"></td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="group_dash__tooltip" id="dash_tip" hidden></div>
+            <details class="group_dash__table">
+                <summary>Teilnehmende pro Training als Tabelle</summary>
+                <table class="member_table member_table--static">
+                    <thead><tr><th>Datum</th><th>Teilnehmende</th></tr></thead>
+                    <tbody>
+                    {% for entry in entries %}<tr><td><a href="{% url 'trainingsession_detail' entry.pk %}">{{ entry.date|date:"D d.m.Y" }}</a></td><td>{{ entry.count }}</td></tr>{% endfor %}
+                    </tbody>
+                </table>
+            </details>
+        </div>
+    </div>
+    {{ timeline|json_script:"timeline_data" }}
+    {% else %}
+    <p class="member_panel__hint">Noch keine Trainingsstunden zu dieser Trainingszeit eingetragen.</p>
+    {% endif %}
 </section>
 
 <script>
@@ -127,4 +216,5 @@
         if (!confirm(`${form.dataset.name} von der Liste von {{ object.title|escapejs }} nehmen? Sie*er kann „Teilnahme“ jederzeit wieder anhaken.`)) event.preventDefault();
     }));
 </script>
+<script src="{% static 'group_dashboard.js' %}"></script>
 {% endblock %}

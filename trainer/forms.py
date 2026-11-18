@@ -80,3 +80,21 @@ class TrainerForm(MdcFormMixin, forms.ModelForm):
 class TrainerSelfForm(TrainerForm):
     class Meta(TrainerForm.Meta):
         fields = [name for name in TrainerForm.Meta.fields if name != "salary"]
+
+
+class GroupEmailForm(MdcFormMixin, forms.Form):
+    """E-mail from the group page to everyone on a training time's list."""
+
+    subject = forms.CharField(label="Betreff", max_length=150)
+    body = forms.CharField(label="Nachricht", widget=forms.Textarea)
+    notice = forms.BooleanField(label="Auch als Hinweis bei dieser Trainingszeit anzeigen (3 Tage)", required=False)
+
+    # who else gets it (board, trainers); offered by the view, removable as chips in the form
+    info_to = forms.MultipleChoiceField(required=False, widget=forms.MultipleHiddenInput)
+
+    def __init__(self, *args, can_notice=False, info_choices=(), **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["info_to"].choices = [(address, name) for name, address in info_choices]
+        self.fields["notice"].widget.attrs.pop("class", None)  # rendered as a chip
+        if not can_notice:
+            del self.fields["notice"]

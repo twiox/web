@@ -1,0 +1,7 @@
+{# e-mail from the group page (trainer_group_email); styled like interested/emails/probe_email_answer.html #}
+<p>{{ greeting }}</p>
+{{ body|linebreaks }}
+
+{% include "trainer/emails/_group_email_sender.html" %}
+
+{% include "emails/_footer.html" %}

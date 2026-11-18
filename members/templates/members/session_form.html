@@ -16,6 +16,7 @@
 
     <form method="POST" class="session_form_page">
         {% csrf_token %}
+        {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
         {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
         <div class="session_grid">
             <div class="session_card">

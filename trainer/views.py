@@ -1,8 +1,8 @@
-from .forms import TrainerForm, TrainerSelfForm
+from .forms import GroupEmailForm, TrainerForm, TrainerSelfForm
 from .models import TrainingSessionEntry, TrainingSessionParticipant
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
-from members.models import Trainer, Session, Profile
+from members.models import AdditionalEmail, Message, Trainer, Session, Profile
 from members.roles import PrivilegedRequiredMixin, is_privileged, is_trainer
 from interested.models import TrialGroup
 from interested.trials import ACTIVE_GROUP_ORDER, annotate_groups, upcoming_trial_dates
@@ -12,7 +12,13 @@ from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.http import require_POST
-from datetime import date
+from datetime import date, datetime, timedelta
+from django.conf import settings
+import html as html_lib
+import re
+from django.core.mail import EmailMultiAlternatives, get_connection
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 from django.db.models import Count, Max, Q
 from itertools import groupby
 
@@ -81,7 +87,62 @@ def trainer_group_detail(request, pk):
         "participants": participants,
         "show_parent": show_parent,
         "candidates": group_candidates(session),
+        **group_dashboard(session, participants),
     })
+
+
+def group_dashboard(session, participants):
+    """Data for the dashboard below the list, from the trainers' session entries (Trainingsstunden):
+    - timeline: participants per entry of this training time (members, guests and trial participants)
+    - heatmap: per person on the list and entry: 2 = there, 1 = at another training the same week, 0 = not there
+    """
+    entries = list(
+        TrainingSessionEntry.objects.filter(session=session, date__isnull=False)
+        .annotate(count=Count("participant")).order_by("date")
+    )
+    timeline = [{"date": e.date.strftime("%Y-%m-%d"), "label": e.date.strftime("%d.%m.%Y"), "count": e.count} for e in entries]
+
+    # every recorded attendance of the people on the list, any training time (for the "same week" cells)
+    attended = {}  # user id -> {entry id: iso week}
+    rows = TrainingSessionParticipant.objects.filter(
+        user__in=[p.user_id for p in participants], session__date__isnull=False
+    ).values_list("user", "session_id", "session__date")
+    for user_id, entry_id, day in rows:
+        attended.setdefault(user_id, {})[entry_id] = day.isocalendar()[:2]
+
+    heatmap = []
+    for profile in participants:
+        visits = attended.get(profile.user_id, {})
+        weeks = {}
+        for entry_id, week in visits.items():
+            weeks.setdefault(week, set()).add(entry_id)
+        cells, last_seen = [], None
+        for entry in entries:
+            if entry.pk in visits:
+                cells.append(2)
+                last_seen = entry.date
+            elif weeks.get(entry.date.isocalendar()[:2], set()) - {entry.pk}:
+                cells.append(1)
+            else:
+                cells.append(0)
+        heatmap.append({"profile": profile, "cells": list(zip(entries, cells)), "last_seen": last_seen})
+
+    # "Andere": who was there but is not on the list (members to add, guests, trial participants)
+    on_list = {p.user_id for p in participants}
+    others = {entry.pk: [] for entry in entries}
+    for row in TrainingSessionParticipant.objects.filter(session__in=entries).select_related("user").order_by("pk"):
+        if row.user_id and row.user_id in on_list:
+            continue
+        if row.user_id:
+            label = f"{row.user.get_full_name()} (Mitglied)"
+        elif row.tester_id:
+            label = f"{row.name or 'Probetraining'} (Probetraining)"
+        else:
+            label = f"{row.name or 'ohne Namen'} (Gast)"
+        others[row.session_id].append(label)
+    other_cells = [(entry, others[entry.pk]) for entry in entries]
+    has_others = any(names for _, names in other_cells)
+    return {"entries": entries, "timeline": timeline, "heatmap": heatmap, "other_cells": other_cells, "has_others": has_others}
 
 
 def group_candidates(session):
@@ -135,6 +196,129 @@ def trainer_group_note(request, pk, profile_pk):
     profile.notes_trainer = request.POST.get("value", "").strip()
     profile.save(update_fields=["notes_trainer"])
     return JsonResponse({"success": True})
+
+
+# shown before the subject in the form too, so members see in their inbox where the e-mail comes from
+GROUP_EMAIL_PREFIX = "Twio X e.V. | "
+# the e-mail goes to the whole group, so it opens with this; shown above the message field as well
+GROUP_EMAIL_GREETING = "Liebe Trainingsgruppe,"
+
+
+def group_email_addresses(user, session):
+    """Besides the participants, the e-mail goes to the board (TO_EMAIL) and to every trainer of the
+    training time, with their public trainer address; replies go to the board and the sender's public
+    trainer address. Trainers without one are skipped, with a hint in the form. An address with special
+    characters before the @ stays out of Reply-To: it would empty the whole header."""
+    info_to, hints = [("Vorstand", settings.TO_EMAIL)], []
+    for trainer in session.trainer.select_related("user").order_by("user__first_name"):
+        address = (trainer.trainer_email or "").strip()
+        if address:
+            info_to.append((trainer.user.get_full_name(), address))
+        else:
+            hints.append(f"{trainer.user.get_full_name()} hat keine öffentliche Trainer-E-Mail-Adresse und bekommt die E-Mail nicht.")
+    own = getattr(user, "trainer", None)
+    own_address = (own.trainer_email or "").strip() if own else ""
+    reply_to = [settings.TO_EMAIL]
+    if not own_address:
+        # the board gets the replies through TO_EMAIL anyway, so only trainers need the hint
+        if own:
+            hints.append("Du hast keine öffentliche Trainer-E-Mail-Adresse, Antworten gehen deshalb nur an den Vorstand."
+                         " Du kannst sie unter „Meine Daten“ eintragen.")
+    elif not own_address.isascii():
+        hints.append(f"Deine Adresse {own_address} enthält Sonderzeichen und kann nicht als Antwortadresse eingetragen werden.")
+    else:
+        reply_to.append(own_address)
+    unique = {}
+    for name, address in info_to:
+        unique.setdefault(address, name)  # e.g. a trainer whose public address is the club address
+    return [(name, address) for address, name in unique.items()], list(dict.fromkeys(reply_to)), hints
+
+
+def group_email_context(user, session, form=None):
+    info_to, reply_to, hints = group_email_addresses(user, session)
+    # after a failed post the chips keep their state, otherwise all are on
+    kept = set(form.data.getlist("info_to")) if form is not None and form.is_bound else {a for _, a in info_to}
+    return {"info_to": [(name, address, address in kept) for name, address in info_to], "reply_to": reply_to, "address_hints": hints}
+
+
+def group_recipients(session):
+    """Everyone on the list with their addresses: the own one and the additional ones (e.g. a parent's)."""
+    participants = list(session.participants.select_related("user").order_by("user__last_name", "user__first_name"))
+    extra = {}
+    for user_id, email in AdditionalEmail.objects.filter(user__in=[p.user_id for p in participants]).values_list("user", "email"):
+        extra.setdefault(user_id, []).append(email)
+    recipients = []
+    for profile in participants:
+        addresses = list(dict.fromkeys(e.strip() for e in [profile.user.email, *extra.get(profile.user_id, [])] if e and e.strip()))
+        recipients.append((profile, addresses))
+    return recipients
+
+
+@user_passes_test(is_privileged)
+def trainer_group_email(request, pk):
+    """Writes to everyone on a training time's list, one e-mail each; the board and the training time's
+    trainers get the same e-mail (see group_email_addresses). Optionally also a notice at the training time."""
+    session = get_object_or_404(Session, pk=pk)
+    recipients = group_recipients(session)
+    reachable = [(p, a) for p, a in recipients if a]
+    can_notice = request.user.has_perm("members.add_message")
+    info_choices = group_email_addresses(request.user, session)[0]
+    form = GroupEmailForm(request.POST or None, can_notice=can_notice, info_choices=info_choices)
+    if request.method == "POST" and form.is_valid():
+        subject, body = form.cleaned_data["subject"], form.cleaned_data["body"]
+        sender = request.user.get_full_name()
+        _, reply_to, _ = group_email_addresses(request.user, session)
+        info_to = form.cleaned_data["info_to"]  # the chips left in the form, only from the offered addresses
+        missing = [p.user.get_full_name() for p, a in recipients if not a]
+        context = {"body": body, "sender": sender, "session": session, "greeting": GROUP_EMAIL_GREETING}
+
+        def mail(to):
+            html = render_to_string("trainer/emails/group_email.html", context)
+            # for mail apps without HTML: keep line and paragraph breaks, then drop the tags
+            text = re.sub(r"<br\s*/?>\s*", "\n", html)
+            text = re.sub(r"<hr\s*/?>", "\n\n___\n\n", text)  # the line above the club footer
+            text = re.sub(r"</(p|li|ul|h\d)>", "\n\n", text)
+            text = re.sub(r"[ \t]+\n", "\n", html_lib.unescape(strip_tags(text)))
+            text = re.sub(r"\n{3,}", "\n\n", text).strip()
+            message = EmailMultiAlternatives(GROUP_EMAIL_PREFIX + subject, text, settings.DEFAULT_FROM_EMAIL, to, reply_to=reply_to)
+            message.attach_alternative(html, "text/html")
+            return message
+
+        connection = get_connection()
+        try:
+            connection.send_messages([mail(addresses) for _, addresses in reachable])
+        except Exception:
+            messages.add_message(request, messages.ERROR, "Die E-Mails konnten nicht gesendet werden – bitte später nochmal versuchen.")
+            return render(request, "trainer/training_group_email.html", {
+                "object": session, "form": form, "recipients": recipients,
+                "prefix": GROUP_EMAIL_PREFIX, "greeting": GROUP_EMAIL_GREETING, "sender": request.user.get_full_name(), "session": session,
+                **group_email_context(request.user, session, form),
+            })
+        text = f"E-Mail an {len(reachable)} Teilnehmende gesendet"
+        if missing:
+            text += f" ({len(missing)} ohne E-Mail-Adresse)"
+        # the same e-mail for the board and the trainers, each on its own: a refused address
+        # (e.g. with an umlaut) only misses that one
+        failed = []
+        for address in info_to:
+            try:
+                connection.send_messages([mail([address])])
+            except Exception:
+                failed.append(address)
+        if failed:
+            text += f"; nicht an {', '.join(failed)}"
+        if can_notice and form.cleaned_data.get("notice"):
+            notice = Message.objects.create(title=subject, message=body, author=request.user, display="sessions",
+                                            autodelete=datetime.now() + timedelta(days=3))
+            notice.sessions.add(session)
+            text += ", Hinweis bei der Trainingszeit angelegt"
+        messages.add_message(request, messages.SUCCESS, text)
+        return HttpResponseRedirect(reverse("trainer_group_detail", args=[session.pk]))
+    return render(request, "trainer/training_group_email.html", {
+        "object": session, "form": form, "recipients": recipients,
+        "prefix": GROUP_EMAIL_PREFIX, "greeting": GROUP_EMAIL_GREETING, "sender": request.user.get_full_name(), "session": session,
+                **group_email_context(request.user, session, form),
+    })
 
 
 @user_passes_test(is_trainer)

@@ -1,0 +1,111 @@
+{% extends "members/base.html" %}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_groups' %}">Trainingsgruppen</a>
+    <a class="float_left"> > </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_group_detail' object.pk %}">{{ object.title }}</a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">E-Mail an alle</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="member_page">
+    <div class="member_toolbar">
+        <h1>E-Mail an alle</h1>
+    </div>
+
+    <form method="POST" class="profile_form group_email_form">
+        {% csrf_token %}
+        <div class="session_card">
+            <p class="member_panel__hint">An alle auf der Liste von {{ object.title }} ({{ object.weekday }} {{ object.format_start_time }} Uhr), jede*r bekommt eine eigene E-Mail. Der Vorstand und die Trainer*innen dieser Trainingszeit bekommen dieselbe E-Mail.</p>
+            {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+            <div class="member_fields member_fields--wide">
+                {# the prefix is part of the subject in the inbox, but not of the notice #}
+                <div class="group_email_form__subject">
+                    <span class="group_email_form__prefix" title="Steht vor jedem Betreff, damit man im Postfach sieht, woher die E-Mail kommt">{{ prefix }}</span>
+                    <div>{% include "user_handling/_field.html" with field=form.subject %}</div>
+                </div>
+                {# like user_handling/_field.html, with the fixed greeting between label and box: it is part of every e-mail, so it is not typed #}
+                <div>
+                    {% for error in form.body.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+                    <h6>{{ form.body.label }}</h6>
+                    <p class="group_email_form__greeting">{{ greeting }}</p>
+                    <label class="mdc-text-field mdc-text-field--textarea mdc-text-field--no-label">
+                        {{ form.body }}
+                        <span class="mdc-notched-outline">
+                            <span class="mdc-notched-outline__leading"></span>
+                            <span class="mdc-notched-outline__trailing"></span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+            {# the same block ends every e-mail (not the notice) #}
+            <div class="group_email_form__preview">
+                <p class="member_panel__hint">Wird in der E-Mail unter deine Nachricht gesetzt (darunter folgt das Impressum des Vereins):</p>
+                {% include "trainer/emails/_group_email_sender.html" %}
+            </div>
+            {% if form.notice %}
+            <div class="chip_list">
+                <label class="toggle_chip">{{ form.notice }}<span>{{ form.notice.label }}</span></label>
+            </div>
+            <p class="member_panel__hint">Der Hinweis erscheint mit dem Betreff bei der Trainingszeit und wird nach 3 Tagen automatisch gelöscht.</p>
+            {% endif %}
+
+            {# who gets it; the addresses come from the member profiles (own and additional ones) #}
+            <details class="contacts_toggle">
+                <summary>Empfänger*innen ({{ recipients|length }})</summary>
+                <ul class="group_email_form__recipients">
+                    {% for profile, addresses in recipients %}
+                    <li>{{ profile.user.first_name }} {{ profile.user.last_name }}: {% if addresses %}{{ addresses|join:", " }}{% else %}<span class="entry_status_hint">keine E-Mail-Adresse</span>{% endif %}</li>
+                    {% empty %}
+                    <li class="member_panel__hint">Noch niemand auf der Liste.</li>
+                    {% endfor %}
+                </ul>
+            </details>
+        </div>
+        {# who else gets it and where replies go: the same addresses the view sends with #}
+        <div class="group_email_form__routing">
+            <p><span>Geht außerdem an:</span></p>
+            {# removable: × leaves an address out of this e-mail; the server only takes the offered ones #}
+            <ul class="chip_list group_email_form__info" id="info_chips">
+                {% for name, address, on in info_to %}
+                <li class="person_chip" {% if not on %}hidden{% endif %}>
+                    {{ name }} <small>{{ address }}</small>
+                    <input type="hidden" name="info_to" value="{{ address }}" {% if not on %}disabled{% endif %}>
+                    <button type="button" class="js_remove_info" title="Diese E-Mail nicht an {{ address }}" aria-label="{{ name }} entfernen"><i class="fas fa-times"></i></button>
+                </li>
+                {% endfor %}
+                <li class="member_panel__hint" id="info_none" hidden>nur an die Teilnehmenden</li>
+            </ul>
+            {% for error in form.info_to.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+            <p id="info_reset" hidden><a href="#" class="more_info_button">Alle wieder hinzufügen</a></p>
+            <p><span>Antworten gehen an:</span> {{ reply_to|join:", " }}</p>
+            {% for hint in address_hints %}<p class="member_panel__hint">{{ hint }}</p>{% endfor %}
+        </div>
+        <button type="submit" class="form_button member_form__submit" {% if not recipients %}disabled{% endif %}>Senden</button>
+        <p style="text-align: center;"><a class="more_info_button" href="{% url 'trainer_group_detail' object.pk %}">Abbrechen</a></p>
+    </form>
+</section>
+
+<script>
+    document.querySelectorAll('.group_email_form .mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));
+    // "Geht außerdem an": × removes a chip (its hidden field is no longer sent), the link brings all back
+    (function () {
+        const chips = [...document.querySelectorAll('#info_chips .person_chip')];
+        const update = () => {
+            const removed = chips.filter(chip => chip.hidden).length;
+            document.getElementById('info_reset').hidden = removed === 0;
+            document.getElementById('info_none').hidden = removed < chips.length;
+        };
+        const show = (chip, on) => { chip.hidden = !on; chip.querySelector('input').disabled = !on; };
+        chips.forEach(chip => chip.querySelector('.js_remove_info').addEventListener('click', () => { show(chip, false); update(); }));
+        document.querySelector('#info_reset a').addEventListener('click', event => {
+            event.preventDefault();
+            chips.forEach(chip => show(chip, true));
+            update();
+        });
+        update();
+    })();
+</script>
+{% endblock %}

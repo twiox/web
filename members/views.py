@@ -1,6 +1,7 @@
 import csv
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
+from django.utils.http import url_has_allowed_host_and_scheme
 from django import forms
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Count, Q
@@ -637,6 +638,13 @@ class SessionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS, "Einheit geändert")
         return super().form_valid(form)
+
+    def get_success_url(self):
+        # e.g. opened from the training group page: back there; only addresses on this site
+        target = self.request.POST.get("next") or self.request.GET.get("next")
+        if target and url_has_allowed_host_and_scheme(target, allowed_hosts={self.request.get_host()}, require_https=self.request.is_secure()):
+            return target
+        return super().get_success_url()
 
 
 class SessionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):

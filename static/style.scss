@@ -971,6 +971,267 @@ footer{
     }
 }
 
+// group page: dashboard below the list (static/group_dashboard.js). Colours validated with the
+// dataviz palette check against the panel surface ($tertiary_bg): series #088eaa passes the dark band,
+// the heatmap greens pass as a one-hue ordinal ramp (weaker step 2.09:1 vs the surface).
+.group_dash{
+    --surface: #{$tertiary_bg};
+    --series: #{$primary};
+    --grid: #{$quartiary_bg};
+    --crosshair: #8a8a8a;
+    --heat-there: #3fbf3f;
+    --heat-week: #3b6e3b;
+    --heat-none: #3b3b3b;
+    --heat-other: #5a5a5a;  // "Andere" row: neutral, the count is the information
+    display: grid;
+    gap: $padding_medium;
+    &__panel{
+        position: relative;  // for the tooltip
+        min-width: 0;
+        padding: $padding_big;
+        background-color: $tertiary_bg;
+        border-radius: 4px;
+        h4{
+            margin: 0 0 $padding_small 0;
+        }
+    }
+    &__chart{
+        outline: none;
+        &:focus-visible{
+            box-shadow: 0 0 0 2px $primary;
+        }
+    }
+    // legend key for the line: a short stroke, not a box
+    &__line_key{
+        display: block;
+        width: 18px;
+        height: 2px;
+        border-radius: 1px;
+        background-color: var(--series);
+    }
+    &__tick{
+        fill: grey;
+        font-variant-numeric: tabular-nums;
+    }
+    &__value{
+        fill: $header_col;
+        font-weight: 600;
+    }
+    &__tooltip{
+        position: absolute;
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+        padding: 6px 10px;
+        border-radius: 4px;
+        background-color: $primary_bg;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        pointer-events: none;
+        white-space: nowrap;
+        &[hidden]{
+            display: none;  // display: flex above would otherwise show the empty box
+        }
+        strong{
+            color: $header_col;
+        }
+        span{
+            color: grey;
+        }
+    }
+    &__table{
+        margin-top: $padding_small;
+        summary{
+            color: grey;
+            font-size: $font_small;
+            cursor: pointer;
+        }
+        table{
+            margin-top: 6px;
+        }
+    }
+}
+.group_dash__restricted{
+    margin: 0 0 $padding_small 0;
+}
+.heatmap_legend{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px $padding_medium;
+    margin-bottom: $padding_small;
+    color: grey;
+    span{
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+}
+.heatmap_wrap{
+    overflow-x: auto;
+}
+.heatmap{
+    border-collapse: separate;
+    border-spacing: 2px;  // the surface gap between the cells
+    th, td{
+        padding: 0;
+    }
+    // the line chart row: the script draws over the date columns, the y labels sit in the name column
+    &__chart{
+        vertical-align: bottom;
+    }
+    &__yaxis{
+        vertical-align: bottom;
+        svg{
+            display: block;
+            margin-left: auto;  // the labels sit right next to the chart
+            overflow: visible;
+        }
+    }
+    // "Andere" below the people on the list, set apart a little
+    &__others > *{
+        padding-top: 8px !important;
+    }
+    // the column under the pointer, in the chart and the heatmap alike
+    td.is_col{
+        background-color: lighten($tertiary_bg, 6%);
+        border-radius: 3px;
+    }
+    th.is_col a{
+        color: $header_col;
+    }
+    &__name{
+        position: sticky;  // names stay visible while scrolling to older trainings
+        left: 0;
+        z-index: 1;
+        padding-right: $padding_small !important;
+        background-color: $tertiary_bg;
+        color: $font_col;
+        font-weight: normal;
+        text-align: left;
+        white-space: nowrap;
+    }
+    &__date a{
+        display: block;
+        padding: 0 0 4px 0;
+        color: grey;
+        font-weight: normal;
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        &:hover{
+            color: $primary_hover;
+        }
+    }
+    &__last{
+        padding-left: $padding_small !important;
+        color: $font_col;
+        font-weight: normal;
+        text-align: left;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+    }
+    // older trainings, hidden when the table is wider than the panel (see group_dashboard.js)
+    .is_old{
+        display: none;
+    }
+}
+.heat{
+    display: block;
+    width: 24px;  // the vertical dates need about that much at the default font size
+    height: 24px;
+    border-radius: 4px;
+    background-color: var(--heat-none);
+    .heatmap &:hover{
+        outline: 2px solid $header_col;  // the hovered cell lifts
+    }
+    &--1{
+        background-color: var(--heat-week);
+    }
+    &--2{
+        background-color: var(--heat-there);
+    }
+    // "Andere": not a participation state, so neutral grey with the count inside
+    &--other{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--heat-other);
+        color: $header_col;
+        font-size: $font_small;
+        font-style: normal;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+    }
+    .heatmap_legend &{
+        width: 16px;
+        height: 16px;
+    }
+}
+// group page: e-mail to everyone on the list
+.group_email_form{
+    max-width: 720px;
+    margin: 0 auto;
+    // fixed prefix in front of the subject field
+    &__subject{
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: end;
+        gap: 6px;
+    }
+    &__prefix{
+        padding: 0 0 12px 0;  // on the baseline of the typed subject
+        color: grey;
+        white-space: nowrap;
+    }
+    // fixed greeting above the message field
+    &__greeting{
+        margin: 4px 0 6px 0;
+        color: grey;
+    }
+    // above the button: who else gets the e-mail and where the replies go
+    &__info{
+        justify-content: center;
+        margin: 4px 0 $padding_small 0;
+        .person_chip[hidden]{
+            display: none;  // display: inline-flex would keep it visible
+        }
+    }
+    &__routing{
+        margin: $padding_medium 0 0 0;
+        text-align: center;
+        p{
+            margin: 2px 0;
+            overflow-wrap: anywhere;
+        }
+        span{
+            color: grey;
+        }
+    }
+    // preview of the sender block that ends every e-mail
+    &__preview{
+        margin-top: $padding_small;
+        padding: $padding_small $padding_medium;
+        border-left: 2px solid $quartiary_bg;
+        p{
+            margin: 4px 0;
+            font-size: $font_small;
+        }
+        small{
+            color: grey;  // as in the e-mail; the global colour rule would make it white here
+        }
+    }
+    &__recipients{
+        margin: 6px 0 0 0;
+        padding: 0;
+        list-style: none;
+        font-size: $font_small;
+        li{
+            padding: 2px 0;
+            overflow-wrap: anywhere;
+        }
+    }
+}
+.group_toolbar{
+    margin-top: $padding_medium;
+}
 // group page: the trainer notes stay one line in the table; the script opens them while editing
 .tester_table .group_note{
     display: block;  // no extra space below the inline textarea
