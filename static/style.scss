@@ -13,16 +13,31 @@ $quartiary_bg: #484848;
 $font_col: #d1d1d1;
 $header_col: white;
 
+// Type scale: the base size is set once on html (17px, 18px on desktop), everything else in rem
+$tablet: 600px;
+$desktop: 1000px;
+$font_small: 0.75rem;  // hints, meta lines, tags, badges, captions (13.5px on desktop)
+$font_large: 1.1rem;   // emphasised labels and icons
+
 $padding_big: 20px;
 $padding_medium: 15px;
 $padding_small: 10px;
 
 /*Overal stuff*/
+html{
+  font-size: 106.25%;  // 17px with the browser default, follows the visitor's font setting
+  @media (min-width: $desktop){
+    font-size: 112.5%;  // 18px
+  }
+}
+// form controls do not inherit the font size by default
+button, input, select, textarea{
+  font-size: inherit;
+}
 * {
   box-sizing: border-box;
   margin:0px;
   padding:0px;
-  font-size: 16px;
   color: $font_col;
   font-family: Catamaran, Noto, sans-serif;
   list-style:none;
@@ -141,6 +156,10 @@ select { -webkit-appearance: none; }
     color:$primary;
     &:hover{
         color:#69CCE1;
+    }
+    // icons inside the link take its colour (the global * rule would make them grey)
+    i, svg, path{
+        color: inherit;
     }
 }
 .web_button {
@@ -282,9 +301,19 @@ a{
     font-weight: 300;
     text-transform: uppercase;
     margin-bottom: 50px;
+    @media (min-width: $tablet){
+        font-size: 5rem;
+        margin-bottom: 80px;
+    }
+    @media (min-width: $desktop){
+        font-size: 6rem;
+        margin-bottom: 100px;
+    }
 }
 h1{
     font-size:1.8rem;
+    @media (min-width: $tablet){ font-size: 2.1rem; }
+    @media (min-width: $desktop){ font-size: 2.3rem; }
     font-weight:300;
     color:$header_col;
     padding-bottom: 15px;
@@ -293,6 +322,8 @@ h1{
 h2{
     color:$header_col;
     font-size:1.5rem;
+    @media (min-width: $tablet){ font-size: 1.75rem; }
+    @media (min-width: $desktop){ font-size: 1.8rem; }
     font-weight:300;
     padding-bottom: 10px;
     text-transform: uppercase;
@@ -300,19 +331,31 @@ h2{
 h3{
     font-weight:300;
     font-size:1.2rem;
+    @media (min-width: $tablet){ font-size: 1.5rem; }
     color:$header_col;
     text-transform: uppercase;
 }
 h4{
     color:$header_col;
     font-weight:300;
-    font-size: 1.1rem;
+    font-size: $font_large;
     text-transform: uppercase;
 }
 h5{
     color:$header_col;
     font-weight:700;
-    font-size: 1.1rem;
+    font-size: $font_large;
+}
+// text styles that used to be inline pt sizes in the templates
+.subtitle{  // coloured line right below a page heading
+    color: $primary;
+    font-size: 1.5rem;
+}
+.callout{  // short, prominent notice such as the FAQ banner
+    font-size: 1.4rem;
+}
+.text_small{
+    font-size: $font_small;
 }
 table{
     border-collapse: collapse;
@@ -367,6 +410,10 @@ strong{
     i{
         padding-top:3px;
     }
+    // label below a menu icon: base size, not the icon's 20px
+    i > p{
+        font-size: 1rem;
+    }
     i:hover{
         color: $header_col;
     }
@@ -420,7 +467,7 @@ strong{
         color:$header_col;
     }
     p{
-        font-size:0.7rem;
+        font-size:$font_small;
         color:grey;
         padding:5px;
         float:left;
@@ -484,7 +531,7 @@ footer{
     i{color:$header_col;}
     span{
         color:$header_col;
-        font-size:1.1rem;
+        font-size:$font_large;
         font-weight:300;
         padding:5px;
         display:none;
@@ -635,7 +682,7 @@ footer{
         label{
             font-weight:500;
             display:block;
-            font-size:1.1rem;
+            font-size:$font_large;
             padding-top:30px;
             padding-left:10px;
             padding-right:10px;
@@ -648,7 +695,7 @@ footer{
     div{
         background-color:#2e2e2e;
         label{
-            font-size:0.8rem;
+            font-size:$font_small;
             padding: 5px;
             color:$primary;
             position:absolute;
@@ -669,7 +716,7 @@ footer{
         border-bottom-color:red;
         background-color:#2e2e2e;
         label{
-            font-size:1.1rem;
+            font-size:$font_large;
             padding-top:30px;
             padding-left:10px;
             padding-right:10px;
@@ -761,7 +808,7 @@ footer{
     cursor: default;
     a{
         padding: 0 4px;
-        font-size: 1.1rem;
+        font-size: $font_large;
     }
 }
 .member_table td.status_cell{
@@ -799,7 +846,7 @@ footer{
     }
     &__meta, &__hint{
         color: grey;
-        font-size: 0.9rem;
+        font-size: $font_small;
     }
 }
 .member_tabs{
@@ -815,7 +862,7 @@ footer{
         color: $font_col;
         cursor: pointer;
         padding: 8px $padding_small;
-        font-size: 0.95rem;
+        font-size: 1rem;
         &.here_I_am{
             color: white;
             border-bottom-color: $primary;
@@ -863,7 +910,7 @@ footer{
         align-items: center;
         gap: $padding_small;
         cursor: pointer;
-        font-size: 1.05rem;
+        font-size: $font_large;
     }
     input{
         width: 18px;
@@ -879,7 +926,7 @@ footer{
     border: none;
     color: $font_col;
     cursor: pointer;
-    font-size: 1.1rem;
+    font-size: $font_large;
 }
 .member_form__submit{
     margin: $padding_big auto 0 auto;
@@ -917,11 +964,11 @@ footer{
     }
     strong{
         color: white;
-        font-size: 1.1rem;
+        font-size: $font_large;
     }
     &__text{
         color: grey;
-        font-size: 0.9rem;
+        font-size: $font_small;
     }
 }
 
@@ -1009,7 +1056,7 @@ footer{
 .archive_switch{
     margin: 0;
     border-bottom: none;
-    font-size: 0.9rem;
+    font-size: $font_small;
 }
 // training session status, used in table cells and as a label on the detail page
 .entry_status, .member_table td.entry_status{
@@ -1088,7 +1135,7 @@ footer{
     h4{
         margin: $padding_small 0 6px 0;
         color: grey;
-        font-size: 0.9rem;
+        font-size: $font_small;
         text-transform: uppercase;
     }
     .mdc-text-field{
@@ -1150,7 +1197,7 @@ footer{
         gap: 4px;
         margin: 0;
         list-style: none;
-        font-size: 0.85rem;
+        font-size: $font_small;
     }
     img{
         height: 90px;
@@ -1167,14 +1214,14 @@ footer{
     &__label{
         margin: 6px 0 2px;
         color: grey;
-        font-size: 0.85rem;
+        font-size: $font_small;
     }
 }
 .contacts_toggle{
     margin-top: $padding_small;
     summary{
         color: grey;
-        font-size: 0.85rem;
+        font-size: $font_small;
         text-transform: uppercase;
         cursor: pointer;
         list-style: none;
@@ -1192,7 +1239,7 @@ footer{
         width: 35%;
     }
     td{
-        font-size: 0.9rem;
+        font-size: $font_small;
     }
     // icon and number/address stay on one line; long addresses end in "…"
     a{
@@ -1210,7 +1257,7 @@ footer{
 }
 .chip_empty{
     color: grey;
-    font-size: 0.9rem;
+    font-size: $font_small;
 }
 .inline_form{
     display: flex;
@@ -1305,7 +1352,7 @@ footer{
     &__name{
         grid-column: 2 / -1;
         color: $primary_hover;
-        font-size: 0.9rem;
+        font-size: $font_small;
         &:empty{
             display: none;
         }
@@ -1341,7 +1388,7 @@ footer{
         display: inline-block;
         padding: 2px 8px 0 0;
         color: $primary;
-        font-size: 0.95rem;
+        font-size: 1rem;
         &:hover{
             color: $primary_hover;
         }
@@ -1462,14 +1509,14 @@ footer{
         margin: 4px 0;
     }
     &__sessions{
-        font-size: 0.85rem;
+        font-size: $font_small;
         color: #555;
     }
     &__links a{
         margin-right: 10px;
     }
     &__hint{
-        font-size: 0.8rem;
+        font-size: $font_small;
         color: #888;
     }
 }
@@ -1482,6 +1529,63 @@ footer{
         color: grey;
         text-transform: uppercase;
         font-size: 1rem;
+    }
+}
+/* "Mitgliedschaften und Partner" on the interested page: built like the contact cards */
+.partner_grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));  // fit: the two cards share the full width
+    gap: $padding_small;
+    @media (max-width: 600px){
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+.partner_card{
+    display: flex;
+    gap: $padding_big;
+    align-items: center;
+    padding: $padding_big;
+    background-color: $tertiary_bg;
+    border-radius: 4px;
+    text-align: left;
+    transition: background-color 0.15s;
+    &:hover, &:focus-visible{
+        background-color: $quartiary_bg;
+    }
+    img{
+        width: 80px;
+        height: 80px;
+        border-radius: 4px;
+        object-fit: contain;
+        flex-shrink: 0;
+    }
+    &__body{
+        min-width: 0;
+        p{
+            text-align: left;
+        }
+        h3{
+            margin: 2px 0 4px 0;
+            color: white;
+            font-size: 1.2rem;
+            text-transform: none;
+        }
+    }
+    &__kind{
+        margin: 0;
+        color: grey;
+        font-size: $font_small;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    &__link{
+        margin: 0;
+        color: $primary_hover;
+        font-size: $font_small;
+        i, svg{
+            color: $primary_hover;
+            font-size: $font_small;
+        }
     }
 }
 .contact_grid{
@@ -1531,12 +1635,12 @@ footer{
             padding: 2px 8px;
             border-radius: 10px;
             background-color: $tertiary_bg;
-            font-size: 0.85rem;
+            font-size: $font_small;
         }
     }
     &__text{
         margin: 6px 0;
-        font-size: 0.95rem;
+        font-size: 1rem;
     }
     &__contact{
         margin: 8px 0 0 0;
@@ -1577,12 +1681,12 @@ footer{
         gap: 6px;
         a{
             padding: 0;
-            font-size: 17px;
+            font-size: $font_large;
         }
     }
 }
 .session_card_age{
-    font-size: 0.9rem;
+    font-size: $font_small;
     &--muted{
         color: grey;
     }
@@ -1591,7 +1695,7 @@ footer{
 #training .session_notice_icon{
     padding-left: 4px;
     color: #c9a227;
-    font-size: 0.9rem;
+    font-size: $font_small;
     cursor: default;
     svg, i{
         color: #c9a227;
@@ -1644,7 +1748,7 @@ footer{
         cite{
             display: block;
             color: grey;
-            font-size: 0.9rem;
+            font-size: $font_small;
         }
     }
     &__delimiter{
@@ -1662,7 +1766,7 @@ footer{
         }
         figcaption{
             color: grey;
-            font-size: 0.9rem;
+            font-size: $font_small;
             padding-top: 4px;
         }
     }
@@ -1677,7 +1781,7 @@ footer{
         }
         small{
             color: $font_col;
-            font-size: 0.8rem;
+            font-size: $font_small;
         }
     }
 }
@@ -1794,7 +1898,7 @@ footer{
         flex-direction: column;
         strong{
             color: white;
-            font-size: 1.05rem;
+            font-size: $font_large;
         }
         small{
             color: grey;
@@ -1806,7 +1910,7 @@ footer{
         border-radius: 4px;
         background-color: $primary;
         color: white;
-        font-size: 0.75rem;
+        font-size: $font_small;
         &--warn{
             background-color: $secondary;
         }
@@ -1848,6 +1952,7 @@ footer{
     &__submit{
         display: flex;
         flex-wrap: wrap;
+        justify-content: center;
         align-items: center;
         gap: $padding_small $padding_big;
         padding-top: $padding_small;
@@ -1857,7 +1962,7 @@ footer{
 .probe_notes_hint{
     margin: 4px 0 0 0;
     color: grey;
-    font-size: 0.8rem;
+    font-size: $font_small;
     text-align: left;
 }
 
@@ -1957,12 +2062,12 @@ footer{
     &__sub{
         display: block;
         color: grey;
-        font-size: 0.8rem;
+        font-size: $font_small;
     }
     // same name as another request: probably signed up twice (same yellow as the training notices)
     &__duplicate{
         color: #c9a227;
-        font-size: 0.8rem;
+        font-size: $font_small;
         cursor: help;
         svg, i{
             color: #c9a227;
@@ -2052,7 +2157,7 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
 }
 .trial_date_row__locked{
     color: grey;
-    font-size: 0.85rem;
+    font-size: $font_small;
     white-space: nowrap;
     cursor: help;
 }
@@ -2127,7 +2232,7 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
     top: $padding_small;
     right: $padding_small;
     background-color: $tertiary_bg;
-    font-size: 0.85rem;
+    font-size: $font_small;
 }
 // dashboard: archived groups, collapsed below the group cards
 .archived_groups{
@@ -2199,7 +2304,7 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
         color: white;
         text-decoration: underline;
         i{
-            font-size: 0.7rem;
+            font-size: $font_small;
         }
     }
     .fa-check{
@@ -2216,7 +2321,7 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
 .finished_group__link{
     margin-left: auto;
     padding: 0;
-    font-size: 0.8rem;
+    font-size: $font_small;
 }
 // dashboard: the next trial dates as day cards (like the training times)
 .trial_calendar{
@@ -2245,7 +2350,7 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
     }
     &__time, &__text{
         color: grey;
-        font-size: 0.85rem;
+        font-size: $font_small;
     }
 }
 
@@ -2277,7 +2382,7 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
         white-space: nowrap;
         .icon_button{
             padding: 0 4px;
-            font-size: 0.95rem;
+            font-size: 1rem;
         }
     }
     &__notes{
@@ -2302,7 +2407,7 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
         border-radius: 4px;
         background-color: $secondary;
         color: white;
-        font-size: 0.75rem;
+        font-size: $font_small;
         &--responsible{
             background-color: $primary;
         }
@@ -2344,7 +2449,7 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
         border-radius: 14px;
         background: none;
         color: $font_col;
-        font-size: 0.8rem;
+        font-size: $font_small;
         cursor: pointer;
         white-space: nowrap;
         &--orga{
@@ -2401,7 +2506,7 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
     gap: $padding_medium;
     margin: $padding_big 0 $padding_small 0;
     color: grey;
-    font-size: 0.9rem;
+    font-size: $font_small;
     text-transform: uppercase;
     letter-spacing: 1px;
     &::before, &::after{
@@ -2449,7 +2554,7 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
         line-height: 1;
     }
     &__month{
-        font-size: 0.85rem;
+        font-size: $font_small;
         letter-spacing: 1px;
     }
     &__info{
@@ -2462,14 +2567,14 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
         .event_card__age{
             margin-left: 4px;
             color: grey;
-            font-size: 0.8rem;
+            font-size: $font_small;
             text-transform: none;
             white-space: nowrap;
         }
         p{
             margin: 2px 0;
             color: $font_col;
-            font-size: 0.9rem;
+            font-size: $font_small;
         }
         i{
             width: 16px;
@@ -2489,7 +2594,7 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
         align-items: center;
         min-height: 26px;
         padding: 6px $padding_medium $padding_small $padding_medium;
-        font-size: 0.85rem;
+        font-size: $font_small;
         span{
             color: grey;  // spans get the light text colour globally
         }

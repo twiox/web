@@ -33,15 +33,6 @@ $primary: #088eaa;
 .col-80 {
     width: 79.75%;
     }
-h1{
-    font-size:2.3rem;
-}
-h2{
-    font-size:1.8rem;
-}
-h3{
-    font-size:1.5rem;
-}
 
 .element span{
     display:flex;
@@ -99,10 +90,4 @@ h3{
         transform: scale(1.2);
         background-color:$primary;
     }
-}
-.hero{
-    font-size: 6rem;
-    font-weight: 300;
-    text-transform: uppercase;
-    margin-bottom: 100px;
 }

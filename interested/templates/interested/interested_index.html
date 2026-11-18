@@ -19,11 +19,11 @@
     {% block content %}
     <section id="The_Club">
         <h1>Unser Verein </h1>
-        <p style="font-size: 25pt;color:#088eaa">Der Twio X e.V - ein Parkourverein aus Leipzig.</p><br>
+        <p class="subtitle">Der Twio X e.V - ein Parkourverein aus Leipzig.</p><br>
         <div style="display:flex;flex-wrap:wrap">
             <div class="chair_col-5">
                 <h2>Parkour in Leipzig</h2>
-                <p class="chair_col-80" style="font-size:14pt">
+                <p class="chair_col-80">
                 Wir widmen uns der Aufgabe den Parkoursport zu unterstützen, indem wir den Sport und die Philosophie dahinter trainieren, uns mit anderen Parkourgruppen vernetzen
                 und bei der Stadt für bessere Trainingsmöglichkeiten werben.<br>
                 Für unsere Mitglieder bieten wir regelmäßiges, angeleitetes und freies Training an.
@@ -176,7 +176,7 @@
         <section id="participate">
         <h1> Teilnahme </h1>
             <div class="secondary padding_all_med">
-                <p style="font-size: 24pt;">Bitte lies dir unsere <a style="font-size: 24pt;padding: 0px;" target="_blank" href="https://share.twio-x.de/index.php/s/tiDrQrK2q3yB3de" class="more_info_button">FAQ</a> durch</p>
+                <p class="callout">Bitte lies dir unsere <a style="padding: 0px;" target="_blank" href="https://share.twio-x.de/index.php/s/tiDrQrK2q3yB3de" class="more_info_button">FAQ</a> durch</p>
             </div>
             <div class="flex_2even">
                 <div class="chair_col-6 tertiary_bg">
@@ -186,24 +186,6 @@
                             <p>Nachdem Du das unten stehende Formular ausgefüllt hast, erhältst Du von uns zeitnah eine Antwort per E-Mail,
                             in welcher Du deine Probetrainings-Termine bekommst. Mit dem Trainer besprichst Du im Anschluss an das Training den weiteren Ablauf.
                             Nach vier absolvierten Trainings kannst Du eine Mitgliedschaft beantragen.</p>
-                            <br>
-                            <strong>Für Minderjährige: Bitte tragt unten Name, Geburtsdatum und Geschlecht der teilnehmenden Person ein und gebt ein Elternteil
-                            als Kontaktperson an – E-Mail und Telefonnummer sind dann die der Kontaktperson.
-                            Sendet uns außerdem die nachfolgende, von den Eltern ausgefüllte Einverständniserklärung.</strong><br>
-                            <br>
-                            <ul>
-                                <li style="width:100%;">
-                                    <a class="download prim_hover padding_all_big" href="{{ STATIC_URL }}/static/docs/Einverstaendniserklaerung_TwioX.pdf">
-                                        <p class="padding_rl_small">Einverständniserklärung</p>
-                                        <div class="flex_center_vertical">
-                                            <i class="fas fa-file-download
-
-                                            padding_rl_small"></i>
-                                        </div>
-                                    </a>
-                                </li>
-                            </ul>
-                            <br>
                             <form class="padding_tb_big" id="prob_form" method="POST">
                                 {% csrf_token %}
                                 {% if form.errors %}
@@ -312,9 +294,12 @@
                                             </label>
                                         </div>
                                     </div>
+                                    <p class="probe_form__wide">
+                                        <strong>Minderjährige benötigen eine von den Eltern ausgefüllte
+                                        <a class="more_info_button" style="padding:0px;" href="{{ STATIC_URL }}/static/docs/Einverstaendniserklaerung_TwioX.pdf" target="_blank">Einverständniserklärung <i class="fas fa-file-download"></i></a>.</strong>
+                                    </p>
                                     <div class="probe_form__wide probe_form__submit">
                                         <button type="submit" class="form_button" id="prob_button">Absenden</button>
-                                        <span class="secondary padding_all_small"><strong>Achtung:</strong> Aktuell ist eine Anmeldung nur für Jugendliche und Erwachsene ab 14 Jahre möglich, sowie für die Mädchengruppe ab 9 Jahren</span>
                                     </div>
                                 </div>
                             </form>
@@ -348,8 +333,9 @@
                     </div>
                 </div>
                 <div class="chair_col-6 tertiary_bg">
-                    <div class="padding_all_big">
-                        <div class="padding_all_big">
+                    {# same padding as the Probetraining column, so both headings line up #}
+                    <div class="padding_all_med">
+                        <div>
                             <h2>Mitgliedschaft</h2>
                             <p>Schön dich wiederzusehen! Du hast dich nach erfolgreichem Probetraining dazu entschieden, unserem Verein beizutreten?
                             Wir freuen uns, dass du dich für Parkour und unseren Verein begeistern kannst. Bitte lies dir auch unsere Satzung und Beitragsordnung durch.
@@ -399,17 +385,22 @@
     {% block content4 %}
     <div class="frame">
         <h1>Mitgliedschaften und Partner</h1>
-        <div style="display: flex; flex-wrap: wrap; flex-direction:row">
-            <a href="https://parkour-deutschland.de" class="col-3" target="_blank">
-                <div class="padding_all_big tertiary_bg">
-                    <img width="100%" src="{{ STATIC_URL }}/static/media/partners/DPV.png">
-                    <p style="font-size: 20pt;color: white;">Mitglied im Deutschen Parkourverband e.V.</p>
+        {# same look as the contact cards below: logo left, text right, the whole card is the link #}
+        <div class="partner_grid">
+            <a class="partner_card" href="https://parkour-deutschland.de" target="_blank" rel="noopener">
+                <img src="{{ STATIC_URL }}/static/media/partners/DPV.png" alt="Logo des Deutschen Parkourverbands">
+                <div class="partner_card__body">
+                    <p class="partner_card__kind">Mitglied im</p>
+                    <h3>Deutscher Parkourverband e.V.</h3>
+                    <p class="partner_card__link">parkour-deutschland.de <i class="fas fa-external-link-alt"></i></p>
                 </div>
             </a>
-            <a href="https://parkour-erfurt.de" target="_blank" class="col-3">
-                <div class="padding_all_big tertiary_bg">
-                    <img width="100%" src="{{ STATIC_URL }}/static/media/partners/pkef.png">
-                    <p style="font-size: 20pt; color: white;">Parkour Erfurt e.V.</p>
+            <a class="partner_card" href="https://parkour-erfurt.de" target="_blank" rel="noopener">
+                <img src="{{ STATIC_URL }}/static/media/partners/pkef.png" alt="Logo von Parkour Erfurt">
+                <div class="partner_card__body">
+                    <p class="partner_card__kind">Partnerverein</p>
+                    <h3>Parkour Erfurt e.V.</h3>
+                    <p class="partner_card__link">parkour-erfurt.de <i class="fas fa-external-link-alt"></i></p>
                 </div>
             </a>
         </div>
