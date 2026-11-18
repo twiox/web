@@ -1,0 +1,21 @@
+{# confirmation to the member after cancelling on the profile page; styled like interested/emails/probe_email_answer.html #}
+<p>Hallo {{ user.first_name }},</p>
+
+<p>wir haben deine Kündigung erhalten. Deine Mitgliedschaft bei Twio X endet zum <strong>{{ end|date:"d.m.Y" }}</strong>.</p>
+
+<ul>
+    <li>Name: {{ user.first_name }} {{ user.last_name }}</li>
+    {% if profile.member_num %}<li>Mitgliedsnummer: {{ profile.member_num }}</li>{% endif %}
+    <li>Gekündigt am: {{ today|date:"d.m.Y" }}</li>
+    <li>Mitgliedschaft endet: {{ end|date:"d.m.Y" }}</li>
+</ul>
+
+<p>Bis dahin kannst du wie gewohnt zum Training kommen, und der Beitrag läuft bis zu diesem Datum weiter.
+Wenn du die Kündigung zurücknehmen möchtest oder etwas nicht stimmt, antworte einfach auf diese E-Mail.</p>
+
+<p>Danke, dass du dabei warst!</p>
+
+<p>Sportliche Grüße<br>
+Twio X e.V.</p>
+
+{% include "emails/_footer.html" %}

@@ -70,7 +70,17 @@
                             <tr> <td>Mitgliedsstatus:</td><td>{{object.profile.status}}</td> </tr>
                             <tr> <td>Mitglied seit:</td><td>{{object.profile.membership_start|date:"m/Y"}}</td> </tr>
                             <tr> <td>Mitgliedsnummer:</td><td>{{object.profile.member_num}}</td> </tr>
+                            {% if object.profile.membership_end %}<tr> <td>Kündigung zum:</td><td><strong>{{ object.profile.membership_end|date:"d.m.Y" }}</strong></td> </tr>{% endif %}
                         </table>
+                        {# cancelling: the date follows the rule in members/membership.py; confirmed in the dialog #}
+                        <div class="profile_cancel">
+                            {% if object.profile.status == "Kündigung" or object.profile.membership_end %}
+                            <p class="member_panel__hint">Deine Mitgliedschaft ist gekündigt{% if object.profile.membership_end %} und endet zum {{ object.profile.membership_end|date:"d.m.Y" }}{% endif %}. Du möchtest doch bleiben? Schreib uns über das Nachrichtenfeld.</p>
+                            {% else %}
+                            <p class="member_panel__hint">Kündigen kannst du zum Ende eines Quartals, spätestens einen Monat vorher. Kündigst du heute, endet deine Mitgliedschaft zum <strong>{{ cancel_end|date:"d.m.Y" }}</strong> (Frist dafür: {{ cancel_deadline|date:"d.m.Y" }}). Bis dahin kannst du weiter trainieren, der Beitrag läuft bis zu diesem Datum.</p>
+                            <button type="button" class="table_action table_action--danger" id="cancel_open">Mitgliedschaft kündigen</button>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -124,7 +134,21 @@
             </div>
         </div>
     </section>
+    {% if object.profile.status != "Kündigung" and not object.profile.membership_end %}
+    <dialog class="confirm_dialog" id="cancel_dialog">
+        <h3><i class="fas fa-exclamation-triangle"></i> Mitgliedschaft kündigen?</h3>
+        <p>Deine Mitgliedschaft bei Twio X endet dann zum <strong>{{ cancel_end|date:"d.m.Y" }}</strong>. Bis dahin kannst du weiter zum Training kommen, und der Beitrag läuft bis zu diesem Datum weiter.</p>
+        <p>Du und der Vorstand bekommt eine Bestätigung per E-Mail{% if object.email %} (an {{ object.email }}){% endif %}.</p>
+        <form method="POST" action="{% url 'profile_cancel' %}" class="confirm_dialog__actions">
+            {% csrf_token %}
+            <button type="button" class="table_action" data-close>Abbrechen</button>
+            <button type="submit" class="table_action table_action--danger">Ja, zum {{ cancel_end|date:"d.m.Y" }} kündigen</button>
+        </form>
+    </dialog>
+    {% endif %}
     <script>
+        document.getElementById('cancel_open')?.addEventListener('click', () => document.getElementById('cancel_dialog').showModal());
+        document.querySelector('#cancel_dialog [data-close]')?.addEventListener('click', () => document.getElementById('cancel_dialog').close());
         function showError(xhr, fallback){
             snackbar.labelText = (xhr.responseJSON && xhr.responseJSON.errors) || fallback;
             snackbar.open();

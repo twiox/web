@@ -1,0 +1,16 @@
+{# note to the board (TO_EMAIL) after a member cancelled on the profile page #}
+<p>{{ user.first_name }} {{ user.last_name }} hat die Mitgliedschaft über die Website gekündigt.</p>
+
+<ul>
+    <li>Name: {{ user.first_name }} {{ user.last_name }}</li>
+    {% if profile.member_num %}<li>Mitgliedsnummer: {{ profile.member_num }}</li>{% endif %}
+    <li>E-Mail: {{ user.email }}</li>
+    <li>Status vorher: {{ previous_status }}</li>
+    <li>Gekündigt am: {{ today|date:"d.m.Y" }}</li>
+    <li>Mitgliedschaft endet: <strong>{{ end|date:"d.m.Y" }}</strong></li>
+    <li>Beitrag: {{ profile.beitrag }} € ({{ profile.zahlungsart }}){% if profile.mandatsref %}, Mandatsreferenz {{ profile.mandatsref }}{% endif %}</li>
+</ul>
+
+<p>Status und Kündigungsdatum sind in der Mitgliederliste schon eingetragen. Das Mitglied hat eine Bestätigung per E-Mail bekommen.</p>
+
+{% include "emails/_footer.html" %}

@@ -1490,6 +1490,14 @@ footer{
         }
     }
 }
+// profile page: cancelling the membership, below the club data
+.profile_cancel{
+    margin-top: $padding_medium;
+    p{
+        text-align: left;
+        margin-bottom: $padding_small;
+    }
+}
 // group page: e-mail to everyone on the list
 .group_email_form{
     max-width: 720px;

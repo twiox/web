@@ -35,6 +35,7 @@ urlpatterns = [
     path("profil/ändere_nutzername/", views.UsernameUpdateView.as_view(),name="profile_update_username"),
     path("profil/ändere_daten/", views.AddressChangeView.as_view(),name="profile_update_address"),
     path("profil/ändere_passwort/", views.PasswordChangeView.as_view(),name="profile_update_pw"),
+    path("profil/kündigen/", views.profile_cancel, name="profile_cancel"),
     path("beiträge/", views.NewsListView.as_view(),name="news_list"),
     path("beiträge/<int:pk>/", views.NewsDetailView.as_view(),name="news_detail"),
     path("beiträge/neu/", views.NewsCreateView.as_view(),name="news_create"),

@@ -58,6 +58,13 @@ from django.contrib import messages
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
+import html as html_lib
+import re
+from datetime import date
+from django.core.mail import EmailMultiAlternatives, get_connection
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from .membership import cancellation_dates
 from user_handling.forms import AdditionalEmailForm
 from django.contrib.auth.views import PasswordChangeView
 from django.conf import settings
@@ -839,6 +846,8 @@ class UserDetailView(LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["additional_emails"] = AdditionalEmail.objects.filter(user=self.object)
+        # when a cancellation today would end the membership (see members/membership.py)
+        context["cancel_end"], context["cancel_deadline"] = cancellation_dates()
         return super().get_context_data(**context)
 
     def post(self, request, *args, **kwargs):
@@ -862,6 +871,51 @@ class UserDetailView(LoginRequiredMixin, UpdateView):
         email.send()
         messages.add_message(request, messages.SUCCESS, "Nachricht erfolgreich versendet")
         return HttpResponseRedirect(reverse("profile_detail"))
+
+
+def html_email(subject, template, context, to, reply_to=None):
+    """An HTML e-mail with a plain-text version for mail apps without HTML."""
+    html = render_to_string(template, context)
+    text = re.sub(r"<br\s*/?>\s*", "\n", html)
+    text = re.sub(r"<hr\s*/?>", "\n\n___\n\n", text)
+    text = re.sub(r"</(p|li|ul|h\d)>", "\n\n", text)
+    text = re.sub(r"[ \t]+\n", "\n", html_lib.unescape(strip_tags(text)))
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
+    message = EmailMultiAlternatives(subject, text, settings.DEFAULT_FROM_EMAIL, to, reply_to=reply_to)
+    message.attach_alternative(html, "text/html")
+    return message
+
+
+@login_required
+@require_POST
+def profile_cancel(request):
+    """The member cancels the own membership (profile page, after a confirmation): status "Kündigung",
+    end date by the rule in members/membership.py, a confirmation to the member and a note to the board."""
+    profile = request.user.profile
+    if profile.status == "Kündigung" or profile.membership_end:
+        messages.add_message(request, messages.INFO, "Deine Mitgliedschaft ist bereits gekündigt.")
+        return HttpResponseRedirect(reverse("profile_detail"))
+    end, _ = cancellation_dates()
+    previous_status = profile.status
+    profile.status = "Kündigung"
+    profile.membership_end = datetime.combine(end, datetime.min.time())
+    profile.save(update_fields=["status", "membership_end"])
+    context = {"user": request.user, "profile": profile, "end": end, "today": date.today(), "previous_status": previous_status}
+    name = request.user.get_full_name()
+    mails = [html_email(f"Twio X e.V. | Kündigung zum {end:%d.%m.%Y}", "members/emails/cancellation_board.html", context, [settings.TO_EMAIL],
+                        reply_to=[request.user.email] if request.user.email else None)]
+    if request.user.email:
+        mails.insert(0, html_email(f"Twio X e.V. | Deine Kündigung zum {end:%d.%m.%Y}", "members/emails/cancellation_member.html",
+                                   context, [request.user.email], reply_to=[settings.TO_EMAIL]))
+    try:
+        get_connection().send_messages(mails)
+        sent = True
+    except Exception:
+        sent = False
+    text = f"Deine Mitgliedschaft ist zum {end:%d.%m.%Y} gekündigt."
+    text += " Du bekommst eine Bestätigung per E-Mail." if sent and request.user.email else " Die Bestätigung per E-Mail konnte nicht gesendet werden, der Vorstand ist aber informiert." if not sent else ""
+    messages.add_message(request, messages.SUCCESS, text)
+    return HttpResponseRedirect(reverse("profile_detail"))
 
 
 class EmailUpdateView(LoginRequiredMixin, FormView):
