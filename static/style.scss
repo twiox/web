@@ -11,6 +11,12 @@ $tertiary_bg: #333333;
 $quartiary_bg: #484848;
 
 $font_col: #d1d1d1;
+
+// member status colours: the status column of the member list and the board's dashboard tiles
+$status_ordentlich: $primary;
+$status_foerdernd: #c9a227;
+$status_pausiert: grey;
+$status_kuendigung: $secondary;
 $header_col: white;
 
 // Type scale: the base size is set once on html (17px, 18px on desktop), everything else in rem
@@ -812,18 +818,18 @@ footer{
     }
 }
 .member_table td.status_cell{
-    background-color: $primary;
+    background-color: $status_ordentlich;
     color: white;
     &--forderndes-mitglied{
-        background-color: #c9a227;
+        background-color: $status_foerdernd;
         color: $primary_bg;
     }
     &--pausiertes-mitglied{
-        background-color: grey;
+        background-color: $status_pausiert;
     }
     // last, so a set cancellation date wins over the status colour
     &--kundigung{
-        background-color: $secondary;
+        background-color: $status_kuendigung;
     }
 }
 .member_panel{
@@ -847,6 +853,30 @@ footer{
     &__meta, &__hint{
         color: grey;
         font-size: $font_small;
+    }
+    // member details: name and tabs stay at the top while the fields scroll below them
+    &__sticky{
+        position: sticky;
+        top: -$padding_big;  // sticky counts from inside the panel padding; this closes the gap above
+        z-index: 3;
+        margin: (-$padding_big) (-$padding_big) 0;  // cover the panel padding, so nothing shows above it
+        // the space above the tabs belongs to this block: with a margin on the tabs instead, it would
+        // close while scrolling before the tabs stick, and the tabs would jump up a little
+        padding: $padding_big $padding_big $padding_small;
+        background-color: $tertiary_bg;
+        .member_panel__meta{
+            margin: 4px 0 0 0;
+        }
+    }
+    .member_tabs{
+        position: sticky;
+        top: calc(var(--panel-head, 0px) - #{$padding_big});
+        z-index: 3;
+        margin-top: 0;
+        margin-left: -$padding_big;
+        margin-right: -$padding_big;
+        padding: 0 $padding_big;
+        background-color: $tertiary_bg;
     }
 }
 .member_tabs{
@@ -1086,6 +1116,13 @@ footer{
             overflow: visible;
         }
     }
+    // small headings between the trainer block and the participants
+    &__section th{
+        padding: 8px 0 2px 0 !important;
+        color: grey;
+        font-size: $font_small;
+        text-transform: uppercase;
+    }
     // "Andere" below the people on the list, set apart a little
     &__others > *{
         padding-top: 8px !important;
@@ -1193,6 +1230,261 @@ footer{
         border-radius: 4px;
         background-color: $secondary_bg;
         color: $font_col;
+    }
+}
+// member list: the board's dashboard below the list (user_handling/_board_dashboard.html). Colours from
+// the validated reference palette, checked against the card surface ($tertiary_bg): women blue, men
+// orange, diverse aqua (all pairs distinct also with colour blindness); group sizes in the site colour
+.board_dash{
+    --sex-w: #3987e5;
+    --sex-m: #d95926;
+    --sex-d: #199e70;
+    --series: #{$primary};
+    margin-top: $padding_big * 2;
+    h3{
+        margin: $padding_big 0 $padding_small 0;
+    }
+    h4{
+        margin: 0 0 $padding_small 0;
+    }
+    &__stats{
+        margin-bottom: 0;
+    }
+    // a status tile with the status colour of the member list as bar on the left
+    &__status{
+        border-left: 4px solid transparent;
+        &--ordentliches-mitglied{ border-left-color: $status_ordentlich; }
+        &--forderndes-mitglied{ border-left-color: $status_foerdernd; }
+        &--pausiertes-mitglied{ border-left-color: $status_pausiert; }
+        &--kundigung{ border-left-color: $status_kuendigung; }
+    }
+    &__sub{
+        display: block;
+        color: grey;
+        font-size: $font_small;
+    }
+    &__grid{
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: $padding_small;
+    }
+    &__money{
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    // the one big number of the dashboard
+    &__hero{
+        color: $header_col;
+        font-size: 3rem;
+        font-weight: 600;
+        line-height: 1.1;
+    }
+    &__table{
+        width: 100%;
+        margin-top: $padding_small;
+        border-collapse: collapse;
+        th, td{
+            padding: 3px 6px 3px 0;
+            text-align: left;
+            font-variant-numeric: tabular-nums;
+        }
+        th{
+            color: grey;
+            font-weight: normal;
+            font-size: $font_small;
+        }
+        tr + tr td{
+            border-top: 1px solid $quartiary_bg;
+        }
+    }
+    &__amount{
+        text-align: right !important;
+    }
+    &__scroll{
+        max-height: 420px;
+        overflow-y: auto;
+    }
+    // bars: thin, rounded at the data end, square at the baseline; the value at the tip
+    &__bar{
+        display: inline-block;
+        height: 14px;
+        min-width: 2px;
+        vertical-align: middle;
+        &--w{
+            background-color: var(--sex-w);
+            border-radius: 4px 0 0 4px;  // grows to the left from the axis
+        }
+        &--m{
+            background-color: var(--sex-m);
+            border-radius: 0 4px 4px 0;
+        }
+        &--group{
+            background-color: var(--series);
+            border-radius: 0 4px 4px 0;
+        }
+    }
+    // a bar with its number at the tip; on the women's side mirrored, growing from the age column to the left
+    &__row{
+        display: flex;
+        align-items: center;
+        &--left{
+            flex-direction: row-reverse;
+        }
+    }
+    &__value{
+        display: inline-block;
+        min-width: 2ch;
+        padding: 0 6px;
+        color: $header_col;
+        font-variant-numeric: tabular-nums;
+        vertical-align: middle;
+    }
+    &__key{
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        vertical-align: middle;
+        &--w{ background-color: var(--sex-w); }
+        &--m{ background-color: var(--sex-m); }
+        &--d{ background-color: var(--sex-d); }
+    }
+    // population pyramid: women to the left of the age column, men to the right
+    &__pyramid{
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 4px;
+        th, td{
+            padding: 0;
+        }
+        thead th{
+            color: grey;
+            font-weight: normal;
+            font-size: $font_small;
+            padding-bottom: 4px;
+        }
+        tbody th{
+            width: 70px;
+            padding: 0 6px;
+            text-align: center;
+            font-weight: normal;
+            color: $font_col;
+            white-space: nowrap;  // "9–13" on one line, also on phones
+        }
+    }
+    &__side{
+        width: 40%;
+    }
+    &__divers{
+        padding-left: $padding_medium !important;
+        white-space: nowrap;
+    }
+    &__groups{
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 4px;
+        th{
+            width: 45%;
+            padding-right: $padding_small;
+            text-align: left;
+            font-weight: normal;
+            white-space: nowrap;
+            a{
+                padding: 0;
+            }
+            small{
+                color: grey;
+            }
+        }
+        td{
+            white-space: nowrap;
+        }
+    }
+    &__nogroup a{
+        padding: 0;
+        text-align: left;
+    }
+    // weekly participation: stacked columns (1x at the bottom, then 2x, 3x+), one hue in three
+    // validated steps, the lightest for the most frequent visitors
+    --freq-once: #2a78d6;
+    --freq-twice: #5598e7;
+    --freq-more: #9ec5f4;
+    &__key--once{ background-color: var(--freq-once); }
+    &__key--twice{ background-color: var(--freq-twice); }
+    &__key--more{ background-color: var(--freq-more); }
+    &__weekly{
+        position: relative;  // for the tooltip
+    }
+    &__columns_wrap{
+        overflow-x: auto;
+    }
+    &__columns{
+        --label: 20px;  // the week dates below the columns
+        position: relative;
+        display: flex;
+        gap: 2px;  // surface gap between neighbouring columns
+        height: 220px;
+        min-width: 480px;
+        padding: 8px 0 0 32px;  // room for the gridline labels on the left
+    }
+    &__gridline{
+        position: absolute;
+        left: 32px;
+        right: 0;
+        bottom: calc(var(--label) + (100% - var(--label) - 8px) * var(--at) / 100);
+        border-top: 1px solid $quartiary_bg;
+        small{
+            position: absolute;
+            right: 100%;
+            transform: translate(-6px, -50%);
+            color: grey;
+            font-size: $font_small;
+            font-variant-numeric: tabular-nums;
+        }
+    }
+    &__column{
+        position: relative;
+        z-index: 1;  // above the gridlines
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        max-width: 40px;
+        outline: none;
+        &:hover .board_dash__stack, &:focus-visible .board_dash__stack{
+            filter: brightness(1.2);  // the hovered column lifts
+        }
+        &--current .board_dash__stack{
+            opacity: 0.6;  // the week is not over yet
+        }
+    }
+    &__stack{
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        flex: 1;
+        gap: 2px;  // surface gap between the segments
+    }
+    &__seg{
+        display: block;
+        min-height: 2px;
+        &:first-child{
+            border-radius: 4px 4px 0 0;  // rounded at the data end, square at the baseline
+        }
+        &--once{ background-color: var(--freq-once); }
+        &--twice{ background-color: var(--freq-twice); }
+        &--more{ background-color: var(--freq-more); }
+    }
+    &__week{
+        height: var(--label);
+        padding-top: 4px;
+        color: grey;
+        font-size: 0.7rem;
+        white-space: nowrap;
+        visibility: hidden;  // every fourth week is labelled; the others keep the space
+        &--shown{
+            visibility: visible;
+        }
     }
 }
 // group page: e-mail to everyone on the list

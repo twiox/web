@@ -98,9 +98,17 @@ def group_dashboard(session, participants):
     """
     entries = list(
         TrainingSessionEntry.objects.filter(session=session, date__isnull=False)
-        .annotate(count=Count("participant")).order_by("date")
+        .annotate(count=Count("participant", distinct=True)).prefetch_related("trainer__user", "cotrainer__user").order_by("date")
     )
-    timeline = [{"date": e.date.strftime("%Y-%m-%d"), "label": e.date.strftime("%d.%m.%Y"), "count": e.count} for e in entries]
+    # trainers and co-trainers are not participants of an entry but count as people at the training
+    for entry in entries:
+        entry.trainer_roles = {t.pk: "Co-Trainer*in" for t in entry.cotrainer.all()}
+        entry.trainer_roles.update({t.pk: "Trainer*in" for t in entry.trainer.all()})  # trainer wins over co-trainer
+        entry.trainer_count = len(entry.trainer_roles)
+        entry.total = entry.count + entry.trainer_count
+    timeline = [{"date": e.date.strftime("%Y-%m-%d"), "label": e.date.strftime("%d.%m.%Y"),
+                 "count": e.total, "trainers": e.trainer_count} for e in entries]
+    trainer_rows = trainer_heatmap(session, entries)
 
     # every recorded attendance of the people on the list, any training time (for the "same week" cells)
     attended = {}  # user id -> {entry id: iso week}
@@ -144,7 +152,41 @@ def group_dashboard(session, participants):
         others[row.session_id].append(label)
     other_cells = [(entry, others[entry.pk]) for entry in entries]
     has_others = any(names for _, names in other_cells)
-    return {"entries": entries, "timeline": timeline, "heatmap": heatmap, "other_cells": other_cells, "has_others": has_others}
+    return {"entries": entries, "timeline": timeline, "heatmap": heatmap, "other_cells": other_cells, "has_others": has_others,
+            "trainer_rows": trainer_rows}
+
+
+def trainer_heatmap(session, entries):
+    """The trainer rows on top of the heatmap: the group's trainers and everyone who trained one of its
+    entries (as trainer or co-trainer). Per entry: 2 = trained it, 1 = trained another one that week, 0 = not."""
+    people = {t.pk: t for t in session.trainer.select_related("user")}
+    for entry in entries:
+        for t in list(entry.trainer.all()) + list(entry.cotrainer.all()):
+            people.setdefault(t.pk, t)
+    if not people:
+        return []
+    # every entry anywhere they trained, for the "same week" cells
+    weeks = {}  # trainer id -> {iso week: {entry id}}
+    for through in (TrainingSessionEntry.trainer.through, TrainingSessionEntry.cotrainer.through):
+        for trainer_id, entry_id, day in through.objects.filter(
+            trainer_id__in=people, trainingsessionentry__date__isnull=False
+        ).values_list("trainer_id", "trainingsessionentry_id", "trainingsessionentry__date"):
+            weeks.setdefault(trainer_id, {}).setdefault(day.isocalendar()[:2], set()).add(entry_id)
+    in_group = set(session.trainer.values_list("pk", flat=True))
+    rows = []
+    for trainer in sorted(people.values(), key=lambda t: (t.pk not in in_group, t.user.last_name, t.user.first_name)):
+        cells, last_seen = [], None
+        for entry in entries:
+            role = entry.trainer_roles.get(trainer.pk)
+            if role:
+                cells.append((entry, 2, role))
+                last_seen = entry.date
+            elif weeks.get(trainer.pk, {}).get(entry.date.isocalendar()[:2], set()) - {entry.pk}:
+                cells.append((entry, 1, ""))
+            else:
+                cells.append((entry, 0, ""))
+        rows.append({"trainer": trainer, "cells": cells, "last_seen": last_seen, "in_group": trainer.pk in in_group})
+    return rows
 
 
 def group_candidates(session):

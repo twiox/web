@@ -1,3 +1,4 @@
+from .dashboard import board_dashboard
 from .forms import MemberForm, ProfileForm, AdditionalEmailForm
 from members.roles import is_privileged
 from members.models import (
@@ -165,6 +166,10 @@ def send_set_password_email(request, user):
 class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     permission_required = "auth.add_user"
     template_name = "user_handling/member_list.html"
+
+    def get_context_data(self, **kwargs):
+        # the board's dashboard below the list
+        return {**super().get_context_data(**kwargs), **board_dashboard()}
 
     def get_queryset(self):
         users = sorted(User.objects.select_related("profile"), key=member_number)

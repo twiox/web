@@ -63,6 +63,8 @@
             <p class="member_panel__hint">Klicke auf ein Mitglied, um die Details zu sehen und zu bearbeiten.</p>
         </aside>
     </div>
+
+    {% include "user_handling/_board_dashboard.html" %}
 </section>
 
 <script>
@@ -100,6 +102,10 @@
             return;
         }
         panel.innerHTML = await response.text();
+        panel.scrollTop = 0;
+        // the tabs stick right below the sticky name block, so they need its height
+        const head = panel.querySelector('.member_panel__sticky');
+        if (head) panel.style.setProperty('--panel-head', head.offsetHeight + 'px');
         panel.querySelectorAll('.mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));
         markSelected(panel.querySelector('form').dataset.pk);
     }
@@ -198,6 +204,15 @@
             showMessage('Rolle konnte nicht geändert werden');
         }
     }
+
+    // dashboard: a name opens the member like a click on its row (and scrolls up to it)
+    document.querySelectorAll('.js_open_member').forEach(link => link.addEventListener('click', event => {
+        event.preventDefault();
+        const row = document.querySelector(`#member_rows tr[data-pk="${link.dataset.pk}"]`);
+        if (!row) return;
+        row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        loadDetail(row.dataset.url);
+    }));
 
     // every listener is registered once here; the panel content is replaced, the listeners stay
     search.addEventListener('input', filterRows);

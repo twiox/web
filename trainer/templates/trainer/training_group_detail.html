@@ -107,7 +107,7 @@
     <div class="group_dash">
         <div class="group_dash__panel">
             <div class="heatmap_legend">
-                <span><i class="group_dash__line_key"></i> Teilnehmende pro Training</span>
+                <span><i class="group_dash__line_key"></i> Personen pro Training (inkl. Trainer*innen)</span>
                 <span><i class="heat heat--2"></i> bei diesem Training da</span>
                 <span><i class="heat heat--1"></i> bei einem anderen Training derselben Woche</span>
                 <span><i class="heat heat--0"></i> nicht da</span>
@@ -123,7 +123,7 @@
                             <th class="heatmap__name heatmap__yaxis" id="timeline_yaxis"></th>
                             <td colspan="{{ entries|length|add:1 }}" class="heatmap__chart">
                                 <div class="group_dash__chart" id="timeline_chart" tabindex="0" role="img"
-                                     aria-label="Liniendiagramm: Teilnehmende pro Trainingsstunde, {{ entries|length }} Trainingsstunden. Werte auch in der Tabelle darunter."></div>
+                                     aria-label="Liniendiagramm: Personen pro Trainingsstunde inklusive Trainer*innen, {{ entries|length }} Trainingsstunden. Werte auch in der Tabelle darunter."></div>
                             </td>
                         </tr>
                         {# 2) the shared x-axis #}
@@ -134,7 +134,24 @@
                             {% endfor %}
                             <th class="heatmap__last">Zuletzt hier</th>
                         </tr>
-                        {# 3) participation per person #}
+                        {# 3) the trainers: who trained which entry (also useful to see who was there) #}
+                        {% if trainer_rows %}
+                        <tr class="heatmap__section"><th class="heatmap__name">Trainer*innen</th></tr>
+                        {% for row in trainer_rows %}
+                        <tr>
+                            <th class="heatmap__name" {% if not row.in_group %}title="Nicht als Trainer*in dieser Trainingszeit eingetragen, hat aber mittrainiert"{% endif %}>{{ row.trainer.user.last_name }}, {{ row.trainer.user.first_name }}{% if not row.in_group %} <small class="group_cancelled">(Vertretung)</small>{% endif %}</th>
+                            {% for entry, state, role in row.cells %}
+                            {% with name=row.trainer.user.first_name|add:" "|add:row.trainer.user.last_name %}
+                            <td data-col="{{ forloop.counter0 }}"><i class="heat heat--{{ state }}" aria-label="{{ name }}, {{ entry.date|date:'d.m.Y' }}: {% if state == 2 %}{{ role }}{% elif state == 1 %}bei einem anderen Training dieser Woche{% else %}nicht da{% endif %}"
+                                   data-tip="{% if state == 2 %}da als {{ role }}{% elif state == 1 %}anderes Training in der Woche{% else %}nicht da{% endif %}|{{ name }}|{{ entry.date|date:'D d.m.Y' }}"></i></td>
+                            {% endwith %}
+                            {% endfor %}
+                            <td class="heatmap__last">{% if row.last_seen %}{{ row.last_seen|date:"d.m.Y" }}{% else %}<span class="member_panel__hint">noch nie</span>{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="heatmap__section"><th class="heatmap__name">Teilnehmende</th></tr>
+                        {% endif %}
+                        {# 4) participation per person #}
                         {% for row in heatmap %}
                         <tr>
                             {# members who cancelled: greyed out, the date in the tooltip #}
@@ -150,7 +167,7 @@
                         {% empty %}
                         <tr><th class="heatmap__name member_panel__hint">Noch niemand auf der Liste.</th></tr>
                         {% endfor %}
-                        {# 4) everyone else who was there: the count, the names on hovering (members can be added above) #}
+                        {# 5) everyone else who was there: the count, the names on hovering (members can be added above) #}
                         {% if has_others %}
                         <tr class="heatmap__others">
                             <th class="heatmap__name">Andere</th>
@@ -166,11 +183,11 @@
             </div>
             <div class="group_dash__tooltip" id="dash_tip" hidden></div>
             <details class="group_dash__table">
-                <summary>Teilnehmende pro Training als Tabelle</summary>
+                <summary>Personen pro Training als Tabelle</summary>
                 <table class="member_table member_table--static">
-                    <thead><tr><th>Datum</th><th>Teilnehmende</th></tr></thead>
+                    <thead><tr><th>Datum</th><th>Personen</th><th>davon Teilnehmende</th><th>davon Trainer*innen</th></tr></thead>
                     <tbody>
-                    {% for entry in entries %}<tr><td><a href="{% url 'trainingsession_detail' entry.pk %}">{{ entry.date|date:"D d.m.Y" }}</a></td><td>{{ entry.count }}</td></tr>{% endfor %}
+                    {% for entry in entries %}<tr><td><a href="{% url 'trainingsession_detail' entry.pk %}">{{ entry.date|date:"D d.m.Y" }}</a></td><td>{{ entry.total }}</td><td>{{ entry.count }}</td><td>{{ entry.trainer_count }}</td></tr>{% endfor %}
                     </tbody>
                 </table>
             </details>

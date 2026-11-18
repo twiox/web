@@ -1,0 +1,207 @@
+{# the board's dashboard below the member list; data from user_handling/dashboard.py #}
+<section class="board_dash">
+    <h2>Übersicht</h2>
+    <p class="member_panel__hint">{{ members_total }} Mitglieder (aktive Konten). Beiträge sind Monatsbeträge; gekündigte Mitglieder zählen bis zu ihrem Kündigungsdatum.</p>
+
+    {# 1. members by status #}
+    <h3>Mitglieder</h3>
+    <div class="tester_stats board_dash__stats">
+        <div class="session_card">
+            <span class="tester_stats__number">{{ members_total }}</span>
+            <span>Mitglieder</span>
+        </div>
+        {# the bar on the left in the status colour of the member list #}
+        {% for status, count in statuses %}
+        <div class="session_card board_dash__status board_dash__status--{{ status|slugify }}">
+            <span class="tester_stats__number">{{ count }}</span>
+            <span>{{ status|cut:"es Mitglied" }}{% if status == "Kündigung" and next_leaving %}<small class="board_dash__sub">nächste zum {{ next_leaving|date:"d.m.Y" }}</small>{% endif %}</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    {# 2. contributions #}
+    <h3>Beiträge</h3>
+    <div class="board_dash__grid">
+        <div class="session_card board_dash__money">
+            <span class="board_dash__hero">{{ monthly_total }} €</span>
+            <span>pro Monat, von {{ paying_count }} Mitgliedern</span>
+            <table class="board_dash__table">
+                <thead><tr><th>Beitrag</th><th>Mitglieder</th><th>Summe</th></tr></thead>
+                <tbody>
+                {% for amount, count in by_amount %}
+                    <tr><td>{{ amount }} €</td><td>{{ count }}</td><td>{% widthratio amount 1 count %} €</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <p class="member_panel__hint">Zahlungsart: {% for method, count in by_method %}{{ method }} {{ count }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+        </div>
+        <div class="session_card">
+            <h4>Die nächsten Monate</h4>
+            <p class="member_panel__hint">Gekündigte fallen nach ihrem Kündigungsdatum heraus.</p>
+            <table class="board_dash__table">
+                <tbody>
+                {% for row in forecast %}
+                    <tr><td>{{ row.month|date:"F Y" }}</td><td class="board_dash__amount">{{ row.total }} €</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# 3. sex and age: women left, men right; diverse beside it (too few for a side of its own) #}
+    <h3>Geschlecht und Alter</h3>
+    <div class="session_card board_dash__pyramid_card">
+        <div class="heatmap_legend">
+            <span><i class="board_dash__key board_dash__key--w"></i> weiblich {{ sex_totals.w }}</span>
+            <span><i class="board_dash__key board_dash__key--m"></i> männlich {{ sex_totals.m }}</span>
+            <span><i class="board_dash__key board_dash__key--d"></i> divers {{ sex_totals.d }}</span>
+            {% if no_birthday %}<span>ohne Geburtsdatum {{ no_birthday }}</span>{% endif %}
+        </div>
+        <table class="board_dash__pyramid">
+            <thead><tr><th class="board_dash__side">weiblich</th><th>Alter</th><th class="board_dash__side">männlich</th><th>divers</th></tr></thead>
+            <tbody>
+            {% for row in pyramid %}
+                <tr>
+                    {# bar from the age column outwards, the number at its tip; the longest bar takes 85 %, so the number always fits #}
+                    <td class="board_dash__side"><div class="board_dash__row board_dash__row--left"><span class="board_dash__bar board_dash__bar--w" style="width: {{ row.w_pct }}%" title="{{ row.label }}: {{ row.w }} weiblich"></span><span class="board_dash__value">{{ row.w }}</span></div></td>
+                    <th>{{ row.label }}</th>
+                    <td class="board_dash__side"><div class="board_dash__row"><span class="board_dash__bar board_dash__bar--m" style="width: {{ row.m_pct }}%" title="{{ row.label }}: {{ row.m }} männlich"></span><span class="board_dash__value">{{ row.m }}</span></div></td>
+                    <td class="board_dash__divers">{% if row.d %}<i class="board_dash__key board_dash__key--d"></i> {{ row.d }}{% else %}<span class="member_panel__hint">–</span>{% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# 4. training activity #}
+    <h3>Training</h3>
+    <div class="tester_stats board_dash__stats">
+        <div class="session_card">
+            <span class="tester_stats__number">{{ on_list_count }}</span>
+            <span>in mindestens einer Trainingsgruppe</span>
+        </div>
+        <div class="session_card">
+            <span class="tester_stats__number">{{ active_count }}</span>
+            <span>in den letzten 3 Monaten beim Training</span>
+        </div>
+        <div class="session_card">
+            <span class="tester_stats__number">{{ without_group|length }}</span>
+            <span>ohne Trainingsgruppe</span>
+        </div>
+    </div>
+    <div class="board_dash__grid">
+        <div class="session_card">
+            <h4>Gruppengröße pro Trainingszeit</h4>
+            <table class="board_dash__groups">
+                <tbody>
+                {% for group in groups %}
+                    <tr>
+                        <th><a href="{% url 'trainer_group_detail' group.session.pk %}">{{ group.session.title }}</a> <small>{{ group.session.day }} {{ group.session.format_start_time }}</small></th>
+                        <td><div class="board_dash__row"><span class="board_dash__bar board_dash__bar--group" style="width: {{ group.pct }}%" title="{{ group.session.title }}: {{ group.count }}"></span><span class="board_dash__value">{{ group.count }}</span></div></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="session_card">
+            <h4>Ohne Trainingsgruppe</h4>
+            <p class="member_panel__hint">Oben die, die trotzdem zum Training kommen (wohl nie „Teilnahme“ angehakt). Klick auf den Namen öffnet das Mitglied.</p>
+            <div class="board_dash__scroll">
+                <table class="board_dash__table board_dash__nogroup">
+                    <thead><tr><th>Name</th><th>Status</th><th>Alter</th><th>Zuletzt beim Training</th><th>Wo</th></tr></thead>
+                    <tbody>
+                    {% for profile in without_group %}
+                        <tr>
+                            <td><a href="#" class="js_open_member" data-pk="{{ profile.user_id }}">{{ profile.user.last_name }}, {{ profile.user.first_name }}</a></td>
+                            <td>{{ profile.status|cut:"es Mitglied" }}</td>
+                            <td>{{ profile.age|default_if_none:"–" }}</td>
+                            <td>{% if profile.last_seen %}{{ profile.last_seen|date:"d.m.Y" }}{% else %}<span class="member_panel__hint">noch nie</span>{% endif %}</td>
+                            {# the training of the last visit: its group page (to add the person there), else the group name #}
+                            <td>{% with entry=profile.last_entry %}{% if entry.session %}<a href="{% url 'trainer_group_detail' entry.session.pk %}">{{ entry.session.title }}</a> <small class="member_panel__hint">{{ entry.session.day }}</small>{% elif entry %}{{ entry.group|default:"–" }}{% endif %}{% endwith %}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5">Alle sind in einer Trainingsgruppe.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {# 5. participation over all trainings: distinct members per week, split by how often they came #}
+    <h3>Teilnahme pro Woche</h3>
+    <div class="tester_stats board_dash__stats">
+        <div class="session_card">
+            <span class="tester_stats__number">{{ avg_members_per_week }}</span>
+            <span>Mitglieder pro Woche im Schnitt</span>
+        </div>
+        <div class="session_card">
+            <span class="tester_stats__number">{{ avg_visits_per_week }}</span>
+            <span>Trainings pro Person und Woche im Schnitt</span>
+        </div>
+        <div class="session_card">
+            <span class="tester_stats__number">{{ share_once }} / {{ share_twice }} / {{ share_more }} %</span>
+            <span>kommen 1× / 2× / 3× und öfter pro Woche</span>
+        </div>
+    </div>
+    <div class="session_card board_dash__weekly">
+        <div class="heatmap_legend">
+            <span><i class="board_dash__key board_dash__key--once"></i> 1× in der Woche</span>
+            <span><i class="board_dash__key board_dash__key--twice"></i> 2×</span>
+            <span><i class="board_dash__key board_dash__key--more"></i> 3× und öfter</span>
+        </div>
+        <p class="member_panel__hint">Verschiedene Mitglieder pro Kalenderwoche, letzte {{ weeks_count }} Wochen (nur Mitglieder mit Konto, jede Trainingsstunde einmal pro Person). Die Säulenhöhe ist die Zahl der Mitglieder, geteilt danach, wie oft sie in der Woche da waren. Durchschnitte über die {{ weeks_held }} Wochen mit Training.</p>
+        <div class="board_dash__columns_wrap">
+            <div class="board_dash__columns" id="weekly_chart">
+                {% for tick in weeks_ticks %}<span class="board_dash__gridline" style="--at: {{ tick.pct }}"><small>{{ tick.value }}</small></span>{% endfor %}
+                {% for w in weeks %}
+                <div class="board_dash__column{% if forloop.last %} board_dash__column--current{% endif %}" tabindex="0"
+                     data-tip="{{ w.members }} Mitglieder|1×: {{ w.once }} · 2×: {{ w.twice }} · 3×+: {{ w.more }}|KW {{ w.week }}, ab {{ w.monday|date:'d.m.Y' }}{% if forloop.last %} (laufende Woche){% endif %}">
+                    <div class="board_dash__stack">
+                        {% if w.more %}<span class="board_dash__seg board_dash__seg--more" style="height: {{ w.pct.more }}%"></span>{% endif %}
+                        {% if w.twice %}<span class="board_dash__seg board_dash__seg--twice" style="height: {{ w.pct.twice }}%"></span>{% endif %}
+                        {% if w.once %}<span class="board_dash__seg board_dash__seg--once" style="height: {{ w.pct.once }}%"></span>{% endif %}
+                    </div>
+                    <small class="board_dash__week{% if forloop.counter0|divisibleby:4 or forloop.last %} board_dash__week--shown{% endif %}">{{ w.monday|date:"d.m." }}</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="group_dash__tooltip" id="weekly_tip" hidden></div>
+        <details class="group_dash__table">
+            <summary>Als Tabelle</summary>
+            <table class="board_dash__table">
+                <thead><tr><th>KW</th><th>ab</th><th>Mitglieder</th><th>1×</th><th>2×</th><th>3×+</th></tr></thead>
+                <tbody>
+                {% for w in weeks %}<tr><td>{{ w.week }}</td><td>{{ w.monday|date:"d.m.Y" }}</td><td>{{ w.members }}</td><td>{{ w.once }}</td><td>{{ w.twice }}</td><td>{{ w.more }}</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </details>
+    </div>
+</section>
+
+<script>
+    // the weekly chart: one tooltip per column (first line bold), on hover and keyboard focus
+    (function () {
+        const chart = document.getElementById('weekly_chart'), tip = document.getElementById('weekly_tip');
+        if (!chart) return;
+        function show(column) {
+            const [head, ...rest] = column.dataset.tip.split('|');
+            tip.replaceChildren(...[[head, true], ...rest.map(t => [t])].map(([text, strong]) => {
+                const line = document.createElement(strong ? 'strong' : 'span');
+                line.textContent = text;
+                return line;
+            }));
+            tip.hidden = false;
+            const panel = tip.parentElement.getBoundingClientRect(), r = column.getBoundingClientRect();
+            tip.style.left = Math.max(4, Math.min(r.left - panel.left + r.width / 2 + 8, panel.width - tip.offsetWidth - 4)) + 'px';
+            tip.style.top = (r.top - panel.top - tip.offsetHeight + 40) + 'px';
+        }
+        chart.querySelectorAll('[data-tip]').forEach(column => {
+            column.addEventListener('pointerenter', () => show(column));
+            column.addEventListener('focus', () => show(column));
+            column.addEventListener('pointerleave', () => { tip.hidden = true; });
+            column.addEventListener('blur', () => { tip.hidden = true; });
+        });
+    })();
+</script>

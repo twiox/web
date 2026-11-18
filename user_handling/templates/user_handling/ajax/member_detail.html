@@ -1,3 +1,5 @@
+{# name and meta stay visible while the panel scrolls; the tabs stick right below (see member_list.html) #}
+<div class="member_panel__sticky">
 <div class="member_panel__header">
     <h3>{{ user.first_name }} {{ user.last_name }}</h3>
     <div>
@@ -13,6 +15,7 @@
     </div>
 </div>
 <p class="member_panel__meta">Nutzername: {{ user.username }} · Letzter Login: {{ user.last_login|date:"d.m.Y"|default:"noch nie" }}</p>
+</div>
 
 <form class="member_form" method="POST" novalidate
       action="{% url 'member_detail_form_update' user.pk %}"

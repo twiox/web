@@ -129,7 +129,8 @@
         chart.cross.setAttribute('x1', px); chart.cross.setAttribute('x2', px);
         chart.dot.setAttribute('cx', px); chart.dot.setAttribute('cy', py);
         const r = box.getBoundingClientRect();
-        showTip(extra || [[`${data[i].count} Teilnehmende`, true], [data[i].label]],
+        const people = data[i].count, trainers = data[i].trainers || 0;
+        showTip(extra || [[`${people} Personen`, true], [`${people - trainers} Teilnehmende, ${trainers} Trainer*in${trainers === 1 ? '' : 'nen'}`], [data[i].label]],
             clientX ?? r.left + px, clientY ?? r.top + py);
     }
     function clear() {
