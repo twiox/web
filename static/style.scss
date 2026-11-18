@@ -949,13 +949,12 @@ footer{
     gap: 6px;
     padding: $padding_big;
     background-color: $tertiary_bg;
-    border-left: 4px solid transparent;
     border-radius: 4px;
     color: $font_col;
-    transition: background-color 0.15s, border-color 0.15s;
+    transition: background-color 0.15s;
+    // slightly lighter on hover, like the event cards
     &:hover, &:focus{
-        background-color: $quartiary_bg;
-        border-left-color: $primary;
+        background-color: lighten($tertiary_bg, 4%);
     }
     i{
         font-size: 1.6rem;
@@ -968,6 +967,33 @@ footer{
     }
     &__text{
         color: grey;
+        font-size: $font_small;
+    }
+}
+
+// trainer document, Trainingsgruppen: the subsections of "Probetraining"
+.trainer_groups__sub{
+    margin: $padding_big 0 4px 0;
+}
+// trainer document: a weekly training time as card (not a link yet, so no hover)
+.training_group_card{
+    // centred like the trial group cards, which get it from being a link
+    align-items: center;
+    text-align: center;
+    &:hover, &:focus{
+        background-color: $tertiary_bg;
+    }
+    .dashboard_card__text i{
+        font-size: inherit;
+        color: inherit;
+        margin: 0;
+    }
+    &__note{
+        align-self: flex-start;
+        padding: 2px 8px;
+        border-radius: 10px;
+        background-color: $secondary;
+        color: white;
         font-size: $font_small;
     }
 }
@@ -2377,12 +2403,10 @@ label.mdc-text-field--filled.mdc-text-field--disabled{
         gap: 2px;
         margin-top: 6px;
         padding: 8px 10px;
-        border-left: 4px solid transparent;
         color: $font_col;
-        transition: background-color 0.15s, border-color 0.15s;
+        transition: background-color 0.15s;
         &:hover, &:focus{
-            background-color: $quartiary_bg;
-            border-left-color: $primary;
+            background-color: lighten($tertiary_bg, 4%);
         }
         strong{
             color: white;

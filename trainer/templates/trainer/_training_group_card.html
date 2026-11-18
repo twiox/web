@@ -1,0 +1,17 @@
+{# a weekly training time as card, built like the trial group cards; not a link yet, the group page follows #}
+<div class="dashboard_card training_group_card">
+    <i class="fas fa-users"></i>
+    <strong>{{ session.title }}</strong>
+    <span class="dashboard_card__text">
+        {{ session.weekday }} · {{ session.format_start_time }}–{{ session.format_end_time }} Uhr
+    </span>
+    <span class="dashboard_card__text">
+        {% if session.spot %}<i class="fas fa-map-marker-alt"></i> {{ session.spot.title }}{% else %}Kein Ort eingetragen{% endif %}
+        {% if session.age_label %} · {{ session.age_label }}{% endif %}
+    </span>
+    <span class="dashboard_card__text">
+        {{ session.participant_count }} Teilnehmende
+        {% if session.co_trainers %} · mit {{ session.co_trainers|join:", " }}{% endif %}
+    </span>
+    {% if session.hinweis %}<span class="training_group_card__note">{{ session.hinweis }}</span>{% endif %}
+</div>

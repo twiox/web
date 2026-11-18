@@ -40,16 +40,29 @@ def trainer_index(request):
 
 
 @user_passes_test(is_trainer)
-def trainer_trials(request):
-    """The next trial dates at the trainer's own training times (as on the trial dashboard), and the groups
-    in progress (not archived) with a date at one of them – e.g. to upload an application after the last date.
-    People and contacts are on the group page."""
-    own = TrialGroup.objects.filter(trial_dates__session__trainer=request.user.trainer).values("pk")
+def trainer_groups(request):
+    """The weekly training times the trainer is responsible for, as cards (the group page follows later),
+    and below them the trial trainings at these times."""
+    trainer = request.user.trainer
+    sessions = (
+        Session.objects.filter(trainer=trainer)
+        .select_related("spot")
+        .prefetch_related("trainer__user")
+        .annotate(participant_count=Count("participants", distinct=True))
+        .order_by("day_key", "start_time")
+    )
+    for session in sessions:
+        session.co_trainers = [t.user.first_name for t in session.trainer.all() if t.pk != trainer.pk]
+    # Probetraining: the next trial dates at the own training times (as on the trial dashboard), and the
+    # groups in progress (not archived) with a date at one of them, e.g. to upload an application after
+    # the last date. People and contacts are on the group page.
+    own = TrialGroup.objects.filter(trial_dates__session__trainer=trainer).values("pk")
     # pk__in instead of filtering the dates directly, so the card numbers count all dates of the group
-    groups = annotate_groups(TrialGroup.objects.filter(pk__in=own, archived__isnull=True)).order_by(*ACTIVE_GROUP_ORDER)
-    return render(request, "trainer/trainer_trials.html", {
+    trial_groups = annotate_groups(TrialGroup.objects.filter(pk__in=own, archived__isnull=True)).order_by(*ACTIVE_GROUP_ORDER)
+    return render(request, "trainer/trainer_groups.html", {
+        "sessions": sessions,
         "upcoming": upcoming_trial_dates(request.user, board=False),
-        "groups": groups,
+        "groups": trial_groups,
     })
 
 
