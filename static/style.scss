@@ -1519,6 +1519,37 @@ footer{
         font-size: $font_small;
         color: #888;
     }
+    &__warning{
+        color: #b00020;
+    }
+    // "Neuer Spot": name and description right in the popup
+    &__form{
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 220px;
+        input, textarea{
+            width: 100%;
+            padding: 4px 6px;
+            border: 1px solid #bbb;
+            border-radius: 3px;
+            color: #222;
+            background: white;
+            font-family: inherit;
+        }
+        button{
+            padding: 3px 12px;
+            border-radius: 3px;
+            background: $primary;
+            color: white;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+    }
+}
+// waiting for the click that places a new spot
+.spot_map--placing{
+    cursor: crosshair;
 }
 
 /* Contact persons (board, appointees) */

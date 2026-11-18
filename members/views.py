@@ -1,6 +1,6 @@
 import csv
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django import forms
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Count, Q
@@ -641,64 +641,42 @@ class SessionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView)
 
 """FOR THE SPOTS"""
 
-# after changing a spot, go back to the dashboard with the map open
-SPOT_MAP_URL = reverse_lazy("index")
 
 
-class SpotCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    model = Spot
-    form_class = SpotForm
-    permission_required = "members.add_spot"
-
-    def get_initial(self):
-        # "Neuer Spot" on the map passes the clicked position
-        return {key: self.request.GET[key] for key in ("lat", "long") if key in self.request.GET}
-
-    def form_valid(self, form):
-        messages.add_message(self.request, messages.SUCCESS, "Spot angelegt")
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return f"{SPOT_MAP_URL}?karte=1"
-
-
-class SpotUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    model = Spot
-    form_class = SpotForm
-    permission_required = "members.change_spot"
-
-    def form_valid(self, form):
-        messages.add_message(self.request, messages.SUCCESS, "Spot geändert")
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return f"{SPOT_MAP_URL}?karte=1"
-
-
-class SpotDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
-    model = Spot
-    permission_required = "members.delete_spot"
-
-    def form_valid(self, form):
-        messages.add_message(self.request, messages.SUCCESS, "Spot gelöscht")
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return f"{SPOT_MAP_URL}?karte=1"
+@login_required
+@permission_required("members.add_spot", raise_exception=True)
+@require_POST
+def spot_create(request):
+    """New spot straight from the map: position from the click, title and description from the popup."""
+    form = SpotForm(request.POST)
+    if not form.is_valid():
+        return JsonResponse({"errors": form.errors}, status=400)
+    spot = form.save()
+    return JsonResponse(spot_data(spot, sessions=[], for_editors=True), status=201)
 
 
 @login_required
 @permission_required("members.change_spot", raise_exception=True)
 @require_POST
-def spot_move(request, pk):
-    """Saves a new position after a marker was dragged on the map."""
+def spot_update(request, pk):
+    """Changes from the map: name and description from the popup form, position from dragging the marker.
+    Fields that are not sent keep their value."""
     spot = get_object_or_404(Spot, pk=pk)
-    form = SpotForm({"title": spot.title, "description": spot.description,
-                     "lat": request.POST.get("lat"), "long": request.POST.get("long")}, instance=spot)
+    current = {"title": spot.title, "description": spot.description, "lat": spot.lat, "long": spot.long}
+    form = SpotForm({key: request.POST.get(key, value) for key, value in current.items()}, instance=spot)
     if not form.is_valid():
         return JsonResponse({"errors": form.errors}, status=400)
     form.save()
-    return JsonResponse({"lat": float(spot.lat), "long": float(spot.long)})
+    return JsonResponse({"title": spot.title, "description": spot.description, "lat": float(spot.lat), "long": float(spot.long)})
+
+
+@login_required
+@permission_required("members.delete_spot", raise_exception=True)
+@require_POST
+def spot_delete(request, pk):
+    """Deleted from the map; training times at this spot keep running without a location (SET_NULL)."""
+    get_object_or_404(Spot, pk=pk).delete()
+    return JsonResponse({"deleted": pk})
 
 
 def spot_map_data(sessions, for_editors):
@@ -707,19 +685,20 @@ def spot_map_data(sessions, for_editors):
     for session in sessions:
         if session.spot_id:
             by_spot.setdefault(session.spot_id, []).append(f"{session.title}, {session.day} {session.format_start_time}")
-    spots = []
-    for spot in Spot.objects.order_by("title"):
-        data = {"id": spot.pk, "title": spot.title, "description": spot.description,
-                "lat": float(spot.lat), "long": float(spot.long)}
-        if for_editors:
-            data.update(
-                sessions=by_spot.get(spot.pk, []),
-                edit_url=reverse("spot_update", args=[spot.pk]),
-                delete_url=reverse("spot_delete", args=[spot.pk]),
-                move_url=reverse("spot_move", args=[spot.pk]),
-            )
-        spots.append(data)
-    return spots
+    return [spot_data(spot, by_spot.get(spot.pk, []), for_editors) for spot in Spot.objects.order_by("title")]
+
+
+def spot_data(spot, sessions, for_editors):
+    """One spot as the map script expects it."""
+    data = {"id": spot.pk, "title": spot.title, "description": spot.description,
+            "lat": float(spot.lat), "long": float(spot.long)}
+    if for_editors:
+        data.update(
+            sessions=sessions,
+            update_url=reverse("spot_update", args=[spot.pk]),
+            delete_url=reverse("spot_delete", args=[spot.pk]),
+        )
+    return data
 
 
 """For the news"""
