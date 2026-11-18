@@ -36,6 +36,12 @@
                 <span class="mdc-floating-label mdc-floating-label--float-above" id="date-label">Datum</span>
                 <span class="mdc-line-ripple"></span>
             </label>
+            {# after a weekday mismatch: confirm a real exception (e.g. moved for a holiday) #}
+            {% if form.weekday_mismatch or form.data.other_day %}
+            <div class="chip_list entry_other_day">
+                <label class="toggle_chip"><input type="checkbox" name="other_day" {% if form.data.other_day %}checked{% endif %}><span>Das Training war ausnahmsweise an einem anderen Tag</span></label>
+            </div>
+            {% endif %}
 
             {% for error in form.session.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
             <label class="mdc-text-field mdc-text-field--filled">

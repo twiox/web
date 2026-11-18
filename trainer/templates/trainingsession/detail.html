@@ -40,6 +40,21 @@
         {% endif %}
         {{ object.date|date:"l, d.m.Y" }} · {{ object.start }}–{{ object.end }} Uhr
     </div>
+    {% if relink_sessions is not None %}
+    {# billed: only the board, and only the link to the training time (the invoice keeps date, times and name) #}
+    <form method="POST" action="{% url 'trainingsession_relink' object.pk %}" class="inline_form entry_relink">
+        {% csrf_token %}
+        <label for="relink_session" class="member_panel__hint">Trainingszeit:</label>
+        <select name="session" id="relink_session">
+            <option value="">– keine –</option>
+            {% for s in relink_sessions %}
+            <option value="{{ s.pk }}" {% if s.pk == object.session_id %}selected{% endif %}>{{ s.title }}, {{ s.day }} {{ s.format_start_time }}{% if s.age_label %} ({{ s.age_label }}){% endif %}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="table_action">Ändern</button>
+        <span class="member_panel__hint">Abgerechnet: nur die Zuordnung zur Trainingszeit lässt sich noch ändern.</span>
+    </form>
+    {% endif %}
 
     <div class="session_grid session_grid--flow">
         <div class="session_card">

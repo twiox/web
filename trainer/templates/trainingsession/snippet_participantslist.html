@@ -22,7 +22,7 @@
         {% if participant.user %}
             {{ participant.user.first_name }} {{ participant.user.last_name }} <small>{{ participant.user.profile.age|default:"" }}</small>
         {% else %}
-            {{ participant.name }}
+            {{ participant.display_name }}
         {% endif %}
         {# reloads the whole list, so the contacts below stay in sync #}
         <button type="button" title="Entfernen"

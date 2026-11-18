@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from datetime import datetime
 from itertools import groupby
-from trainer.forms import TrainingSessionForm
+from trainer.forms import TrainingSessionForm, find_duplicate
 from trainer.models import TrainingSessionEntry, TrainingSessionParticipant, TrainingSessionInvoice
 from members.models import Trainer, Profile, Session
 from members.roles import is_board, is_privileged, is_trainer
@@ -243,7 +243,9 @@ def session_detail_view(request, pk):
         # redirect, so reloading the page does not send the form again
         return redirect('trainingsession_detail', pk=object.pk)
 
-    return render(request, 'trainingsession/detail.html', {'object':object})
+    # the board can move billed entries to another training time (see session_relink)
+    relink_sessions = Session.objects.order_by("day_key", "start_time") if is_board(request.user) and (object.payed or object.invoice.exists()) else None
+    return render(request, 'trainingsession/detail.html', {'object': object, 'relink_sessions': relink_sessions})
 
 def session_form_values(form):
     """Field values for the hand-written form inputs: the submitted data, or the entry being edited."""
@@ -301,6 +303,25 @@ def session_edit_view(request, pk):
         messages.add_message(request, messages.SUCCESS, "Gespeichert")
         return redirect('trainingsession_detail', pk=pk)
     return render(request, "trainingsession/index.html", {**session_form_context(form), "entry": entry, "duplicate": duplicate})
+
+
+@user_passes_test(is_board)
+@require_POST
+def session_relink(request, pk):
+    """The board moves an entry to another training time, also when it is billed already: only the
+    link changes (group view, dashboard); date, times and the group name on the invoice stay."""
+    entry = get_object_or_404(TrainingSessionEntry, pk=pk)
+    target = get_object_or_404(Session, pk=request.POST.get("session") or 0) if request.POST.get("session") else None
+    entry.session = target
+    entry.save(update_fields=["session"])
+    text = f"Verknüpft mit {target.title} ({target.weekday} {target.format_start_time} Uhr)" if target else "Keine Trainingszeit mehr verknüpft"
+    messages.add_message(request, messages.SUCCESS, text)
+    if target and entry.date and entry.date.isoweekday() != target.day_key:
+        messages.add_message(request, messages.WARNING, f"Hinweis: Der {entry.date:%d.%m.%Y} ist kein {target.weekday[:-1]}.")
+    duplicate = find_duplicate(entry.date, target, entry.group, entry.start, entry.end, exclude=entry.pk)
+    if duplicate:
+        messages.add_message(request, messages.WARNING, f"Bei {target.title if target else entry.group} gibt es am {duplicate.date:%d.%m.%Y} schon eine Trainingsstunde ({duplicate.start}–{duplicate.end} Uhr).")
+    return redirect('trainingsession_detail', pk=pk)
 
 
 @user_passes_test(is_privileged)
@@ -476,6 +497,7 @@ urlpatterns = [
     path("<int:pk>", session_detail_view, name="trainingsession_detail"),
     path("<int:pk>/bearbeiten/", session_edit_view, name="trainingsession_edit"),
     path("<int:pk>/remove/", session_delete, name='trainingsession_delete'),
+    path("<int:pk>/trainingszeit/", session_relink, name='trainingsession_relink'),
     path("<int:pk>/set-payed/", mark_invoice_as_payed, name='trainingsession_mark_invoice_as_payed'),
     path("rechnung/<int:pk>/loeschen/", delete_invoice, name='trainingsession_delete_invoice'),
     path("<int:pk>/search", search, name="trainingsession_search"),

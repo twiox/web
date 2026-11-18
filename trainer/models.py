@@ -40,10 +40,16 @@ class TrainingSessionParticipant(models.Model):
     )
     notes = models.TextField("Notizen", blank=True, null=True) #add notes, e.g. if left earlier or if needed first aid
 
-    def __str__(self):
-        if user:
+    @property
+    def display_name(self):
+        """The member's name, else the stored one (guests, trial participants). Neither: the member
+        account was deleted (user is SET_NULL, so the participant count stays right)."""
+        if self.user:
             return f"{self.user.first_name} {self.user.last_name}"
-        return self.name
+        return self.name or "Gelöschtes Mitglied"
+
+    def __str__(self):
+        return self.display_name
 
 
 class TrainingSessionInvoice(models.Model):

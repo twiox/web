@@ -137,8 +137,10 @@ def group_dashboard(session, participants):
             label = f"{row.user.get_full_name()} (Mitglied)"
         elif row.tester_id:
             label = f"{row.name or 'Probetraining'} (Probetraining)"
+        elif row.name:
+            label = f"{row.name} (Gast)"
         else:
-            label = f"{row.name or 'ohne Namen'} (Gast)"
+            label = row.display_name  # the member account was deleted
         others[row.session_id].append(label)
     other_cells = [(entry, others[entry.pk]) for entry in entries]
     has_others = any(names for _, names in other_cells)

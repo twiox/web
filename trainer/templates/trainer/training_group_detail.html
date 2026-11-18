@@ -52,7 +52,7 @@
             <tbody>
             {% for profile in participants %}
                 <tr>
-                    <td>{{ profile.user.last_name }}, {{ profile.user.first_name }}</td>
+                    <td>{{ profile.user.last_name }}, {{ profile.user.first_name }}{% if profile.status == "Kündigung" %} <small class="group_cancelled">(Kündigung{% if profile.membership_end %} zum {{ profile.membership_end|date:"d.m.Y" }}{% endif %})</small>{% endif %}</td>
                     <td title="{{ profile.birthday|date:'d.m.Y' }}">{{ profile.age|default_if_none:"–" }}</td>
                     <td class="tester_table__email" title="{{ profile.user.email }}">{% if profile.user.email %}<a href="mailto:{{ profile.user.email }}">{{ profile.user.email }}</a>{% else %}–{% endif %}</td>
                     <td>{% if profile.telephone %}<a href="tel:{{ profile.telephone }}">{{ profile.telephone }}</a>{% else %}–{% endif %}</td>
@@ -137,7 +137,8 @@
                         {# 3) participation per person #}
                         {% for row in heatmap %}
                         <tr>
-                            <th class="heatmap__name">{{ row.profile.user.last_name }}, {{ row.profile.user.first_name }}</th>
+                            {# members who cancelled: greyed out, the date in the tooltip #}
+                            <th class="heatmap__name{% if row.profile.status == 'Kündigung' %} heatmap__name--cancelled{% endif %}"{% if row.profile.status == 'Kündigung' %} title="Kündigung{% if row.profile.membership_end %} zum {{ row.profile.membership_end|date:'d.m.Y' }}{% endif %}"{% endif %}>{{ row.profile.user.last_name }}, {{ row.profile.user.first_name }}</th>
                             {% for entry, state in row.cells %}
                             {% with name=row.profile.user.first_name|add:" "|add:row.profile.user.last_name %}
                             <td data-col="{{ forloop.counter0 }}"><i class="heat heat--{{ state }}" aria-label="{{ name }}, {{ entry.date|date:'d.m.Y' }}: {% if state == 2 %}da{% elif state == 1 %}bei einem anderen Training dieser Woche{% else %}nicht da{% endif %}"

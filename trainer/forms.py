@@ -13,13 +13,42 @@ def minutes(value):
         return None
 
 
+WEEKDAY_NAMES = {1: "Montag", 2: "Dienstag", 3: "Mittwoch", 4: "Donnerstag", 5: "Freitag", 6: "Samstag", 7: "Sonntag"}
+
+
+def find_duplicate(day, session, group, start, end, exclude=None):
+    """An existing entry for the same training on the same day with overlapping times, or None.
+    Same training: the same training time, or without one the same group name."""
+    if not day:
+        return None
+    candidates = TrainingSessionEntry.objects.filter(date__date=day.date()).exclude(pk=exclude)
+    group = (group or "").strip()
+    if session:
+        candidates = candidates.filter(session=session)
+    elif group:
+        candidates = candidates.filter(session__isnull=True, group__iexact=group)
+    else:
+        return None
+    start, end = minutes(start), minutes(end)
+    for entry in candidates.order_by("pk"):
+        other_start, other_end = minutes(entry.start), minutes(entry.end)
+        # without complete times, the same training on the same day counts as the same entry
+        if None in (start, end, other_start, other_end) or (start < other_end and other_start < end):
+            return entry
+    return None
+
+
 class TrainingSessionForm(forms.ModelForm):
     # trainers may only enter sessions up to this far back; chairmen may enter any date
     MAX_AGE = timedelta(weeks=4)
 
+    # shown after a weekday mismatch: the training really was on another day this time
+    other_day = forms.BooleanField(required=False)
+
     def __init__(self, *args, allow_old_dates=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.allow_old_dates = allow_old_dates
+        self.weekday_mismatch = False
 
     @classmethod
     def min_date(cls):
@@ -36,26 +65,22 @@ class TrainingSessionForm(forms.ModelForm):
         return value
 
     def duplicate(self):
-        """An existing entry for the same training on the same day with overlapping times, or None.
-        Same training: the same training time, or without one the same group name."""
+        """An existing entry for the same training on the same day with overlapping times, or None."""
         data = self.cleaned_data
-        day, session, group = data.get("date"), data.get("session"), (data.get("group") or "").strip()
-        if not day:
-            return None
-        candidates = TrainingSessionEntry.objects.filter(date__date=day.date()).exclude(pk=self.instance.pk)
-        if session:
-            candidates = candidates.filter(session=session)
-        elif group:
-            candidates = candidates.filter(session__isnull=True, group__iexact=group)
-        else:
-            return None
-        start, end = minutes(data.get("start")), minutes(data.get("end"))
-        for entry in candidates.order_by("pk"):
-            other_start, other_end = minutes(entry.start), minutes(entry.end)
-            # without complete times, the same training on the same day counts as the same entry
-            if None in (start, end, other_start, other_end) or (start < other_end and other_start < end):
-                return entry
-        return None
+        return find_duplicate(data.get("date"), data.get("session"), data.get("group"),
+                              data.get("start"), data.get("end"), exclude=self.instance.pk)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        day, session = cleaned_data.get("date"), cleaned_data.get("session")
+        # the date must fall on the training time's weekday; checked when one of them is set or changed,
+        # so older entries stay editable; real exceptions (e.g. moved for a holiday) are confirmed
+        changed = self.instance.pk is None or {"date", "session"} & set(self.changed_data)
+        if day and session and changed and not cleaned_data.get("other_day") and day.isoweekday() != session.day_key:
+            self.weekday_mismatch = True
+            self.add_error("date", f"Der {day:%d.%m.%Y} ist ein {WEEKDAY_NAMES[day.isoweekday()]}, "
+                                   f"die Trainingszeit {session.title} ist {session.weekday.lower()}.")
+        return cleaned_data
 
     class Meta:
         model = TrainingSessionEntry
