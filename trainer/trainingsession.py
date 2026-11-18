@@ -16,16 +16,25 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.contrib import messages
 
-@csrf_exempt
-@user_passes_test(is_privileged)  # trainers, and chairmen for the billing
+@user_passes_test(is_privileged)  # trainers in their table, chairmen on the detail page
 @require_POST
 def session_delete(request, pk):
+    """From the trainer's table (htmx: the row disappears) or the detail page (back to the training
+    group, e.g. after finding a duplicate there, else to the list)."""
     entry = get_object_or_404(TrainingSessionEntry, pk=pk)
+    from_page = not request.headers.get("HX-Request")
     if entry.payed or entry.invoice.exists():
         # deleting it would make the invoice wrong; htmx keeps the row on an error status
+        if from_page:
+            messages.add_message(request, messages.ERROR, "Diese Stunde ist bereits abgerechnet und kann nicht gelöscht werden.")
+            return redirect('trainingsession_detail', pk=pk)
         return HttpResponse("Bereits abgerechnet", status=409)
+    session_id, label = entry.session_id, f"{entry.group or 'Trainingsstunde'} vom {entry.date:%d.%m.%Y}" if entry.date else "Trainingsstunde"
     entry.delete()
-    return HttpResponse("")
+    if not from_page:
+        return HttpResponse("")
+    messages.add_message(request, messages.SUCCESS, f"{label} gelöscht")
+    return redirect('trainer_group_detail', pk=session_id) if session_id else redirect('trainingsession_list')
 
 ## HTMX snippets
 @user_passes_test(is_privileged)
@@ -262,6 +271,13 @@ def session_form_context(form):
 def session_create_view(request):
     form = TrainingSessionForm(request.POST or None, allow_old_dates=is_board(request.user))
     if request.method == "POST" and form.is_valid():
+        existing = form.duplicate()
+        if existing:
+            # no second entry for the same training: off to the one that is there
+            names = ", ".join(t.user.first_name for t in existing.trainer.all()) or "jemand"
+            messages.add_message(request, messages.WARNING,
+                f"Diese Trainingsstunde ist schon eingetragen ({existing.date:%d.%m.%Y}, {existing.start}–{existing.end} Uhr, von {names}). Du bist jetzt bei diesem Eintrag.")
+            return redirect('trainingsession_detail', pk=existing.pk)
         session = form.save()
         # chairmen who aren't trainers add the trainers on the detail page
         if is_trainer(request.user):
@@ -277,11 +293,14 @@ def session_edit_view(request, pk):
         messages.add_message(request, messages.WARNING, "Diese Stunde ist bereits abgerechnet und kann nicht mehr geändert werden.")
         return redirect('trainingsession_detail', pk=pk)
     form = TrainingSessionForm(request.POST or None, instance=entry, allow_old_dates=is_board(request.user))
-    if request.method == "POST" and form.is_valid():
+    duplicate = form.duplicate() if request.method == "POST" and form.is_valid() else None
+    if duplicate:
+        form.add_error(None, f"Für diese Trainingszeit gibt es am {duplicate.date:%d.%m.%Y} schon eine Trainingsstunde ({duplicate.start}–{duplicate.end} Uhr).")
+    elif request.method == "POST" and form.is_valid():
         form.save()
         messages.add_message(request, messages.SUCCESS, "Gespeichert")
         return redirect('trainingsession_detail', pk=pk)
-    return render(request, "trainingsession/index.html", {**session_form_context(form), "entry": entry})
+    return render(request, "trainingsession/index.html", {**session_form_context(form), "entry": entry, "duplicate": duplicate})
 
 
 @user_passes_test(is_privileged)

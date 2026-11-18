@@ -1165,6 +1165,16 @@ footer{
         height: 16px;
     }
 }
+// entry detail: edit (and for the board delete) next to the date
+.entry_meta{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 $padding_small 0;
+    form{
+        margin: 0;
+    }
+}
 // group page: e-mail to everyone on the list
 .group_email_form{
     max-width: 720px;

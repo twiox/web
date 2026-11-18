@@ -4,6 +4,15 @@ from members.models import Trainer
 from user_handling.forms import MdcFormMixin, date_widget
 from .models import TrainingSessionEntry
 
+def minutes(value):
+    """ "17:30" -> 1050; None for an empty or odd time (the times are free text fields)."""
+    try:
+        hours, mins = str(value).strip().split(":")[:2]
+        return int(hours) * 60 + int(mins)
+    except (ValueError, AttributeError):
+        return None
+
+
 class TrainingSessionForm(forms.ModelForm):
     # trainers may only enter sessions up to this far back; chairmen may enter any date
     MAX_AGE = timedelta(weeks=4)
@@ -25,6 +34,28 @@ class TrainingSessionForm(forms.ModelForm):
                 "Einheiten, die länger als 4 Wochen zurückliegen, kann nur der Vorstand eintragen."
             )
         return value
+
+    def duplicate(self):
+        """An existing entry for the same training on the same day with overlapping times, or None.
+        Same training: the same training time, or without one the same group name."""
+        data = self.cleaned_data
+        day, session, group = data.get("date"), data.get("session"), (data.get("group") or "").strip()
+        if not day:
+            return None
+        candidates = TrainingSessionEntry.objects.filter(date__date=day.date()).exclude(pk=self.instance.pk)
+        if session:
+            candidates = candidates.filter(session=session)
+        elif group:
+            candidates = candidates.filter(session__isnull=True, group__iexact=group)
+        else:
+            return None
+        start, end = minutes(data.get("start")), minutes(data.get("end"))
+        for entry in candidates.order_by("pk"):
+            other_start, other_end = minutes(entry.start), minutes(entry.end)
+            # without complete times, the same training on the same day counts as the same entry
+            if None in (start, end, other_start, other_end) or (start < other_end and other_start < end):
+                return entry
+        return None
 
     class Meta:
         model = TrainingSessionEntry

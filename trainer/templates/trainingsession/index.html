@@ -27,6 +27,7 @@
     <form method="POST" class="session_card">
         {% csrf_token %}
         {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+        {% if duplicate %}<p><a class="more_info_button" href="{% url 'trainingsession_detail' duplicate.pk %}">Zum vorhandenen Eintrag</a></p>{% endif %}
         <div class="member_fields">
             {% for error in form.date.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
             <label class="mdc-text-field mdc-text-field--filled">

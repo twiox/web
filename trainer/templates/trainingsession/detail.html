@@ -25,12 +25,21 @@
             <span class="entry_status entry_status--draft">Nicht abgesendet</span>
         {% endif %}
     </div>
-    <p class="member_panel__hint">
+    {# a div: the delete form may not sit inside a <p> #}
+    <div class="member_panel__hint entry_meta">
         {% if not object.payed and not object.invoice.all %}
         <a href="{% url 'trainingsession_edit' object.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
+        {% if is_board %}
+        {# the board removes e.g. duplicates; billed ones stay, the invoice depends on them #}
+        <form method="POST" action="{% url 'trainingsession_delete' object.pk %}" class="entry_delete" data-name="{{ object.group|default:'Trainingsstunde' }} vom {{ object.date|date:'d.m.Y' }}">
+            {% csrf_token %}
+            <button type="submit" class="icon_button" title="Löschen"><i class="far fa-minus-square"></i></button>
+        </form>
+        {% endif %}
+        {% elif is_board %}<span title="Abgerechnete Stunden können nicht gelöscht werden"><i class="fas fa-lock"></i></span>
         {% endif %}
         {{ object.date|date:"l, d.m.Y" }} · {{ object.start }}–{{ object.end }} Uhr
-    </p>
+    </div>
 
     <div class="session_grid session_grid--flow">
         <div class="session_card">
@@ -98,5 +107,10 @@
         evt.detail.target.querySelectorAll('.mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));
     });
     document.querySelectorAll('.session_card .mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));
+</script>
+<script>
+    document.querySelector('.entry_delete')?.addEventListener('submit', event => {
+        if (!confirm(`${event.target.dataset.name} wirklich löschen? Die Anwesenheiten dieser Stunde werden mitgelöscht.`)) event.preventDefault();
+    });
 </script>
 {% endblock %}

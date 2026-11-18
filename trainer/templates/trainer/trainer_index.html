@@ -42,6 +42,7 @@
                             {% if not entry.payed and not entry.invoice_count %}
                             <a role="button" title="Löschen"
                                hx-post="{% url 'trainingsession_delete' entry.pk %}"
+                               hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                                hx-target="closest tr"
                                hx-swap="delete"
                                hx-confirm="Bist du dir sicher, dass du den Eintrag löschen willst?">
