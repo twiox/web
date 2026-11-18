@@ -80,49 +80,7 @@ def interested_index(request):
 
 
 def interested_offers(request):
-    if request.method == "POST":
-        form = ProbetrainingForm(request.POST)  # if no files
-        if form.is_valid():
-            messages.add_message(
-                request, messages.SUCCESS, "Workshopanfrage verschickt"
-            )
-            first_name = form.cleaned_data.get("first_name")
-            last_name = form.cleaned_data.get("last_name")
-            birthdate = form.cleaned_data.get("birth_date")
-            int_email = form.cleaned_data.get("email")
-            telnr = form.cleaned_data.get("telephone")
-            city = form.cleaned_data.get("city")
-            notes = form.cleaned_data.get("notes")
-
-            mail_subject = f"Anfrage Workshop von {first_name} {last_name}"
-            message = render_to_string(
-                "interested/emails/workshop_email.html",
-                {
-                    "first_name": first_name,
-                    "last_name": last_name,
-                    "birthdate": birthdate,
-                    "email": int_email,
-                    "telnr": telnr,
-                    "city": city,
-                    "notes": notes,
-                },
-            )
-            email = EmailMessage(mail_subject, message, to=[settings.TO_EMAIL])
-            email.send()
-            # And the message to the interested
-            message2 = render_to_string(
-                "interested/emails/workshop_email_answer.html",
-                {"first_name": first_name, "last_name": last_name},
-            )
-            EmailMessage(
-                f"Twio X e.V. - Deine Workshopanfrage", message2, to=[int_email]
-            ).send()
-            return HttpResponseRedirect(reverse("offers"))
-
-        else:
-            return render(request, "interested/interested_offers.html", {"form": form})
-    form = ProbetrainingForm()
-    return render(request, "interested/interested_offers.html", {"form": form})
+    return render(request, "interested/interested_offers.html")
 
 
 def interested_philosophy(request):
