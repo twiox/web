@@ -1,5 +1,5 @@
-{# a weekly training time as card, built like the trial group cards; not a link yet, the group page follows #}
-<div class="dashboard_card training_group_card">
+{# a weekly training time as card, built like the trial group cards #}
+<a class="dashboard_card training_group_card" href="{% url 'trainer_group_detail' session.pk %}">
     <i class="fas fa-users"></i>
     <strong>{{ session.title }}</strong>
     <span class="dashboard_card__text">
@@ -14,4 +14,4 @@
         {% if session.co_trainers %} · mit {{ session.co_trainers|join:", " }}{% endif %}
     </span>
     {% if session.hinweis %}<span class="training_group_card__note">{{ session.hinweis }}</span>{% endif %}
-</div>
+</a>

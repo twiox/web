@@ -1,0 +1,73 @@
+{% extends "members/base.html" %}
+{# a weekly training time as a group; built like interested/trialgroup_detail.html #}
+{% block navbar2 %}
+<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_groups' %}">Trainingsgruppen</a>
+    <a class="float_left"> > </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{ object.title }}</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="member_page trial_group_page">
+    <div class="session_header">
+        <h1>{{ object.title }}</h1>
+    </div>
+    <div class="member_panel__hint event_detail_meta trial_group_meta">
+        {{ participants|length }} Teilnehmende ·
+        {{ object.weekday }} {{ object.format_start_time }}–{{ object.format_end_time }} Uhr
+        {% if object.spot %}· <i class="fas fa-map-marker-alt"></i> {{ object.spot.title }}{% endif %}
+        {% if object.age_label %}· {{ object.age_label }}{% endif %}
+        {% for trainer in object.trainer.all %}{% if forloop.first %} · {% else %}, {% endif %}{{ trainer.user.first_name }}{% endfor %}
+    </div>
+    {% if object.hinweis %}<p class="trial_group_notes">{{ object.hinweis }}</p>{% endif %}
+
+    <h3>Teilnehmende</h3>
+    <p class="member_panel__hint">Alle, die bei dieser Trainingszeit „Teilnahme“ angehakt haben.</p>
+    <div class="member_table_wrapper tertiary_bg">
+        <table class="member_table member_table--static tester_table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Alter</th>
+                    <th>E-Mail</th>
+                    <th>Telefon</th>
+                    <th title="Bei Minderjährigen">Ansprechpartner*in</th>
+                    <th title="Bei Minderjährigen">Notfallnummer</th>
+                    <th>Trainernotizen</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for profile in participants %}
+                <tr>
+                    <td>{{ profile.user.last_name }}, {{ profile.user.first_name }}</td>
+                    <td title="{{ profile.birthday|date:'d.m.Y' }}">{{ profile.age|default_if_none:"–" }}</td>
+                    <td class="tester_table__email" title="{{ profile.user.email }}">{% if profile.user.email %}<a href="mailto:{{ profile.user.email }}">{{ profile.user.email }}</a>{% else %}–{% endif %}</td>
+                    <td>{% if profile.telephone %}<a href="tel:{{ profile.telephone }}">{{ profile.telephone }}</a>{% else %}–{% endif %}</td>
+                    <td class="tester_table__contact">{{ profile.parent|default:"–" }}</td>
+                    <td>{% if profile.parent_telnr %}<a href="tel:{{ profile.parent_telnr }}">{{ profile.parent_telnr }}</a>{% else %}–{% endif %}</td>
+                    <td class="tester_table__notes">{{ profile.notes_trainer|default:"–"|linebreaksbr }}</td>
+                    <td class="table_actions">
+                        {# e.g. "Teilnahme" ticked by accident; they can tick it again on the dashboard #}
+                        <form method="POST" action="{% url 'trainer_group_remove' object.pk profile.pk %}" class="group_remove"
+                              data-name="{{ profile.user.first_name }} {{ profile.user.last_name }}">
+                            {% csrf_token %}
+                            <button type="submit" class="icon_button" title="Von der Liste nehmen"><i class="fas fa-user-minus"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="8">Noch niemand hat „Teilnahme“ angehakt.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script>
+    document.querySelectorAll('.group_remove').forEach(form => form.addEventListener('submit', event => {
+        if (!confirm(`${form.dataset.name} von der Liste von {{ object.title|escapejs }} nehmen? Sie*er kann „Teilnahme“ jederzeit wieder anhaken.`)) event.preventDefault();
+    }));
+</script>
+{% endblock %}

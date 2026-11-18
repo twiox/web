@@ -45,8 +45,10 @@
             <div class="col-20" style="overflow: visible; min-width:200px;">
                 <div class="primary padding_all_small flex_center" style="opacity:0.75;"><strong>{{ day }}</strong></div>
                 {% for session in sessions|lookup:short %}
-                    <!--session hinweise -->
-                    <div style="margin-top:10px;">
+                    {# trainers and the board: the whole card opens the training group (like the event cards); its controls sit above that link #}
+                    <div style="margin-top:10px;" class="training_card{% if is_privileged %} training_card--link{% endif %}">
+                        {% if is_privileged %}<a class="training_card__link" href="{% url 'trainer_group_detail' session.pk %}" aria-label="Trainingsgruppe {{ session.title }}"></a>{% endif %}
+                        <!--session hinweise -->
                         {% if session.visible %}
                         {% for notice in session.notices %}
                         <div class="third_session session_notice_block">{{ notice }}</div>
@@ -99,36 +101,32 @@
                             </div>
                             {% endif %}
                         </div>
-                        <div class="third_session tertiary_bg" style="text-align: left;">
-                            <!-- Anmelden -->
+                        {# "Teilnahme" only where the member's age fits; the trainers see who ticked it in their group view #}
+                        {% if session.can_participate %}
+                        <div class="third_session tertiary_bg training_card__above" style="text-align: left;">
                              <div class="mdc-form-field" style="margin: 0px;">
                                 <div class="mdc-checkbox">
-                                    <input type="checkbox" class="mdc-checkbox__native-control" id="participate" name="participate"
+                                    <input type="checkbox" class="mdc-checkbox__native-control" id="participate_{{ session.pk }}" name="participate"
                                     {% if request.user.profile in session.participants.all %} checked {% endif %}
-                                    hx-get="{% url 'session_participation_toggle' %}?pk={{session.pk}}"
+                                    hx-post="{% url 'session_participation_toggle' %}"
+                                    hx-vals='{"pk": "{{ session.pk }}"}'
+                                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                                     hx-swap="none"
+                                    hx-on::after-request="if (!event.detail.successful) { this.checked = !this.checked; snackbar.labelText = 'Konnte nicht gespeichert werden'; snackbar.open(); }"
                                     >
                                     <div class="mdc-checkbox__background">
                                         <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
                                             <path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
                                         </svg>
                                     </div>
-                                </div> 
-                                <label for="participate">
+                                </div>
+                                <label for="participate_{{ session.pk }}">
                                     <div>Teilnahme</div>
                                 </label>
                             </div>
                         </div>
-                        {% if is_privileged %}
-                        <div style="display: flex;">
-                            <div id="emaillist_{{session.pk}}"
-                                data-url="{% url 'trainer_get_sessionemails' session.pk %}"
-                                class="third_session tertiary_bg prim_hover email_copy" style="display:none; cursor: pointer; width:100%">
-                                <i class="far fa-envelope padding_all_small"><p>Emails</p></i>
-                            </div>
-                        </div>
                         {% endif %}
-                        <div id="trainerchip_{{session.pk}}" class="third_session tertiary_bg padding_all_small" style="text-align: left; display:none;">
+                        <div id="trainerchip_{{session.pk}}" class="third_session tertiary_bg padding_all_small training_card__above" style="text-align: left; display:none;">
                             <!-- Trainerchip -->
                             {% if session.visible %}
                             {% for trainer in session.trainer.all %}
@@ -146,7 +144,7 @@
                             <p style="color:grey;">Mit {{session.trainerlist}}</p>
                             {% endif %}
                         </div>
-                        <div id="trainerchipdisplay_{{session.pk}}" class="prim_hover third_session tertiary_bg trainerchip_display" style="cursor:pointer;">
+                        <div id="trainerchipdisplay_{{session.pk}}" class="prim_hover third_session tertiary_bg trainerchip_display training_card__above" style="cursor:pointer;">
                             <i class="fas fa-angle-down prim_hover" style="color:grey"></i>
                         </div>
                     </div>
@@ -158,21 +156,7 @@
         $('body').on('click', '.trainerchip_display', function(){
             var pk = $(this).attr('id').split('_')[1]
             $(`#trainerchip_${pk}`).toggle(300)
-            $(`#emaillist_${pk}`).toggle(300)
             $(this).find('i').toggleClass('fa-angle-down').toggleClass('fa-angle-up')
         });
-
-        $('body').on('click', '.email_copy', function(){
-            var pk= $(this).attr('id').split('_')[1]
-            $.ajax({
-                url: $(this).attr('data-url'),
-                success: function(data) {
-                    //write emails to clipboqrd
-                    navigator.clipboard.writeText(data['emailstring']);
-                    //close the menu
-                    $(`#trainerchipdisplay_${pk}`).click()
-                }
-            });
-        })
     </script>
 </section>

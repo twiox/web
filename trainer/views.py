@@ -2,15 +2,16 @@ from .forms import TrainerForm, TrainerSelfForm
 from .models import TrainingSessionEntry
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
-from members.models import Trainer, Session, Profile, AdditionalEmail
+from members.models import Trainer, Session
 from members.roles import PrivilegedRequiredMixin, is_privileged, is_trainer
 from interested.models import TrialGroup
 from interested.trials import ACTIVE_GROUP_ORDER, annotate_groups, upcoming_trial_dates
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.views.generic import DeleteView, UpdateView, ListView
 from django.urls import reverse, reverse_lazy
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import user_passes_test
+from django.views.decorators.http import require_POST
 from datetime import date
 from django.db.models import Count, Q
 from itertools import groupby
@@ -66,6 +67,28 @@ def trainer_groups(request):
     })
 
 
+@user_passes_test(is_privileged)
+def trainer_group_detail(request, pk):
+    """A weekly training time as a group: who ticked "Teilnahme" for it, with their contacts.
+    Built like the trial group page, without dates, attendance and outcomes. Open to every trainer
+    (e.g. a substitute) and the board, like the trial groups."""
+    session = get_object_or_404(Session.objects.select_related("spot").prefetch_related("trainer__user"), pk=pk)
+    participants = session.participants.select_related("user").order_by("user__last_name", "user__first_name")
+    return render(request, "trainer/training_group_detail.html", {"object": session, "participants": participants})
+
+
+@user_passes_test(is_privileged)
+@require_POST
+def trainer_group_remove(request, pk, profile_pk):
+    """Takes someone off a training time's list, e.g. after ticking "Teilnahme" by accident.
+    They can tick it again on the dashboard at any time."""
+    session = get_object_or_404(Session, pk=pk)
+    profile = get_object_or_404(session.participants.select_related("user"), pk=profile_pk)
+    session.participants.remove(profile)
+    messages.add_message(request, messages.SUCCESS, f"{profile.user.get_full_name()} aus {session.title} entfernt")
+    return HttpResponseRedirect(reverse("trainer_group_detail", args=[session.pk]))
+
+
 @user_passes_test(is_trainer)
 def trainer_data(request):
     trainer = request.user.trainer
@@ -81,21 +104,6 @@ def trainer_data(request):
         "license_expires_soon": license_days_left is not None and 0 <= license_days_left <= 60,
         "documents": documents,
     })
-
-### JQUERY AJAX STUFF ###
-@user_passes_test(is_privileged)
-def get_session_emails(request, sessionid):
-    """
-    Get the emails of all regular members whose age fits the session, plus its trainers
-    """
-    session = get_object_or_404(Session, pk=sessionid)
-    profiles = Profile.objects.filter(status="Ordentliches Mitglied", birthday__isnull=False).select_related("user")
-    users = [p.user for p in profiles if session.allows_age(p.age)]
-    emails = {u.email for u in users}
-    emails |= set(AdditionalEmail.objects.filter(user__in=users).values_list("email", flat=True))
-    emails |= set(session.trainer.values_list("trainer_email", flat=True))
-    return JsonResponse({'emailstring': ','.join(sorted(e for e in emails if e))})
-
 
 class TrainerListView(LoginRequiredMixin, PrivilegedRequiredMixin, ListView):
     queryset = Trainer.objects.filter(active=True).select_related("user").order_by("user__last_name")

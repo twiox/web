@@ -975,14 +975,9 @@ footer{
 .trainer_groups__sub{
     margin: $padding_big 0 4px 0;
 }
-// trainer document: a weekly training time as card (not a link yet, so no hover)
+// trainer document: a weekly training time as card, links to its group page
 .training_group_card{
-    // centred like the trial group cards, which get it from being a link
     align-items: center;
-    text-align: center;
-    &:hover, &:focus{
-        background-color: $tertiary_bg;
-    }
     .dashboard_card__text i{
         font-size: inherit;
         color: inherit;
@@ -1731,6 +1726,27 @@ footer{
 }
 
 /* Warning sign on a training time that has a notice */
+// dashboard, trainers and the board: the whole training time card opens its training group,
+// like the event cards (a stretched link); the controls in the card stay clickable above it
+.training_card--link{
+    position: relative;
+    .training_card__link{
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        padding: 0;
+    }
+    .training_card__above, #container a{
+        position: relative;
+        z-index: 2;
+    }
+    .tertiary_bg{
+        transition: background-color 0.15s;
+    }
+    &:hover .tertiary_bg{
+        background-color: lighten($tertiary_bg, 4%);
+    }
+}
 // first row of a training time card: buttons or age on the left, warning sign on the right
 .session_card_top{
     display: flex;

@@ -130,6 +130,8 @@ def index(request):
     sessions = list(Session.objects.prefetch_related("messages").order_by("start_time"))
     for session in sessions:
         session.visible = privileged or session.allows_age(age)
+        # "Teilnahme" only where the member's age fits (for trainers and the board too)
+        session.can_participate = session.allows_age(age)
         # titles of the notices linked to this session, shown as a small warning sign
         session.notices = [notice.title for notice in session.messages.all()]
     session_days = sorted({(x.day, x.weekday, x.order) for x in sessions}, key=lambda x: x[2])
@@ -600,15 +602,21 @@ def update_memberparticipant(request):
 
 
 """FOR THE SESSIONS"""
-# this happens just in the background, no return value...
+@login_required
+@require_POST
 def session_participation_toggle(request):
-    session = Session.objects.get(pk=int(request.GET.get('pk')))
-    user = request.user
-    if user.profile in session.participants.all():
-        session.participants.remove(user.profile)
+    """The "Teilnahme" box on a training time card, only where the member's age fits."""
+    session = get_object_or_404(Session, pk=request.POST.get("pk") or 0)
+    profile = request.user.profile
+    if not session.allows_age(profile.age):
+        return JsonResponse({"success": False, "error": "Diese Trainingszeit passt nicht zu deinem Alter."}, status=403)
+    if session.participants.filter(pk=profile.pk).exists():
+        session.participants.remove(profile)
+        participating = False
     else:
-        session.participants.add(user.profile)
-    return JsonResponse({"success": True})
+        session.participants.add(profile)
+        participating = True
+    return JsonResponse({"success": True, "participating": participating})
 
 
 class SessionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
