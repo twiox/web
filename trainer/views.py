@@ -88,19 +88,26 @@ class TrainerListView(LoginRequiredMixin, PrivilegedRequiredMixin, ListView):
     queryset = Trainer.objects.filter(active=True).select_related("user").order_by("user__last_name")
     template_name = "user_handling/trainer_list.html"
 
-class TrainerDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
-    model = Trainer
-    template_name = "user_handling/trainer_confirm_delete.html"
-    permission_required = "members.delete_trainer"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # deactivated trainers keep their data (see TrainerDeleteView), listed collapsed below
+        context["inactive_trainers"] = Trainer.objects.filter(active=False).select_related("user").order_by("user__last_name")
+        return context
 
-    def get_success_url(self):
-        return reverse("trainer_list")
+class TrainerDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    """Deactivates straight from the list, without a confirmation page: it can be undone
+    in the "Inaktive Trainer*innen" section below the list."""
+
+    model = Trainer
+    permission_required = "members.delete_trainer"
+    http_method_names = ["post"]
 
     def form_valid(self, form):
         # deactivate instead of delete, see member_role in user_handling/views.py
         self.object.active = False
         self.object.save()
-        return HttpResponseRedirect(self.get_success_url())
+        messages.add_message(self.request, messages.SUCCESS, f"{self.object.user.get_full_name()} deaktiviert")
+        return HttpResponseRedirect(reverse("trainer_list"))
 
 class TrainerUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Trainer

@@ -1053,6 +1053,10 @@ footer{
         border-bottom: 2px solid $primary;
     }
 }
+// trainer list: the deactivated trainers, collapsed below the active ones
+.inactive_trainers{
+    margin-top: $padding_big;
+}
 .archive_switch{
     margin: 0;
     border-bottom: none;

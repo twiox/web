@@ -33,12 +33,16 @@
             <tbody>
             {% for object in object_list %}
                 <tr>
-                    <td>
+                    <td class="table_actions">
                         {% if perms.members.change_trainer %}
                             <a href="{% url 'trainer_update_form' object.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
                         {% endif %}
                         {% if perms.members.delete_trainer %}
-                            <a href="{% url 'trainer_delete' object.pk %}" title="Deaktivieren"><i class="far fa-minus-square"></i></a>
+                            {# no confirmation page: it can be undone below under "Inaktive Trainer*innen" #}
+                            <form method="POST" action="{% url 'trainer_delete' object.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="icon_button" title="Deaktivieren"><i class="far fa-minus-square"></i></button>
+                            </form>
                         {% endif %}
                     </td>
                     <td>{{ object.user.last_name }}, {{ object.user.first_name }}</td>
@@ -61,5 +65,72 @@
             </tbody>
         </table>
     </div>
+
+    {# deactivated trainers keep their data; collapsed, opened when needed #}
+    {% if inactive_trainers %}
+    <details class="archive_month inactive_trainers">
+        <summary>
+            <strong>Inaktive Trainer*innen ({{ inactive_trainers|length }})</strong>
+            <span class="member_panel__hint">Deaktiviert, Daten und Dokumente bleiben erhalten</span>
+        </summary>
+        {% csrf_token %}
+        <div class="member_table_wrapper tertiary_bg">
+            <table class="member_table member_table--static">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Lizenzstufe</th>
+                        <th>Lizenznummer</th>
+                        <th>Gültig bis</th>
+                        <th>Dokumente</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for object in inactive_trainers %}
+                    <tr>
+                        <td class="table_actions">
+                            {% if perms.members.change_trainer %}
+                                <a href="{% url 'trainer_update_form' object.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
+                            {% endif %}
+                            {% if perms.members.add_trainer %}
+                                <button type="button" class="icon_button js_reactivate" title="Reaktivieren"
+                                        data-url="{% url 'member_role' object.user.pk 'trainer' %}" data-name="{{ object.user.get_full_name }}">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                            {% endif %}
+                        </td>
+                        <td>{{ object.user.last_name }}, {{ object.user.first_name }}</td>
+                        <td>{{ object.license_level|default:"" }}</td>
+                        <td>{{ object.license_number|default:"" }}</td>
+                        <td>{{ object.license_valid|date:"d.m.Y" }}</td>
+                        <td>
+                            {% if object.license %}<a class="more_info_button" href="{{ object.license.url }}">Lizenz</a>{% endif %}
+                            {% if object.contract %}<a class="more_info_button" href="{{ object.contract.url }}">Vertrag</a>{% endif %}
+                            {% if object.codex %}<a class="more_info_button" href="{{ object.codex.url }}">Ehrenkodex</a>{% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </details>
+    {% endif %}
 </section>
+
+<script>
+    // reactivate: switches the trainer role back on, as on the member page
+    document.querySelectorAll('.js_reactivate').forEach(button => button.addEventListener('click', async () => {
+        const body = new FormData();
+        body.append('active', '1');
+        body.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        const response = await fetch(button.dataset.url, { method: 'POST', body });
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            snackbar.labelText = `${button.dataset.name} konnte nicht reaktiviert werden`;
+            snackbar.open();
+        }
+    }));
+</script>
 {% endblock %}
