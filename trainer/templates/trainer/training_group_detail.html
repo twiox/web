@@ -149,11 +149,12 @@
                             <td class="heatmap__last">{% if row.last_seen %}{{ row.last_seen|date:"d.m.Y" }}{% else %}<span class="member_panel__hint">noch nie</span>{% endif %}</td>
                         </tr>
                         {% endfor %}
-                        <tr class="heatmap__section"><th class="heatmap__name">Teilnehmende</th></tr>
                         {% endif %}
-                        {# 4) participation per person #}
+                        {# the heading of the participants, with the sort button (script at the end; remembered in this browser) #}
+                        <tr class="heatmap__section"><th class="heatmap__name">Teilnehmende <button type="button" class="heatmap_sort" id="heatmap_sort" data-mode="name" title="Sortierung wechseln: Name / zuletzt da">↕ Name</button></th></tr>
+                        {# 4) participation per person; data-name / data-last for sorting (script at the end) #}
                         {% for row in heatmap %}
-                        <tr>
+                        <tr class="heatmap__person" data-name="{{ row.profile.user.last_name }} {{ row.profile.user.first_name }}" data-last="{{ row.last_seen|date:'Y-m-d' }}">
                             {# members who cancelled: greyed out, the date in the tooltip #}
                             <th class="heatmap__name{% if row.profile.status == 'Kündigung' %} heatmap__name--cancelled{% endif %}"{% if row.profile.status == 'Kündigung' %} title="Kündigung{% if row.profile.membership_end %} zum {{ row.profile.membership_end|date:'d.m.Y' }}{% endif %}"{% endif %}>{{ row.profile.user.last_name }}, {{ row.profile.user.first_name }}</th>
                             {% for entry, state in row.cells %}
@@ -235,4 +236,32 @@
     }));
 </script>
 <script src="{% static 'group_dashboard.js' %}"></script>
+<script>
+    // heatmap: participants by name or by last participation (the latest first, never at the end)
+    (function () {
+        const button = document.getElementById('heatmap_sort');
+        const rows = [...document.querySelectorAll('.heatmap__person')];
+        if (!button || !rows.length) return;
+        const anchor = rows[rows.length - 1].nextElementSibling;  // the "Andere" row, or nothing
+        const parent = rows[0].parentElement;
+        const labels = { name: '↕ Name', last: '↕ zuletzt da' };
+        function apply(mode) {
+            const byName = (a, b) => a.dataset.name.localeCompare(b.dataset.name, 'de');
+            const sorted = [...rows].sort((a, b) => mode === 'last'
+                ? (b.dataset.last || '').localeCompare(a.dataset.last || '') || byName(a, b)
+                : byName(a, b));
+            sorted.forEach(row => parent.insertBefore(row, anchor));
+            button.dataset.mode = mode;
+            button.textContent = labels[mode];
+        }
+        let saved = 'name';
+        try { saved = localStorage.getItem('heatmap_sort') === 'last' ? 'last' : 'name'; } catch (error) { /* private mode */ }
+        apply(saved);
+        button.addEventListener('click', () => {
+            const mode = button.dataset.mode === 'name' ? 'last' : 'name';
+            apply(mode);
+            try { localStorage.setItem('heatmap_sort', mode); } catch (error) { /* private mode */ }
+        });
+    })();
+</script>
 {% endblock %}

@@ -1083,6 +1083,22 @@ footer{
 .group_dash__restricted{
     margin: 0 0 $padding_small 0;
 }
+// the small sort button next to "Teilnehmende" in the heatmap
+.heatmap_sort{
+    margin-left: 6px;
+    padding: 1px 8px;
+    border: 1px solid $quartiary_bg;
+    border-radius: 10px;
+    background: none;
+    color: $font_col;
+    font-size: $font_small;
+    text-transform: none;
+    cursor: pointer;
+    &:hover{
+        border-color: $primary;
+        color: $header_col;
+    }
+}
 .heatmap_legend{
     display: flex;
     flex-wrap: wrap;
