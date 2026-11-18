@@ -1410,9 +1410,11 @@ footer{
     --freq-once: #2a78d6;
     --freq-twice: #5598e7;
     --freq-more: #9ec5f4;
+    --freq-trainers: #d95926;  // orange: the second slot of the validated palette, distinct from the blues
     &__key--once{ background-color: var(--freq-once); }
     &__key--twice{ background-color: var(--freq-twice); }
     &__key--more{ background-color: var(--freq-more); }
+    &__key--trainers{ background-color: var(--freq-trainers); }
     &__weekly{
         position: relative;  // for the tooltip
     }
@@ -1474,6 +1476,7 @@ footer{
         &--once{ background-color: var(--freq-once); }
         &--twice{ background-color: var(--freq-twice); }
         &--more{ background-color: var(--freq-more); }
+        &--trainers{ background-color: var(--freq-trainers); }
     }
     &__week{
         height: var(--label);

@@ -128,12 +128,16 @@
         </div>
     </div>
 
-    {# 5. participation over all trainings: distinct members per week, split by how often they came #}
+    {# 5. participation over all trainings: distinct members per week, split by how often they came, and the trainers on top #}
     <h3>Teilnahme pro Woche</h3>
     <div class="tester_stats board_dash__stats">
         <div class="session_card">
             <span class="tester_stats__number">{{ avg_members_per_week }}</span>
             <span>Mitglieder pro Woche im Schnitt</span>
+        </div>
+        <div class="session_card">
+            <span class="tester_stats__number">{{ avg_trainers_per_week }}</span>
+            <span>Trainer*innen pro Woche im Schnitt</span>
         </div>
         <div class="session_card">
             <span class="tester_stats__number">{{ avg_visits_per_week }}</span>
@@ -149,15 +153,17 @@
             <span><i class="board_dash__key board_dash__key--once"></i> 1× in der Woche</span>
             <span><i class="board_dash__key board_dash__key--twice"></i> 2×</span>
             <span><i class="board_dash__key board_dash__key--more"></i> 3× und öfter</span>
+            <span><i class="board_dash__key board_dash__key--trainers"></i> Trainer*innen</span>
         </div>
-        <p class="member_panel__hint">Verschiedene Mitglieder pro Kalenderwoche, letzte {{ weeks_count }} Wochen (nur Mitglieder mit Konto, jede Trainingsstunde einmal pro Person). Die Säulenhöhe ist die Zahl der Mitglieder, geteilt danach, wie oft sie in der Woche da waren. Durchschnitte über die {{ weeks_held }} Wochen mit Training.</p>
+        <p class="member_panel__hint">Verschiedene Mitglieder pro Kalenderwoche, letzte {{ weeks_count }} Wochen (nur Mitglieder mit Konto, jede Trainingsstunde einmal pro Person). Die Säule zeigt die Mitglieder, geteilt danach, wie oft sie in der Woche da waren, und oben die Trainer*innen (wer in der Woche trainiert hat, zählt nur dort). Durchschnitte über die {{ weeks_held }} Wochen mit Anwesenheit.</p>
         <div class="board_dash__columns_wrap">
             <div class="board_dash__columns" id="weekly_chart">
                 {% for tick in weeks_ticks %}<span class="board_dash__gridline" style="--at: {{ tick.pct }}"><small>{{ tick.value }}</small></span>{% endfor %}
                 {% for w in weeks %}
                 <div class="board_dash__column{% if forloop.last %} board_dash__column--current{% endif %}" tabindex="0"
-                     data-tip="{{ w.members }} Mitglieder|1×: {{ w.once }} · 2×: {{ w.twice }} · 3×+: {{ w.more }}|KW {{ w.week }}, ab {{ w.monday|date:'d.m.Y' }}{% if forloop.last %} (laufende Woche){% endif %}">
+                     data-tip="{{ w.people }} Personen|{{ w.members }} Mitglieder (1×: {{ w.once }} · 2×: {{ w.twice }} · 3×+: {{ w.more }})|{{ w.trainers }} Trainer*innen|KW {{ w.week }}, ab {{ w.monday|date:'d.m.Y' }}{% if forloop.last %} (laufende Woche){% endif %}">
                     <div class="board_dash__stack">
+                        {% if w.trainers %}<span class="board_dash__seg board_dash__seg--trainers" style="height: {{ w.pct.trainers }}%"></span>{% endif %}
                         {% if w.more %}<span class="board_dash__seg board_dash__seg--more" style="height: {{ w.pct.more }}%"></span>{% endif %}
                         {% if w.twice %}<span class="board_dash__seg board_dash__seg--twice" style="height: {{ w.pct.twice }}%"></span>{% endif %}
                         {% if w.once %}<span class="board_dash__seg board_dash__seg--once" style="height: {{ w.pct.once }}%"></span>{% endif %}
@@ -171,9 +177,9 @@
         <details class="group_dash__table">
             <summary>Als Tabelle</summary>
             <table class="board_dash__table">
-                <thead><tr><th>KW</th><th>ab</th><th>Mitglieder</th><th>1×</th><th>2×</th><th>3×+</th></tr></thead>
+                <thead><tr><th>KW</th><th>ab</th><th>Mitglieder</th><th>1×</th><th>2×</th><th>3×+</th><th>Trainer*innen</th></tr></thead>
                 <tbody>
-                {% for w in weeks %}<tr><td>{{ w.week }}</td><td>{{ w.monday|date:"d.m.Y" }}</td><td>{{ w.members }}</td><td>{{ w.once }}</td><td>{{ w.twice }}</td><td>{{ w.more }}</td></tr>{% endfor %}
+                {% for w in weeks %}<tr><td>{{ w.week }}</td><td>{{ w.monday|date:"d.m.Y" }}</td><td>{{ w.members }}</td><td>{{ w.once }}</td><td>{{ w.twice }}</td><td>{{ w.more }}</td><td>{{ w.trainers }}</td></tr>{% endfor %}
                 </tbody>
             </table>
         </details>

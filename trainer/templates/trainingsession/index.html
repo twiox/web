@@ -22,7 +22,7 @@
     <div class="member_toolbar">
         <h1>{% if entry %}Trainingsstunde bearbeiten{% else %}Neue Trainingsstunde{% endif %}</h1>
     </div>
-    <p class="member_panel__hint">Wähle die Trainingszeit aus, dann werden Training und Uhrzeit automatisch ausgefüllt. {% if not entry %}{% if is_trainer %}Teilnehmende trägst du im nächsten Schritt ein.{% else %}Trainer*innen und Teilnehmende trägst du im nächsten Schritt ein.{% endif %}{% endif %}</p>
+    <p class="member_panel__hint">Wähle die Trainingszeit aus, dann werden Training und Uhrzeit automatisch ausgefüllt (auf volle Stunden: z.&nbsp;B. 17:15–18:45 als 17:00–19:00). {% if not entry %}{% if is_trainer %}Teilnehmende trägst du im nächsten Schritt ein.{% else %}Trainer*innen und Teilnehmende trägst du im nächsten Schritt ein.{% endif %}{% endif %}</p>
 
     <form method="POST" class="session_card">
         {% csrf_token %}

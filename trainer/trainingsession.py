@@ -218,12 +218,21 @@ def search(request, pk):
     return render(request, 'trainingsession/snippet_searchresult.html', context)
 
 # to populate the session form fields
-def fill_session_details(request):
-    session = get_object_or_404(Session, pk=request.GET.get("session_id") or None)
+def billed_hours(start, end):
+    """Times for the entry (and so the invoice): the start rounded down, the end rounded up to the
+    full hour, so e.g. a 17:15–18:45 training is entered as 17:00–19:00."""
+    end_hour = end.hour + (1 if end.minute or end.second else 0)
+    # "24:00" is no value for the time field: a training ending after 23:00 keeps its end
+    return f"{start.hour:02d}:00", end.strftime("%H:%M") if end_hour >= 24 else f"{end_hour:02d}:00"
 
+
+def fill_session_details(request):
+    """Fills the entry form after choosing the training time (rounded times, see billed_hours)."""
+    session = get_object_or_404(Session, pk=request.GET.get("session_id") or None)
+    start, end = billed_hours(session.start_time, session.end_time)
     return JsonResponse({
-        "start_time": session.start_time.strftime("%H:%M"),
-        "end_time": session.end_time.strftime("%H:%M"),
+        "start_time": start,
+        "end_time": end,
         "group": session.billing_label,
     })
 

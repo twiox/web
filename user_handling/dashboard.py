@@ -10,8 +10,8 @@ from datetime import date, timedelta
 
 from django.db.models import Count, Max
 
-from members.models import Profile, Session
-from trainer.models import TrainingSessionParticipant
+from members.models import Profile, Session, Trainer
+from trainer.models import TrainingSessionEntry, TrainingSessionParticipant
 
 STATUS_ORDER = ["Ordentliches Mitglied", "Förderndes Mitglied", "Pausiertes Mitglied", "Kündigung"]
 AGE_BANDS = [("unter 9", 0, 8), ("9–13", 9, 13), ("14–17", 14, 17), ("18–29", 18, 29), ("30–49", 30, 49), ("50+", 50, 200)]
@@ -76,7 +76,9 @@ def board_dashboard(today=None):
     biggest = max([g["count"] for g in groups] + [1])
     for group in groups:
         group["pct"] = round(group["count"] / biggest * 85)
-    without_group = [p for p in members if p.pk not in on_list]
+    # active trainers are at the trainings as trainers, not missing from a group
+    trainers = set(Trainer.objects.filter(active=True).values_list("user_id", flat=True))
+    without_group = [p for p in members if p.pk not in on_list and p.user_id not in trainers]
     for p in without_group:
         p.last_seen = last_seen.get(p.user_id)
         p.last_entry = last_visit.get(p.user_id)
@@ -121,13 +123,15 @@ def nice_step(top):
 
 
 def weekly_participation(today):
-    """Per calendar week: how many distinct members were at a training, and how many of them came
-    once, twice or three times and more. Members only (guests and trial participants have no
-    account); each Trainingsstunde counts once per person, even if it was entered twice."""
+    """Per calendar week: how many distinct members were at a training, how many of them came once,
+    twice or three times and more, and how many trainers trained (as trainer or co-trainer). Someone
+    who trained in a week counts once, as trainer, even if they also took part somewhere that week.
+    Members with an account only (guests and trial participants have none); each Trainingsstunde
+    counts once per person, even if it was entered twice."""
     this_monday = today - timedelta(days=today.weekday())
     first_monday = this_monday - timedelta(weeks=WEEKS - 1)
     visits = {}  # (monday, user) -> {entry}
-    held = set()  # weeks with at least one training (for the averages)
+    held = set()  # weeks with recorded attendance (for the averages)
     rows = TrainingSessionParticipant.objects.filter(
         user__isnull=False, session__date__date__gte=first_monday, session__date__date__lte=today
     ).values_list("user", "session_id", "session__date")
@@ -135,20 +139,30 @@ def weekly_participation(today):
         monday = day.date() - timedelta(days=day.weekday())
         visits.setdefault((monday, user_id), set()).add(entry_id)
         held.add(monday)
+    trained = set()  # (monday, user)
+    for through in (TrainingSessionEntry.trainer.through, TrainingSessionEntry.cotrainer.through):
+        for user_id, day in through.objects.filter(
+            trainingsessionentry__date__date__gte=first_monday, trainingsessionentry__date__date__lte=today
+        ).values_list("trainer__user_id", "trainingsessionentry__date"):
+            monday = day.date() - timedelta(days=day.weekday())
+            trained.add((monday, user_id))  # not in held: a week with only trainers entered has no attendance recorded
+    for key in trained:  # counted as trainer that week, not again as participant
+        visits.pop(key, None)
 
     weeks = []
     for n in range(WEEKS):
         monday = first_monday + timedelta(weeks=n)
         counts = [len(entries) for (week, _), entries in visits.items() if week == monday]
         once, twice, more = (sum(1 for c in counts if c == 1), sum(1 for c in counts if c == 2), sum(1 for c in counts if c >= 3))
+        trainers = sum(1 for week, _ in trained if week == monday)
         weeks.append({"monday": monday, "week": monday.isocalendar()[1], "members": len(counts),
-                      "once": once, "twice": twice, "more": more})
-    top = max([w["members"] for w in weeks] + [1])
+                      "once": once, "twice": twice, "more": more, "trainers": trainers, "people": len(counts) + trainers})
+    top = max([w["people"] for w in weeks] + [1])
     step = nice_step(top)
     top = -(-top // step) * step  # rounded up to the next gridline
     # as text with a dot: in the German locale the template would print "33,3", which CSS does not read
     for w in weeks:
-        w["pct"] = {k: f"{w[k] / top * 100:.2f}" for k in ("members", "once", "twice", "more")}
+        w["pct"] = {k: f"{w[k] / top * 100:.2f}" for k in ("members", "once", "twice", "more", "trainers")}
 
     member_weeks = [len(entries) for entries in visits.values()]
     total = len(member_weeks) or 1
@@ -158,6 +172,7 @@ def weekly_participation(today):
         "weeks_ticks": [{"value": v, "pct": f"{v / top * 100:.2f}"} for v in range(0, top + 1, step)],
         "weeks_held": len(held),
         "avg_members_per_week": round(sum(w["members"] for w in weeks if w["monday"] in held) / (len(held) or 1), 1),
+        "avg_trainers_per_week": round(sum(w["trainers"] for w in weeks if w["monday"] in held) / (len(held) or 1), 1),
         "avg_visits_per_week": round(sum(member_weeks) / total, 2),
         "share_once": round(sum(1 for c in member_weeks if c == 1) / total * 100),
         "share_twice": round(sum(1 for c in member_weeks if c == 2) / total * 100),
