@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django import forms
-from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.models import User
 from members.models import Profile, AdditionalEmail
 
@@ -19,7 +19,8 @@ class MdcFormMixin:
         for name, field in self.fields.items():
             attrs = field.widget.attrs
             attrs.setdefault("class", "mdc-text-field__input")
-            attrs.setdefault("aria-labelledby", f"{self[name].id_for_label}-label")
+            # a fresh bound field: self[name] would be cached with the current label, and labels set later in __init__ would not show
+            attrs.setdefault("aria-labelledby", f"{field.get_bound_field(self, name).id_for_label}-label")
             if isinstance(field.widget, forms.Textarea):
                 attrs.update(rows=8, cols=80)
 
@@ -209,3 +210,42 @@ class UsernameForm(MdcFormMixin, forms.ModelForm):
 
 class MemberPasswordChangeForm(MdcFormMixin, PasswordChangeForm):
     """Django's password change form in the site's field style."""
+
+
+# login and password reset (the views come from Django, see urls.py)
+
+class LoginForm(MdcFormMixin, AuthenticationForm):
+    """Username or e-mail address (see backends.EmailBackend) and password."""
+
+    # Django's message says both fields are case-sensitive; ours aren't (only the password is)
+    error_messages = {**AuthenticationForm.error_messages, "invalid_login": "Nutzername/E-Mail oder Passwort stimmen nicht."}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["username"].label = "Nutzername/Email"
+        self.fields["password"].label = "Passwort"
+        self.fields["username"].widget.attrs.pop("autofocus", None)  # as before: no field focused on load
+
+
+class ResetRequestForm(MdcFormMixin, PasswordResetForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["email"].label = "Deine E-Mail-Adresse"
+
+    def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name=None):
+        """Our own e-mail instead of Django's (formal, partly English): German, in the club layout, with a plain-text part."""
+        from django.conf import settings
+
+        from .profile import html_email  # profile.py imports this module
+
+        context["valid_days"] = settings.PASSWORD_RESET_TIMEOUT // (60 * 60 * 24)
+        html_email("Twio X e.V. | Passwort zurücksetzen", "accounts/emails/password_reset.html", context, [to_email]).send()
+
+
+class ResetPasswordForm(MdcFormMixin, SetPasswordForm):
+    """The new password from the link in the reset e-mail."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["new_password1"].label = "Neues Passwort"
+        self.fields["new_password2"].label = "Neues Passwort bestätigen"

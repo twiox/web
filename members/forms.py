@@ -3,7 +3,7 @@ from decimal import Decimal, InvalidOperation
 
 from django import forms
 from django.db.models import Q
-from user_handling.forms import MdcFormMixin, date_widget
+from accounts.forms import MdcFormMixin, date_widget
 from .event_content import clean_content
 from .models import Event, EventAsset, Message, Session, Spot, Document, Trainer
 

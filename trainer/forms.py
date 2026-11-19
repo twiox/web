@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from django import forms
 from members.models import Trainer
-from user_handling.forms import MdcFormMixin, date_widget
+from accounts.forms import MdcFormMixin, date_widget
 from .models import TrainingSessionEntry
 
 def minutes(value):

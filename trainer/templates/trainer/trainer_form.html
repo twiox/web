@@ -24,18 +24,18 @@
                 <h3>Kontakt</h3>
                 <p class="member_panel__hint">Öffentlich, wird bei den Trainingszeiten angezeigt.</p>
                 <div class="member_fields">
-                    {% include "user_handling/snippets/field.html" with field=form.trainer_telnr %}
-                    {% include "user_handling/snippets/field.html" with field=form.trainer_email %}
+                    {% include "accounts/snippets/field.html" with field=form.trainer_telnr %}
+                    {% include "accounts/snippets/field.html" with field=form.trainer_email %}
                 </div>
             </div>
 
             <div class="session_card">
                 <h3>Lizenz{% if form.salary %} & Bezahlung{% endif %}</h3>
                 <div class="member_fields">
-                    {% include "user_handling/snippets/field.html" with field=form.license_level %}
-                    {% include "user_handling/snippets/field.html" with field=form.license_number %}
-                    {% include "user_handling/snippets/field.html" with field=form.license_valid %}
-                    {% if form.salary %}{% include "user_handling/snippets/field.html" with field=form.salary %}{% endif %}
+                    {% include "accounts/snippets/field.html" with field=form.license_level %}
+                    {% include "accounts/snippets/field.html" with field=form.license_number %}
+                    {% include "accounts/snippets/field.html" with field=form.license_valid %}
+                    {% if form.salary %}{% include "accounts/snippets/field.html" with field=form.salary %}{% endif %}
                 </div>
             </div>
 

@@ -5,5 +5,5 @@ class MembersConfig(AppConfig):
     name = 'members'
     
     def ready(self):
-        import user_handling.signals #important, if we have signals
+        import accounts.signals #important, if we have signals
         import members.signals

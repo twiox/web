@@ -1,5 +1,5 @@
 from .dashboard import board_dashboard
-from .forms import MemberForm, ProfileForm, AdditionalEmailForm
+from .forms import AdditionalEmailForm, MemberForm, ProfileForm, ResetPasswordForm, ResetRequestForm
 from members.roles import BoardRequiredMixin, board_required, is_board, is_privileged
 from members.models import (
     Chairman,
@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)
 @login_required
 @board_required
 def index(request):
-    return render(request, "user_handling/index.html")
+    return render(request, "accounts/index.html")
 
 
 def member_number(user):
@@ -131,7 +131,7 @@ def register(request):
         profile_form = ProfileForm(initial=new_member_initial())
     return render(
         request,
-        "user_handling/register.html",
+        "accounts/register.html",
         context={
             "user_form": user_form,
             "profile_form": profile_form,
@@ -146,7 +146,7 @@ def register(request):
 
 def send_set_password_email(request, user):
     message = render_to_string(
-        "user_handling/emails/set_password.html",
+        "accounts/emails/set_password.html",
         {
             "user": user,
             "protocol": request.scheme,
@@ -163,7 +163,7 @@ def send_set_password_email(request, user):
 
 
 class MemberListView(LoginRequiredMixin, BoardRequiredMixin, ListView):
-    template_name = "user_handling/member_list.html"
+    template_name = "accounts/member_list.html"
 
     def get_context_data(self, **kwargs):
         # the board's dashboard below the list
@@ -183,7 +183,7 @@ class MemberListView(LoginRequiredMixin, BoardRequiredMixin, ListView):
 
 class UserDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
     model = User
-    template_name = "user_handling/user_confirm_delete.html"
+    template_name = "accounts/user_confirm_delete.html"
 
     def get_success_url(self):
         return reverse("member_list")
@@ -191,7 +191,7 @@ class UserDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
 
 class ChairmanDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
     model = Chairman
-    template_name = "user_handling/chairman_confirm_delete.html"
+    template_name = "accounts/chairman_confirm_delete.html"
 
     def form_valid(self, form):
         # deactivate instead of delete, see member_role
@@ -206,7 +206,7 @@ class ChairmanDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
 class ChairmanUpdateView(LoginRequiredMixin, BoardRequiredMixin, UpdateView):
     model = Chairman
     fields = ["public_telnr", "public_email", "competences", "image", "show"]
-    template_name = "user_handling/chairman_form.html"
+    template_name = "accounts/chairman_form.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -216,10 +216,12 @@ class ChairmanUpdateView(LoginRequiredMixin, BoardRequiredMixin, UpdateView):
 
 class ChairmanListView(LoginRequiredMixin, BoardRequiredMixin, ListView):
     queryset = Chairman.objects.filter(active=True).select_related("user").order_by("user__last_name")
-    template_name = "user_handling/chairman_list.html"
+    template_name = "accounts/chairman_list.html"
 
 
 class TwioPasswordResetView(PasswordResetView):
+    form_class = ResetRequestForm
+
     def get_success_url(self):
         messages.add_message(
             self.request, messages.SUCCESS, "Email verschickt. Bitte schau in deinen Posteingang"
@@ -235,16 +237,18 @@ class TwioLogoutView(LogoutView):
 
 
 class TwioPasswordResetConfirmView(PasswordResetConfirmView):
+    form_class = ResetPasswordForm
+
     def get_success_url(self):
         messages.add_message(
             self.request, messages.SUCCESS, "Passwort erstellt. Du kannst dich nun einloggen"
         )
-        return reverse("index")
+        return reverse("login")
 
 
 @user_passes_test(is_privileged)
 def mailing_lists(request):
-    return render(request, "user_handling/mailing-lists.html")
+    return render(request, "accounts/mailing-lists.html")
 
 
 def emails_of(users):
@@ -290,7 +294,7 @@ def member_detail_form(request, pk):
     trainer = Trainer.objects.filter(user=user, active=True).first()
     return render(
         request,
-        "user_handling/ajax/member_detail.html",
+        "accounts/ajax/member_detail.html",
         context={
             "user": user,
             "user_form": MemberForm(instance=user),

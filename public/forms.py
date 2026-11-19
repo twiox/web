@@ -1,5 +1,5 @@
 from django import forms
-from user_handling.forms import MdcFormMixin, date_widget
+from accounts.forms import MdcFormMixin, date_widget
 from members.models import calculate_age
 from members.models import Session
 from trainer.models import TrainingSessionParticipant

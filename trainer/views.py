@@ -383,7 +383,7 @@ def trainer_data(request):
 
 class TrainerListView(LoginRequiredMixin, PrivilegedRequiredMixin, ListView):
     queryset = Trainer.objects.filter(active=True).select_related("user").order_by("user__last_name")
-    template_name = "user_handling/trainer_list.html"
+    template_name = "accounts/trainer_list.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -399,7 +399,7 @@ class TrainerDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
     http_method_names = ["post"]
 
     def form_valid(self, form):
-        # deactivate instead of delete, see member_role in user_handling/views.py
+        # deactivate instead of delete, see member_role in accounts/views.py
         if conflict := self.object.schedule_conflict():
             messages.add_message(self.request, messages.ERROR, conflict)
             return HttpResponseRedirect(reverse("trainer_list"))

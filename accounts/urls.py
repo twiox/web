@@ -1,10 +1,13 @@
-from django.urls import path
+from django.contrib.auth import views as auth_views
+from django.urls import include, path
 from . import views
+from .forms import LoginForm
 from trainer import views as trainer_views
 from members import views as member_views
 from public import views as public_views
 
-urlpatterns = [
+# the board pages, under /vorstand/
+board_urlpatterns = [
     path("", views.index, name="chairman_index"),
     path('mitglieder/', views.MemberListView.as_view(), name="member_list"),
     path('mitglieder/<int:pk>/entfernen', views.UserDeleteView.as_view(), name="remove_user"),
@@ -40,4 +43,15 @@ urlpatterns = [
     path("ajax/mitglieder/<int:pk>/aktivieren", views.member_activate, name="member_activate"),
     path("ajax/mitglieder/<int:pk>/weitere_email/löschen", views.delete_additional_email_chair, name="delete_additional_email_chair"),
     path("ajax/mitglieder/<int:pk>/rolle/<str:role>", views.member_role, name="member_role"),
+]
+
+# included at the site root (twio_web/urls.py)
+urlpatterns = [
+    path("vorstand/", include(board_urlpatterns)),
+    path("mitglieder/profil/", include("accounts.profile")),
+    path("login/", auth_views.LoginView.as_view(template_name="accounts/login.html", authentication_form=LoginForm), name="login"),
+    path("logout/", views.TwioLogoutView.as_view(), name="logout"),
+    path("passwort_zurücksetzen/", views.TwioPasswordResetView.as_view(template_name="accounts/password_reset.html"), name="password_reset"),
+    path("passwort_zurücksetzen/bestätigen/<str:uidb64>/<str:token>/",
+         views.TwioPasswordResetConfirmView.as_view(template_name="accounts/password_reset_confirm.html"), name="password_reset_confirm"),
 ]

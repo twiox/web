@@ -1,7 +1,8 @@
 from django.urls import path, include
 from . import views
 
-urlpatterns = [
+# the Interessierte pages, under /interessierte/
+interested_urlpatterns = [
     path("", views.interested_index, name="interested_index"),
     path("interessierte-angebot", views.interested_offers, name="offers"),
     path("interessierte-philosophie", views.interested_philosophy, name="philosophy"),
@@ -65,4 +66,14 @@ urlpatterns = [
         views.EventMerchDeleteView.as_view(),
         name="eventmerch_delete",
     ),
+]
+
+# included at the site root (twio_web/urls.py)
+urlpatterns = [
+    path("", views.landing_page, name="landing"),
+    path("impressum", views.impressum_page, name="impressum"),
+    path("datenschutzerklärung", views.data_protection_page, name="dataprotection"),
+    # its own section in the navigation, which highlights it by /veranstalter/
+    path("veranstalter/", views.organizers_index, name="organizers_index"),
+    path("interessierte/", include(interested_urlpatterns)),
 ]

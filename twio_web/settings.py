@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     "members.apps.MembersConfig",
     "public.apps.PublicConfig",
     "trainer.apps.TrainerConfig",
-    "user_handling.apps.UserHandlingConfig",
+    "accounts.apps.AccountsConfig",
     "six",
     "multiselectfield",
     "compressor",
@@ -146,7 +146,7 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 if not EMAIL_HOST:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-AUTHENTICATION_BACKENDS = ["user_handling.backends.EmailBackend"]
+AUTHENTICATION_BACKENDS = ["accounts.backends.EmailBackend"]
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # traefik terminates TLS and tells Django the original scheme

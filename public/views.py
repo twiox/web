@@ -25,7 +25,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from .forms import OrganizerForm, ProbetrainingForm, PublicEventForm, TeamerForm, TesterForm, TrialDateFormSet, TrialGroupForm
 from members.models import Chairman
-from user_handling.profile import html_email
+from accounts.profile import html_email
 from .models import (
     Teamer,
     PublicEvent,

@@ -58,7 +58,7 @@ class Tester(models.Model):
     board_notes = models.TextField("Vorstandsnotizen", blank=True)
     has_consent = models.BooleanField("Einverständniserklärung liegt vor", default=False)
     # after the trial: did the person join? (empty: not decided yet)
-    # "member" is set automatically once a member with the same name and birthday is saved (user_handling.signals)
+    # "member" is set automatically once a member with the same name and birthday is saved (accounts.signals)
     OUTCOMES = [("", "offen"), ("applied", "Antrag abgegeben"), ("member", "Mitglied"), ("declined", "nicht Mitglied geworden")]
     outcome = models.CharField("Ergebnis", max_length=20, choices=OUTCOMES, blank=True)
     # when the sign-up form was sent; empty for sign-ups from before this field existed

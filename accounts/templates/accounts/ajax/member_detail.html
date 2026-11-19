@@ -31,34 +31,34 @@
     </div>
 
     <div class="member_fields" data-tab-panel="personal">
-        {% include "user_handling/snippets/field.html" with field=user_form.first_name %}
-        {% include "user_handling/snippets/field.html" with field=user_form.last_name %}
-        {% include "user_handling/snippets/field.html" with field=user_form.email %}
-        {% include "user_handling/snippets/field.html" with field=profile_form.telephone %}
-        {% include "user_handling/snippets/field.html" with field=profile_form.address %}
-        {% include "user_handling/snippets/field.html" with field=profile_form.birthday %}
-        {% include "user_handling/snippets/field.html" with field=profile_form.sex %}
+        {% include "accounts/snippets/field.html" with field=user_form.first_name %}
+        {% include "accounts/snippets/field.html" with field=user_form.last_name %}
+        {% include "accounts/snippets/field.html" with field=user_form.email %}
+        {% include "accounts/snippets/field.html" with field=profile_form.telephone %}
+        {% include "accounts/snippets/field.html" with field=profile_form.address %}
+        {% include "accounts/snippets/field.html" with field=profile_form.birthday %}
+        {% include "accounts/snippets/field.html" with field=profile_form.sex %}
         <h6 class="member_fields__heading">Bei Minderjährigen</h6>
-        {% include "user_handling/snippets/field.html" with field=profile_form.parent %}
-        {% include "user_handling/snippets/field.html" with field=profile_form.parent_telnr %}
+        {% include "accounts/snippets/field.html" with field=profile_form.parent %}
+        {% include "accounts/snippets/field.html" with field=profile_form.parent_telnr %}
     </div>
 
     <div class="member_fields" data-tab-panel="club" hidden>
-        {% include "user_handling/snippets/field.html" with field=profile_form.member_num %}
-        {% include "user_handling/snippets/field.html" with field=profile_form.status %}
-        {% include "user_handling/snippets/field.html" with field=profile_form.membership_start %}
-        {% include "user_handling/snippets/field.html" with field=profile_form.membership_end %}
+        {% include "accounts/snippets/field.html" with field=profile_form.member_num %}
+        {% include "accounts/snippets/field.html" with field=profile_form.status %}
+        {% include "accounts/snippets/field.html" with field=profile_form.membership_start %}
+        {% include "accounts/snippets/field.html" with field=profile_form.membership_end %}
     </div>
 
     <div class="member_fields" data-tab-panel="payment" hidden>
-        {% include "user_handling/snippets/field.html" with field=profile_form.zahlungsart %}
-        {% include "user_handling/snippets/field.html" with field=profile_form.beitrag %}
-        {% include "user_handling/snippets/field.html" with field=profile_form.mandatsref %}
+        {% include "accounts/snippets/field.html" with field=profile_form.zahlungsart %}
+        {% include "accounts/snippets/field.html" with field=profile_form.beitrag %}
+        {% include "accounts/snippets/field.html" with field=profile_form.mandatsref %}
     </div>
 
     <div class="member_fields member_fields--wide" data-tab-panel="notes" hidden>
-        {% include "user_handling/snippets/field.html" with field=profile_form.notes_trainer %}
-        {% include "user_handling/snippets/field.html" with field=profile_form.notes_chairman %}
+        {% include "accounts/snippets/field.html" with field=profile_form.notes_trainer %}
+        {% include "accounts/snippets/field.html" with field=profile_form.notes_chairman %}
     </div>
 
     <div class="member_fields" data-tab-panel="emails" hidden>
@@ -79,8 +79,8 @@
             {% endfor %}
         </table>
         <h6 class="member_fields__heading">Neue Adresse hinzufügen</h6>
-        {% include "user_handling/snippets/field.html" with field=email_form.title %}
-        {% include "user_handling/snippets/field.html" with field=email_form.email %}
+        {% include "accounts/snippets/field.html" with field=email_form.title %}
+        {% include "accounts/snippets/field.html" with field=email_form.email %}
     </div>
 
     <div class="member_fields member_fields--wide" data-tab-panel="roles" hidden>

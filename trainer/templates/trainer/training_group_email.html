@@ -24,9 +24,9 @@
                 {# the prefix is part of the subject in the inbox, but not of the notice #}
                 <div class="group_email_form__subject">
                     <span class="group_email_form__prefix" title="Steht vor jedem Betreff, damit man im Postfach sieht, woher die E-Mail kommt">{{ prefix }}</span>
-                    <div>{% include "user_handling/snippets/field.html" with field=form.subject %}</div>
+                    <div>{% include "accounts/snippets/field.html" with field=form.subject %}</div>
                 </div>
-                {# like user_handling/snippets/field.html, with the fixed greeting between label and box: it is part of every e-mail, so it is not typed #}
+                {# like accounts/snippets/field.html, with the fixed greeting between label and box: it is part of every e-mail, so it is not typed #}
                 <div>
                     {% for error in form.body.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
                     <h6>{{ form.body.label }}</h6>

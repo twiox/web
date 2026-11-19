@@ -35,7 +35,7 @@ from .membership import cancellation_dates
 class UserDetailView(LoginRequiredMixin, UpdateView):
     # TODO: get email for every change in "Hinweis"
     model = User
-    template_name = "user_handling/profile/detail.html"
+    template_name = "accounts/profile/detail.html"
     form_class = UpdateMemberInformationForm
 
     def get_object(self, queryset=None):
@@ -78,7 +78,8 @@ def html_email(subject, template, context, to, reply_to=None):
     text = re.sub(r"<br\s*/?>\s*", "\n", html)
     text = re.sub(r"<hr\s*/?>", "\n\n___\n\n", text)
     text = re.sub(r"</(p|li|ul|h\d)>", "\n\n", text)
-    text = re.sub(r"[ \t]+\n", "\n", html_lib.unescape(strip_tags(text)))
+    # without the indentation of the HTML source
+    text = "\n".join(line.strip() for line in html_lib.unescape(strip_tags(text)).splitlines())
     text = re.sub(r"\n{3,}", "\n\n", text).strip()
     message = EmailMultiAlternatives(subject, text, settings.DEFAULT_FROM_EMAIL, to, reply_to=reply_to)
     message.attach_alternative(html, "text/html")
@@ -101,10 +102,10 @@ def profile_cancel(request):
     profile.save(update_fields=["status", "membership_end"])
     context = {"user": request.user, "profile": profile, "end": end, "today": date.today(), "previous_status": previous_status}
     name = request.user.get_full_name()
-    mails = [html_email(f"Twio X e.V. | Kündigung zum {end:%d.%m.%Y}", "user_handling/emails/cancellation_board.html", context, [settings.TO_EMAIL],
+    mails = [html_email(f"Twio X e.V. | Kündigung zum {end:%d.%m.%Y}", "accounts/emails/cancellation_board.html", context, [settings.TO_EMAIL],
                         reply_to=[request.user.email] if request.user.email else None)]
     if request.user.email:
-        mails.insert(0, html_email(f"Twio X e.V. | Deine Kündigung zum {end:%d.%m.%Y}", "user_handling/emails/cancellation_member.html",
+        mails.insert(0, html_email(f"Twio X e.V. | Deine Kündigung zum {end:%d.%m.%Y}", "accounts/emails/cancellation_member.html",
                                    context, [request.user.email], reply_to=[settings.TO_EMAIL]))
     try:
         get_connection().send_messages(mails)
@@ -118,7 +119,7 @@ def profile_cancel(request):
 
 
 class EmailUpdateView(LoginRequiredMixin, FormView):
-    template_name = "user_handling/profile/form.html"
+    template_name = "accounts/profile/form.html"
     form_class = UpdateMemberEmailForm
     extra_context = {"title": "E-Mail-Adresse ändern"}
 
@@ -139,7 +140,7 @@ class EmailUpdateView(LoginRequiredMixin, FormView):
 class PasswordChangeView(LoginRequiredMixin, DjangoPasswordChangeView):
     """Django's view: saves the password and keeps the member logged in."""
 
-    template_name = "user_handling/profile/form.html"
+    template_name = "accounts/profile/form.html"
     form_class = MemberPasswordChangeForm
     success_url = reverse_lazy("profile_detail")
     extra_context = {"title": "Passwort ändern", "hint": "Mindestens 8 Zeichen, nicht nur Ziffern und nicht zu ähnlich zu deinem Namen."}
@@ -150,7 +151,7 @@ class PasswordChangeView(LoginRequiredMixin, DjangoPasswordChangeView):
 
 
 class UsernameUpdateView(LoginRequiredMixin, UpdateView):
-    template_name = "user_handling/profile/form.html"
+    template_name = "accounts/profile/form.html"
     form_class = UsernameForm
     extra_context = {"title": "Nutzername ändern", "hint": "Du kannst dich mit dem Nutzernamen oder deiner E-Mail-Adresse anmelden."}
 
@@ -164,7 +165,7 @@ class UsernameUpdateView(LoginRequiredMixin, UpdateView):
 
 class AddressChangeView(LoginRequiredMixin, UpdateView):
     model = Profile
-    template_name = "user_handling/profile/address.html"
+    template_name = "accounts/profile/address.html"
     form_class = ProfileSelfForm
 
     def get_object(self, queryset=None):

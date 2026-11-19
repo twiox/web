@@ -16,14 +16,13 @@ RUN uv sync --frozen --no-dev
 RUN uv pip install gunicorn
 
 # copy code and prepare build
-COPY interested interested
+COPY accounts accounts
 COPY media media
 COPY members members
-COPY organizers organizers
+COPY public public
 COPY static static
 COPY trainer trainer
 COPY twio_web twio_web
-COPY user_handling user_handling
 RUN uv run manage.py compress --force
 COPY docker-config/start-server.sh ./start.sh
 
