@@ -23,7 +23,7 @@
             {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
             <div class="member_fields member_fields--wide">
                 {% for field in form %}
-                    {% include "user_handling/_field.html" %}
+                    {% include "user_handling/snippets/field.html" %}
                 {% endfor %}
             </div>
         </div>

@@ -17,10 +17,10 @@
     <div>
         <div id="container" style="overflow: visible;">
             <div class="trainer_ui">
-                {% if perms.members.change_spot %}
+                {% if is_privileged %}
                 <a href="{% url 'news_update' object.id  %}" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:17px;"></i></a>
                 {% endif %}
-                {% if perms.members.delete_spot %}
+                {% if is_privileged %}
                 <a href="{% url 'news_delete' object.id  %}" title="Löschen"><i class="far fa-minus-square" style="font-size:17px;"></i></a>
                 {% endif %}
             </div>

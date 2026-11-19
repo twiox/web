@@ -34,15 +34,17 @@
             {% for object in object_list %}
                 <tr>
                     <td class="table_actions">
-                        {% if perms.members.change_trainer %}
+                        {% if is_board %}
                             <a href="{% url 'trainer_update_form' object.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
                         {% endif %}
-                        {% if perms.members.delete_trainer %}
+                        {% if is_board %}
                             {# no confirmation page: it can be undone below under "Inaktive Trainer*innen" #}
-                            <form method="POST" action="{% url 'trainer_delete' object.pk %}">
+                            {% with conflict=object.schedule_conflict %}
+                            <form method="POST" action="{% url 'trainer_delete' object.pk %}"{% if conflict %} title="{{ conflict }}"{% endif %}>
                                 {% csrf_token %}
-                                <button type="submit" class="icon_button" title="Deaktivieren"><i class="far fa-minus-square"></i></button>
+                                <button type="submit" class="icon_button" {% if conflict %}disabled{% else %}title="Deaktivieren"{% endif %}><i class="far fa-minus-square"></i></button>
                             </form>
+                            {% endwith %}
                         {% endif %}
                     </td>
                     <td>{{ object.user.last_name }}, {{ object.user.first_name }}</td>
@@ -90,10 +92,10 @@
                 {% for object in inactive_trainers %}
                     <tr>
                         <td class="table_actions">
-                            {% if perms.members.change_trainer %}
+                            {% if is_board %}
                                 <a href="{% url 'trainer_update_form' object.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
                             {% endif %}
-                            {% if perms.members.add_trainer %}
+                            {% if is_board %}
                                 <button type="button" class="icon_button js_reactivate" title="Reaktivieren"
                                         data-url="{% url 'member_role' object.user.pk 'trainer' %}" data-name="{{ object.user.get_full_name }}">
                                     <i class="fas fa-undo"></i>

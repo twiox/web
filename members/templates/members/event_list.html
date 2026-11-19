@@ -12,7 +12,7 @@
     <div class="member_toolbar">
         <h1>Veranstaltungen</h1>
         <input class="searchbar" id="event_search" type="search" placeholder="Suche nach Name, Ort …">
-        {% if perms.members.add_event %}
+        {% if is_privileged %}
             <a href="{% url 'event_create' %}" class="table_action table_action--primary"><i class="far fa-plus-square"></i> Neue Veranstaltung</a>
         {% endif %}
     </div>
@@ -59,7 +59,7 @@
                         </td>
                         <td class="table_actions">
                             <a href="{% url 'event_detail' event.pk %}" title="Ansehen"><i class="far fa-eye"></i></a>
-                            {% if perms.members.delete_event %}<a href="{% url 'event_delete' event.pk %}" title="Löschen"><i class="far fa-minus-square"></i></a>{% endif %}
+                            {% if is_privileged %}<a href="{% url 'event_delete' event.pk %}" title="Löschen"><i class="far fa-minus-square"></i></a>{% endif %}
                         </td>
                     </tr>
                 {% endfor %}

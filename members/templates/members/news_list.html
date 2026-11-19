@@ -12,7 +12,7 @@
         <div id="container">
         <h1>Alle Beiträge</h1>
             <div class="trainer_ui">
-                {% if perms.members.add_news %}
+                {% if is_privileged %}
                     <a class="blue_font" href="{% url 'news_create' %}"><i class="far fa-plus-square" style="font-size:27px;"></i></a>
                 {% endif %}
             </div>

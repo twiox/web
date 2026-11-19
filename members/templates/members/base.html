@@ -34,13 +34,16 @@
                     <img src="{{ STATIC_URL }}/static/media/twiox_logo.svg">
                 </a>
             </header>
-            <!-- navigationbar; the highlighted section comes from members.context_processors.nav_section -->
+            <!-- navigationbar: the section is highlighted by the URL; everything outside /interessierte/ and
+                 /veranstalter/ is the member area, except the landing page, Impressum and Datenschutz -->
             {% block nav %}
             <nav class="sticky" id="nav">
                 <div class="three_grid">
-                    <a id="members" {% if nav_section == "members" %}class="here_I_am"{% endif %} href="{% url 'index' %}">MITGLIEDER</a>
-                    <a id="interested" {% if nav_section == "interested" %}class="here_I_am"{% endif %} href="{% url 'interested_index'%}">INTERESSIERTE</a>
-                    <a id="organizers" {% if nav_section == "organizers" %}class="here_I_am"{% endif %} href="{% url 'organizers_index' %}">VERANSTALTER</a>
+                    {% with path=request.path page=request.resolver_match.url_name %}
+                    <a id="members" {% if "/interessierte/" not in path and "/veranstalter/" not in path and page != "landing" and page != "impressum" and page != "dataprotection" %}class="here_I_am"{% endif %} href="{% url 'index' %}">MITGLIEDER</a>
+                    <a id="interested" {% if "/interessierte/" in path %}class="here_I_am"{% endif %} href="{% url 'interested_index'%}">INTERESSIERTE</a>
+                    <a id="organizers" {% if "/veranstalter/" in path %}class="here_I_am"{% endif %} href="{% url 'organizers_index' %}">VERANSTALTER</a>
+                    {% endwith %}
                 </div>
             </nav>
             {% endblock %}

@@ -1,6 +1,6 @@
 import csv
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django import forms
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -12,18 +12,15 @@ from django.views.generic import (
     CreateView,
     UpdateView,
     DeleteView,
-    FormView,
 )
-from .roles import BoardRequiredMixin, PrivilegedRequiredMixin, is_board, is_chairman, is_privileged, is_trainer
+from .roles import BoardRequiredMixin, PrivilegedRequiredMixin, board_required, privileged_required, is_board, is_chairman, is_privileged, is_trainer
 from .models import (
     Event,
-    Profile,
     Chairman,
     Session,
     Spot,
     Message,
     News,
-    AdditionalEmail,
     ShopItem,
     Image,
     Gallery,
@@ -31,43 +28,24 @@ from .models import (
     Document,
     EventAsset,
 )
-from django.contrib.auth.decorators import login_required, permission_required
-from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import (
     LoginRequiredMixin,
     UserPassesTestMixin,
-    PermissionRequiredMixin,
 )
 from .forms import (
-    UsernameForm,
-    MemberPasswordChangeForm,
-    ProfileSelfForm,
     EventUpdateParticipantForm,
     EventUpdateParticipantForm2,
     SessionForm,
     EventForm,
-    UpdateMemberInformationForm,
-    UpdateMemberEmailForm,
     SpotForm,
     MessageForm,
     EventFileForm,
 )
 from django.contrib import messages
 from datetime import datetime, timedelta
-from django.contrib.auth.models import User
-from django.core.mail import EmailMessage
-import html as html_lib
-import re
-from datetime import date
-from django.core.mail import EmailMultiAlternatives, get_connection
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
-from .membership import cancellation_dates
-from user_handling.forms import AdditionalEmailForm
-from django.contrib.auth.views import PasswordChangeView
-from django.conf import settings
 from django.utils.text import slugify
 import markdown
 
@@ -115,7 +93,6 @@ def past_events(request):
 @login_required
 def index(request):
     """This is the View for the homepage"""
-    # TODO: meet with martin and implement django-crontabs. this is hardly an acceptable soultion -.-
     # we never have more than 1-2 messages, so thats okay for now
     for msg in Message.objects.all():
         if msg.delme:
@@ -142,22 +119,22 @@ def index(request):
         session.can_participate = session.allows_age(age)
         # titles of the notices linked to this session, shown as a small warning sign
         session.notices = [notice.title for notice in session.messages.all()]
-    session_days = sorted({(x.day, x.weekday, x.order) for x in sessions}, key=lambda x: x[2])
-    grouped_sessions = {short: [x for x in sessions if x.day == short] for short, _, _ in session_days}
+    # one column per weekday that has trainings: (name of the day, its sessions)
+    session_days = [(weekday, [x for x in sessions if x.day == short])
+                    for short, weekday, _ in sorted({(x.day, x.weekday, x.order) for x in sessions}, key=lambda x: x[2])]
 
     return render(
         request,
         "members/index.html",
         {
             "chairmen": chairmen,
-            "sessions": grouped_sessions,
             "session_days": session_days,
             "events": events,
             "has_past_events": Event.objects.filter(past_events_q()).exists(),
             "training_messags": training_messags,
             "event_messags": event_messags,
             "posts": posts,
-            "spots": spot_map_data(sessions, for_editors=request.user.has_perm("members.change_spot")),
+            "spots": spot_map_data(sessions, for_editors=privileged),
         },
     )
 
@@ -252,23 +229,21 @@ def event_responsible_toggle(request, pk):
     return redirect(event)
 
 
-class EventCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class EventCreateView(LoginRequiredMixin, PrivilegedRequiredMixin, CreateView):
     # template: event_detail.html
     model = Event
     form_class = EventForm
-    permission_required = "members.add_event"
 
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS, "Veranstaltung erstellt")
         return super().form_valid(form)
 
 
-class EventUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class EventUpdateView(LoginRequiredMixin, PrivilegedRequiredMixin, UpdateView):
     # template: event_detail.html
     model = Event
     form_class = EventForm
     # who can update the event?
-    permission_required = "members.change_event"
 
 
     def form_valid(self, form):
@@ -308,7 +283,7 @@ def event_asset_upload(request, kind):
     if kind not in EVENT_UPLOAD_TYPES:
         raise Http404
     user = request.user
-    if not (user.has_perm("members.add_event") or user.has_perm("members.change_event")):
+    if not is_privileged(user):
         return JsonResponse({"success": 0, "message": "Keine Berechtigung."}, status=403)
     upload = request.FILES.get("file")
     if error := check_event_upload(kind, upload):
@@ -327,11 +302,10 @@ def event_asset_upload(request, kind):
     return JsonResponse({"success": 1, "file": file})
 
 
-class EventDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class EventDeleteView(LoginRequiredMixin, PrivilegedRequiredMixin, DeleteView):
     model = Event
     # success_url = "/mitglieder/#events"
     # who can delete the event?
-    permission_required = "members.delete_event"
 
     def get_success_url(self, **kwargs):
         return reverse("index") + "#events"
@@ -627,20 +601,18 @@ def session_participation_toggle(request):
     return JsonResponse({"success": True, "participating": participating})
 
 
-class SessionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class SessionCreateView(LoginRequiredMixin, PrivilegedRequiredMixin, CreateView):
     model = Session
     form_class = SessionForm
-    permission_required = "members.add_session"
 
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS, "Einheit erstellt")
         return super().form_valid(form)
 
 
-class SessionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class SessionUpdateView(LoginRequiredMixin, PrivilegedRequiredMixin, UpdateView):
     model = Session
     form_class = SessionForm
-    permission_required = "members.change_session"
 
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS, "Einheit geändert")
@@ -654,9 +626,8 @@ class SessionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
         return super().get_success_url()
 
 
-class SessionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class SessionDeleteView(LoginRequiredMixin, PrivilegedRequiredMixin, DeleteView):
     model = Session
-    permission_required = "members.delete_session"
 
     def post(self, request, *args, **kwargs):
         messages.add_message(request, messages.SUCCESS, "Einheit gelöscht")
@@ -671,7 +642,7 @@ class SessionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView)
 
 
 @login_required
-@permission_required("members.add_spot", raise_exception=True)
+@privileged_required
 @require_POST
 def spot_create(request):
     """New spot straight from the map: position from the click, title and description from the popup."""
@@ -683,7 +654,7 @@ def spot_create(request):
 
 
 @login_required
-@permission_required("members.change_spot", raise_exception=True)
+@privileged_required
 @require_POST
 def spot_update(request, pk):
     """Changes from the map: name and description from the popup form, position from dragging the marker.
@@ -698,7 +669,7 @@ def spot_update(request, pk):
 
 
 @login_required
-@permission_required("members.delete_spot", raise_exception=True)
+@privileged_required
 @require_POST
 def spot_delete(request, pk):
     """Deleted from the map; training times at this spot keep running without a location (SET_NULL)."""
@@ -739,10 +710,9 @@ class NewsDetailView(LoginRequiredMixin, DetailView):
     model = News
 
 
-class NewsCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class NewsCreateView(LoginRequiredMixin, PrivilegedRequiredMixin, CreateView):
     # template: event_form.html
     model = News
-    permission_required = "members.add_news"
     fields = ["title", "capture", "content"]
 
     def form_valid(self, form):
@@ -752,10 +722,9 @@ class NewsCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class NewsUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class NewsUpdateView(LoginRequiredMixin, PrivilegedRequiredMixin, UpdateView):
     # template: event_form.html
     model = News
-    permission_required = "members.change_news"
     fields = ["title", "capture", "content"]
 
     def form_valid(self, form):
@@ -765,9 +734,8 @@ class NewsUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class NewsDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class NewsDeleteView(LoginRequiredMixin, PrivilegedRequiredMixin, DeleteView):
     model = News
-    permission_required = "members.delete_news"
 
     def post(self, request, *args, **kwargs):
         messages.add_message(request, messages.SUCCESS, "Beitrag gelöscht")
@@ -780,12 +748,11 @@ class NewsDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 """For The Messages"""
 
 
-class MessageCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class MessageCreateView(LoginRequiredMixin, PrivilegedRequiredMixin, CreateView):
     """Base for the two kinds of notices; ?session=<pk> or ?event=<pk> starts with that one ticked."""
 
     model = Message
     form_class = MessageForm
-    permission_required = "members.add_message"
     kind = None
 
     def get_form_kwargs(self):
@@ -809,18 +776,16 @@ class MessageSessCreateView(MessageCreateView):
     kind = "sessions"
 
 
-class MessageDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class MessageDeleteView(LoginRequiredMixin, PrivilegedRequiredMixin, DeleteView):
     model = Message
-    permission_required = "members.delete_message"
 
     def get_success_url(self, **kwargs):
         return reverse("index")
 
 
-class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class MessageUpdateView(LoginRequiredMixin, PrivilegedRequiredMixin, UpdateView):
     model = Message
     form_class = MessageForm
-    permission_required = "members.change_message"
 
     def get_form_kwargs(self):
         return {**super().get_form_kwargs(), "kind": "events" if self.object.display == "events" else "sessions"}
@@ -828,153 +793,6 @@ class MessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
     def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
-
-
-"""USER STUFF"""
-
-
-class UserDetailView(LoginRequiredMixin, UpdateView):
-    # TODO: get email for every change in "Hinweis"
-    model = User
-    template_name = "members/user_detail.html"
-    form_class = UpdateMemberInformationForm
-
-    def get_object(self, queryset=None):
-        obj = self.request.user
-        return obj
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["additional_emails"] = AdditionalEmail.objects.filter(user=self.object)
-        # when a cancellation today would end the membership (see members/membership.py)
-        context["cancel_end"], context["cancel_deadline"] = cancellation_dates()
-        return super().get_context_data(**context)
-
-    def post(self, request, *args, **kwargs):
-        self.object = request.user
-        form = self.form_class(request.POST, request.FILES)
-        if not form.is_valid():
-            for errors in form.errors.values():
-                for error in errors:
-                    messages.add_message(request, messages.ERROR, error)
-            return HttpResponseRedirect(reverse("profile_detail"))
-        email = EmailMessage(
-            f"Mitteilung von {request.user.first_name} {request.user.last_name}",
-            form.cleaned_data["comment"],
-            to=[settings.TO_EMAIL],
-            cc=[request.user.email],
-        )
-        # attached straight from the upload: nothing is stored on the server (media/ is public)
-        attachment = form.cleaned_data.get("attachment")
-        if attachment:
-            email.attach(attachment.name, attachment.read(), attachment.content_type)
-        email.send()
-        messages.add_message(request, messages.SUCCESS, "Nachricht erfolgreich versendet")
-        return HttpResponseRedirect(reverse("profile_detail"))
-
-
-def html_email(subject, template, context, to, reply_to=None):
-    """An HTML e-mail with a plain-text version for mail apps without HTML."""
-    html = render_to_string(template, context)
-    text = re.sub(r"<br\s*/?>\s*", "\n", html)
-    text = re.sub(r"<hr\s*/?>", "\n\n___\n\n", text)
-    text = re.sub(r"</(p|li|ul|h\d)>", "\n\n", text)
-    text = re.sub(r"[ \t]+\n", "\n", html_lib.unescape(strip_tags(text)))
-    text = re.sub(r"\n{3,}", "\n\n", text).strip()
-    message = EmailMultiAlternatives(subject, text, settings.DEFAULT_FROM_EMAIL, to, reply_to=reply_to)
-    message.attach_alternative(html, "text/html")
-    return message
-
-
-@login_required
-@require_POST
-def profile_cancel(request):
-    """The member cancels the own membership (profile page, after a confirmation): status "Kündigung",
-    end date by the rule in members/membership.py, a confirmation to the member and a note to the board."""
-    profile = request.user.profile
-    if profile.status == "Kündigung" or profile.membership_end:
-        messages.add_message(request, messages.INFO, "Deine Mitgliedschaft ist bereits gekündigt.")
-        return HttpResponseRedirect(reverse("profile_detail"))
-    end, _ = cancellation_dates()
-    previous_status = profile.status
-    profile.status = "Kündigung"
-    profile.membership_end = datetime.combine(end, datetime.min.time())
-    profile.save(update_fields=["status", "membership_end"])
-    context = {"user": request.user, "profile": profile, "end": end, "today": date.today(), "previous_status": previous_status}
-    name = request.user.get_full_name()
-    mails = [html_email(f"Twio X e.V. | Kündigung zum {end:%d.%m.%Y}", "members/emails/cancellation_board.html", context, [settings.TO_EMAIL],
-                        reply_to=[request.user.email] if request.user.email else None)]
-    if request.user.email:
-        mails.insert(0, html_email(f"Twio X e.V. | Deine Kündigung zum {end:%d.%m.%Y}", "members/emails/cancellation_member.html",
-                                   context, [request.user.email], reply_to=[settings.TO_EMAIL]))
-    try:
-        get_connection().send_messages(mails)
-        sent = True
-    except Exception:
-        sent = False
-    text = f"Deine Mitgliedschaft ist zum {end:%d.%m.%Y} gekündigt."
-    text += " Du bekommst eine Bestätigung per E-Mail." if sent and request.user.email else " Die Bestätigung per E-Mail konnte nicht gesendet werden, der Vorstand ist aber informiert." if not sent else ""
-    messages.add_message(request, messages.SUCCESS, text)
-    return HttpResponseRedirect(reverse("profile_detail"))
-
-
-class EmailUpdateView(LoginRequiredMixin, FormView):
-    template_name = "members/profile_form.html"
-    form_class = UpdateMemberEmailForm
-    extra_context = {"title": "E-Mail-Adresse ändern"}
-
-    def get_form_kwargs(self):
-        return {**super().get_form_kwargs(), "user": self.request.user}
-
-    def get_context_data(self, **kwargs):
-        hint = f"Aktuell: {self.request.user.email or 'keine'}. Mit der neuen Adresse meldest du dich auch an."
-        return super().get_context_data(hint=hint, **kwargs)
-
-    def form_valid(self, form):
-        self.request.user.email = form.cleaned_data["email1"]
-        self.request.user.save(update_fields=["email"])
-        messages.add_message(self.request, messages.SUCCESS, "E-Mail erfolgreich geändert")
-        return HttpResponseRedirect(reverse("profile_detail"))
-
-
-class PasswordChangeView(LoginRequiredMixin, PasswordChangeView):
-    """Django's view: saves the password and keeps the member logged in."""
-
-    template_name = "members/profile_form.html"
-    form_class = MemberPasswordChangeForm
-    success_url = reverse_lazy("profile_detail")
-    extra_context = {"title": "Passwort ändern", "hint": "Mindestens 8 Zeichen, nicht nur Ziffern und nicht zu ähnlich zu deinem Namen."}
-
-    def form_valid(self, form):
-        messages.add_message(self.request, messages.SUCCESS, "Passwort erfolgreich geändert")
-        return super().form_valid(form)
-
-
-class UsernameUpdateView(LoginRequiredMixin, UpdateView):
-    template_name = "members/profile_form.html"
-    form_class = UsernameForm
-    extra_context = {"title": "Nutzername ändern", "hint": "Du kannst dich mit dem Nutzernamen oder deiner E-Mail-Adresse anmelden."}
-
-    def get_object(self, queryset=None):
-        return self.request.user
-
-    def get_success_url(self):
-        messages.add_message(self.request, messages.SUCCESS, "Nutzername erfolgreich geändert")
-        return reverse("profile_detail")
-
-
-class AddressChangeView(LoginRequiredMixin, UpdateView):
-    model = Profile
-    template_name = "members/update_address.html"
-    form_class = ProfileSelfForm
-
-    def get_object(self, queryset=None):
-        obj = self.request.user.profile
-        return obj
-
-    def get_success_url(self):
-        messages.add_message(self.request, messages.SUCCESS, "Daten erfolgreich geändert")
-        return reverse("profile_detail")
 
 
 class ShopItemDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
@@ -1068,8 +886,9 @@ def delete_image(request):
         return JsonResponse({"data": False})
 
 
-@csrf_exempt
 @login_required
+@board_required
+@require_POST
 def add_image(request):
     img = request.FILES["files[]"]
     obj = ShopItem.objects.get(pk=request.POST["object_id"])
@@ -1078,35 +897,3 @@ def add_image(request):
     new.save()
     new.refresh_from_db()
     return JsonResponse({"url": new.image.url, "pk": new.pk})
-
-
-@login_required
-@require_POST
-def add_another_email(request):
-    """A further address on the own profile (e.g. a parent's), for the info mails."""
-    form = AdditionalEmailForm(request.POST)
-    if not form.is_valid():
-        return JsonResponse({"errors": " ".join(e for errors in form.errors.values() for e in errors)}, status=400)
-    form.instance.user = request.user
-    form.save()
-    return JsonResponse({"pk": form.instance.pk})
-
-
-@login_required
-@require_POST
-def delete_additional_email(request):
-    """Only the own addresses; anything else is not found."""
-    try:
-        pk = int(request.POST.get("id", ""))
-    except ValueError:
-        return JsonResponse({"errors": "Keine Adresse angegeben."}, status=400)
-    get_object_or_404(AdditionalEmail, user=request.user, pk=pk).delete()
-    return JsonResponse({"deleted": pk})
-
-
-@permission_required("auth.add_user", raise_exception=True)
-@require_POST
-def delete_additional_email_chair(request, pk):
-    email = get_object_or_404(AdditionalEmail, user__pk=pk, pk=request.POST.get("id"))
-    email.delete()
-    return JsonResponse({"data": True})

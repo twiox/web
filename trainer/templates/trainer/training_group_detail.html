@@ -26,7 +26,7 @@
     {% csrf_token %}
     {# functions for the trainers, above the list #}
     <div class="member_toolbar group_toolbar">
-        {% if perms.members.change_session %}
+        {% if is_privileged %}
         <a class="table_action table_action--primary" href="{% url 'session_update' object.pk %}?next={{ request.path|urlencode }}"><i class="fas fa-pen-square"></i> Trainingszeit bearbeiten</a>
         {% endif %}
         <a class="table_action table_action--primary" href="{% url 'trainer_group_email' object.pk %}"><i class="far fa-envelope"></i> E-Mail an alle</a>

@@ -13,7 +13,7 @@
     <div class="member_toolbar">
         <h1>Mitgliederliste</h1>
         <input class="searchbar" id="member_search" type="search" placeholder="Suche nach Name, Nummer, E-Mail …">
-        {% if perms.auth.add_user %}
+        {% if is_board %}
             <a href="{% url 'register' %}" class="table_action table_action--primary"><i class="far fa-plus-square"></i> Neues Mitglied</a>
         {% endif %}
     </div>
@@ -64,7 +64,7 @@
         </aside>
     </div>
 
-    {% include "user_handling/_board_dashboard.html" %}
+    {% include "user_handling/snippets/board_dashboard.html" %}
 </section>
 
 <script>
@@ -201,7 +201,8 @@
             showMessage(checkbox.checked ? `${name}-Rolle vergeben` : `${name}-Rolle entfernt`);
         } else {
             checkbox.checked = !checkbox.checked;
-            showMessage('Rolle konnte nicht geändert werden');
+            const data = await response.json().catch(() => ({}));
+            showMessage(data.error || 'Rolle konnte nicht geändert werden');
         }
     }
 

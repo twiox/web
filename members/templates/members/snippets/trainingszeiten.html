@@ -1,12 +1,12 @@
-{% load custom_filters l10n %}
+{% load l10n %}
 <section id="training">
     <div id="container">
         <h1>TRAININGSZEITEN</h1>
         <div class="trainer_ui">
-            {% if perms.members.add_session %}
+            {% if is_privileged %}
                 <a href="{% url 'session_create' %}" title="Trainingseinheit hinzufügen"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
             {% endif %}
-            {% if perms.members.add_message %}
+            {% if is_privileged %}
                 <a href="{% url 'message_sess_create' %}" title="Hinweis hinzufügen"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
             {% endif %}
         </div>
@@ -25,10 +25,10 @@
                     <h5>{{msg.title}}</h5>
                     <p>{{msg.message}}</p>
                     <div class="trainer_ui">
-                        {% if perms.members.delete_message %}
+                        {% if is_privileged %}
                         <a href="{% url 'message_delete' msg.id %}" title="Löschen"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                         {% endif %}
-                        {% if perms.members.change_message %}
+                        {% if is_privileged %}
                         <a href="{% url 'message_update' msg.id %}" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
                         {% endif %}
                     </div>
@@ -40,11 +40,11 @@
     {% endif %}
     <div style="display:flex; gap:10px; overflow-x: auto;">
         <!--<h3 id="group_header" style="display:none;"></h3>-->
-        {% for short,day,order in session_days %}
+        {% for day, day_sessions in session_days %}
             <!-- one column for the sessions of each day -->
             <div class="col-20" style="overflow: visible; min-width:200px;">
                 <div class="primary padding_all_small flex_center" style="opacity:0.75;"><strong>{{ day }}</strong></div>
-                {% for session in sessions|lookup:short %}
+                {% for session in day_sessions %}
                     {# trainers and the board: the whole card opens the training group (like the event cards); its controls sit above that link #}
                     <div style="margin-top:10px;" class="training_card{% if is_privileged %} training_card--link{% endif %}">
                         {% if is_privileged %}<a class="training_card__link" href="{% url 'trainer_group_detail' session.pk %}" aria-label="Trainingsgruppe {{ session.title }}"></a>{% endif %}
@@ -62,16 +62,16 @@
                         {% endif %}
                         <div class="padding_all_small tertiary_bg" id="container">
                             {# trainers/chairmen: buttons left, warning right; members: age left, warning right #}
-                            {% if perms.members.add_message or perms.members.change_session or perms.members.delete_session %}
+                            {% if is_privileged %}
                             <div class="session_card_top">
                                 <span class="session_card_top__actions">
-                                    {% if perms.members.add_message %}
+                                    {% if is_privileged %}
                                     <a href="{% url 'message_sess_create' %}?session={{ session.pk }}" title="Hinweis zu dieser Trainingszeit"><i class="far fa-sticky-note"></i></a>
                                     {% endif %}
-                                    {% if perms.members.change_session %}
+                                    {% if is_privileged %}
                                     <a href="{% url 'session_update' session.id %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
                                     {% endif %}
-                                    {% if perms.members.delete_session %}
+                                    {% if is_privileged %}
                                     <a href="{% url 'session_delete' session.id %}" title="Löschen"><i class="far fa-minus-square"></i></a>
                                     {% endif %}
                                 </span>

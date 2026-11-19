@@ -157,7 +157,7 @@
                 {% csrf_token %}
                 {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
                 <div class="member_fields member_fields--wide">
-                    {% include "user_handling/_field.html" with field=form.name %}
+                    {% include "user_handling/snippets/field.html" with field=form.name %}
                 </div>
                 <div class="file_field">
                     {% for error in form.file.errors %}<p class="form_error">{{ error }}</p>{% endfor %}

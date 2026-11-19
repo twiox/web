@@ -17,7 +17,7 @@
             {% if event.place %}<p><i class="fas fa-map-marker-alt"></i> {{ event.place }}</p>{% endif %}
             <p><i class="fas fa-euro-sign"></i> {% if event.costs %}{{ event.costs|floatformat:"-2" }} €{% else %}kostenlos{% endif %}</p>
         </div>
-        {% if perms.members.add_message %}
+        {% if is_privileged %}
         <a class="event_card__note" href="{% url 'message_eve_create' %}?event={{ event.pk }}" title="Hinweis zu dieser Veranstaltung"><i class="far fa-sticky-note"></i></a>
         {% endif %}
     </div>

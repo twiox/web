@@ -1,15 +1,17 @@
 """Who may do what: the role checks used across all apps.
 
-Roles decide who may enter an area (board pages, orga pages, check-in, trainer pages).
-Fine-grained create/edit/delete actions use the Django permissions, which the role
-signals in user_handling keep in sync with the roles (perms.members.change_event etc.).
+Roles decide who may enter an area and who may create, edit or delete things; views
+use the mixins and decorators below, templates the context variables ({% if is_board %}).
 
 - is_trainer / is_chairman: the bare roles, for role-specific pages and UI
   (e.g. a trainer's own training sessions need request.user.trainer).
 - is_privileged: trainer, chairman or superuser – the club's staff.
 - is_board: chairman or superuser – board-only pages.
 """
+from functools import wraps
+
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.core.exceptions import PermissionDenied
 
 
 def is_trainer(user):
@@ -38,6 +40,22 @@ class PrivilegedRequiredMixin(UserPassesTestMixin):
 class BoardRequiredMixin(UserPassesTestMixin):
     def test_func(self):
         return is_board(self.request.user)
+
+
+def role_required(check):
+    """Decorator for function views: 403 unless the user has the role (put @login_required above it)."""
+    def decorator(view):
+        @wraps(view)
+        def wrapped(request, *args, **kwargs):
+            if not check(request.user):
+                raise PermissionDenied
+            return view(request, *args, **kwargs)
+        return wrapped
+    return decorator
+
+
+privileged_required = role_required(is_privileged)
+board_required = role_required(is_board)
 
 
 def roles(request):

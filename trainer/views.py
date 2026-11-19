@@ -3,10 +3,10 @@ from .models import TrainingSessionEntry, TrainingSessionParticipant
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
 from members.models import AdditionalEmail, Message, Trainer, Session, Profile
-from members.roles import PrivilegedRequiredMixin, is_privileged, is_trainer
+from members.roles import BoardRequiredMixin, PrivilegedRequiredMixin, is_privileged, is_trainer
 from interested.models import TrialGroup
 from interested.trials import ACTIVE_GROUP_ORDER, annotate_groups, upcoming_trial_dates
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import DeleteView, UpdateView, ListView
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, JsonResponse
@@ -305,7 +305,7 @@ def trainer_group_email(request, pk):
     session = get_object_or_404(Session, pk=pk)
     recipients = group_recipients(session)
     reachable = [(p, a) for p, a in recipients if a]
-    can_notice = request.user.has_perm("members.add_message")
+    can_notice = is_privileged(request.user)
     info_choices = group_email_addresses(request.user, session)[0]
     form = GroupEmailForm(request.POST or None, can_notice=can_notice, info_choices=info_choices)
     if request.method == "POST" and form.is_valid():
@@ -391,26 +391,27 @@ class TrainerListView(LoginRequiredMixin, PrivilegedRequiredMixin, ListView):
         context["inactive_trainers"] = Trainer.objects.filter(active=False).select_related("user").order_by("user__last_name")
         return context
 
-class TrainerDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class TrainerDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
     """Deactivates straight from the list, without a confirmation page: it can be undone
     in the "Inaktive Trainer*innen" section below the list."""
 
     model = Trainer
-    permission_required = "members.delete_trainer"
     http_method_names = ["post"]
 
     def form_valid(self, form):
         # deactivate instead of delete, see member_role in user_handling/views.py
+        if conflict := self.object.schedule_conflict():
+            messages.add_message(self.request, messages.ERROR, conflict)
+            return HttpResponseRedirect(reverse("trainer_list"))
         self.object.active = False
         self.object.save()
         messages.add_message(self.request, messages.SUCCESS, f"{self.object.user.get_full_name()} deaktiviert")
         return HttpResponseRedirect(reverse("trainer_list"))
 
-class TrainerUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class TrainerUpdateView(LoginRequiredMixin, BoardRequiredMixin, UpdateView):
     model = Trainer
     form_class = TrainerForm
     template_name = "trainer/trainer_form.html"
-    permission_required = "members.change_trainer"
 
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS, "Gespeichert")

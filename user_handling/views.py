@@ -1,6 +1,6 @@
 from .dashboard import board_dashboard
 from .forms import MemberForm, ProfileForm, AdditionalEmailForm
-from members.roles import is_privileged
+from members.roles import BoardRequiredMixin, board_required, is_board, is_privileged
 from members.models import (
     Chairman,
     Trainer,
@@ -22,12 +22,11 @@ from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import (
-    permission_required,
     login_required,
     user_passes_test,
 )
 from django.contrib.auth.models import User
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import DeleteView, UpdateView, ListView
 from django.contrib.auth.views import (
     PasswordResetView,
@@ -44,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-@permission_required("auth.add_user", raise_exception=True)
+@board_required
 def index(request):
     return render(request, "user_handling/index.html")
 
@@ -92,7 +91,7 @@ def member_fields_from_tester(tester):
 
 
 @login_required
-@permission_required("auth.add_user", raise_exception=True)
+@board_required
 def register(request):
     if request.method == "POST":
         user_form = MemberForm(request.POST)
@@ -147,7 +146,7 @@ def register(request):
 
 def send_set_password_email(request, user):
     message = render_to_string(
-        "user_handling/set_password_email.html",
+        "user_handling/emails/set_password.html",
         {
             "user": user,
             "protocol": request.scheme,
@@ -163,8 +162,7 @@ def send_set_password_email(request, user):
     email.send()
 
 
-class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
-    permission_required = "auth.add_user"
+class MemberListView(LoginRequiredMixin, BoardRequiredMixin, ListView):
     template_name = "user_handling/member_list.html"
 
     def get_context_data(self, **kwargs):
@@ -183,19 +181,17 @@ class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         return users
 
 
-class UserDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class UserDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
     model = User
     template_name = "user_handling/user_confirm_delete.html"
-    permission_required = "auth.delete_user"
 
     def get_success_url(self):
         return reverse("member_list")
 
 
-class ChairmanDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class ChairmanDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
     model = Chairman
     template_name = "user_handling/chairman_confirm_delete.html"
-    permission_required = "members.delete_chairman"
 
     def form_valid(self, form):
         # deactivate instead of delete, see member_role
@@ -207,11 +203,10 @@ class ChairmanDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView
         return reverse("chairman_list")
 
 
-class ChairmanUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class ChairmanUpdateView(LoginRequiredMixin, BoardRequiredMixin, UpdateView):
     model = Chairman
     fields = ["public_telnr", "public_email", "competences", "image", "show"]
     template_name = "user_handling/chairman_form.html"
-    permission_required = "members.change_chairman"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -219,9 +214,8 @@ class ChairmanUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView
         return context
 
 
-class ChairmanListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+class ChairmanListView(LoginRequiredMixin, BoardRequiredMixin, ListView):
     queryset = Chairman.objects.filter(active=True).select_related("user").order_by("user__last_name")
-    permission_required = "members.change_chairman"
     template_name = "user_handling/chairman_list.html"
 
 
@@ -290,9 +284,10 @@ def get_all_emails(request):
 
 
 @login_required
-@permission_required("auth.add_user", raise_exception=True)
+@board_required
 def member_detail_form(request, pk):
     user = get_object_or_404(User.objects.select_related("profile"), pk=pk)
+    trainer = Trainer.objects.filter(user=user, active=True).first()
     return render(
         request,
         "user_handling/ajax/member_detail.html",
@@ -304,13 +299,14 @@ def member_detail_form(request, pk):
             "email_form": AdditionalEmailForm(prefix="add_email", use_required_attribute=False),
             "additional_emails": AdditionalEmail.objects.filter(user=user),
             "chairman": Chairman.objects.filter(user=user, active=True).first(),
-            "trainer": Trainer.objects.filter(user=user, active=True).first(),
+            "trainer": trainer,
+            "trainer_conflict": trainer.schedule_conflict() if trainer else None,
         },
     )
 
 
 @login_required
-@permission_required("auth.add_user", raise_exception=True)
+@board_required
 @require_POST
 def member_activate(request, pk):
     user = get_object_or_404(User, pk=pk)
@@ -325,24 +321,25 @@ ROLE_MODELS = {"chairman": Chairman, "trainer": Trainer}
 @login_required
 @require_POST
 def member_role(request, pk, role):
-    """Switches the chairman or trainer role on or off, the signals handle the permissions."""
+    """Switches the chairman or trainer role on or off (board only)."""
     model = ROLE_MODELS.get(role)
     if model is None:
         raise Http404
     active = request.POST.get("active") == "1"
-    action = "add" if active else "delete"
-    if not request.user.has_perm(f"members.{action}_{role}"):
+    if not is_board(request.user):
         raise PermissionDenied
     user = get_object_or_404(User, pk=pk)
     # never deleted, so switching a role back on restores its profile and history
     entry = model.objects.filter(user=user).first() or model(user=user)
+    if not active and entry.active and role == "trainer" and (conflict := entry.schedule_conflict()):
+        return JsonResponse({"error": conflict}, status=409)
     entry.active = active
     entry.save()
     return JsonResponse({"data": True})
 
 
 @login_required
-@permission_required("auth.add_user", raise_exception=True)
+@board_required
 @require_POST
 def member_detail_update(request, pk):
     user = get_object_or_404(User.objects.select_related("profile"), pk=pk)
@@ -368,4 +365,13 @@ def member_detail_update(request, pk):
             additional_email = email_form.save(commit=False)
             additional_email.user = user
             additional_email.save()
+    return JsonResponse({"data": True})
+
+
+@login_required
+@board_required
+@require_POST
+def delete_additional_email_chair(request, pk):
+    email = get_object_or_404(AdditionalEmail, user__pk=pk, pk=request.POST.get("id"))
+    email.delete()
     return JsonResponse({"data": True})

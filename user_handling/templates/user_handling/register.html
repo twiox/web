@@ -37,41 +37,41 @@
             <h5 class="padding_all_big">Mitgliedsdaten</h5>
             <div class="flex_center">
                 <div class="col-5 padding_all_small">
-                    {% include "user_handling/_field.html" with field=user_form.first_name %}
-                    {% include "user_handling/_field.html" with field=user_form.last_name %}
-                    {% include "user_handling/_field.html" with field=profile_form.address %}
-                    {% include "user_handling/_field.html" with field=profile_form.birthday %}
+                    {% include "user_handling/snippets/field.html" with field=user_form.first_name %}
+                    {% include "user_handling/snippets/field.html" with field=user_form.last_name %}
+                    {% include "user_handling/snippets/field.html" with field=profile_form.address %}
+                    {% include "user_handling/snippets/field.html" with field=profile_form.birthday %}
                 </div>
                 <div class="col-5 padding_all_small">
-                    {% include "user_handling/_field.html" with field=profile_form.telephone %}
-                    {% include "user_handling/_field.html" with field=user_form.email %}
-                    {% include "user_handling/_field.html" with field=profile_form.sex %}
+                    {% include "user_handling/snippets/field.html" with field=profile_form.telephone %}
+                    {% include "user_handling/snippets/field.html" with field=user_form.email %}
+                    {% include "user_handling/snippets/field.html" with field=profile_form.sex %}
                 </div>
             </div>
 
             <h6>Bei Minderjährigen</h6>
-            {% include "user_handling/_field.html" with field=profile_form.parent %}
-            {% include "user_handling/_field.html" with field=profile_form.parent_telnr %}
+            {% include "user_handling/snippets/field.html" with field=profile_form.parent %}
+            {% include "user_handling/snippets/field.html" with field=profile_form.parent_telnr %}
 
             <h5 class="padding_all_big">Vereinsdaten</h5>
             <div class="flex_center">
                 <div class="col-5 padding_all_small">
                     <h6>Verwaltung</h6>
-                    {% include "user_handling/_field.html" with field=profile_form.membership_start %}
-                    {% include "user_handling/_field.html" with field=profile_form.status %}
-                    {% include "user_handling/_field.html" with field=profile_form.member_num %}
+                    {% include "user_handling/snippets/field.html" with field=profile_form.membership_start %}
+                    {% include "user_handling/snippets/field.html" with field=profile_form.status %}
+                    {% include "user_handling/snippets/field.html" with field=profile_form.member_num %}
                 </div>
                 <div class="col-5 padding_all_small">
                     <h6>Mitgliedsbeitrag</h6>
-                    {% include "user_handling/_field.html" with field=profile_form.zahlungsart %}
-                    {% include "user_handling/_field.html" with field=profile_form.beitrag %}
-                    {% include "user_handling/_field.html" with field=profile_form.mandatsref %}
+                    {% include "user_handling/snippets/field.html" with field=profile_form.zahlungsart %}
+                    {% include "user_handling/snippets/field.html" with field=profile_form.beitrag %}
+                    {% include "user_handling/snippets/field.html" with field=profile_form.mandatsref %}
                 </div>
             </div>
 
             <h5 class="padding_all_big">Notizen</h5>
-            {% include "user_handling/_field.html" with field=profile_form.notes_trainer %}
-            {% include "user_handling/_field.html" with field=profile_form.notes_chairman %}
+            {% include "user_handling/snippets/field.html" with field=profile_form.notes_trainer %}
+            {% include "user_handling/snippets/field.html" with field=profile_form.notes_chairman %}
 
             <button class="form_button padding_all_small" style="margin:20px auto;" type="submit">
                 <span>OK</span>

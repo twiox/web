@@ -1,5 +1,4 @@
 {% extends 'members/base.html' %}
-{% load custom_filters %}
 
 {% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
@@ -26,22 +25,22 @@
         {% endfor %}
     </div>
 
-    {% if trainers %}
+    {% if rows %}
     <div class="member_table_wrapper tertiary_bg">
         <table class="member_table member_table--static">
             <thead>
                 <tr>
                     <th>Trainer*in</th>
-                    {% for key, month in months %}<th>{{ month|date:"F" }}</th>{% endfor %}
+                    {% for month in months %}<th>{{ month|date:"F" }}</th>{% endfor %}
                 </tr>
             </thead>
             <tbody>
-                {% for trainer in trainers %}
+                {% for trainer, row in rows %}
                 <tr>
-                    <td>{{ trainer }}</td>
-                    {% for key, month in months %}
+                    <td>{{ trainer.user.get_full_name }}</td>
+                    {% for month_sessions in row %}
                     <td>
-                        {% for session in grouping|lookup:key|lookup:trainer %}
+                        {% for session in month_sessions %}
                             <a href="{% url 'trainingsession_detail' session.pk %}" class="day_link{% if session.payed %} day_link--payed{% endif %}"
                                title="{{ session.date|date:'d.m.Y' }}{% if session.payed %} – bezahlt{% else %} – offen{% endif %}">{{ session.date|date:'j.' }}</a>
                         {% endfor %}

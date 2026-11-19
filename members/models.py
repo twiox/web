@@ -315,6 +315,20 @@ class Trainer(models.Model):
     def get_absolute_url(self):
         return reverse("trainer_list")
 
+    def schedule_conflict(self):
+        """Why the trainer can't be switched off: the training times they're still assigned to, or None.
+        They first have to be taken off (or replaced) there, so no training time loses its trainer unnoticed."""
+        sessions = self.session_set.order_by("day_key", "start_time") if self.pk else []
+        if not sessions:
+            return None
+        names = ", ".join(f"{s.day} {s.format_start_time} ({s.title})" for s in sessions)
+        return f"{self.user.get_full_name()} ist noch für Trainingszeiten eingetragen: {names}. Bitte dort zuerst austragen."
+
+    def clean(self):
+        # the admin and model forms; our views check schedule_conflict() before switching off
+        if not self.active and Trainer.objects.filter(pk=self.pk, active=True).exists() and (conflict := self.schedule_conflict()):
+            raise ValidationError({"active": conflict})
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self.image:
@@ -546,7 +560,6 @@ class Profile(models.Model):
         "Beginn der Mitgliedschaft", null=True, blank=True
     )
     membership_end = models.DateTimeField("Kündigung zum", null=True, blank=True)
-    ermaessigt = models.BooleanField("Ermäßigt?", default=False)
     mandatsref = models.CharField(
         "Mandatsreferenz", max_length=40, null=True, blank=True
     )

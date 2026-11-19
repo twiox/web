@@ -38,5 +38,6 @@ urlpatterns = [
     path("ajax/mitglieder/detail_form/<int:pk>", views.member_detail_form,name="get_member_detail_form"),
     path("ajax/mitglieder/detail_form/<int:pk>/update", views.member_detail_update,name="member_detail_form_update"),
     path("ajax/mitglieder/<int:pk>/aktivieren", views.member_activate, name="member_activate"),
+    path("ajax/mitglieder/<int:pk>/weitere_email/löschen", views.delete_additional_email_chair, name="delete_additional_email_chair"),
     path("ajax/mitglieder/<int:pk>/rolle/<str:role>", views.member_role, name="member_role"),
 ]

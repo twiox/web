@@ -1,0 +1,19 @@
+{# to the organizer: confirmation of the request from the organizers page #}
+<p>Hallo {{ first_name }} {{ last_name }},</p>
+
+<p>vielen Dank für Ihre Anfrage! Wir melden uns so bald wie möglich bei Ihnen, um die Einzelheiten der Veranstaltung und unserer Teilnahme zu besprechen.</p>
+
+<p>Ihre Angaben:</p>
+<ul>
+    <li>Name: {{ first_name }} {{ last_name }}</li>
+    <li>E-Mail: {{ email }}</li>
+    <li>Telefon: {{ telnr }}</li>
+    {% if notes %}<li>Anmerkungen: {{ notes|linebreaksbr }}</li>{% endif %}
+</ul>
+
+<p>Bis bald!</p>
+
+<p>Sportliche Grüße<br>
+Twio X e.V.</p>
+
+{% include "members/emails/_footer.html" %}

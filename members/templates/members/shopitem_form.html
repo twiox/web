@@ -129,6 +129,7 @@ $(document).on('change','#inputFileImage' , function(e){
     var form_data = new FormData();
     form_data.append('files[]', image);
     form_data.append('object_id', "{{object.pk}}");
+    form_data.append('csrfmiddlewaretoken', $('[name=csrfmiddlewaretoken]').val());
 
     $.ajax({
         type: "POST",

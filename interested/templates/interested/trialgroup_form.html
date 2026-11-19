@@ -26,8 +26,8 @@
             <div class="session_card">
                 <h3>Gruppe</h3>
                 <div class="member_fields member_fields--wide">
-                    {% include "user_handling/_field.html" with field=form.name %}
-                    {% include "user_handling/_field.html" with field=form.notes %}
+                    {% include "user_handling/snippets/field.html" with field=form.name %}
+                    {% include "user_handling/snippets/field.html" with field=form.notes %}
                 </div>
             </div>
 
@@ -41,8 +41,8 @@
                     <div class="trial_date_row">
                         {% for hidden in date_form.hidden_fields %}{{ hidden }}{% endfor %}
                         <div class="member_fields">
-                            {% include "user_handling/_field.html" with field=date_form.date %}
-                            {% include "user_handling/_field.html" with field=date_form.session %}
+                            {% include "user_handling/snippets/field.html" with field=date_form.date %}
+                            {% include "user_handling/snippets/field.html" with field=date_form.session %}
                         </div>
                         {% if date_form.locked %}
                         <span class="trial_date_row__locked" title="An diesem Termin war schon jemand aus der Gruppe da – er bleibt deshalb unverändert."><i class="fas fa-lock"></i> besucht</span>
@@ -57,8 +57,8 @@
                     <div class="trial_date_row">
                         {% for hidden in dates.empty_form.hidden_fields %}{{ hidden }}{% endfor %}
                         <div class="member_fields">
-                            {% include "user_handling/_field.html" with field=dates.empty_form.date %}
-                            {% include "user_handling/_field.html" with field=dates.empty_form.session %}
+                            {% include "user_handling/snippets/field.html" with field=dates.empty_form.date %}
+                            {% include "user_handling/snippets/field.html" with field=dates.empty_form.session %}
                         </div>
                     </div>
                 </template>

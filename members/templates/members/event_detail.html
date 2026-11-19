@@ -5,7 +5,7 @@
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'index' %}#events">Mitglieder</a>
     <a class="float_left"> > </a>
     <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{ object.title }}</a>
-    {% if perms.members.delete_event %}
+    {% if is_privileged %}
     <a class="float_left"> > </a>
     <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'event_participants' object.id %}">Orga</a>
     {% endif %}
@@ -21,9 +21,9 @@
         {% endif %}
     </div>
     <p class="member_panel__hint event_detail_meta">
-        {% if perms.members.change_event %}<a href="{% url 'event_update' object.id %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>{% endif %}
-        {% if perms.members.delete_event %}<a href="{% url 'event_delete' object.id %}" title="Löschen"><i class="far fa-minus-square"></i></a>{% endif %}
-        {% if perms.members.add_message %}<a href="{% url 'message_eve_create' %}?event={{ object.pk }}" title="Hinweis zu dieser Veranstaltung"><i class="far fa-sticky-note"></i></a>{% endif %}
+        {% if is_privileged %}<a href="{% url 'event_update' object.id %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>{% endif %}
+        {% if is_privileged %}<a href="{% url 'event_delete' object.id %}" title="Löschen"><i class="far fa-minus-square"></i></a>{% endif %}
+        {% if is_privileged %}<a href="{% url 'message_eve_create' %}?event={{ object.pk }}" title="Hinweis zu dieser Veranstaltung"><i class="far fa-sticky-note"></i></a>{% endif %}
         {% include "members/snippets/event_dates.html" %} · {{ object.place }}
     </p>
     {% if object.hinweis %}
@@ -32,8 +32,8 @@
     {% for notice in notices %}
         <div class="session_notice_block event_notice">
             <strong>{{ notice.title }}</strong>
-            {% if perms.members.change_message %}<a href="{% url 'message_update' notice.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>{% endif %}
-            {% if perms.members.delete_message %}<a href="{% url 'message_delete' notice.pk %}" title="Löschen"><i class="far fa-minus-square"></i></a>{% endif %}
+            {% if is_privileged %}<a href="{% url 'message_update' notice.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>{% endif %}
+            {% if is_privileged %}<a href="{% url 'message_delete' notice.pk %}" title="Löschen"><i class="far fa-minus-square"></i></a>{% endif %}
             {% if notice.message %}<p>{{ notice.message|linebreaksbr }}</p>{% endif %}
         </div>
     {% endfor %}

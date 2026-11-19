@@ -30,12 +30,6 @@ urlpatterns = [
     path("hinweis/neu/trainingseinheit/", views.MessageSessCreateView.as_view(),name="message_sess_create"),
     path("hinweis/<int:pk>/löschen/", views.MessageDeleteView.as_view(),name="message_delete"),
     path("hinweis/<int:pk>/ändern/", views.MessageUpdateView.as_view(),name="message_update"),
-    path("profil/", views.UserDetailView.as_view(),name="profile_detail"),
-    path("profil/ändere_email/", views.EmailUpdateView.as_view(),name="profile_update_email"),
-    path("profil/ändere_nutzername/", views.UsernameUpdateView.as_view(),name="profile_update_username"),
-    path("profil/ändere_daten/", views.AddressChangeView.as_view(),name="profile_update_address"),
-    path("profil/ändere_passwort/", views.PasswordChangeView.as_view(),name="profile_update_pw"),
-    path("profil/kündigen/", views.profile_cancel, name="profile_cancel"),
     path("beiträge/", views.NewsListView.as_view(),name="news_list"),
     path("beiträge/<int:pk>/", views.NewsDetailView.as_view(),name="news_detail"),
     path("beiträge/neu/", views.NewsCreateView.as_view(),name="news_create"),
@@ -48,9 +42,5 @@ urlpatterns = [
     path("ajax/get/bilder_daten", views.get_image_data, name="get_image_data"),
     path("ajax/set/bilder_daten", views.set_image_data, name="set_image_data"),
     path("ajax/entferne/bild", views.delete_image, name="delete_image"),
-    path("ajax/hinzufügen/bild",views.add_image,name="upload_image_file"),
-    path("ajax/weitere_email/neu", views.add_another_email, name='add_another_email'),
-    path("ajax/weitere_email/löschen", views.delete_additional_email, name='delete_additional_email'),
-    path("ajax/weitere_email/löschen/<int:pk>", views.delete_additional_email_chair, name='delete_additional_email_chair')
+    path("ajax/hinzufügen/bild",views.add_image,name="upload_image_file")
 ]
-

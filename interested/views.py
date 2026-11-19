@@ -7,7 +7,6 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib.auth.mixins import (
     LoginRequiredMixin,
-    PermissionRequiredMixin,
     UserPassesTestMixin,
 )
 from django.views.generic import (
@@ -24,8 +23,9 @@ from django.db.models import Count, F
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.conf import settings
-from .forms import ProbetrainingForm, PublicEventForm, TesterForm, TrialDateFormSet, TrialGroupForm
+from .forms import OrganizerForm, ProbetrainingForm, PublicEventForm, TeamerForm, TesterForm, TrialDateFormSet, TrialGroupForm
 from members.models import Chairman
+from user_handling.profile import html_email
 from .models import (
     Teamer,
     PublicEvent,
@@ -450,52 +450,27 @@ def trial_group_archive(request, pk):
     return redirect("tester_index")
 
 
-class TeamerLeipzigCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class TeamerLeipzigCreateView(LoginRequiredMixin, BoardRequiredMixin, CreateView):
     model = Teamer
-    fields = [
-        "priority",
-        "picture",
-        "name",
-        "position",
-        "notes",
-        "public_telnr",
-        "public_email",
-    ]
-    permission_required = "interested.add_teamer"
+    form_class = TeamerForm
 
     def form_valid(self, form):
-        teamer = form.save()
-        teamer.city = "leipzig"
-        teamer.save()
-        messages.add_message(
-            self.request, messages.SUCCESS, "Neues Teammitglied erstellt"
-        )
-        return super(TeamerLeipzigCreateView, self).form_valid(form)
+        form.instance.city = "leipzig"  # before the one save (each save crops the photo again)
+        messages.add_message(self.request, messages.SUCCESS, "Neues Teammitglied erstellt")
+        return super().form_valid(form)
 
 
-class TeamerUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class TeamerUpdateView(LoginRequiredMixin, BoardRequiredMixin, UpdateView):
     model = Teamer
-    fields = [
-        "priority",
-        "picture",
-        "name",
-        "position",
-        "notes",
-        "public_telnr",
-        "public_email",
-    ]
-    permission_required = "interested.change_teamer"
+    form_class = TeamerForm
 
     def form_valid(self, form):
-        messages.add_message(
-            self.request, messages.SUCCESS, "Teammitglied erfolgreich aktualisiert"
-        )
-        return super(TeamerUpdateView, self).form_valid(form)
+        messages.add_message(self.request, messages.SUCCESS, "Teammitglied erfolgreich aktualisiert")
+        return super().form_valid(form)
 
 
-class TeamerDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class TeamerDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
     model = Teamer
-    permission_required = "interested.delete_teamer"
 
     def post(self, request, *args, **kwargs):
         messages.add_message(request, messages.SUCCESS, "Teammitglied gelöscht")
@@ -505,9 +480,8 @@ class TeamerDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         return reverse("team")
 
 
-class PublicEventCreateView(PermissionRequiredMixin, CreateView):
+class PublicEventCreateView(LoginRequiredMixin, BoardRequiredMixin, CreateView):
     model = PublicEvent
-    permission_required = "interested_add_publicevent"
     fields = "__all__"
     template_name = "interested/publicevent_form.html"
 
@@ -607,7 +581,6 @@ def event_participant_list_view(request, event_slug):
 
 class EventParticipantDeleteView(UserPassesTestMixin, DeleteView):
     model = EventParticipant
-    permission_required = "interested_remove_eventparticipant"
 
     def test_func(self):
         return is_board(self.request.user)
@@ -622,7 +595,6 @@ class EventParticipantDeleteView(UserPassesTestMixin, DeleteView):
 
 class EventParticipantUpdateView(UserPassesTestMixin, UpdateView):
     model = EventParticipant
-    permission_required = "interested_change_eventparticipant"
     template_name = "interested/eventparticipant_form_update.html"
     fields = [
         "first_name",
@@ -651,7 +623,6 @@ class EventParticipantUpdateView(UserPassesTestMixin, UpdateView):
 
 class PublicEventDeleteView(UserPassesTestMixin, DeleteView):
     model = PublicEvent
-    permission_required = "interested_publicevent_delete"
 
     def test_func(self):
         return is_board(self.request.user)
@@ -666,7 +637,6 @@ class PublicEventDeleteView(UserPassesTestMixin, DeleteView):
 
 class PublicEventUpdateView(UserPassesTestMixin, UpdateView):
     model = PublicEvent
-    permission_required = "interested_change_eventparticipant"
     fields = "__all__"
 
     def test_func(self):
@@ -682,7 +652,6 @@ class PublicEventUpdateView(UserPassesTestMixin, UpdateView):
 
 class EventMerchCreateView(UserPassesTestMixin, CreateView):
     model = EventMerch
-    permission_required = "interested_change_eventmerch"
     fields = "__all__"
 
     def test_func(self):
@@ -701,7 +670,6 @@ class EventMerchCreateView(UserPassesTestMixin, CreateView):
 
 class EventMerchUpdateView(UserPassesTestMixin, UpdateView):
     model = EventMerch
-    permission_required = "interested_change_eventmerch"
     fields = "__all__"
 
     def test_func(self):
@@ -717,7 +685,6 @@ class EventMerchUpdateView(UserPassesTestMixin, UpdateView):
 
 class EventMerchDeleteView(UserPassesTestMixin, DeleteView):
     model = EventMerch
-    permission_required = "interested_change_eventmerch"
 
     def test_func(self):
         return is_board(self.request.user)
@@ -735,3 +702,37 @@ def fsj_view(request):
 
 def nebenjob_view(request):
     return render(request,'interested/nebenjob.html')
+
+
+def organizers_index(request):
+    """The page for event organizers (/veranstalter/, its own section in the navigation): a request form
+    that goes to the board, with a confirmation to the organizer."""
+    chairmen = Chairman.objects.filter(active=True, show__contains="event_site")
+    if (request.method == "POST"):
+        form = OrganizerForm(request.POST) #if no files
+        if form.is_valid():
+            #get Form data
+            captcha = form.cleaned_data.get('captcha')
+
+            if captcha != 'parkour':
+                form = OrganizerForm() 
+                return render(request, "interested/organizers.html", {"form":form,"chairmen":chairmen})
+
+            first_name = form.cleaned_data.get('first_name')
+            last_name = form.cleaned_data.get('last_name')
+            int_email = form.cleaned_data.get('email')
+            telnr = form.cleaned_data.get('telephone')
+            notes = form.cleaned_data.get('notes')
+            
+            context = {"first_name": first_name, "last_name": last_name, "email": int_email, "telnr": telnr, "notes": notes}
+            # to the board (a reply goes to the organizer), and a confirmation to the organizer
+            html_email(f"Twio X e.V. | Anfrage Veranstalter {first_name} {last_name}", "interested/emails/organizer_request_board.html",
+                       context, [settings.TO_EMAIL], reply_to=[int_email] if int_email.isascii() else None).send()  # a non-ASCII Reply-To ends up empty
+            html_email("Twio X e.V. | Deine Anfrage", "interested/emails/organizer_request_answer.html",
+                       context, [int_email], reply_to=[settings.TO_EMAIL]).send()
+            messages.add_message(request, messages.SUCCESS, 'Anfrage erfolgreich verschickt')
+            return HttpResponseRedirect("")
+        else:
+            return render(request,"interested/organizers.html",{"form":form, "chairmen":chairmen})
+    form = OrganizerForm() 
+    return render(request, "interested/organizers.html", {"form":form,"chairmen":chairmen})

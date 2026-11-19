@@ -121,11 +121,11 @@
     </div>
     {% endblock %}
     {% block content2 %}
-    {% if public_events or perms.interested.add_publicevent %}
+    {% if public_events or is_board %}
     <div class="frame" style="margin-bottom: 1%;padding-bottom: 0px;min-height: 0px;">
         <h1> Aktuelles </h1>
         <section id="Events">
-            {% if perms.interested.add_publicevent %}
+            {% if is_board %}
                 <a href="{%url 'public_event_add' %}" target="_blank" class="more_info_button"> Hinzufügen </a>
             {% endif %}
             <div style="display:flex;flex-direction:column;gap:30px">

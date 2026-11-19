@@ -347,40 +347,15 @@ def session_list_view(request):
         .order_by('year')
     )
 
-    # I want the structure
-    # { month: {
-    #     trainer: [
-    #            Abrechnung 1,
-    #            Abrechnung 2,
-    #            Abrechnung 3  
-    #         ]
-    #     }   
-    # }
-    #
-
-    grouping = {}
-   
+    # the billed sessions of the year as a table: one row per trainer, one cell per month
     sessions = TrainingSessionEntry.objects.filter(billed=True, date__year=int(year)).order_by('date')
-    dates = []
-    trainers = []
-
+    months = sorted({session.date.replace(day=1).date() for session in sessions})
+    cells = {}  # trainer -> {month: [sessions]}
     for session in sessions:
-        # compile a list of dates
-        date = session.date.strftime('%Y-%m')
-        if date not in dates:
-            dates.append(date)
-        if date not in grouping:
-            grouping[date] = {}
-        # compile a list of trainers
         for trainer in session.get_trainers:
-            name = f"{trainer.user.first_name} {trainer.user.last_name}"
-            if name not in trainers:
-                trainers.append(name)
-            # compile a list of sessions per date and trainer
-            if name in grouping[date]:
-                grouping[date][name].append(session)
-            else:
-                grouping[date][name] = [session]
+            cells.setdefault(trainer, {}).setdefault(session.date.replace(day=1).date(), []).append(session)
+    rows = [(trainer, [cells[trainer].get(month, []) for month in months])
+            for trainer in sorted(cells, key=lambda t: (t.user.first_name, t.user.last_name, t.pk))]
 
     invoices = TrainingSessionInvoice.objects.select_related("trainer__user").annotate(session_count=Count("sessions"))
     unpayed_invoices = invoices.filter(date_payed__isnull=True).order_by('-date_billed')
@@ -402,10 +377,8 @@ def session_list_view(request):
         })
 
     return render(request, "trainingsession/list.html", {
-            'grouping':grouping,
-            # (key for the grouping, first day of the month for display)
-            'months':[(d, datetime.strptime(d, '%Y-%m')) for d in sorted(dates)],
-            'trainers':sorted(trainers),
+            'months':months,
+            'rows':rows,
             'unpayed_invoices':unpayed_invoices,
             'archive':archive,
             'archive_by':archive_by,

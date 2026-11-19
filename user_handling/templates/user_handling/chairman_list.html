@@ -31,10 +31,10 @@
             {% for object in object_list %}
                 <tr>
                     <td>
-                        {% if perms.members.change_chairman %}
+                        {% if is_board %}
                             <a href="{% url 'chairman_update' object.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
                         {% endif %}
-                        {% if perms.members.delete_chairman %}
+                        {% if is_board %}
                             <a href="{% url 'chairman_delete' object.pk %}" title="Deaktivieren"><i class="far fa-minus-square"></i></a>
                         {% endif %}
                     </td>

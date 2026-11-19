@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth import views as auth_views
 from django.conf.urls.static import static
 from user_handling import views as user_views
+from interested import views as interested_views
 from . import views
 
 urlpatterns = [
@@ -12,8 +13,10 @@ urlpatterns = [
     path('impressum', views.impressumPage, name="impressum"),
     path('datenschutzerklärung', views.dataProtectionPage, name="dataprotection"),
     path("mitglieder/", include('members.urls')),
+    path("mitglieder/profil/", include("user_handling.profile")),
     path("interessierte/", include('interested.urls')),
-    path('veranstalter/', include('organizers.urls')),
+    # the organizers page lives in the interested app, but keeps its URL: the navigation highlights it by /veranstalter/
+    path('veranstalter/', interested_views.organizers_index, name="organizers_index"),
     path("trainer/", include('trainer.urls')),
     path("session/", include('trainer.trainingsession')),
     path("vorstand/", include('user_handling.urls')),

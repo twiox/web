@@ -72,7 +72,7 @@
                             <tr> <td>Mitgliedsnummer:</td><td>{{object.profile.member_num}}</td> </tr>
                             {% if object.profile.membership_end %}<tr> <td>Kündigung zum:</td><td><strong>{{ object.profile.membership_end|date:"d.m.Y" }}</strong></td> </tr>{% endif %}
                         </table>
-                        {# cancelling: the date follows the rule in members/membership.py; confirmed in the dialog #}
+                        {# cancelling: the date follows the rule in user_handling/membership.py; confirmed in the dialog #}
                         <div class="profile_cancel">
                             {% if object.profile.status == "Kündigung" or object.profile.membership_end %}
                             <p class="member_panel__hint">Deine Mitgliedschaft ist gekündigt{% if object.profile.membership_end %} und endet zum {{ object.profile.membership_end|date:"d.m.Y" }}{% endif %}. Du möchtest doch bleiben? Schreib uns über das Nachrichtenfeld.</p>

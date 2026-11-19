@@ -2,10 +2,10 @@
     <div id="container">
         <h1>EVENTKALENDER</h1>
         <div class="trainer_ui">
-            {% if perms.members.add_event %}
+            {% if is_privileged %}
                 <a href="{% url 'event_create' %}" title="Veranstaltung hinzufügen"><i class="far fa-calendar-plus" style="font-size:27px;"></i></a>
             {% endif %}
-            {% if perms.members.add_message %}
+            {% if is_privileged %}
                 <a href="{% url 'message_eve_create' %}" title="Hinweis hinzufügen"><i class="far fa-sticky-note" style="font-size:27px;"></i></a>
             {% endif %}
         </div>
@@ -21,10 +21,10 @@
                     <h5>{{msg.title}}</h5>
                     <p>{{msg.message}}</p>
                     <div class="trainer_ui">
-                        {% if perms.members.delete_message %}
+                        {% if is_privileged %}
                         <a href="{% url 'message_delete' msg.id %}" title="Löschen"><i class="far fa-minus-square" style="font-size:15px;"></i></a>
                         {% endif %}
-                        {% if perms.members.change_message %}
+                        {% if is_privileged %}
                         <a href="{% url 'message_update' msg.id %}" title="Bearbeiten"><i class="fas fa-pen-square" style="font-size:15px;"></i></a>
                         {% endif %}
                     </div>

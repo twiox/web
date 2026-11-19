@@ -1,29 +1,71 @@
 {% extends "members/base.html" %}
-{% block navbar2 %} 
-{% if object.city %}
+{# a person on the public team page; built like trainer/trainer_form.html #}
+{% block navbar2 %}
 <div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'interested_index' %}">
-        Interessierte </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'interested_index' %}">Interessierte</a>
     <a class="float_left"> > </a>
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'team' %}">
-        Team </a>
+    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'team' %}">Team</a>
     <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> {{object.name}} </a>
+    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{% if object.pk %}{{ object.name }}{% else %}Neues Teammitglied{% endif %}</a>
 </div>
-{% else %}
-<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'interested_index' %}">
-        Mitglieder </a>
-    <a class="float_left"> > </a>
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'team' %}">
-        Team </a>
-    <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;"> Neues Teammitglied </a>
-</div>
-{% endif %}
 {% endblock %}
+
 {% block content %}
-<section style="text-align: center;">
-    {% include "members/form_snippet.html" %}
+<section class="member_page">
+    <div class="member_toolbar">
+        <h1>{% if object.pk %}{{ object.name }}{% else %}Neues Teammitglied{% endif %}</h1>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="teamer_form">
+        {% csrf_token %}
+        {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+        <div class="session_grid">
+            <div class="session_card">
+                <h3>Person</h3>
+                <div class="member_fields">
+                    {% include "user_handling/snippets/field.html" with field=form.name %}
+                    {% include "user_handling/snippets/field.html" with field=form.position %}
+                    {% include "user_handling/snippets/field.html" with field=form.public_telnr %}
+                    {% include "user_handling/snippets/field.html" with field=form.public_email %}
+                    {% include "user_handling/snippets/field.html" with field=form.priority %}
+                </div>
+                <p class="member_panel__hint">{{ form.priority.help_text }}</p>
+                <div class="member_fields member_fields--wide">
+                    {% include "user_handling/snippets/field.html" with field=form.notes %}
+                </div>
+            </div>
+            <div class="session_card">
+                <h3>Foto</h3>
+                {# the photo is cropped to a square on saving #}
+                <div class="file_field">
+                    {% for error in form.picture.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+                    <span class="file_field__label">{{ form.picture.label }}</span>
+                    {% if form.picture.value %}
+                        <a class="more_info_button" href="{{ form.picture.value.url }}" target="_blank">ansehen</a>
+                    {% else %}
+                        <span class="member_panel__hint">fehlt</span>
+                    {% endif %}
+                    <label class="table_action">
+                        Datei wählen
+                        <input type="file" name="{{ form.picture.html_name }}" accept="image/*" hidden>
+                    </label>
+                    <span class="file_field__name"></span>
+                </div>
+                <p class="member_panel__hint">Wird quadratisch zugeschnitten.</p>
+            </div>
+        </div>
+        <button type="submit" class="form_button member_form__submit">Speichern</button>
+        <p style="text-align: center;"><a class="more_info_button" href="{% url 'team' %}">Abbrechen</a></p>
+    </form>
 </section>
+
+<script>
+    document.querySelectorAll('.teamer_form .mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));
+    // show the chosen file name next to its button
+    document.querySelector('.teamer_form').addEventListener('change', function (event) {
+        if (event.target.type !== 'file') return;
+        const name = event.target.files[0] ? event.target.files[0].name : '';
+        event.target.closest('.file_field').querySelector('.file_field__name').textContent = name;
+    });
+</script>
 {% endblock %}

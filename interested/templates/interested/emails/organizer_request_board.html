@@ -1,0 +1,14 @@
+{# to the board (TO_EMAIL): an organizer sent the request form on the organizers page; replying goes to the organizer #}
+<p>Über die Veranstalter-Seite ist eine Anfrage eingegangen.</p>
+
+<ul>
+    <li>Name: {{ first_name }} {{ last_name }}</li>
+    <li>E-Mail: <a href="mailto:{{ email }}">{{ email }}</a></li>
+    <li>Telefon: {{ telnr }}</li>
+</ul>
+
+{% if notes %}<p><strong>Anmerkungen:</strong><br>{{ notes|linebreaksbr }}</p>{% else %}<p>Ohne Anmerkungen.</p>{% endif %}
+
+<p>Eine Antwort auf diese E-Mail geht direkt an {{ first_name }} {{ last_name }}. Eine Eingangsbestätigung wurde schon verschickt.</p>
+
+{% include "members/emails/_footer.html" %}

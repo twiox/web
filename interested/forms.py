@@ -3,7 +3,7 @@ from user_handling.forms import MdcFormMixin, date_widget
 from members.models import calculate_age
 from members.models import Session
 from trainer.models import TrainingSessionParticipant
-from .models import Tester, TrialDate, TrialGroup
+from .models import Teamer, Tester, TrialDate, TrialGroup
 
 # the choices of the trial sign-up form on the interested page
 SEX_CHOICES = [("weiblich", "weiblich"), ("männlich", "männlich"), ("divers", "divers"), ("keine Angabe", "keine Angabe")]
@@ -69,6 +69,33 @@ class TesterForm(MdcFormMixin, forms.ModelForm):
         self.fields["has_consent"].widget.attrs.pop("class", None)  # rendered as a chip
         if self.instance.age is not None and self.instance.age >= 18:
             del self.fields["has_consent"]  # only minors need their parents' consent
+
+
+class TeamerForm(MdcFormMixin, forms.ModelForm):
+    """A person on the public team page ("Das Team")."""
+
+    public_email = forms.EmailField(label="Öffentliche E-Mail-Adresse", required=False, empty_value=None)
+
+    class Meta:
+        model = Teamer
+        fields = ["name", "position", "priority", "public_telnr", "public_email", "notes", "picture"]
+        labels = {
+            "priority": "Reihenfolge",
+            "public_telnr": "Öffentliche Telefonnummer",
+            "notes": "Sonstiges",
+            "picture": "Foto",
+        }
+        help_texts = {"priority": "Kleinere Zahlen stehen weiter vorn."}
+        widgets = {
+            "notes": forms.Textarea,
+            # plain file input: no "currently / clear" text, the template shows the current photo
+            "picture": forms.FileInput(attrs={"accept": "image/*"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["notes"].widget.attrs["rows"] = 4
+        self.fields["picture"].widget.attrs.pop("class", None)
 
 
 class TrialGroupForm(MdcFormMixin, forms.ModelForm):
@@ -159,3 +186,16 @@ class PublicEventForm(forms.Form):
             "confirm",
             "inform_ok"
         ]
+
+
+class OrganizerForm(forms.Form):
+    first_name = forms.CharField()
+    last_name = forms.CharField()
+    email = forms.EmailField()
+    telephone = forms.CharField()
+    notes = forms.CharField(required=False)
+    confirm = forms.BooleanField()
+    captcha = forms.CharField()
+    
+    class Meta:
+        fields = ["first_name", "last_name", "email", "telephone", "notes", "confirm", 'captcha']

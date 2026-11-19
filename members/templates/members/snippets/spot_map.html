@@ -1,12 +1,12 @@
 {# Spot map on the dashboard: every member sees it, trainers/chairmen get the list and can edit #}
 <section id="spots" class="spot_map_section" hidden>
-    <div class="spot_map_layout{% if perms.members.change_spot %} spot_map_layout--with-list{% endif %}">
+    <div class="spot_map_layout{% if is_privileged %} spot_map_layout--with-list{% endif %}">
         <div id="spot_map" class="spot_map"></div>
-        {% if perms.members.change_spot %}
+        {% if is_privileged %}
         <div class="spot_map_list session_card">
             <div class="member_toolbar">
                 <h3>Spots</h3>
-                {% if perms.members.add_spot %}
+                {% if is_privileged %}
                 <button type="button" id="spot_new" class="table_action table_action--primary"><i class="fas fa-map-marker-alt"></i> Neuer Spot</button>
                 {% endif %}
             </div>
@@ -30,8 +30,8 @@
         toggle.lastChild.textContent = open ? ' Spots ausblenden' : ' Spots anzeigen';
         if (open && !map) {
             map = SpotMap.overview(document.getElementById('spot_map'), JSON.parse(document.getElementById('spot_data').textContent), {
-                canEdit: {{ perms.members.change_spot|yesno:"true,false" }},
-                canDelete: {{ perms.members.delete_spot|yesno:"true,false" }},
+                canEdit: {{ is_privileged|yesno:"true,false" }},
+                canDelete: {{ is_privileged|yesno:"true,false" }},
                 csrfToken: '{{ csrf_token }}',
                 list: document.getElementById('spot_list'),
                 newButton: document.getElementById('spot_new'),

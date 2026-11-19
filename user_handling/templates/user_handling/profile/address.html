@@ -23,19 +23,19 @@
             <div class="session_card">
                 <h3>Deine Daten</h3>
                 <div class="member_fields">
-                    {% include "user_handling/_field.html" with field=form.birthday %}
-                    {% include "user_handling/_field.html" with field=form.telephone %}
+                    {% include "user_handling/snippets/field.html" with field=form.birthday %}
+                    {% include "user_handling/snippets/field.html" with field=form.telephone %}
                 </div>
                 <div class="member_fields member_fields--wide">
-                    {% include "user_handling/_field.html" with field=form.address %}
+                    {% include "user_handling/snippets/field.html" with field=form.address %}
                 </div>
             </div>
             <div class="session_card">
                 <h3>Für Minderjährige</h3>
                 <p class="member_panel__hint">Wen wir im Notfall erreichen, z.&nbsp;B. ein Elternteil.</p>
                 <div class="member_fields">
-                    {% include "user_handling/_field.html" with field=form.parent %}
-                    {% include "user_handling/_field.html" with field=form.parent_telnr %}
+                    {% include "user_handling/snippets/field.html" with field=form.parent %}
+                    {% include "user_handling/snippets/field.html" with field=form.parent_telnr %}
                 </div>
             </div>
         </div>
