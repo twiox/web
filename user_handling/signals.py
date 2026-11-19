@@ -2,8 +2,8 @@ from django.db.models.signals import post_save, pre_delete
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from members.models import Profile
-from interested.models import Tester
-from interested.trials import mark_member
+from public.models import Tester
+from public.trials import mark_member
 from trainer.models import TrainingSessionParticipant
 
 

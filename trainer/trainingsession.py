@@ -7,8 +7,8 @@ from trainer.forms import TrainingSessionForm, find_duplicate
 from trainer.models import TrainingSessionEntry, TrainingSessionParticipant, TrainingSessionInvoice
 from members.models import Trainer, Profile, Session
 from members.roles import is_board, is_privileged, is_trainer
-from interested.models import TrialGroup
-from interested.trials import expected_testers
+from public.models import TrialGroup
+from public.trials import expected_testers
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.http import require_POST

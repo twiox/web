@@ -8,7 +8,7 @@ from members.models import (
     AdditionalEmail,
     Event,
 )
-from interested.models import PublicEvent, EventParticipant, Tester
+from public.models import PublicEvent, EventParticipant, Tester
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
 from django.core.exceptions import PermissionDenied

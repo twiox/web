@@ -47,10 +47,10 @@
         {% for group in groups %}
         {# a wrapper, so the archive button can sit on the card without being inside its link #}
         <div class="trial_group_card_wrap">
-            {% include "interested/_trial_group_card.html" %}
+            {% include "public/_trial_group_card.html" %}
             {% if is_board and group.size and group.member_count|add:group.declined_count == group.size %}
             <button type="button" class="table_action trial_group_card__archive" data-archive="archive_dialog_{{ group.pk }}" title="Alle sind Mitglied oder nicht Mitglied geworden"><i class="fas fa-archive"></i> Archivieren</button>
-            {% include "interested/_archive_dialog.html" with size=group.size members=group.member_count %}
+            {% include "public/_archive_dialog.html" with size=group.size members=group.member_count %}
             {% endif %}
         </div>
         {% empty %}
@@ -86,7 +86,7 @@
     <div class="member_toolbar tester_dashboard__head">
         <h3>{% if upcoming_all %}Nächste Probetrainings{% else %}Deine nächsten Einheiten{% endif %}</h3>
     </div>
-    {% include "interested/_trial_calendar.html" %}
+    {% include "public/_trial_calendar.html" %}
 
     <div class="member_toolbar tester_dashboard__head">
         <h3>Abgeschlossene Probetrainings</h3>

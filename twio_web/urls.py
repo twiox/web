@@ -4,19 +4,18 @@ from django.conf import settings
 from django.contrib.auth import views as auth_views
 from django.conf.urls.static import static
 from user_handling import views as user_views
-from interested import views as interested_views
-from . import views
+from public import views as public_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.landingPage, name="landing"),
-    path('impressum', views.impressumPage, name="impressum"),
-    path('datenschutzerklärung', views.dataProtectionPage, name="dataprotection"),
+    path('', public_views.landing_page, name="landing"),
+    path('impressum', public_views.impressum_page, name="impressum"),
+    path('datenschutzerklärung', public_views.data_protection_page, name="dataprotection"),
     path("mitglieder/", include('members.urls')),
     path("mitglieder/profil/", include("user_handling.profile")),
-    path("interessierte/", include('interested.urls')),
-    # the organizers page lives in the interested app, but keeps its URL: the navigation highlights it by /veranstalter/
-    path('veranstalter/', interested_views.organizers_index, name="organizers_index"),
+    path("interessierte/", include('public.urls')),
+    # the organizers page lives in the public app, but keeps its URL: the navigation highlights it by /veranstalter/
+    path('veranstalter/', public_views.organizers_index, name="organizers_index"),
     path("trainer/", include('trainer.urls')),
     path("session/", include('trainer.trainingsession')),
     path("vorstand/", include('user_handling.urls')),

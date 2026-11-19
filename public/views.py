@@ -38,7 +38,7 @@ from .trials import (
     ACTIVE_GROUP_ORDER, FINAL_OUTCOMES, annotate_groups, archive_group, attended_trainings, can_archive, current_testers, delete_stale_requests, email_board,
     finished_testers, group_attendance, is_photo, upcoming_trial_dates, weekday_matches,
 )
-from members.roles import BoardRequiredMixin, PrivilegedRequiredMixin, is_board, is_privileged
+from members.roles import BoardRequiredMixin, PrivilegedRequiredMixin, board_required, is_board, is_privileged
 
 
 def interested_index(request):
@@ -55,7 +55,7 @@ def interested_index(request):
                 f"Twio X e.V. - Anfrage Probetraining {test.first_name} {test.last_name}"
             )
             message = render_to_string(
-                "interested/emails/probe_email_answer.html",
+                "public/emails/probe_email_answer.html",
                 {
                     "object": test,
                 },
@@ -68,30 +68,30 @@ def interested_index(request):
         else:
             return render(
                 request,
-                "interested/interested_index.html",
+                "public/interested_index.html",
                 {"form": form, "chairmen": chairmen, "public_events": public_events},
             )
     form = ProbetrainingForm()
     return render(
         request,
-        "interested/interested_index.html",
+        "public/interested_index.html",
         {"form": form, "chairmen": chairmen, "public_events": public_events},
     )
 
 
 def interested_offers(request):
-    return render(request, "interested/interested_offers.html")
+    return render(request, "public/interested_offers.html")
 
 
 def interested_philosophy(request):
-    return render(request, "interested/interested_philosophy.html", {})
+    return render(request, "public/interested_philosophy.html", {})
 
 
 def interested_team(request):
     leipzig_people = Teamer.objects.all()
     return render(
         request,
-        "interested/interested_team.html",
+        "public/interested_team.html",
         {"leipzig_people": leipzig_people},
     )
 
@@ -111,7 +111,7 @@ def tester_age_groups(testers):
 class TesterIndexView(LoginRequiredMixin, PrivilegedRequiredMixin, TemplateView):
     """Probetraining dashboard: who is waiting, the groups, and the next trial dates (archived groups only in their overview)."""
 
-    template_name = "interested/tester_index.html"
+    template_name = "public/tester_index.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -151,6 +151,7 @@ class TesterIndexView(LoginRequiredMixin, PrivilegedRequiredMixin, TemplateView)
 
 class TesterListView(LoginRequiredMixin, PrivilegedRequiredMixin, ListView):
     """All trial requests outside archived groups, newest first; requests from before the date was stored come last."""
+    template_name = "public/tester_list.html"
 
     model = Tester
     queryset = (
@@ -308,6 +309,7 @@ def tester_consent_upload(request, pk):
 
 class TesterCreateView(LoginRequiredMixin, BoardRequiredMixin, CreateView):
     """The board enters someone by hand, e.g. after a phone call, without the public form."""
+    template_name = "public/tester_form.html"
 
     model = Tester
     form_class = TesterForm
@@ -321,6 +323,7 @@ class TesterCreateView(LoginRequiredMixin, BoardRequiredMixin, CreateView):
 
 
 class TesterUpdateView(LoginRequiredMixin, PrivilegedRequiredMixin, UpdateView):
+    template_name = "public/tester_form.html"
     model = Tester
     form_class = TesterForm
 
@@ -342,6 +345,7 @@ class TesterUpdateView(LoginRequiredMixin, PrivilegedRequiredMixin, UpdateView):
 
 class TesterDeleteView(LoginRequiredMixin, PrivilegedRequiredMixin, DeleteView):
     """POST only (the list and the group page ask first)."""
+    template_name = "public/tester_confirm_delete.html"
 
     model = Tester
     http_method_names = ["post"]
@@ -362,7 +366,7 @@ class TrialGroupFormMixin:
 
     model = TrialGroup
     form_class = TrialGroupForm
-    template_name = "interested/trialgroup_form.html"
+    template_name = "public/trialgroup_form.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -395,7 +399,7 @@ class TrialGroupDetailView(LoginRequiredMixin, PrivilegedRequiredMixin, DetailVi
     """Dates, participants and their attendance (from the trainers' session entries)."""
 
     model = TrialGroup
-    template_name = "interested/trialgroup_detail.html"
+    template_name = "public/trialgroup_detail.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -419,6 +423,7 @@ class TrialGroupDeleteView(LoginRequiredMixin, PrivilegedRequiredMixin, DeleteVi
 
     An archived group (board only) takes its anonymised participants with it.
     """
+    template_name = "public/trialgroup_confirm_delete.html"
 
     model = TrialGroup
     http_method_names = ["post"]
@@ -451,6 +456,7 @@ def trial_group_archive(request, pk):
 
 
 class TeamerLeipzigCreateView(LoginRequiredMixin, BoardRequiredMixin, CreateView):
+    template_name = "public/teamer_form.html"
     model = Teamer
     form_class = TeamerForm
 
@@ -461,6 +467,7 @@ class TeamerLeipzigCreateView(LoginRequiredMixin, BoardRequiredMixin, CreateView
 
 
 class TeamerUpdateView(LoginRequiredMixin, BoardRequiredMixin, UpdateView):
+    template_name = "public/teamer_form.html"
     model = Teamer
     form_class = TeamerForm
 
@@ -470,6 +477,7 @@ class TeamerUpdateView(LoginRequiredMixin, BoardRequiredMixin, UpdateView):
 
 
 class TeamerDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
+    template_name = "public/teamer_confirm_delete.html"
     model = Teamer
 
     def post(self, request, *args, **kwargs):
@@ -483,10 +491,11 @@ class TeamerDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
 class PublicEventCreateView(LoginRequiredMixin, BoardRequiredMixin, CreateView):
     model = PublicEvent
     fields = "__all__"
-    template_name = "interested/publicevent_form.html"
+    template_name = "public/publicevent_form.html"
 
 
 class PublicEventView(DetailView):
+    template_name = "public/publicevent_detail.html"
     model = PublicEvent
     slug_url_kwarg = "event_slug"
     slug_field = "slug"  # DetailView's default value: optional
@@ -534,7 +543,7 @@ class PublicEventView(DetailView):
             participant.save()
             mail_subject = f"Twio X e.V. | {event.title}: Anmeldebestätigung {participant.first_name} {participant.last_name}"
             message = render_to_string(
-                "interested/public_event_confirmation_email.html",
+                "public/public_event_confirmation_email.html",
                 {
                     "first_name": participant.first_name,
                     "last_name": participant.last_name,
@@ -567,19 +576,20 @@ class PublicEventView(DetailView):
             return self.render_to_response(context=context)
 
 
+@login_required
+@board_required
 def event_participant_list_view(request, event_slug):
-    if not is_board(request.user):
-        return render(request, "login")
-    event = PublicEvent.objects.get(slug=event_slug)
+    event = get_object_or_404(PublicEvent, slug=event_slug)
     object_list = EventParticipant.objects.filter(event=event)
     return render(
         request,
-        "interested/eventparticipant_list.html",
+        "public/eventparticipant_list.html",
         {"object_list": object_list, "event": event},
     )
 
 
 class EventParticipantDeleteView(UserPassesTestMixin, DeleteView):
+    template_name = "public/eventparticipant_confirm_delete.html"
     model = EventParticipant
 
     def test_func(self):
@@ -595,7 +605,7 @@ class EventParticipantDeleteView(UserPassesTestMixin, DeleteView):
 
 class EventParticipantUpdateView(UserPassesTestMixin, UpdateView):
     model = EventParticipant
-    template_name = "interested/eventparticipant_form_update.html"
+    template_name = "public/eventparticipant_form_update.html"
     fields = [
         "first_name",
         "last_name",
@@ -622,6 +632,7 @@ class EventParticipantUpdateView(UserPassesTestMixin, UpdateView):
 
 
 class PublicEventDeleteView(UserPassesTestMixin, DeleteView):
+    template_name = "public/publicevent_confirm_delete.html"
     model = PublicEvent
 
     def test_func(self):
@@ -636,6 +647,7 @@ class PublicEventDeleteView(UserPassesTestMixin, DeleteView):
 
 
 class PublicEventUpdateView(UserPassesTestMixin, UpdateView):
+    template_name = "public/publicevent_form.html"
     model = PublicEvent
     fields = "__all__"
 
@@ -651,6 +663,7 @@ class PublicEventUpdateView(UserPassesTestMixin, UpdateView):
 
 
 class EventMerchCreateView(UserPassesTestMixin, CreateView):
+    template_name = "public/eventmerch_form.html"
     model = EventMerch
     fields = "__all__"
 
@@ -669,6 +682,7 @@ class EventMerchCreateView(UserPassesTestMixin, CreateView):
 
 
 class EventMerchUpdateView(UserPassesTestMixin, UpdateView):
+    template_name = "public/eventmerch_form.html"
     model = EventMerch
     fields = "__all__"
 
@@ -684,6 +698,7 @@ class EventMerchUpdateView(UserPassesTestMixin, UpdateView):
 
 
 class EventMerchDeleteView(UserPassesTestMixin, DeleteView):
+    template_name = "public/eventmerch_confirm_delete.html"
     model = EventMerch
 
     def test_func(self):
@@ -698,10 +713,10 @@ class EventMerchDeleteView(UserPassesTestMixin, DeleteView):
 
 
 def fsj_view(request):
-    return render(request,'interested/fsj.html')
+    return render(request,'public/fsj.html')
 
 def nebenjob_view(request):
-    return render(request,'interested/nebenjob.html')
+    return render(request,'public/nebenjob.html')
 
 
 def organizers_index(request):
@@ -716,7 +731,7 @@ def organizers_index(request):
 
             if captcha != 'parkour':
                 form = OrganizerForm() 
-                return render(request, "interested/organizers.html", {"form":form,"chairmen":chairmen})
+                return render(request, "public/organizers.html", {"form":form,"chairmen":chairmen})
 
             first_name = form.cleaned_data.get('first_name')
             last_name = form.cleaned_data.get('last_name')
@@ -726,13 +741,26 @@ def organizers_index(request):
             
             context = {"first_name": first_name, "last_name": last_name, "email": int_email, "telnr": telnr, "notes": notes}
             # to the board (a reply goes to the organizer), and a confirmation to the organizer
-            html_email(f"Twio X e.V. | Anfrage Veranstalter {first_name} {last_name}", "interested/emails/organizer_request_board.html",
+            html_email(f"Twio X e.V. | Anfrage Veranstalter {first_name} {last_name}", "public/emails/organizer_request_board.html",
                        context, [settings.TO_EMAIL], reply_to=[int_email] if int_email.isascii() else None).send()  # a non-ASCII Reply-To ends up empty
-            html_email("Twio X e.V. | Deine Anfrage", "interested/emails/organizer_request_answer.html",
+            html_email("Twio X e.V. | Deine Anfrage", "public/emails/organizer_request_answer.html",
                        context, [int_email], reply_to=[settings.TO_EMAIL]).send()
             messages.add_message(request, messages.SUCCESS, 'Anfrage erfolgreich verschickt')
             return HttpResponseRedirect("")
         else:
-            return render(request,"interested/organizers.html",{"form":form, "chairmen":chairmen})
+            return render(request,"public/organizers.html",{"form":form, "chairmen":chairmen})
     form = OrganizerForm() 
-    return render(request, "interested/organizers.html", {"form":form,"chairmen":chairmen})
+    return render(request, "public/organizers.html", {"form":form,"chairmen":chairmen})
+
+
+def landing_page(request):
+    public_events = [x for x in PublicEvent.objects.all() if not x.is_past_due]
+    return render(request, "public/landing.html", {"public_events": public_events})
+
+
+def impressum_page(request):
+    return render(request, "public/impressum.html")
+
+
+def data_protection_page(request):
+    return render(request, "public/dataprotection.html")

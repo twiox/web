@@ -4,8 +4,8 @@ from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
 from members.models import AdditionalEmail, Message, Trainer, Session, Profile
 from members.roles import BoardRequiredMixin, PrivilegedRequiredMixin, is_privileged, is_trainer
-from interested.models import TrialGroup
-from interested.trials import ACTIVE_GROUP_ORDER, annotate_groups, upcoming_trial_dates
+from public.models import TrialGroup
+from public.trials import ACTIVE_GROUP_ORDER, annotate_groups, upcoming_trial_dates
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import DeleteView, UpdateView, ListView
 from django.urls import reverse, reverse_lazy

@@ -32,7 +32,7 @@
         <button type="button" class="table_action" data-archive="archive_dialog_{{ object.pk }}" {% if not can_archive %}disabled{% endif %}><i class="fas fa-archive"></i> Gruppe archivieren</button>
         {% if not can_archive %}<span class="member_panel__hint">Geht, sobald alle Mitglied oder nicht Mitglied geworden sind.</span>{% endif %}
     </div>
-    {% if can_archive %}{% include "interested/_archive_dialog.html" with group=object size=rows|length members=archive_members %}{% endif %}
+    {% if can_archive %}{% include "public/_archive_dialog.html" with group=object size=rows|length members=archive_members %}{% endif %}
     {% endif %}
 
     {% if object.archived %}
