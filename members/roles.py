@@ -12,6 +12,7 @@ from functools import wraps
 
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
+from django.http import JsonResponse
 
 
 def is_trainer(user):
@@ -56,6 +57,21 @@ def role_required(check):
 
 privileged_required = role_required(is_privileged)
 board_required = role_required(is_board)
+
+
+def json_role_required(check):
+    """Like role_required, for views answering fetch() calls: {"success": false} with status 403 instead of the error page."""
+    def decorator(view):
+        @wraps(view)
+        def wrapped(request, *args, **kwargs):
+            if not check(request.user):
+                return JsonResponse({"success": False}, status=403)
+            return view(request, *args, **kwargs)
+        return wrapped
+    return decorator
+
+
+json_privileged_required = json_role_required(is_privileged)
 
 
 def roles(request):

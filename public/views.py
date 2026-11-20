@@ -5,10 +5,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from django.contrib.auth.mixins import (
-    LoginRequiredMixin,
-    UserPassesTestMixin,
-)
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import (
     CreateView,
     UpdateView,
@@ -38,15 +35,12 @@ from .trials import (
     ACTIVE_GROUP_ORDER, FINAL_OUTCOMES, annotate_groups, archive_group, attended_trainings, can_archive, current_testers, delete_stale_requests, email_board,
     finished_testers, group_attendance, is_photo, upcoming_trial_dates, weekday_matches,
 )
-from members.roles import BoardRequiredMixin, PrivilegedRequiredMixin, board_required, is_board, is_privileged
+from members.roles import BoardRequiredMixin, PrivilegedRequiredMixin, board_required, is_board, is_privileged, json_privileged_required
 
 
 def interested_index(request):
-    chairmen = Chairman.objects.filter(active=True, show__contains="interested_site")
-    public_events = [x for x in PublicEvent.objects.all() if not x.is_past_due]
-
     if request.method == "POST":
-        form = ProbetrainingForm(request.POST)  # if no files
+        form = ProbetrainingForm(request.POST)
         if form.is_valid():
             # get Form data
             test = form.save()
@@ -65,13 +59,10 @@ def interested_index(request):
             email.send()
             messages.add_message(request, messages.SUCCESS, "Anmeldung verschickt")
             return HttpResponseRedirect(reverse("interested_index"))
-        else:
-            return render(
-                request,
-                "public/interested_index.html",
-                {"form": form, "chairmen": chairmen, "public_events": public_events},
-            )
-    form = ProbetrainingForm()
+    else:
+        form = ProbetrainingForm()
+    chairmen = Chairman.objects.filter(active=True, show__contains="interested_site")
+    public_events = [x for x in PublicEvent.objects.all() if not x.is_past_due]
     return render(
         request,
         "public/interested_index.html",
@@ -192,11 +183,10 @@ def tester_note(request, pk):
 
 
 @login_required
+@json_privileged_required
 @require_POST
 def tester_set_group(request, pk):
     """Puts a trial participant into a group (from the list or the group page); empty: waiting again."""
-    if not is_privileged(request.user):
-        return JsonResponse({"success": False}, status=403)
     tester = get_object_or_404(current_testers(), pk=pk)
     group_pk = request.POST.get("group", "")
     tester.trial_group = get_object_or_404(TrialGroup, pk=group_pk, archived__isnull=True) if group_pk else None
@@ -205,11 +195,10 @@ def tester_set_group(request, pk):
 
 
 @login_required
+@json_privileged_required
 @require_POST
 def tester_outcome(request, pk):
     """Dashboard dropdown: what came of the trial (membership application or not); empty: still open."""
-    if not is_privileged(request.user):
-        return JsonResponse({"success": False}, status=403)
     tester = get_object_or_404(current_testers(), pk=pk)
     outcome = request.POST.get("outcome", "")
     if outcome not in dict(Tester.OUTCOMES):
@@ -223,6 +212,7 @@ APPLICATION_MAX_PAGES = 10
 
 
 @login_required
+@json_privileged_required
 @require_POST
 def tester_application(request, pk):
     """Group page: a trainer photographed the membership application (one photo per page).
@@ -231,8 +221,6 @@ def tester_application(request, pk):
     "Antrag abgegeben" – also if the email fails; the trainer then hands in the paper.
     Errors with the photos come back as {"error": ...}, nothing is changed then.
     """
-    if not is_privileged(request.user):
-        return JsonResponse({"success": False}, status=403)
     tester = get_object_or_404(current_testers().select_related("trial_group").exclude(outcome__in=FINAL_OUTCOMES), pk=pk)
     pages = request.FILES.getlist("pages")
     if not pages:
@@ -263,11 +251,10 @@ def tester_application(request, pk):
 
 
 @login_required
+@json_privileged_required
 @require_POST
 def tester_consent(request, pk):
     """List checkbox: the parents' consent for a minor is there (or not)."""
-    if not is_privileged(request.user):
-        return JsonResponse({"success": False}, status=403)
     tester = get_object_or_404(current_testers(), pk=pk)
     tester.has_consent = request.POST.get("value") == "true"
     tester.save(update_fields=["has_consent"])
@@ -275,6 +262,7 @@ def tester_consent(request, pk):
 
 
 @login_required
+@json_privileged_required
 @require_POST
 def tester_consent_upload(request, pk):
     """Group page, for trainers: the parents handed in the consent form – with a photo of it, or without.
@@ -282,8 +270,6 @@ def tester_consent_upload(request, pk):
     The board gets an email (the photo as PDF, built in memory, never stored). The box is ticked also if
     the email fails; the trainer then hands in the paper. Errors with the photo come back as {"error": ...}.
     """
-    if not is_privileged(request.user):
-        return JsonResponse({"success": False}, status=403)
     tester = get_object_or_404(current_testers().select_related("trial_group"), pk=pk)
     photo = request.FILES.get("photo")
     if photo and not is_photo(photo):
@@ -588,22 +574,19 @@ def event_participant_list_view(request, event_slug):
     )
 
 
-class EventParticipantDeleteView(UserPassesTestMixin, DeleteView):
+class EventParticipantDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
     template_name = "public/eventparticipant_confirm_delete.html"
     model = EventParticipant
 
-    def test_func(self):
-        return is_board(self.request.user)
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, "Teilnehmer*in erfolgreich gelöscht")
+        return super().form_valid(form)
 
-    def get_success_url(self, **kwargs):
-        slug = self.get_object().event.slug
-        messages.add_message(
-            self.request, messages.SUCCESS, "Teilnehmer*in erfolgreich gelöscht"
-        )
-        return reverse("event_participant_list", kwargs={"event_slug": slug})
+    def get_success_url(self):
+        return reverse("event_participant_list", kwargs={"event_slug": self.object.event.slug})
 
 
-class EventParticipantUpdateView(UserPassesTestMixin, UpdateView):
+class EventParticipantUpdateView(LoginRequiredMixin, BoardRequiredMixin, UpdateView):
     model = EventParticipant
     template_name = "public/eventparticipant_form_update.html"
     fields = [
@@ -620,96 +603,75 @@ class EventParticipantUpdateView(UserPassesTestMixin, UpdateView):
         "notes",
     ]
 
-    def test_func(self):
-        return is_board(self.request.user)
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, "Teilnehmer*in erfolgreich geändert")
+        return super().form_valid(form)
 
-    def get_success_url(self, **kwargs):
-        slug = self.get_object().event.slug
-        messages.add_message(
-            self.request, messages.SUCCESS, "Teilnehmer*in erfolgreich geändert"
-        )
-        return reverse("event_participant_list", kwargs={"event_slug": slug})
+    def get_success_url(self):
+        return reverse("event_participant_list", kwargs={"event_slug": self.object.event.slug})
 
 
-class PublicEventDeleteView(UserPassesTestMixin, DeleteView):
+class PublicEventDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
     template_name = "public/publicevent_confirm_delete.html"
     model = PublicEvent
 
-    def test_func(self):
-        return is_board(self.request.user)
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, "Veranstaltung erfolgreich gelöscht")
+        return super().form_valid(form)
 
-    def get_success_url(self, **kwargs):
-        slug = self.get_object().slug
-        messages.add_message(
-            self.request, messages.SUCCESS, "Veranstaltung erfolgreich gelöscht"
-        )
+    def get_success_url(self):
         return reverse("interested_index")
 
 
-class PublicEventUpdateView(UserPassesTestMixin, UpdateView):
+class PublicEventUpdateView(LoginRequiredMixin, BoardRequiredMixin, UpdateView):
     template_name = "public/publicevent_form.html"
     model = PublicEvent
     fields = "__all__"
 
-    def test_func(self):
-        return is_board(self.request.user)
-
-    def get_success_url(self, **kwargs):
-        slug = self.get_object().slug
-        messages.add_message(
-            self.request, messages.SUCCESS, "Veranstaltung erfolgreich geändert"
-        )
-        return reverse("public_event", kwargs={"event_slug": slug})
-
-
-class EventMerchCreateView(UserPassesTestMixin, CreateView):
-    template_name = "public/eventmerch_form.html"
-    model = EventMerch
-    fields = "__all__"
-
-    def test_func(self):
-        return is_board(self.request.user)
-
     def form_valid(self, form):
-        self.object = form.save()
+        messages.add_message(self.request, messages.SUCCESS, "Veranstaltung erfolgreich geändert")
         return super().form_valid(form)
 
-    def get_success_url(self, **kwargs):
-        messages.add_message(
-            self.request, messages.SUCCESS, "Merch erfolgreich hinzugefügt"
-        )
-        return reverse("public_event_change", kwargs={"pk": self.object.event.pk})
+    def get_success_url(self):
+        return reverse("public_event", kwargs={"event_slug": self.object.slug})
 
 
-class EventMerchUpdateView(UserPassesTestMixin, UpdateView):
+class EventMerchCreateView(LoginRequiredMixin, BoardRequiredMixin, CreateView):
     template_name = "public/eventmerch_form.html"
     model = EventMerch
     fields = "__all__"
 
-    def test_func(self):
-        return is_board(self.request.user)
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, "Merch erfolgreich hinzugefügt")
+        return super().form_valid(form)
 
-    def get_success_url(self, **kwargs):
-        event_pk = self.get_object().event.pk
-        messages.add_message(
-            self.request, messages.SUCCESS, "Merch erfolgreich geändert"
-        )
-        return reverse("public_event_change", kwargs={"pk": event_pk})
+    def get_success_url(self):
+        return reverse("public_event_change", kwargs={"pk": self.object.event_id})
 
 
-class EventMerchDeleteView(UserPassesTestMixin, DeleteView):
+class EventMerchUpdateView(LoginRequiredMixin, BoardRequiredMixin, UpdateView):
+    template_name = "public/eventmerch_form.html"
+    model = EventMerch
+    fields = "__all__"
+
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, "Merch erfolgreich geändert")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("public_event_change", kwargs={"pk": self.object.event_id})
+
+
+class EventMerchDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
     template_name = "public/eventmerch_confirm_delete.html"
     model = EventMerch
 
-    def test_func(self):
-        return is_board(self.request.user)
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, "Merch erfolgreich gelöscht")
+        return super().form_valid(form)
 
-    def get_success_url(self, **kwargs):
-        event_pk = self.get_object().event.pk
-        messages.add_message(
-            self.request, messages.SUCCESS, "Merch erfolgreich gelöscht"
-        )
-        return reverse("public_event_change", kwargs={"pk": event_pk})
+    def get_success_url(self):
+        return reverse("public_event_change", kwargs={"pk": self.object.event_id})
 
 
 def fsj_view(request):
@@ -722,17 +684,11 @@ def nebenjob_view(request):
 def organizers_index(request):
     """The page for event organizers (/veranstalter/, its own section in the navigation): a request form
     that goes to the board, with a confirmation to the organizer."""
-    chairmen = Chairman.objects.filter(active=True, show__contains="event_site")
-    if (request.method == "POST"):
-        form = OrganizerForm(request.POST) #if no files
-        if form.is_valid():
-            #get Form data
-            captcha = form.cleaned_data.get('captcha')
-
-            if captcha != 'parkour':
-                form = OrganizerForm() 
-                return render(request, "public/organizers.html", {"form":form,"chairmen":chairmen})
-
+    if request.method == "POST":
+        form = OrganizerForm(request.POST)
+        if form.is_valid() and form.cleaned_data.get("captcha") != "parkour":
+            form = OrganizerForm()  # wrong captcha: start over
+        elif form.is_valid():
             first_name = form.cleaned_data.get('first_name')
             last_name = form.cleaned_data.get('last_name')
             int_email = form.cleaned_data.get('email')
@@ -747,10 +703,10 @@ def organizers_index(request):
                        context, [int_email], reply_to=[settings.TO_EMAIL]).send()
             messages.add_message(request, messages.SUCCESS, 'Anfrage erfolgreich verschickt')
             return HttpResponseRedirect("")
-        else:
-            return render(request,"public/organizers.html",{"form":form, "chairmen":chairmen})
-    form = OrganizerForm() 
-    return render(request, "public/organizers.html", {"form":form,"chairmen":chairmen})
+    else:
+        form = OrganizerForm()
+    chairmen = Chairman.objects.filter(active=True, show__contains="event_site")
+    return render(request, "public/organizers.html", {"form": form, "chairmen": chairmen})
 
 
 def landing_page(request):
