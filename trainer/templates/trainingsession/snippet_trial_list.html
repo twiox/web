@@ -13,7 +13,6 @@
                 <button type="button" title="Als anwesend eintragen"
                         hx-post="{% url 'trainingsession_trial_add' session.pk %}?type=trial"
                         hx-vals='{"tester_pk": "{{ tester.pk }}"}'
-                        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                         hx-target="#trial-list"><i class="far fa-plus-square"></i></button>
             </li>
             {% endfor %}

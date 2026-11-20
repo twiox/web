@@ -53,33 +53,47 @@
             {% endif %}
 
             {# who gets it; the addresses come from the member profiles (own and additional ones) #}
-            <details class="contacts_toggle">
-                <summary>Empfänger*innen ({{ recipients|length }})</summary>
-                <ul class="group_email_form__recipients">
-                    {% for profile, addresses in recipients %}
-                    <li>{{ profile.user.first_name }} {{ profile.user.last_name }}: {% if addresses %}{{ addresses|join:", " }}{% else %}<span class="entry_status_hint">keine E-Mail-Adresse</span>{% endif %}</li>
+            {# removable like the chips below: × leaves someone out of this e-mail; open when someone was left out before #}
+            <details class="contacts_toggle" id="recipient_list" {% if form.is_bound %}open{% endif %}>
+                <summary>Empfänger*innen (<span class="js_chip_count">{{ recipients|length }}</span>)</summary>
+                <ul class="chip_list group_email_form__recipients">
+                    {% for profile, addresses, on in recipients %}
+                    {% if addresses %}
+                    <li class="person_chip js_chip" {% if not on %}hidden{% endif %}>
+                        {{ profile.user.first_name }} {{ profile.user.last_name }} <small>{{ addresses|join:", " }}</small>
+                        <input type="hidden" name="recipients" value="{{ profile.pk }}" {% if not on %}disabled{% endif %}>
+                        <button type="button" class="js_chip_remove" title="Diese E-Mail nicht an {{ profile.user.first_name }} {{ profile.user.last_name }}" aria-label="{{ profile.user.first_name }} {{ profile.user.last_name }} entfernen"><i class="fas fa-times"></i></button>
+                    </li>
+                    {% else %}
+                    <li class="person_chip person_chip--add">{{ profile.user.first_name }} {{ profile.user.last_name }} <small>keine E-Mail-Adresse</small></li>
+                    {% endif %}
                     {% empty %}
                     <li class="member_panel__hint">Noch niemand auf der Liste.</li>
                     {% endfor %}
+                    <li class="member_panel__hint js_chip_none" hidden>an niemanden von der Liste</li>
                 </ul>
+                {% for error in form.recipients.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+                <p class="js_chip_reset" hidden><a href="#" class="more_info_button">Alle wieder hinzufügen</a></p>
             </details>
         </div>
         {# who else gets it and where replies go: the same addresses the view sends with #}
         <div class="group_email_form__routing">
             <p><span>Geht außerdem an:</span></p>
             {# removable: × leaves an address out of this e-mail; the server only takes the offered ones #}
-            <ul class="chip_list group_email_form__info" id="info_chips">
-                {% for name, address, on in info_to %}
-                <li class="person_chip" {% if not on %}hidden{% endif %}>
-                    {{ name }} <small>{{ address }}</small>
-                    <input type="hidden" name="info_to" value="{{ address }}" {% if not on %}disabled{% endif %}>
-                    <button type="button" class="js_remove_info" title="Diese E-Mail nicht an {{ address }}" aria-label="{{ name }} entfernen"><i class="fas fa-times"></i></button>
-                </li>
-                {% endfor %}
-                <li class="member_panel__hint" id="info_none" hidden>nur an die Teilnehmenden</li>
-            </ul>
-            {% for error in form.info_to.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
-            <p id="info_reset" hidden><a href="#" class="more_info_button">Alle wieder hinzufügen</a></p>
+            <div id="info_chips">
+                <ul class="chip_list group_email_form__info">
+                    {% for name, address, on in info_to %}
+                    <li class="person_chip js_chip" {% if not on %}hidden{% endif %}>
+                        {{ name }} <small>{{ address }}</small>
+                        <input type="hidden" name="info_to" value="{{ address }}" {% if not on %}disabled{% endif %}>
+                        <button type="button" class="js_chip_remove" title="Diese E-Mail nicht an {{ address }}" aria-label="{{ name }} entfernen"><i class="fas fa-times"></i></button>
+                    </li>
+                    {% endfor %}
+                    <li class="member_panel__hint js_chip_none" hidden>nur an die Teilnehmenden</li>
+                </ul>
+                {% for error in form.info_to.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
+                <p class="js_chip_reset" hidden><a href="#" class="more_info_button">Alle wieder hinzufügen</a></p>
+            </div>
             <p><span>Antworten gehen an:</span> {{ reply_to|join:", " }}</p>
             {% for hint in address_hints %}<p class="member_panel__hint">{{ hint }}</p>{% endfor %}
         </div>
@@ -90,22 +104,25 @@
 
 <script>
     document.querySelectorAll('.group_email_form .mdc-text-field').forEach(field => mdc.textField.MDCTextField.attachTo(field));
-    // "Geht außerdem an": × removes a chip (its hidden field is no longer sent), the link brings all back
-    (function () {
-        const chips = [...document.querySelectorAll('#info_chips .person_chip')];
+    // Empfänger*innen and "Geht außerdem an": × removes a chip (its hidden field is no longer sent), the link brings all back
+    ['recipient_list', 'info_chips'].forEach(id => {
+        const box = document.getElementById(id);
+        const chips = [...box.querySelectorAll('.js_chip')];
+        const count = box.querySelector('.js_chip_count');
         const update = () => {
             const removed = chips.filter(chip => chip.hidden).length;
-            document.getElementById('info_reset').hidden = removed === 0;
-            document.getElementById('info_none').hidden = removed < chips.length;
+            box.querySelector('.js_chip_reset').hidden = removed === 0;
+            box.querySelector('.js_chip_none').hidden = chips.length === 0 || removed < chips.length;
+            if (count) count.textContent = removed ? `${chips.length - removed} von ${chips.length}` : chips.length;
         };
         const show = (chip, on) => { chip.hidden = !on; chip.querySelector('input').disabled = !on; };
-        chips.forEach(chip => chip.querySelector('.js_remove_info').addEventListener('click', () => { show(chip, false); update(); }));
-        document.querySelector('#info_reset a').addEventListener('click', event => {
+        chips.forEach(chip => chip.querySelector('.js_chip_remove').addEventListener('click', () => { show(chip, false); update(); }));
+        box.querySelector('.js_chip_reset a').addEventListener('click', event => {
             event.preventDefault();
             chips.forEach(chip => show(chip, true));
             update();
         });
         update();
-    })();
+    });
 </script>
 {% endblock %}

@@ -21,6 +21,9 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.db.models import Count, Max, Q
 from itertools import groupby
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @user_passes_test(is_trainer)
@@ -278,11 +281,18 @@ def group_email_addresses(user, session):
     return [(name, address) for address, name in unique.items()], list(dict.fromkeys(reply_to)), hints
 
 
-def group_email_context(user, session, form=None):
-    info_to, reply_to, hints = group_email_addresses(user, session)
-    # after a failed post the chips keep their state, otherwise all are on
-    kept = set(form.data.getlist("info_to")) if form is not None and form.is_bound else {a for _, a in info_to}
-    return {"info_to": [(name, address, address in kept) for name, address in info_to], "reply_to": reply_to, "address_hints": hints}
+def group_email_context(addresses, recipients, form):
+    """The chips of the form: participants and the board/trainers, after a failed post in the state they were sent."""
+    info_to, reply_to, hints = addresses
+    posted = form.is_bound
+    kept_info = set(form.data.getlist("info_to")) if posted else {a for _, a in info_to}
+    kept_recipients = set(form.data.getlist("recipients")) if posted else {str(p.pk) for p, a in recipients if a}
+    return {
+        "info_to": [(name, address, address in kept_info) for name, address in info_to],
+        "recipients": [(profile, addresses, str(profile.pk) in kept_recipients) for profile, addresses in recipients],
+        "reply_to": reply_to,
+        "address_hints": hints,
+    }
 
 
 def group_recipients(session):
@@ -298,23 +308,38 @@ def group_recipients(session):
     return recipients
 
 
+def send_each(connection, mails):
+    """Sends the e-mails one at a time, so a refused address (e.g. with an umlaut) only misses that one.
+    mails: (label, build) pairs; returns the labels whose e-mail could not be sent."""
+    failed = []
+    for label, build in mails:
+        try:
+            connection.send_messages([build()])
+        except Exception:
+            logger.exception("group e-mail to %s failed", label)
+            failed.append(label)
+            connection.close()  # opened again for the next one, in case the error broke the connection
+    return failed
+
+
 @user_passes_test(is_privileged)
 def trainer_group_email(request, pk):
     """Writes to everyone on a training time's list, one e-mail each; the board and the training time's
-    trainers get the same e-mail (see group_email_addresses). Optionally also a notice at the training time."""
+    trainers get the same e-mail (see group_email_addresses). Participants, board and trainers can be
+    left out in the form. Optionally also a notice at the training time."""
     session = get_object_or_404(Session, pk=pk)
     recipients = group_recipients(session)
     reachable = [(p, a) for p, a in recipients if a]
     can_notice = is_privileged(request.user)
-    info_choices = group_email_addresses(request.user, session)[0]
-    form = GroupEmailForm(request.POST or None, can_notice=can_notice, info_choices=info_choices)
+    addresses = group_email_addresses(request.user, session)
+    info_choices, reply_to, _ = addresses
+    form = GroupEmailForm(
+        request.POST or None, can_notice=can_notice, info_choices=info_choices,
+        recipient_choices=[(str(p.pk), p.user.get_full_name()) for p, _ in reachable],
+    )
     if request.method == "POST" and form.is_valid():
         subject, body = form.cleaned_data["subject"], form.cleaned_data["body"]
-        sender = request.user.get_full_name()
-        _, reply_to, _ = group_email_addresses(request.user, session)
-        info_to = form.cleaned_data["info_to"]  # the chips left in the form, only from the offered addresses
-        missing = [p.user.get_full_name() for p, a in recipients if not a]
-        context = {"body": body, "sender": sender, "session": session, "greeting": GROUP_EMAIL_GREETING}
+        context = {"body": body, "sender": request.user.get_full_name(), "session": session, "greeting": GROUP_EMAIL_GREETING}
 
         def mail(to):
             html = render_to_string("trainer/emails/group_email.html", context)
@@ -328,40 +353,35 @@ def trainer_group_email(request, pk):
             message.attach_alternative(html, "text/html")
             return message
 
+        chosen = set(form.cleaned_data["recipients"])
+        selected = [(p, a) for p, a in reachable if str(p.pk) in chosen]
         connection = get_connection()
-        try:
-            connection.send_messages([mail(addresses) for _, addresses in reachable])
-        except Exception:
+        failed = send_each(connection, [(p.user.get_full_name(), lambda a=a: mail(a)) for p, a in selected])
+        if selected and len(failed) == len(selected):
+            # nobody got it (e.g. the mail server is down): nothing else is sent, so trying again sends no duplicates
+            connection.close()
             messages.add_message(request, messages.ERROR, "Die E-Mails konnten nicht gesendet werden – bitte später nochmal versuchen.")
-            return render(request, "trainer/training_group_email.html", {
-                "object": session, "form": form, "recipients": recipients,
-                "prefix": GROUP_EMAIL_PREFIX, "greeting": GROUP_EMAIL_GREETING, "sender": request.user.get_full_name(), "session": session,
-                **group_email_context(request.user, session, form),
-            })
-        text = f"E-Mail an {len(reachable)} Teilnehmende gesendet"
-        if missing:
-            text += f" ({len(missing)} ohne E-Mail-Adresse)"
-        # the same e-mail for the board and the trainers, each on its own: a refused address
-        # (e.g. with an umlaut) only misses that one
-        failed = []
-        for address in info_to:
-            try:
-                connection.send_messages([mail([address])])
-            except Exception:
-                failed.append(address)
-        if failed:
-            text += f"; nicht an {', '.join(failed)}"
-        if can_notice and form.cleaned_data.get("notice"):
-            notice = Message.objects.create(title=subject, message=body, author=request.user, display="sessions",
-                                            autodelete=datetime.now() + timedelta(days=3))
-            notice.sessions.add(session)
-            text += ", Hinweis bei der Trainingszeit angelegt"
-        messages.add_message(request, messages.SUCCESS, text)
-        return HttpResponseRedirect(reverse("trainer_group_detail", args=[session.pk]))
+        else:
+            info_to = form.cleaned_data["info_to"]  # the chips left in the form, only from the offered addresses
+            failed_info = send_each(connection, [(address, lambda address=address: mail([address])) for address in info_to])
+            connection.close()
+            missing = len(recipients) - len(reachable)
+            text = f"E-Mail an {len(selected) - len(failed)} Teilnehmende gesendet"
+            if missing:
+                text += f" ({missing} ohne E-Mail-Adresse)"
+            if failed or failed_info:
+                text += f"; nicht an {', '.join(failed + failed_info)}"
+            if can_notice and form.cleaned_data.get("notice"):
+                notice = Message.objects.create(title=subject, message=body, author=request.user, display="sessions",
+                                                autodelete=datetime.now() + timedelta(days=3))
+                notice.sessions.add(session)
+                text += ", Hinweis bei der Trainingszeit angelegt"
+            messages.add_message(request, messages.WARNING if failed or failed_info else messages.SUCCESS, text)
+            return HttpResponseRedirect(reverse("trainer_group_detail", args=[session.pk]))
     return render(request, "trainer/training_group_email.html", {
-        "object": session, "form": form, "recipients": recipients,
+        "object": session, "form": form,
         "prefix": GROUP_EMAIL_PREFIX, "greeting": GROUP_EMAIL_GREETING, "sender": request.user.get_full_name(), "session": session,
-                **group_email_context(request.user, session, form),
+        **group_email_context(addresses, recipients, form),
     })
 
 

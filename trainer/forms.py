@@ -145,12 +145,21 @@ class GroupEmailForm(MdcFormMixin, forms.Form):
     body = forms.CharField(label="Nachricht", widget=forms.Textarea)
     notice = forms.BooleanField(label="Auch als Hinweis bei dieser Trainingszeit anzeigen (3 Tage)", required=False)
 
+    # the participants with an address (profile pks), all offered by the view, removable as chips in the form
+    recipients = forms.MultipleChoiceField(required=False, widget=forms.MultipleHiddenInput)
     # who else gets it (board, trainers); offered by the view, removable as chips in the form
     info_to = forms.MultipleChoiceField(required=False, widget=forms.MultipleHiddenInput)
 
-    def __init__(self, *args, can_notice=False, info_choices=(), **kwargs):
+    def __init__(self, *args, can_notice=False, info_choices=(), recipient_choices=(), **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["recipients"].choices = recipient_choices
         self.fields["info_to"].choices = [(address, name) for name, address in info_choices]
         self.fields["notice"].widget.attrs.pop("class", None)  # rendered as a chip
         if not can_notice:
             del self.fields["notice"]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data.get("recipients") and not cleaned_data.get("info_to") and "recipients" not in self.errors:
+            raise forms.ValidationError("Niemand mehr ausgewählt – bitte mindestens eine*n Empfänger*in drinlassen.")
+        return cleaned_data

@@ -1412,9 +1412,6 @@ footer{
     &__info{
         justify-content: center;
         margin: 4px 0 $padding_small 0;
-        .person_chip[hidden]{
-            display: none;  // display: inline-flex would keep it visible
-        }
     }
     &__routing{
         margin: $padding_medium 0 0 0;
@@ -1446,7 +1443,6 @@ footer{
         list-style: none;
         font-size: $font_small;
         li{
-            padding: 2px 0;
             overflow-wrap: anywhere;
         }
     }
@@ -1673,6 +1669,9 @@ footer{
 }
 .person_chip{
     display: inline-flex;
+    &[hidden]{
+        display: none;  // display: inline-flex would keep it visible
+    }
     align-items: center;
     gap: 6px;
     padding: 4px 6px 4px $padding_small;

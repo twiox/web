@@ -9,7 +9,6 @@ from members.models import Trainer, Profile, Session
 from members.roles import is_board, is_privileged, is_trainer
 from public.models import TrialGroup
 from public.trials import expected_testers
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -98,7 +97,6 @@ def get_trainer_list(request, pk):
         context.update({'object_list':session.cotrainer.all()})
     return render(request,'trainingsession/snippet_trainerlist.html',context)
 
-@csrf_exempt
 @user_passes_test(is_privileged)
 @require_POST
 def remove_trainer(request, pk):
@@ -115,7 +113,6 @@ def remove_trainer(request, pk):
         session.cotrainer.remove(trainer)
     return get_trainer_list(request, pk)
 
-@csrf_exempt
 @user_passes_test(is_privileged)
 @require_POST
 def add_trainer(request, pk):
@@ -133,7 +130,6 @@ def add_trainer(request, pk):
     return get_trainer_list(request, pk)
 
 
-@csrf_exempt
 @user_passes_test(is_privileged)
 @require_POST
 def add_member(request, pk):
@@ -149,7 +145,6 @@ def add_member(request, pk):
 
     return get_participants_list(request, pk)
 
-@csrf_exempt
 @user_passes_test(is_privileged)
 @require_POST
 def add_nonmember(request, pk):
@@ -175,15 +170,12 @@ def add_trial_participant(request, pk):
     return get_participants_list(request, pk)
 
 
-@csrf_exempt
 @user_passes_test(is_privileged)
 @require_POST
 def delete_participant(request, pk):
-    """
-    Remove participant from session,then return the list-snippet 
-    """    
-    TrainingSessionParticipant.objects.get(pk=int(request.POST.get('part_pk'))).delete()
-
+    """Removes a participant from this entry (only from this one), then returns the list snippet."""
+    entry = get_object_or_404(TrainingSessionEntry, pk=pk)
+    get_object_or_404(entry.participant, pk=request.POST.get('part_pk') or 0).delete()
     return get_participants_list(request, pk)
 
 @user_passes_test(is_privileged)

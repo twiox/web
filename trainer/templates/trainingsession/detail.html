@@ -56,7 +56,8 @@
     </form>
     {% endif %}
 
-    <div class="session_grid session_grid--flow">
+    {# the CSRF token for every htmx request of the lists below (adding and removing trainers and participants) #}
+    <div class="session_grid session_grid--flow" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
         <div class="session_card">
             <h3>Trainer*innen</h3>
             <h4>Trainer*innen</h4>
