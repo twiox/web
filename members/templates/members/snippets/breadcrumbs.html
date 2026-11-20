@@ -1,0 +1,11 @@
+{% comment %}
+The breadcrumbs below the main navigation, from members.breadcrumbs.trail(): breadcrumbs [(label, url)]
+and breadcrumb_current (the page itself, not linked). Use inside {% block navbar2 %}.
+{% endcomment %}
+<nav class="navbar primary_bg padding_all_small breadcrumbs" aria-label="Breadcrumb">
+    {% for label, url in breadcrumbs %}
+    <a class="more_info_button" href="{{ url }}">{{ label }}</a>
+    <span class="breadcrumbs__sep" aria-hidden="true">&gt;</span>
+    {% endfor %}
+    <span class="breadcrumbs__current" aria-current="page">{{ breadcrumb_current }}</span>
+</nav>

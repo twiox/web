@@ -2,11 +2,7 @@
 {% load static %}
 {# a weekly training time as a group; built like interested/trialgroup_detail.html #}
 {% block navbar2 %}
-<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_groups' %}">Trainingsgruppen</a>
-    <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{ object.title }}</a>
-</div>
+{% include "members/snippets/breadcrumbs.html" %}
 {% endblock %}
 
 {% block content %}
@@ -29,7 +25,7 @@
         {% if is_privileged %}
         <a class="table_action table_action--primary" href="{% url 'session_update' object.pk %}?next={{ request.path|urlencode }}"><i class="fas fa-pen-square"></i> Trainingszeit bearbeiten</a>
         {% endif %}
-        <a class="table_action table_action--primary" href="{% url 'trainer_group_email' object.pk %}"><i class="far fa-envelope"></i> E-Mail an alle</a>
+        <a class="table_action table_action--primary" href="{% url 'trainer_group_email' object.pk %}?von={{ von_next|urlencode }}"><i class="far fa-envelope"></i> E-Mail an alle</a>
     </div>
     <h3>Teilnehmende</h3>
     <p class="member_panel__hint">Alle, die bei dieser Trainingszeit „Teilnahme“ angehakt haben.</p>
@@ -66,7 +62,7 @@
                     </td>
                     <td class="table_actions">
                         {# e.g. "Teilnahme" ticked by accident; they can tick it again on the dashboard #}
-                        <form method="POST" action="{% url 'trainer_group_remove' object.pk profile.pk %}" class="group_remove"
+                        <form method="POST" action="{% url 'trainer_group_remove' object.pk profile.pk %}?von={{ von|urlencode }}" class="group_remove"
                               data-name="{{ profile.user.first_name }} {{ profile.user.last_name }}">
                             {% csrf_token %}
                             <button type="submit" class="icon_button" title="Von der Liste nehmen"><i class="fas fa-user-minus"></i></button>
@@ -82,7 +78,7 @@
 
     {# members who came to this training at least once (from the trainers' session entries), as on the trial group page #}
     {% if candidates %}
-    <form class="orga_add" id="group_add" method="POST" action="{% url 'trainer_group_add' object.pk %}">
+    <form class="orga_add" id="group_add" method="POST" action="{% url 'trainer_group_add' object.pk %}?von={{ von|urlencode }}">
         {% csrf_token %}
         <label for="group_add_input"><i class="fas fa-user-plus"></i> Hinzufügen</label>
         <input class="searchbar" id="group_add_input" list="group_add_options" placeholder="Name …" autocomplete="off">
@@ -130,7 +126,7 @@
                         <tr class="heatmap__axis">
                             <th class="heatmap__name"></th>
                             {% for entry in entries %}
-                            <th class="heatmap__date" data-col="{{ forloop.counter0 }}" data-date="{{ entry.date|date:'Y-m-d' }}"><a href="{% url 'trainingsession_detail' entry.pk %}" title="Zur Trainingsstunde vom {{ entry.date|date:'d.m.Y' }}">{{ entry.date|date:"d.m." }}</a></th>
+                            <th class="heatmap__date" data-col="{{ forloop.counter0 }}" data-date="{{ entry.date|date:'Y-m-d' }}"><a href="{% url 'trainingsession_detail' entry.pk %}?von={{ von_next|urlencode }}" title="Zur Trainingsstunde vom {{ entry.date|date:'d.m.Y' }}">{{ entry.date|date:"d.m." }}</a></th>
                             {% endfor %}
                             <th class="heatmap__last">Zuletzt hier</th>
                         </tr>
@@ -188,7 +184,7 @@
                 <table class="member_table member_table--static">
                     <thead><tr><th>Datum</th><th>Personen</th><th>davon Teilnehmende</th><th>davon Trainer*innen</th></tr></thead>
                     <tbody>
-                    {% for entry in entries %}<tr><td><a href="{% url 'trainingsession_detail' entry.pk %}">{{ entry.date|date:"D d.m.Y" }}</a></td><td>{{ entry.total }}</td><td>{{ entry.count }}</td><td>{{ entry.trainer_count }}</td></tr>{% endfor %}
+                    {% for entry in entries %}<tr><td><a href="{% url 'trainingsession_detail' entry.pk %}?von={{ von_next|urlencode }}">{{ entry.date|date:"D d.m.Y" }}</a></td><td>{{ entry.total }}</td><td>{{ entry.count }}</td><td>{{ entry.trainer_count }}</td></tr>{% endfor %}
                     </tbody>
                 </table>
             </details>

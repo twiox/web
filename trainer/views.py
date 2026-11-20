@@ -3,6 +3,7 @@ from .models import TrainingSessionEntry, TrainingSessionParticipant, month_of
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
 from members.models import AdditionalEmail, Message, Trainer, Session, Profile
+from members.breadcrumbs import trail, with_von
 from members.roles import BoardRequiredMixin, PrivilegedRequiredMixin, TrainerRequiredMixin, is_privileged, is_trainer
 from public.models import TrialGroup
 from public.trials import ACTIVE_GROUP_ORDER, annotate_groups, upcoming_trial_dates
@@ -47,7 +48,9 @@ def trainer_index(request):
             "entries": group,
             "unsent": sum(not e.billed for e in group),
         })
-    return render(request, "trainer/trainer_index.html", {"months": months})
+    return render(request, "trainer/trainer_index.html", {
+        "months": months, **trail(request, "trainer", "Trainingstabellen", step="tabellen", fixed=True),
+    })
 
 
 @user_passes_test(is_trainer)
@@ -70,10 +73,13 @@ def trainer_groups(request):
     own = TrialGroup.objects.filter(trial_dates__session__trainer=trainer).values("pk")
     # pk__in instead of filtering the dates directly, so the card numbers count all dates of the group
     trial_groups = annotate_groups(TrialGroup.objects.filter(pk__in=own, archived__isnull=True)).order_by(*ACTIVE_GROUP_ORDER)
+    crumbs = trail(request, "trainer", "Trainingsgruppen", step="gruppen", fixed=True)
     return render(request, "trainer/trainer_groups.html", {
         "sessions": sessions,
         "upcoming": upcoming_trial_dates(request.user, board=False),
         "groups": trial_groups,
+        **crumbs,
+        "trial_von": f"{crumbs['von_next']}/probetraining",  # for the trial calendar and group cards
     })
 
 
@@ -87,6 +93,7 @@ def trainer_group_detail(request, pk):
     # contact person and emergency number are columns only if a minor here has one of them
     show_parent = any(p.age is not None and p.age < 18 and (p.parent or p.parent_telnr) for p in participants)
     return render(request, "trainer/training_group_detail.html", {
+        **group_trail(request, session),
         "object": session,
         "participants": participants,
         "show_parent": show_parent,
@@ -118,6 +125,16 @@ def week_cells(entries, weeks):
         else:
             cells.append(0)
     return cells, last_seen
+
+
+def group_trail(request, session, current=None):
+    """Breadcrumbs of a training group (current: a page below it, e.g. the e-mail form). Without a trail
+    (e.g. a bookmark): trainers come from their groups, everyone else from the board."""
+    default = "trainer/gruppen" if is_trainer(request.user) else "vorstand"
+    step = f"gruppe:{session.pk}"
+    if current:
+        return trail(request, f"{default}/{step}", current)
+    return trail(request, default, session.title, step=step)
 
 
 def group_dashboard(session, participants):
@@ -225,7 +242,7 @@ def trainer_group_add(request, pk):
     profile = get_object_or_404(group_candidates(session), pk=request.POST.get("profile") or 0)
     session.participants.add(profile)
     messages.add_message(request, messages.SUCCESS, f"{profile.user.get_full_name()} zu {session.title} hinzugefügt")
-    return HttpResponseRedirect(reverse("trainer_group_detail", args=[session.pk]))
+    return HttpResponseRedirect(with_von(reverse("trainer_group_detail", args=[session.pk]), group_trail(request, session)["von"]))
 
 
 @user_passes_test(is_privileged)
@@ -237,7 +254,7 @@ def trainer_group_remove(request, pk, profile_pk):
     profile = get_object_or_404(session.participants.select_related("user"), pk=profile_pk)
     session.participants.remove(profile)
     messages.add_message(request, messages.SUCCESS, f"{profile.user.get_full_name()} aus {session.title} entfernt")
-    return HttpResponseRedirect(reverse("trainer_group_detail", args=[session.pk]))
+    return HttpResponseRedirect(with_von(reverse("trainer_group_detail", args=[session.pk]), group_trail(request, session)["von"]))
 
 
 @user_passes_test(is_privileged)
@@ -338,6 +355,7 @@ def trainer_group_email(request, pk):
     reachable = [(p, a) for p, a in recipients if a]
     addresses = group_email_addresses(request.user, session)
     info_choices, reply_to, _ = addresses
+    crumbs = group_trail(request, session, current="E-Mail an alle")
     form = GroupEmailForm(
         request.POST or None, info_choices=info_choices,
         recipient_choices=[(str(p.pk), p.user.get_full_name()) for p, _ in reachable],
@@ -382,8 +400,9 @@ def trainer_group_email(request, pk):
                 notice.sessions.add(session)
                 text += ", Hinweis bei der Trainingszeit angelegt"
             messages.add_message(request, messages.WARNING if failed or failed_info else messages.SUCCESS, text)
-            return HttpResponseRedirect(reverse("trainer_group_detail", args=[session.pk]))
+            return HttpResponseRedirect(crumbs["back_url"])
     return render(request, "trainer/training_group_email.html", {
+        **crumbs,
         "object": session, "form": form,
         "prefix": GROUP_EMAIL_PREFIX, "greeting": GROUP_EMAIL_GREETING, "sender": request.user.get_full_name(), "session": session,
         **group_email_context(addresses, recipients, form),
@@ -400,6 +419,7 @@ def trainer_data(request):
         ("Ehrenkodex", trainer.codex),
     ]
     return render(request, "trainer/trainer_data.html", {
+        **trail(request, "trainer", "Meine Daten", step="daten", fixed=True),
         "trainer": trainer,
         "license_expired": license_days_left is not None and license_days_left < 0,
         "license_expires_soon": license_days_left is not None and 0 <= license_days_left <= 60,
@@ -412,6 +432,7 @@ class TrainerListView(LoginRequiredMixin, PrivilegedRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context.update(trail(self.request, "vorstand", "Trainerliste", step="trainerliste", fixed=True))
         # deactivated trainers keep their data (see TrainerDeleteView), listed collapsed below
         context["inactive_trainers"] = Trainer.objects.filter(active=False).select_related("user").order_by("user__last_name")
         return context
@@ -439,6 +460,9 @@ class TrainerUpdateView(LoginRequiredMixin, BoardRequiredMixin, SuccessMessageMi
     template_name = "trainer/trainer_form.html"
     success_message = "Gespeichert"
 
+    def get_context_data(self, **kwargs):
+        return {**super().get_context_data(**kwargs), **trail(self.request, "vorstand/trainerliste", self.object.user.get_full_name(), fixed=True)}
+
 
 class TrainerSelfUpdateView(LoginRequiredMixin, TrainerRequiredMixin, SuccessMessageMixin, UpdateView):
     form_class = TrainerSelfForm
@@ -449,3 +473,6 @@ class TrainerSelfUpdateView(LoginRequiredMixin, TrainerRequiredMixin, SuccessMes
 
     def get_object(self):
         return self.request.user.trainer
+
+    def get_context_data(self, **kwargs):
+        return {**super().get_context_data(**kwargs), **trail(self.request, "trainer/daten", "Bearbeiten", fixed=True)}

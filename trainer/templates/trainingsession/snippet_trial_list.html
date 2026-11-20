@@ -3,7 +3,7 @@
     {# one block per trial group, its name links to the group page (dates, attendance, outcome) #}
     {% for block in trial_groups %}
     <div class="trial_block">
-        <a class="table_action table_action--primary" href="{% url 'trial_group_detail' block.group.pk %}" title="Zur Probetrainingsgruppe: Termine, Anwesenheit, Kontakte"><i class="fas fa-users"></i> {{ block.group }}</a>
+        <a class="table_action table_action--primary" href="{% url 'trial_group_detail' block.group.pk %}?von={{ request.GET.von|urlencode }}" title="Zur Probetrainingsgruppe: Termine, Anwesenheit, Kontakte"><i class="fas fa-users"></i> {{ block.group }}</a>
         {% if block.expected %}
         <p class="trial_block__label">Erwartet</p>
         <ul class="chip_list">
@@ -11,7 +11,7 @@
             <li class="person_chip person_chip--add">
                 {{ tester.first_name }} {{ tester.last_name }} <small>{{ tester.age|default_if_none:"" }}</small>
                 <button type="button" title="Als anwesend eintragen"
-                        hx-post="{% url 'trainingsession_trial_add' session.pk %}?type=trial"
+                        hx-post="{% url 'trainingsession_trial_add' session.pk %}?type=trial&von={{ request.GET.von|urlencode }}"
                         hx-vals='{"tester_pk": "{{ tester.pk }}"}'
                         hx-target="#trial-list"><i class="far fa-plus-square"></i></button>
             </li>
@@ -24,7 +24,7 @@
             <li class="person_chip">
                 {{ participant.tester.first_name }} {{ participant.tester.last_name }} <small>{{ participant.tester.age|default_if_none:"" }}</small>
                 <button type="button" title="Entfernen"
-                        hx-post="{% url 'trainingsession_del_participant' session.pk %}?type=trial"
+                        hx-post="{% url 'trainingsession_del_participant' session.pk %}?type=trial&von={{ request.GET.von|urlencode }}"
                         hx-vals='{"part_pk":"{{ participant.pk }}"}'
                         hx-target="#trial-list"><i class="far fa-minus-square"></i></button>
             </li>
@@ -41,7 +41,7 @@
         <li class="person_chip">
             {{ participant.tester.first_name }} {{ participant.tester.last_name }} <small>{{ participant.tester.age|default_if_none:"" }}</small>
             <button type="button" title="Entfernen"
-                    hx-post="{% url 'trainingsession_del_participant' session.pk %}?type=trial"
+                    hx-post="{% url 'trainingsession_del_participant' session.pk %}?type=trial&von={{ request.GET.von|urlencode }}"
                     hx-vals='{"part_pk":"{{ participant.pk }}"}'
                     hx-target="#trial-list"><i class="far fa-minus-square"></i></button>
         </li>

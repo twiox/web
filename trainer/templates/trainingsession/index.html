@@ -1,21 +1,6 @@
 {% extends 'members/base.html' %}
 {% block navbar2 %}
-<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    {% if is_board %}
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}">Übersicht</a>
-    {% else %}
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_index' %}">
-        Trainerdokument </a>
-    {% endif %}
-    <a class="float_left"> > </a>
-    {% if entry %}
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainingsession_detail' entry.pk %}">{{ entry.date|date:"d.m.Y" }}</a>
-    <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Bearbeiten</a>
-    {% else %}
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Neue Trainingsstunde</a>
-    {% endif %}
-</div>
+{% include "members/snippets/breadcrumbs.html" %}
 {% endblock %}
 {% block content %}
 <section class="member_page session_form">
@@ -27,7 +12,7 @@
     <form method="POST" class="session_card">
         {% csrf_token %}
         {% for error in form.non_field_errors %}<p class="form_error">{{ error }}</p>{% endfor %}
-        {% if duplicate %}<p><a class="more_info_button" href="{% url 'trainingsession_detail' duplicate.pk %}">Zum vorhandenen Eintrag</a></p>{% endif %}
+        {% if duplicate %}<p><a class="more_info_button" href="{% url 'trainingsession_detail' duplicate.pk %}?von={{ sibling_von|urlencode }}">Zum vorhandenen Eintrag</a></p>{% endif %}
         <div class="member_fields">
             {% for error in form.date.errors %}<p class="form_error">{{ error }}</p>{% endfor %}
             <label class="mdc-text-field mdc-text-field--filled">
@@ -84,7 +69,7 @@
             </label>
         </div>
         <button type="submit" class="form_button member_form__submit">{% if entry %}Speichern{% else %}Anlegen{% endif %}</button>
-        {% if entry %}<p style="text-align: center;"><a class="more_info_button" href="{% url 'trainingsession_detail' entry.pk %}">Abbrechen</a></p>{% endif %}
+        {% if entry %}<p style="text-align: center;"><a class="more_info_button" href="{{ back_url }}">Abbrechen</a></p>{% endif %}
     </form>
 </section>
 

@@ -1,14 +1,6 @@
 {% extends "members/base.html" %}
 {% block navbar2 %}
-<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    {% if is_board %}
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}">Übersicht</a>
-    {% else %}
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_index' %}">Trainerdokument</a>
-    {% endif %}
-    <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Probetraining</a>
-</div>
+{% include "members/snippets/breadcrumbs.html" %}
 {% endblock %}
 
 {% block content %}
@@ -19,7 +11,7 @@
 
     <div class="member_toolbar tester_dashboard__head">
         <h3>Anfragen</h3>
-        <a class="table_action" href="{% url 'tester_list' %}"><i class="fas fa-list"></i> Alle Anfragen</a>
+        <a class="table_action" href="{% url 'tester_list' %}?von={{ von_next|urlencode }}"><i class="fas fa-list"></i> Alle Anfragen</a>
     </div>
 
     <div class="tester_stats">
@@ -41,7 +33,7 @@
 
     <div class="member_toolbar tester_dashboard__head">
         <h3>Gruppen</h3>
-        <a class="table_action table_action--primary" href="{% url 'trial_group_create' %}"><i class="far fa-plus-square"></i> Neue Gruppe</a>
+        <a class="table_action table_action--primary" href="{% url 'trial_group_create' %}?von={{ von_next|urlencode }}"><i class="far fa-plus-square"></i> Neue Gruppe</a>
     </div>
     <div class="dashboard_grid">
         {% for group in groups %}
@@ -69,7 +61,7 @@
                 <tbody>
                 {% for group in archived_groups %}
                     <tr>
-                        <td><a href="{% url 'trial_group_detail' group.pk %}">{{ group.name }}</a></td>
+                        <td><a href="{% url 'trial_group_detail' group.pk %}?von={{ von_next|urlencode }}">{{ group.name }}</a></td>
                         <td>{% if group.first_date %}{{ group.first_date|date:"d.m." }}–{{ group.last_date|date:"d.m.Y" }}{% else %}–{% endif %}</td>
                         <td>{{ group.size }}</td>
                         <td>{{ group.member_count }}</td>
@@ -106,7 +98,7 @@
         <summary>
             <strong>{{ group.name }}</strong>
             <span class="member_panel__hint">{{ group.first_date|date:"d.m." }}–{{ group.last_date|date:"d.m.Y" }} · {{ group.decided_count }} von {{ group.size }} mit Ergebnis</span>
-            <a class="finished_group__link" href="{% url 'trial_group_detail' group.pk %}" title="Zur Gruppe"><i class="fas fa-external-link-alt"></i></a>
+            <a class="finished_group__link" href="{% url 'trial_group_detail' group.pk %}?von={{ von_next|urlencode }}" title="Zur Gruppe"><i class="fas fa-external-link-alt"></i></a>
         </summary>
         <div class="member_table_wrapper tertiary_bg">
             <table class="member_table member_table--static tester_table">

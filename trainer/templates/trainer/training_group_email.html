@@ -1,12 +1,6 @@
 {% extends "members/base.html" %}
 {% block navbar2 %}
-<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_groups' %}">Trainingsgruppen</a>
-    <a class="float_left"> > </a>
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_group_detail' object.pk %}">{{ object.title }}</a>
-    <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">E-Mail an alle</a>
-</div>
+{% include "members/snippets/breadcrumbs.html" %}
 {% endblock %}
 
 {% block content %}
@@ -96,7 +90,7 @@
             {% for hint in address_hints %}<p class="member_panel__hint">{{ hint }}</p>{% endfor %}
         </div>
         <button type="submit" class="form_button member_form__submit" {% if not recipients %}disabled{% endif %}>Senden</button>
-        <p style="text-align: center;"><a class="more_info_button" href="{% url 'trainer_group_detail' object.pk %}">Abbrechen</a></p>
+        <p style="text-align: center;"><a class="more_info_button" href="{{ back_url }}">Abbrechen</a></p>
     </form>
 </section>
 

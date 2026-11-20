@@ -1,4 +1,7 @@
 {% extends 'members/base.html' %}
+{% block navbar2 %}
+{% include "members/snippets/breadcrumbs.html" %}
+{% endblock %}
 {% block content %}
 <section class="member_page">
     {% include "trainer/_tabs.html" with active="data" %}

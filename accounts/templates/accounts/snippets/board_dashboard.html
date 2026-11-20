@@ -96,7 +96,7 @@
                 <tbody>
                 {% for group in groups %}
                     <tr>
-                        <th><a href="{% url 'trainer_group_detail' group.session.pk %}">{{ group.session.title }}</a> <small>{{ group.session.day }} {{ group.session.format_start_time }}</small></th>
+                        <th><a href="{% url 'trainer_group_detail' group.session.pk %}?von=vorstand/mitgliederliste">{{ group.session.title }}</a> <small>{{ group.session.day }} {{ group.session.format_start_time }}</small></th>
                         <td><div class="board_dash__row"><span class="board_dash__bar board_dash__bar--group" style="width: {{ group.pct }}%" title="{{ group.session.title }}: {{ group.count }}"></span><span class="board_dash__value">{{ group.count }}</span></div></td>
                     </tr>
                 {% endfor %}
@@ -117,7 +117,7 @@
                             <td>{{ profile.age|default_if_none:"–" }}</td>
                             <td>{% if profile.last_seen %}{{ profile.last_seen|date:"d.m.Y" }}{% else %}<span class="member_panel__hint">noch nie</span>{% endif %}</td>
                             {# the training of the last visit: its group page (to add the person there), else the group name #}
-                            <td>{% with entry=profile.last_entry %}{% if entry.session %}<a href="{% url 'trainer_group_detail' entry.session.pk %}">{{ entry.session.title }}</a> <small class="member_panel__hint">{{ entry.session.day }}</small>{% elif entry %}{{ entry.group|default:"–" }}{% endif %}{% endwith %}</td>
+                            <td>{% with entry=profile.last_entry %}{% if entry.session %}<a href="{% url 'trainer_group_detail' entry.session.pk %}?von=vorstand/mitgliederliste">{{ entry.session.title }}</a> <small class="member_panel__hint">{{ entry.session.day }}</small>{% elif entry %}{{ entry.group|default:"–" }}{% endif %}{% endwith %}</td>
                         </tr>
                     {% empty %}
                         <tr><td colspan="5">Alle sind in einer Trainingsgruppe.</td></tr>

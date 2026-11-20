@@ -1,27 +1,18 @@
 {% extends 'members/base.html' %}
 
 {% block navbar2 %}
-<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    {% if is_board %}
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}">Übersicht</a>
-    {% else %}
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_index' %}">
-        Trainerdokument </a>
-    {% endif %}
-    <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Trainingsstunden & Rechnungen</a>
-</div>
+{% include "members/snippets/breadcrumbs.html" %}
 {% endblock %}
 
 {% block content %}
 <section class="member_page">
     <div class="member_toolbar">
         <h1>Trainingsstunden</h1>
-        <a href="{% url 'trainingsession_create' %}" class="table_action table_action--primary"><i class="far fa-plus-square"></i> Neue Trainingsstunde</a>
+        <a href="{% url 'trainingsession_create' %}?von={{ von_next|urlencode }}" class="table_action table_action--primary"><i class="far fa-plus-square"></i> Neue Trainingsstunde</a>
     </div>
     <div class="year_tabs">
         {% for y in all_years %}
-            <a href="{% url 'trainingsession_list' %}?year={{ y }}" {% if y == year %}class="here_I_am"{% endif %}>{{ y }}</a>
+            <a href="{% url 'trainingsession_list' %}?year={{ y }}&von={{ von|urlencode }}" {% if y == year %}class="here_I_am"{% endif %}>{{ y }}</a>
         {% endfor %}
     </div>
 
@@ -41,7 +32,7 @@
                     {% for month_sessions in row %}
                     <td>
                         {% for session in month_sessions %}
-                            <a href="{% url 'trainingsession_detail' session.pk %}" class="day_link{% if session.payed %} day_link--payed{% endif %}"
+                            <a href="{% url 'trainingsession_detail' session.pk %}?von={{ von_next|urlencode }}" class="day_link{% if session.payed %} day_link--payed{% endif %}"
                                title="{{ session.date|date:'d.m.Y' }}{% if session.payed %} – bezahlt{% else %} – offen{% endif %}">{{ session.date|date:'j.' }}</a>
                         {% endfor %}
                     </td>
@@ -59,7 +50,7 @@
     <div class="member_toolbar invoice_heading">
         <h3>Offene Rechnungen</h3>
         {% if is_board %}
-        <form method="POST" action="{% url 'generate_invoices' %}">
+        <form method="POST" action="{% url 'generate_invoices' %}?von={{ von|urlencode }}">
             {% csrf_token %}
             <button type="submit" class="table_action table_action--primary">Rechnungen erstellen</button>
         </form>
@@ -90,11 +81,11 @@
                     <td>{% if invoice.invoice_pdf %}<a href="{{ invoice.invoice_pdf.url }}" class="more_info_button">PDF</a>{% else %}fehlt{% endif %}</td>
                     {% if is_board %}
                     <td class="table_actions">
-                        <form method="POST" action="{% url 'trainingsession_mark_invoice_as_payed' invoice.pk %}">
+                        <form method="POST" action="{% url 'trainingsession_mark_invoice_as_payed' invoice.pk %}?von={{ von|urlencode }}">
                             {% csrf_token %}
                             <button type="submit" class="table_action">Als bezahlt markieren</button>
                         </form>
-                        <form method="POST" action="{% url 'trainingsession_delete_invoice' invoice.pk %}"
+                        <form method="POST" action="{% url 'trainingsession_delete_invoice' invoice.pk %}?von={{ von|urlencode }}"
                               onsubmit="return confirm('Rechnung löschen? Die Trainingsstunden werden wieder offen und können neu abgerechnet werden.');">
                             {% csrf_token %}
                             <button type="submit" class="table_action table_action--danger">Löschen</button>

@@ -1,36 +1,46 @@
 {% extends 'members/base.html' %}
+{% block navbar2 %}
+{% include "members/snippets/breadcrumbs.html" %}
+{% endblock %}
 {% block content %}
 <section class="member_page">
     {% include "trainer/_tabs.html" with active="groups" %}
 
-    <div class="member_toolbar tester_dashboard__head">
-        <h3>Deine Trainingsgruppen</h3>
-    </div>
-    <p class="member_panel__hint">Alle Trainingszeiten, bei denen du als Trainer*in eingetragen bist.</p>
-    <div class="dashboard_grid">
-        {% for session in sessions %}
-        {% include "trainer/_training_group_card.html" %}
-        {% empty %}
-        <p class="member_panel__hint">Du bist noch bei keiner Trainingszeit eingetragen.</p>
-        {% endfor %}
-    </div>
+    {# side by side; on phones one below the other #}
+    <div class="trainer_groups">
+        <div>
+            <div class="member_toolbar tester_dashboard__head">
+                <h3>Deine Trainingsgruppen</h3>
+            </div>
+            <p class="member_panel__hint">Alle Trainingszeiten, bei denen du als Trainer*in eingetragen bist.</p>
+            <div class="dashboard_grid">
+                {% for session in sessions %}
+                {% include "trainer/_training_group_card.html" %}
+                {% empty %}
+                <p class="member_panel__hint">Du bist noch bei keiner Trainingszeit eingetragen.</p>
+                {% endfor %}
+            </div>
+        </div>
 
-    {# trial trainings at these training times (was its own tab before) #}
-    <div class="member_toolbar tester_dashboard__head" id="probetraining">
-        <h3>Probetraining</h3>
-    </div>
-    <h4 class="trainer_groups__sub">Deine nächsten Einheiten</h4>
-    <p class="member_panel__hint">Probetrainings zu deinen Trainingszeiten. Kontaktinformationen findest du in der Gruppenübersicht.</p>
-    {% include "public/_trial_calendar.html" %}
+        {# trial trainings at these training times (was its own tab before) #}
+        <div>
+            <div class="member_toolbar tester_dashboard__head" id="probetraining">
+                <h3>Probetraining</h3>
+            </div>
+            <h4 class="trainer_groups__sub">Deine nächsten Einheiten</h4>
+            <p class="member_panel__hint">Probetrainings zu deinen Trainingszeiten. Kontaktinformationen findest du in der Gruppenübersicht.</p>
+            {% include "public/_trial_calendar.html" %}
 
-    <h4 class="trainer_groups__sub">Laufende Gruppen</h4>
-    <p class="member_panel__hint">Alle noch nicht archivierten Gruppen</p>
-    <div class="dashboard_grid">
-        {% for group in groups %}
-        {% include "public/_trial_group_card.html" %}
-        {% empty %}
-        <p class="member_panel__hint">Keine laufenden Gruppen zu deinen Trainingszeiten.</p>
-        {% endfor %}
+            <h4 class="trainer_groups__sub">Laufende Gruppen</h4>
+            <p class="member_panel__hint">Alle noch nicht archivierten Gruppen</p>
+            <div class="dashboard_grid">
+                {% for group in groups %}
+                {% include "public/_trial_group_card.html" %}
+                {% empty %}
+                <p class="member_panel__hint">Keine laufenden Gruppen zu deinen Trainingszeiten.</p>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </section>
 {% endblock %}

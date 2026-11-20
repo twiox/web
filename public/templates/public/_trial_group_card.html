@@ -1,5 +1,5 @@
 {# a trial group as dashboard card (dashboard, trainer document); group from trials.annotate_groups #}
-<a class="dashboard_card trial_group_card" href="{% url 'trial_group_detail' group.pk %}">
+<a class="dashboard_card trial_group_card" href="{% url 'trial_group_detail' group.pk %}?von={{ trial_von|urlencode }}">
     <i class="fas fa-users"></i>
     <strong>{{ group.name }}</strong>
     <span class="dashboard_card__text">

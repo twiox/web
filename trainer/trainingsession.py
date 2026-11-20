@@ -1,5 +1,6 @@
 from django.urls import path
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.http import HttpResponse, JsonResponse
 from datetime import datetime
 from itertools import groupby
@@ -7,6 +8,7 @@ from trainer.forms import TrainingSessionForm, find_duplicate
 from trainer.models import month_of
 from trainer.models import TrainingSessionEntry, TrainingSessionParticipant, TrainingSessionInvoice
 from members.models import Trainer, Profile, Session
+from members.breadcrumbs import entry_label, trail, with_von
 from members.roles import is_board, is_privileged, is_trainer
 from public.models import TrialGroup
 from public.trials import expected_testers
@@ -16,25 +18,44 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.contrib import messages
 
+def entry_default(request):
+    """Where a training session entry sits without a trail (e.g. a bookmark): trainers in their tables,
+    the board in the list of sessions and invoices."""
+    return "trainer/tabellen" if is_trainer(request.user) else "vorstand/rechnungen"
+
+
+def entry_trail(request, entry, current=None):
+    """Breadcrumbs of an entry's page, or (current) of a page below it, e.g. the edit form."""
+    step = f"stunde:{entry.pk}"
+    if current:
+        return trail(request, f"{entry_default(request)}/{step}", current)
+    return trail(request, entry_default(request), entry_label(entry), step=step)
+
+
+def list_trail(request):
+    return trail(request, "vorstand", "Trainingsstunden & Rechnungen", step="rechnungen")
+
+
 @user_passes_test(is_privileged)  # trainers in their table, chairmen on the detail page
 @require_POST
 def session_delete(request, pk):
-    """From the trainer's table (htmx: the row disappears) or the detail page (back to the training
-    group, e.g. after finding a duplicate there, else to the list)."""
+    """From the trainer's table (htmx: the row disappears) or the detail page (back to the page it was
+    opened from, e.g. the training group after finding a duplicate there)."""
     entry = get_object_or_404(TrainingSessionEntry, pk=pk)
     from_page = not request.headers.get("HX-Request")
+    crumbs = entry_trail(request, entry)
     if entry.is_invoiced:
         # deleting it would make the invoice wrong; htmx keeps the row on an error status
         if from_page:
             messages.add_message(request, messages.ERROR, "Diese Stunde ist bereits abgerechnet und kann nicht gelöscht werden.")
-            return redirect('trainingsession_detail', pk=pk)
+            return redirect(with_von(reverse('trainingsession_detail', args=[pk]), crumbs['von']))
         return HttpResponse("Bereits abgerechnet", status=409)
-    session_id, label = entry.session_id, f"{entry.group or 'Trainingsstunde'} vom {entry.date:%d.%m.%Y}" if entry.date else "Trainingsstunde"
+    label = entry_label(entry)
     entry.delete()
     if not from_page:
         return HttpResponse("")
     messages.add_message(request, messages.SUCCESS, f"{label} gelöscht")
-    return redirect('trainer_group_detail', pk=session_id) if session_id else redirect('trainingsession_list')
+    return redirect(crumbs['back_url'])
 
 ## HTMX snippets
 def snippet_context(request, session):
@@ -213,11 +234,13 @@ def session_detail_view(request, pk):
         object.save()
         messages.add_message(request, messages.SUCCESS, "Gespeichert")
         # redirect, so reloading the page does not send the form again
-        return redirect('trainingsession_detail', pk=object.pk)
+        return redirect(with_von(reverse('trainingsession_detail', args=[object.pk]), entry_trail(request, object)['von']))
 
     # the board can move billed entries to another training time (see session_relink)
     relink_sessions = Session.objects.order_by("day_key", "start_time") if is_board(request.user) and object.is_invoiced else None
-    return render(request, 'trainingsession/detail.html', {'object': object, 'relink_sessions': relink_sessions})
+    return render(request, 'trainingsession/detail.html', {
+        'object': object, 'relink_sessions': relink_sessions, **entry_trail(request, object),
+    })
 
 def session_form_values(form):
     """Field values for the hand-written form inputs: the submitted data, or the entry being edited."""
@@ -244,6 +267,9 @@ def session_form_context(form):
 @user_passes_test(is_privileged)
 def session_create_view(request):
     form = TrainingSessionForm(request.POST or None, allow_old_dates=is_board(request.user))
+    crumbs = trail(request, entry_default(request), "Neue Trainingsstunde")
+    # the new (or already existing) entry sits where this form was opened from
+    detail = lambda entry: redirect(with_von(reverse('trainingsession_detail', args=[entry.pk]), crumbs['von']))
     if request.method == "POST" and form.is_valid():
         existing = form.duplicate()
         if existing:
@@ -251,21 +277,22 @@ def session_create_view(request):
             names = ", ".join(t.user.first_name for t in existing.trainer.all()) or "jemand"
             messages.add_message(request, messages.WARNING,
                 f"Diese Trainingsstunde ist schon eingetragen ({existing.date:%d.%m.%Y}, {existing.start}–{existing.end} Uhr, von {names}). Du bist jetzt bei diesem Eintrag.")
-            return redirect('trainingsession_detail', pk=existing.pk)
+            return detail(existing)
         session = form.save()
         # chairmen who aren't trainers add the trainers on the detail page
         if is_trainer(request.user):
             session.trainer.add(request.user.trainer)
-        return redirect('trainingsession_detail', pk=session.pk)
-    return render(request, "trainingsession/index.html", session_form_context(form))
+        return detail(session)
+    return render(request, "trainingsession/index.html", {**session_form_context(form), **crumbs, "sibling_von": crumbs['von']})
 
 
 @user_passes_test(is_privileged)
 def session_edit_view(request, pk):
     entry = get_object_or_404(TrainingSessionEntry, pk=pk)
+    crumbs = entry_trail(request, entry, current="Bearbeiten")
     if entry.is_invoiced:
         messages.add_message(request, messages.WARNING, "Diese Stunde ist bereits abgerechnet und kann nicht mehr geändert werden.")
-        return redirect('trainingsession_detail', pk=pk)
+        return redirect(crumbs['back_url'])
     form = TrainingSessionForm(request.POST or None, instance=entry, allow_old_dates=is_board(request.user))
     duplicate = None
     if request.method == "POST" and form.is_valid():
@@ -273,9 +300,13 @@ def session_edit_view(request, pk):
         if not duplicate:
             form.save()
             messages.add_message(request, messages.SUCCESS, "Gespeichert")
-            return redirect('trainingsession_detail', pk=pk)
+            return redirect(crumbs['back_url'])
         form.add_error(None, f"Für diese Trainingszeit gibt es am {duplicate.date:%d.%m.%Y} schon eine Trainingsstunde ({duplicate.start}–{duplicate.end} Uhr).")
-    return render(request, "trainingsession/index.html", {**session_form_context(form), "entry": entry, "duplicate": duplicate})
+    # the duplicate sits next to this entry: its trail without this entry
+    sibling_von = crumbs['von'].removesuffix(f"/stunde:{entry.pk}")
+    return render(request, "trainingsession/index.html", {
+        **session_form_context(form), **crumbs, "entry": entry, "duplicate": duplicate, "sibling_von": sibling_von,
+    })
 
 
 @user_passes_test(is_board)
@@ -294,7 +325,7 @@ def session_relink(request, pk):
     duplicate = find_duplicate(entry.date, target, entry.group, entry.start, entry.end, exclude=entry.pk)
     if duplicate:
         messages.add_message(request, messages.WARNING, f"Bei {target.title if target else entry.group} gibt es am {duplicate.date:%d.%m.%Y} schon eine Trainingsstunde ({duplicate.start}–{duplicate.end} Uhr).")
-    return redirect('trainingsession_detail', pk=pk)
+    return redirect(with_von(reverse('trainingsession_detail', args=[pk]), entry_trail(request, entry)['von']))
 
 
 @user_passes_test(is_privileged)
@@ -340,6 +371,7 @@ def session_list_view(request):
         })
 
     return render(request, "trainingsession/list.html", {
+            **list_trail(request),
             'months':months,
             'rows':rows,
             'unpayed_invoices':unpayed_invoices,
@@ -411,7 +443,7 @@ def generate_invoices(request):
         messages.add_message(request, messages.SUCCESS, f"{len(created)} Abrechnung(en) erstellt.")
     else:
         messages.add_message(request, messages.INFO, "Keine offenen Trainingsstunden zum Abrechnen.")
-    return redirect('trainingsession_list')
+    return redirect(with_von(reverse('trainingsession_list'), list_trail(request)['von']))
 
 
 @user_passes_test(is_board)
@@ -421,7 +453,7 @@ def mark_invoice_as_payed(request, pk):
     invoice.date_payed = datetime.today()
     invoice.save()
     messages.add_message(request, messages.SUCCESS, "Rechnung als bezahlt markiert")
-    return redirect('trainingsession_list')
+    return redirect(with_von(reverse('trainingsession_list'), list_trail(request)['von']))
 
 
 @user_passes_test(is_board)
@@ -432,7 +464,7 @@ def delete_invoice(request, pk):
     invoice.invoice_pdf.delete(save=False)
     invoice.delete()
     messages.add_message(request, messages.SUCCESS, "Rechnung gelöscht, die Trainingsstunden sind wieder offen")
-    return redirect('trainingsession_list')
+    return redirect(with_von(reverse('trainingsession_list'), list_trail(request)['von']))
 
 
 urlpatterns = [

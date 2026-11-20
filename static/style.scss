@@ -430,6 +430,24 @@ strong{
         }
     }
 }
+// below the main navigation: where the page sits (members.breadcrumbs); wraps on narrow screens
+.breadcrumbs{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 8px;
+    margin-top: 2px;
+    padding-block: 16px;
+    font-size: 1.1rem;
+    a{
+        padding-block: 4px;  // the global 10px would space wrapped rows far apart on phones
+    }
+    &__current{
+        color: white;
+        font-weight: 500;
+    }
+}
+
 .image_wrapper{
     position:relative;
     align-items:center;
@@ -1461,6 +1479,16 @@ footer{
     }
 }
 // trainer document, Trainingsgruppen: the subsections of "Probetraining"
+// trainer document: the training groups and the trial trainings side by side, on phones one below the other
+.trainer_groups{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0 $padding_big;
+    align-items: start;
+    @media (min-width: $tablet){
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
 .trainer_groups__sub{
     margin: $padding_big 0 4px 0;
 }

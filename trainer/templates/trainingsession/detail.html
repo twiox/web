@@ -1,15 +1,6 @@
 {% extends 'members/base.html' %}
 {% block navbar2 %}
-<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    {% if is_board %}
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'chairman_index' %}">Übersicht</a>
-    {% else %}
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'trainer_index' %}">
-        Trainerdokument </a>
-    {% endif %}
-    <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{ object.date|date:"d.m.Y" }}</a>
-</div>
+{% include "members/snippets/breadcrumbs.html" %}
 {% endblock %}
 {% block content %}
 <section class="member_page">
@@ -28,10 +19,10 @@
     {# a div: the delete form may not sit inside a <p> #}
     <div class="member_panel__hint entry_meta">
         {% if not object.is_invoiced %}
-        <a href="{% url 'trainingsession_edit' object.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
+        <a href="{% url 'trainingsession_edit' object.pk %}?von={{ von_next|urlencode }}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
         {% if is_board %}
         {# the board removes e.g. duplicates; billed ones stay, the invoice depends on them #}
-        <form method="POST" action="{% url 'trainingsession_delete' object.pk %}" class="entry_delete" data-name="{{ object.group|default:'Trainingsstunde' }} vom {{ object.date|date:'d.m.Y' }}">
+        <form method="POST" action="{% url 'trainingsession_delete' object.pk %}?von={{ von|urlencode }}" class="entry_delete" data-name="{{ object.group|default:'Trainingsstunde' }} vom {{ object.date|date:'d.m.Y' }}">
             {% csrf_token %}
             <button type="submit" class="icon_button" title="Löschen"><i class="far fa-minus-square"></i></button>
         </form>
@@ -42,7 +33,7 @@
     </div>
     {% if relink_sessions is not None %}
     {# billed: only the board, and only the link to the training time (the invoice keeps date, times and name) #}
-    <form method="POST" action="{% url 'trainingsession_relink' object.pk %}" class="inline_form entry_relink">
+    <form method="POST" action="{% url 'trainingsession_relink' object.pk %}?von={{ von|urlencode }}" class="inline_form entry_relink">
         {% csrf_token %}
         <label for="relink_session" class="member_panel__hint">Trainingszeit:</label>
         <select name="session" id="relink_session">
@@ -73,7 +64,7 @@
 
         <div class="session_card">
             <h3>Probetraining</h3>
-            <div id="trial-list" hx-get="{% url 'trainingsession_get_participants' object.pk %}?type=trial" hx-trigger="load once"></div>
+            <div id="trial-list" hx-get="{% url 'trainingsession_get_participants' object.pk %}?type=trial&von={{ von_next|urlencode }}" hx-trigger="load once"></div>
         </div>
 
         <div class="session_card">

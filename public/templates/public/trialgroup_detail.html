@@ -1,11 +1,7 @@
 {% extends "members/base.html" %}
 {% load static %}
 {% block navbar2 %}
-<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'tester_index' %}">Probetraining</a>
-    <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">{{ object }}</a>
-</div>
+{% include "members/snippets/breadcrumbs.html" %}
 {% endblock %}
 
 {% block content %}
@@ -15,9 +11,9 @@
         <h1>{{ object }}</h1>
     </div>
     <div class="member_panel__hint event_detail_meta trial_group_meta">
-        {% if not object.archived %}<a href="{% url 'trial_group_update' object.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>{% endif %}
+        {% if not object.archived %}<a href="{% url 'trial_group_update' object.pk %}?von={{ von_next|urlencode }}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>{% endif %}
         {% if is_board or not object.archived %}
-        <form method="POST" action="{% url 'trial_group_delete' object.pk %}" class="trial_group_delete" data-name="{{ object }}" data-archived="{{ object.archived|yesno:'1,' }}">
+        <form method="POST" action="{% url 'trial_group_delete' object.pk %}?von={{ von|urlencode }}" class="trial_group_delete" data-name="{{ object }}" data-archived="{{ object.archived|yesno:'1,' }}">
             {% csrf_token %}
             <button type="submit" class="icon_button" title="Löschen"><i class="far fa-minus-square"></i></button>
         </form>
@@ -50,7 +46,7 @@
                     <td>{{ tester.get_outcome_display }}</td>
                     <td class="table_actions">
                         {% if is_board %}
-                        <form method="POST" action="{% url 'tester_delete' tester.pk %}" class="tester_delete" data-name="{{ tester }}">
+                        <form method="POST" action="{% url 'tester_delete' tester.pk %}?von={{ von|urlencode }}" class="tester_delete" data-name="{{ tester }}">
                             {% csrf_token %}
                             <input type="hidden" name="from_group">
                             <button type="submit" class="icon_button" title="Endgültig löschen"><i class="far fa-minus-square"></i></button>
@@ -68,7 +64,7 @@
     <h3>Termine &amp; Anwesenheit</h3>
     <p class="member_panel__hint">Aus den Trainingsstunden der Trainer*innen: <i class="fas fa-check"></i> war da, <i class="fas fa-times"></i> nicht da, – noch kein Eintrag für den Termin.</p>
     {% if not dates %}
-    <p class="member_panel__hint">Noch keine Termine – über <a href="{% url 'trial_group_update' object.pk %}">Bearbeiten</a> hinzufügen.</p>
+    <p class="member_panel__hint">Noch keine Termine – über <a href="{% url 'trial_group_update' object.pk %}?von={{ von_next|urlencode }}">Bearbeiten</a> hinzufügen.</p>
     {% endif %}
     {% if dates or rows %}
     <div class="member_table_wrapper tertiary_bg">
@@ -80,7 +76,7 @@
                     <th class="trial_attendance__date" title="{{ trial_date.session.title }}{% for trainer in trial_date.session.trainer.all %}{% if forloop.first %} · {% else %}, {% endif %}{{ trainer.user.first_name }}{% endfor %}">
                         {# once a trainer entered the training: link to it #}
                         {% if trial_date.entry_pk %}
-                        <a class="trial_attendance__entry" href="{% url 'trainingsession_detail' trial_date.entry_pk %}" title="Zur Trainingsstunde">{{ trial_date.date|date:"D d.m." }} <i class="fas fa-external-link-alt"></i></a><br>
+                        <a class="trial_attendance__entry" href="{% url 'trainingsession_detail' trial_date.entry_pk %}?von={{ von_next|urlencode }}" title="Zur Trainingsstunde">{{ trial_date.date|date:"D d.m." }} <i class="fas fa-external-link-alt"></i></a><br>
                         {% else %}
                         {{ trial_date.date|date:"D d.m." }}<br>
                         {% endif %}
@@ -157,9 +153,9 @@
                         {% endif %}
                     </td>
                     <td class="table_actions">
-                        <a href="{% url 'tester_update' tester.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
+                        <a href="{% url 'tester_update' tester.pk %}?von={{ von_next|urlencode }}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
                         <button type="button" class="icon_button" data-remove="{% url 'tester_set_group' tester.pk %}" data-name="{{ tester }}" title="Aus der Gruppe nehmen (wieder wartend)"><i class="fas fa-user-minus"></i></button>
-                        <form method="POST" action="{% url 'tester_delete' tester.pk %}" class="tester_delete" data-name="{{ tester }}">
+                        <form method="POST" action="{% url 'tester_delete' tester.pk %}?von={{ von|urlencode }}" class="tester_delete" data-name="{{ tester }}">
                             {% csrf_token %}
                             <input type="hidden" name="from_group">
                             <button type="submit" class="icon_button" title="Löschen"><i class="far fa-minus-square"></i></button>

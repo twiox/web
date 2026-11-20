@@ -1,10 +1,6 @@
 {% extends "members/base.html" %}
 {% block navbar2 %}
-<div class="navbar primary_bg padding_all_small" style="margin-top:2px;">
-    <a class="more_info_button float_left" style="font-size: 1.1rem;" href="{% url 'tester_index' %}">Probetraining</a>
-    <a class="float_left"> > </a>
-    <a class="float_left strong" style="font-size: 1.1rem; color:white;">Anmeldungen</a>
-</div>
+{% include "members/snippets/breadcrumbs.html" %}
 {% endblock %}
 
 {% block content %}
@@ -13,7 +9,7 @@
         <h1>Anmeldungen</h1>
         <input class="searchbar" id="tester_search" type="search" placeholder="Suche nach Name, E-Mail, Notiz …">
         {% if is_board %}
-            <a href="{% url 'tester_create' %}" class="table_action table_action--primary"><i class="far fa-plus-square"></i> Manueller Eintrag</a>
+            <a href="{% url 'tester_create' %}?von={{ von_next|urlencode }}" class="table_action table_action--primary"><i class="far fa-plus-square"></i> Manueller Eintrag</a>
         {% endif %}
     </div>
     {# same age groups as on the dashboard #}
@@ -79,8 +75,8 @@
                         </select>
                     </td>
                     <td class="table_actions">
-                        <a href="{% url 'tester_update' tester.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
-                        <form method="POST" action="{% url 'tester_delete' tester.pk %}" data-name="{{ tester }}">
+                        <a href="{% url 'tester_update' tester.pk %}?von={{ von_next|urlencode }}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
+                        <form method="POST" action="{% url 'tester_delete' tester.pk %}?von={{ von|urlencode }}" data-name="{{ tester }}">
                             {% csrf_token %}
                             <button type="submit" class="icon_button" title="Löschen"><i class="far fa-minus-square"></i></button>
                         </form>

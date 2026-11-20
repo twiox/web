@@ -9,7 +9,7 @@ upcoming: trials.upcoming_trial_dates(); upcoming_all: all dates (board) or only
     <div class="trial_calendar__day">
         <div class="primary padding_all_small flex_center"><strong>{{ day.grouper|date:"D d.m." }}</strong></div>
         {% for trial_date in day.list %}
-        <a class="trial_calendar__entry tertiary_bg" href="{% url 'trial_group_detail' trial_date.group.pk %}">
+        <a class="trial_calendar__entry tertiary_bg" href="{% url 'trial_group_detail' trial_date.group.pk %}?von={{ trial_von|urlencode }}">
             <span class="trial_calendar__time">{{ trial_date.session.format_start_time }} · {{ trial_date.session.title }}</span>
             <strong>{{ trial_date.group }}</strong>
             {% with count=trial_date.group.testers.all|length %}

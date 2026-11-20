@@ -35,6 +35,7 @@ from .trials import (
     ACTIVE_GROUP_ORDER, FINAL_OUTCOMES, annotate_groups, archive_group, attended_trainings, can_archive, current_testers, delete_stale_requests, email_board,
     finished_testers, group_attendance, is_photo, upcoming_trial_dates, weekday_matches,
 )
+from members.breadcrumbs import trail, with_von
 from members.roles import BoardRequiredMixin, PrivilegedRequiredMixin, board_required, is_board, is_privileged, json_privileged_required
 
 
@@ -99,6 +100,20 @@ def tester_age_groups(testers):
     return groups
 
 
+def trial_default(user):
+    """Where the trial trainings sit without a trail (e.g. a bookmark): the board's dashboard, or for
+    trainers the Probetraining section of their groups page."""
+    return "vorstand/probetraining" if is_board(user) else "trainer/gruppen/probetraining"
+
+
+def trial_group_trail(request, group, current=None):
+    """Breadcrumbs of a trial group's page, or (current) of a page below it, e.g. the edit form."""
+    step = f"probe:{group.pk}"
+    if current:
+        return trail(request, f"{trial_default(request.user)}/{step}", current)
+    return trail(request, trial_default(request.user), str(group), step=step)
+
+
 class TesterIndexView(LoginRequiredMixin, PrivilegedRequiredMixin, TemplateView):
     """Probetraining dashboard: who is waiting, the groups, and the next trial dates (archived groups only in their overview)."""
 
@@ -136,6 +151,8 @@ class TesterIndexView(LoginRequiredMixin, PrivilegedRequiredMixin, TemplateView)
             upcoming_all=board,
             finished_groups=finished_groups,
             outcomes=Tester.OUTCOMES,
+            **(crumbs := trail(self.request, "vorstand" if board else "trainer/gruppen", "Probetraining", step="probetraining")),
+            trial_von=crumbs["von_next"],  # for the trial calendar and group cards
         )
         return context
 
@@ -153,6 +170,7 @@ class TesterListView(LoginRequiredMixin, PrivilegedRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context.update(trail(self.request, "vorstand/probetraining", "Anmeldungen", step="anmeldungen"))
         context["groups"] = TrialGroup.objects.filter(archived__isnull=True).order_by("name")  # for the group dropdown in each row
         context["object_list"] = flag_duplicates(context["object_list"])
         return context
@@ -303,9 +321,15 @@ class TesterCreateView(LoginRequiredMixin, BoardRequiredMixin, CreateView):
     def get_form_kwargs(self):
         return {**super().get_form_kwargs(), "board": True}
 
+    def trail(self):
+        return trail(self.request, "vorstand/probetraining/anmeldungen", "Neue Person")
+
+    def get_context_data(self, **kwargs):
+        return {**super().get_context_data(**kwargs), **self.trail()}
+
     def get_success_url(self):
         messages.add_message(self.request, messages.SUCCESS, f"{self.object} eingetragen")
-        return reverse("tester_list")
+        return self.trail()["back_url"]
 
 
 class TesterUpdateView(LoginRequiredMixin, PrivilegedRequiredMixin, UpdateView):
@@ -319,14 +343,24 @@ class TesterUpdateView(LoginRequiredMixin, PrivilegedRequiredMixin, UpdateView):
     def get_form_kwargs(self):
         return {**super().get_form_kwargs(), "board": is_board(self.request.user)}
 
+    def trail(self):
+        """Opened from the list of requests or from the person's trial group."""
+        group = self.object.trial_group
+        if is_board(self.request.user) or not group:
+            default = "vorstand/probetraining/anmeldungen"
+        else:
+            default = f"{trial_default(self.request.user)}/probe:{group.pk}"
+        return trail(self.request, default, str(self.object))
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["attended"] = attended_trainings(self.object)
+        context.update(self.trail())
         return context
 
     def get_success_url(self):
         messages.add_message(self.request, messages.SUCCESS, f"{self.object} gespeichert")
-        return reverse("tester_list")
+        return self.trail()["back_url"]
 
 
 class TesterDeleteView(LoginRequiredMixin, PrivilegedRequiredMixin, DeleteView):
@@ -341,10 +375,11 @@ class TesterDeleteView(LoginRequiredMixin, PrivilegedRequiredMixin, DeleteView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        # deleted from the group page: back to the group
+        # back to the page it was deleted from (its trail comes along as ?von=)
+        von = self.request.GET.get("von")
         if "from_group" in self.request.POST and self.object.trial_group_id:
-            return reverse("trial_group_detail", args=[self.object.trial_group_id])
-        return reverse("tester_list")
+            return with_von(reverse("trial_group_detail", args=[self.object.trial_group_id]), von)
+        return with_von(reverse("tester_list"), von)
 
 
 class TrialGroupFormMixin:
@@ -357,6 +392,7 @@ class TrialGroupFormMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["dates"] = kwargs.get("dates") or TrialDateFormSet(instance=self.object)
+        context.update(self.trail())
         return context
 
     def post(self, request, *args, **kwargs):
@@ -368,17 +404,28 @@ class TrialGroupFormMixin:
             dates.instance = self.object
             dates.save()
             messages.add_message(request, messages.SUCCESS, f"Gruppe {self.object} gespeichert")
-            return redirect("trial_group_detail", pk=self.object.pk)
+            return redirect(self.saved_url())
         return self.render_to_response(self.get_context_data(form=form, dates=dates))
 
 
 class TrialGroupCreateView(LoginRequiredMixin, PrivilegedRequiredMixin, TrialGroupFormMixin, CreateView):
-    pass
+    def trail(self):
+        return trail(self.request, trial_default(self.request.user), "Neue Gruppe")
+
+    def saved_url(self):
+        # the new group sits where this form was opened from
+        return with_von(reverse("trial_group_detail", args=[self.object.pk]), self.trail()["von"])
 
 
 class TrialGroupUpdateView(LoginRequiredMixin, PrivilegedRequiredMixin, TrialGroupFormMixin, UpdateView):
     def get_queryset(self):
         return TrialGroup.objects.filter(archived__isnull=True)
+
+    def trail(self):
+        return trial_group_trail(self.request, self.object, current="Bearbeiten")
+
+    def saved_url(self):
+        return self.trail()["back_url"]
 
 
 class TrialGroupDetailView(LoginRequiredMixin, PrivilegedRequiredMixin, DetailView):
@@ -400,6 +447,7 @@ class TrialGroupDetailView(LoginRequiredMixin, PrivilegedRequiredMixin, DetailVi
             outcomes=Tester.OUTCOMES,
             # for adding people who are still waiting
             waiting=Tester.objects.filter(trial_group__isnull=True).order_by("last_name", "first_name"),
+            **trial_group_trail(self.request, self.object),
         )
         return context
 
@@ -423,7 +471,7 @@ class TrialGroupDeleteView(LoginRequiredMixin, PrivilegedRequiredMixin, DeleteVi
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse("tester_index")
+        return trial_group_trail(self.request, self.object)["back_url"]  # where the group page was opened from
 
 
 @login_required
@@ -435,7 +483,7 @@ def trial_group_archive(request, pk):
     group = get_object_or_404(TrialGroup, pk=pk)
     if not can_archive(group):
         messages.add_message(request, messages.ERROR, "Archivieren geht erst, wenn alle Mitglied oder nicht Mitglied geworden sind.")
-        return redirect("trial_group_detail", pk=group.pk)
+        return redirect(with_von(reverse("trial_group_detail", args=[group.pk]), trial_group_trail(request, group)["von"]))
     archive_group(group)
     messages.add_message(request, messages.SUCCESS, f"Gruppe {group} archiviert")
     return redirect("tester_index")

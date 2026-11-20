@@ -1,5 +1,5 @@
 {# a weekly training time as card, built like the trial group cards #}
-<a class="dashboard_card training_group_card" href="{% url 'trainer_group_detail' session.pk %}">
+<a class="dashboard_card training_group_card" href="{% url 'trainer_group_detail' session.pk %}?von={{ von_next|urlencode }}">
     <i class="fas fa-users"></i>
     <strong>{{ session.title }}</strong>
     <span class="dashboard_card__text">

@@ -1,12 +1,15 @@
 {% extends 'members/base.html' %}
+{% block navbar2 %}
+{% include "members/snippets/breadcrumbs.html" %}
+{% endblock %}
 {% block content %}
 <section class="member_page">
     {% include "trainer/_tabs.html" with active="sessions" %}
 
     <div class="member_toolbar">
-        <a href="{% url 'trainingsession_create' %}" class="table_action table_action--primary"><i class="far fa-plus-square"></i> Neue Trainingsstunde</a>
+        <a href="{% url 'trainingsession_create' %}?von={{ von_next|urlencode }}" class="table_action table_action--primary"><i class="far fa-plus-square"></i> Neue Trainingsstunde</a>
         <span class="member_panel__hint">Fülle für jedes Training einen Eintrag aus und sende ihn ab, sobald er vollständig ist.</span>
-        <a href="{% url 'trainingsession_list' %}" class="more_info_button">Alle Stunden & Rechnungen</a>
+        <a href="{% url 'trainingsession_list' %}?von={{ von_next|urlencode }}" class="more_info_button">Alle Stunden & Rechnungen</a>
     </div>
 
     {% for group in months %}
@@ -38,7 +41,7 @@
                     {% for entry in group.entries %}
                     <tr>
                         <td class="table_actions">
-                            <a href="{% url 'trainingsession_detail' entry.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
+                            <a href="{% url 'trainingsession_detail' entry.pk %}?von={{ von_next|urlencode }}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
                             {% if not entry.payed and not entry.invoice_count %}
                             <a role="button" title="Löschen"
                                hx-post="{% url 'trainingsession_delete' entry.pk %}"

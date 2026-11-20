@@ -47,7 +47,7 @@
                 {% for session in day_sessions %}
                     {# trainers and the board: the whole card opens the training group (like the event cards); its controls sit above that link #}
                     <div style="margin-top:10px;" class="training_card{% if is_privileged %} training_card--link{% endif %}">
-                        {% if is_privileged %}<a class="training_card__link" href="{% url 'trainer_group_detail' session.pk %}" aria-label="Trainingsgruppe {{ session.title }}"></a>{% endif %}
+                        {% if is_privileged %}<a class="training_card__link" href="{% url 'trainer_group_detail' session.pk %}?von=mitglieder" aria-label="Trainingsgruppe {{ session.title }}"></a>{% endif %}
                         <!--session hinweise -->
                         {% if session.visible %}
                         {% for notice in session.notices %}
