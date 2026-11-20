@@ -1,12 +1,13 @@
 from .forms import GroupEmailForm, TrainerForm, TrainerSelfForm
-from .models import TrainingSessionEntry, TrainingSessionParticipant
+from .models import TrainingSessionEntry, TrainingSessionParticipant, month_of
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
 from members.models import AdditionalEmail, Message, Trainer, Session, Profile
-from members.roles import BoardRequiredMixin, PrivilegedRequiredMixin, is_privileged, is_trainer
+from members.roles import BoardRequiredMixin, PrivilegedRequiredMixin, TrainerRequiredMixin, is_privileged, is_trainer
 from public.models import TrialGroup
 from public.trials import ACTIVE_GROUP_ORDER, annotate_groups, upcoming_trial_dates
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic import DeleteView, UpdateView, ListView
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, JsonResponse
@@ -39,7 +40,7 @@ def trainer_index(request):
     )
     # grouped by month, newest first; entries without a date go last
     months = []
-    for month, group in groupby(entries, key=lambda e: e.date.replace(day=1).date() if e.date else None):
+    for month, group in groupby(entries, key=lambda e: month_of(e.date) if e.date else None):
         group = list(group)
         months.append({
             "month": month,
@@ -82,7 +83,7 @@ def trainer_group_detail(request, pk):
     Built like the trial group page, without dates, attendance and outcomes. Open to every trainer
     (e.g. a substitute) and the board, like the trial groups."""
     session = get_object_or_404(Session.objects.select_related("spot").prefetch_related("trainer__user"), pk=pk)
-    participants = list(session.participants.select_related("user").order_by("user__last_name", "user__first_name"))
+    participants = group_participants(session)
     # contact person and emergency number are columns only if a minor here has one of them
     show_parent = any(p.age is not None and p.age < 18 and (p.parent or p.parent_telnr) for p in participants)
     return render(request, "trainer/training_group_detail.html", {
@@ -92,6 +93,31 @@ def trainer_group_detail(request, pk):
         "candidates": group_candidates(session),
         **group_dashboard(session, participants),
     })
+
+
+def group_participants(session):
+    """Everyone on a training time's list (who ticked "Teilnahme"), by name."""
+    return list(session.participants.select_related("user").order_by("user__last_name", "user__first_name"))
+
+
+def iso_week(moment):
+    return moment.isocalendar()[:2]
+
+
+def week_cells(entries, weeks):
+    """One heatmap row: per entry 2 = there, 1 = at another training the same week, 0 = not there; and the
+    date last there. weeks: {iso week: {entry ids}} of every entry the person attended, any training time."""
+    cells, last_seen = [], None
+    for entry in entries:
+        same_week = weeks.get(iso_week(entry.date), set())
+        if entry.pk in same_week:
+            cells.append(2)
+            last_seen = entry.date
+        elif same_week:
+            cells.append(1)
+        else:
+            cells.append(0)
+    return cells, last_seen
 
 
 def group_dashboard(session, participants):
@@ -114,28 +140,16 @@ def group_dashboard(session, participants):
     trainer_rows = trainer_heatmap(session, entries)
 
     # every recorded attendance of the people on the list, any training time (for the "same week" cells)
-    attended = {}  # user id -> {entry id: iso week}
+    attended = {}  # user id -> {iso week: {entry id}}
     rows = TrainingSessionParticipant.objects.filter(
         user__in=[p.user_id for p in participants], session__date__isnull=False
     ).values_list("user", "session_id", "session__date")
     for user_id, entry_id, day in rows:
-        attended.setdefault(user_id, {})[entry_id] = day.isocalendar()[:2]
+        attended.setdefault(user_id, {}).setdefault(iso_week(day), set()).add(entry_id)
 
     heatmap = []
     for profile in participants:
-        visits = attended.get(profile.user_id, {})
-        weeks = {}
-        for entry_id, week in visits.items():
-            weeks.setdefault(week, set()).add(entry_id)
-        cells, last_seen = [], None
-        for entry in entries:
-            if entry.pk in visits:
-                cells.append(2)
-                last_seen = entry.date
-            elif weeks.get(entry.date.isocalendar()[:2], set()) - {entry.pk}:
-                cells.append(1)
-            else:
-                cells.append(0)
+        cells, last_seen = week_cells(entries, attended.get(profile.user_id, {}))
         heatmap.append({"profile": profile, "cells": list(zip(entries, cells)), "last_seen": last_seen})
 
     # "Andere": who was there but is not on the list (members to add, guests, trial participants)
@@ -174,20 +188,12 @@ def trainer_heatmap(session, entries):
         for trainer_id, entry_id, day in through.objects.filter(
             trainer_id__in=people, trainingsessionentry__date__isnull=False
         ).values_list("trainer_id", "trainingsessionentry_id", "trainingsessionentry__date"):
-            weeks.setdefault(trainer_id, {}).setdefault(day.isocalendar()[:2], set()).add(entry_id)
+            weeks.setdefault(trainer_id, {}).setdefault(iso_week(day), set()).add(entry_id)
     in_group = set(session.trainer.values_list("pk", flat=True))
     rows = []
     for trainer in sorted(people.values(), key=lambda t: (t.pk not in in_group, t.user.last_name, t.user.first_name)):
-        cells, last_seen = [], None
-        for entry in entries:
-            role = entry.trainer_roles.get(trainer.pk)
-            if role:
-                cells.append((entry, 2, role))
-                last_seen = entry.date
-            elif weeks.get(trainer.pk, {}).get(entry.date.isocalendar()[:2], set()) - {entry.pk}:
-                cells.append((entry, 1, ""))
-            else:
-                cells.append((entry, 0, ""))
+        cells, last_seen = week_cells(entries, weeks.get(trainer.pk, {}))
+        cells = [(entry, cell, entry.trainer_roles[trainer.pk] if cell == 2 else "") for entry, cell in zip(entries, cells)]
         rows.append({"trainer": trainer, "cells": cells, "last_seen": last_seen, "in_group": trainer.pk in in_group})
     return rows
 
@@ -297,7 +303,7 @@ def group_email_context(addresses, recipients, form):
 
 def group_recipients(session):
     """Everyone on the list with their addresses: the own one and the additional ones (e.g. a parent's)."""
-    participants = list(session.participants.select_related("user").order_by("user__last_name", "user__first_name"))
+    participants = group_participants(session)
     extra = {}
     for user_id, email in AdditionalEmail.objects.filter(user__in=[p.user_id for p in participants]).values_list("user", "email"):
         extra.setdefault(user_id, []).append(email)
@@ -330,11 +336,10 @@ def trainer_group_email(request, pk):
     session = get_object_or_404(Session, pk=pk)
     recipients = group_recipients(session)
     reachable = [(p, a) for p, a in recipients if a]
-    can_notice = is_privileged(request.user)
     addresses = group_email_addresses(request.user, session)
     info_choices, reply_to, _ = addresses
     form = GroupEmailForm(
-        request.POST or None, can_notice=can_notice, info_choices=info_choices,
+        request.POST or None, info_choices=info_choices,
         recipient_choices=[(str(p.pk), p.user.get_full_name()) for p, _ in reachable],
     )
     if request.method == "POST" and form.is_valid():
@@ -371,7 +376,7 @@ def trainer_group_email(request, pk):
                 text += f" ({missing} ohne E-Mail-Adresse)"
             if failed or failed_info:
                 text += f"; nicht an {', '.join(failed + failed_info)}"
-            if can_notice and form.cleaned_data.get("notice"):
+            if form.cleaned_data["notice"]:
                 notice = Message.objects.create(title=subject, message=body, author=request.user, display="sessions",
                                                 autodelete=datetime.now() + timedelta(days=3))
                 notice.sessions.add(session)
@@ -422,34 +427,25 @@ class TrainerDeleteView(LoginRequiredMixin, BoardRequiredMixin, DeleteView):
         # deactivate instead of delete, see member_role in accounts/views.py
         if conflict := self.object.schedule_conflict():
             messages.add_message(self.request, messages.ERROR, conflict)
-            return HttpResponseRedirect(reverse("trainer_list"))
-        self.object.active = False
-        self.object.save()
-        messages.add_message(self.request, messages.SUCCESS, f"{self.object.user.get_full_name()} deaktiviert")
-        return HttpResponseRedirect(reverse("trainer_list"))
+        else:
+            self.object.active = False
+            self.object.save()
+            messages.add_message(self.request, messages.SUCCESS, f"{self.object.user.get_full_name()} deaktiviert")
+        return HttpResponseRedirect(self.object.get_absolute_url())  # the trainer list
 
-class TrainerUpdateView(LoginRequiredMixin, BoardRequiredMixin, UpdateView):
+class TrainerUpdateView(LoginRequiredMixin, BoardRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Trainer
     form_class = TrainerForm
     template_name = "trainer/trainer_form.html"
-
-    def form_valid(self, form):
-        messages.add_message(self.request, messages.SUCCESS, "Gespeichert")
-        return super().form_valid(form)
+    success_message = "Gespeichert"
 
 
-class TrainerSelfUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class TrainerSelfUpdateView(LoginRequiredMixin, TrainerRequiredMixin, SuccessMessageMixin, UpdateView):
     form_class = TrainerSelfForm
     template_name = "trainer/trainer_form.html"
     success_url = reverse_lazy("trainer_data")
+    success_message = "Gespeichert"
     extra_context = {"is_self": True}
 
     def get_object(self):
         return self.request.user.trainer
-
-    def test_func(self):
-        return is_trainer(self.request.user)
-
-    def form_valid(self, form):
-        messages.add_message(self.request, messages.SUCCESS, "Gespeichert")
-        return super().form_valid(form)

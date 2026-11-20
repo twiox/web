@@ -4,6 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from datetime import datetime
 from itertools import groupby
 from trainer.forms import TrainingSessionForm, find_duplicate
+from trainer.models import month_of
 from trainer.models import TrainingSessionEntry, TrainingSessionParticipant, TrainingSessionInvoice
 from members.models import Trainer, Profile, Session
 from members.roles import is_board, is_privileged, is_trainer
@@ -22,7 +23,7 @@ def session_delete(request, pk):
     group, e.g. after finding a duplicate there, else to the list)."""
     entry = get_object_or_404(TrainingSessionEntry, pk=pk)
     from_page = not request.headers.get("HX-Request")
-    if entry.payed or entry.invoice.exists():
+    if entry.is_invoiced:
         # deleting it would make the invoice wrong; htmx keeps the row on an error status
         if from_page:
             messages.add_message(request, messages.ERROR, "Diese Stunde ist bereits abgerechnet und kann nicht gelöscht werden.")
@@ -36,15 +37,22 @@ def session_delete(request, pk):
     return redirect('trainer_group_detail', pk=session_id) if session_id else redirect('trainingsession_list')
 
 ## HTMX snippets
+def snippet_context(request, session):
+    """What every list snippet gets: the entry and the list type (?type=member, trainer, ...)."""
+    return {'session': session, 'type': request.GET.get('type')}
+
+
+def trainer_field(session, type):
+    """The entry's trainers (type "trainer") or co-trainers (anything else)."""
+    return session.trainer if type == 'trainer' else session.cotrainer
+
+
 @user_passes_test(is_privileged)
 def get_participants_list(request, pk):
-    """
-    Get the trainer-list snippet for display in session-detail view 
-    """
-    session = TrainingSessionEntry.objects.get(pk=pk)
-    type = request.GET.get('type')
-
-    context = {'session':session, 'type':type}
+    """The participants snippet of the detail page: members, trial participants or non-members (?type=)."""
+    session = get_object_or_404(TrainingSessionEntry, pk=pk)
+    context = snippet_context(request, session)
+    type = context['type']
 
     if type=='member':
         present = list(session.participant.filter(user__isnull=False).select_related('user__profile'))
@@ -83,62 +91,37 @@ def get_participants_list(request, pk):
 
 @user_passes_test(is_privileged)
 def get_trainer_list(request, pk):
-    """
-    Get the trainer-list snippet for display in session-detail view 
-    """
-    session = TrainingSessionEntry.objects.get(pk=pk)
-    type = request.GET.get('type')
-
-    context = {'session':session, 'type':type}
-
-    if type=='trainer':
-        context.update({'object_list':session.trainer.all()})
-    else:
-        context.update({'object_list':session.cotrainer.all()})
+    """The trainers or co-trainers snippet of the detail page (?type=)."""
+    session = get_object_or_404(TrainingSessionEntry, pk=pk)
+    context = snippet_context(request, session)
+    context['object_list'] = trainer_field(session, context['type']).all()
     return render(request,'trainingsession/snippet_trainerlist.html',context)
 
 @user_passes_test(is_privileged)
 @require_POST
 def remove_trainer(request, pk):
-    """
-    Remove trainer or cotrainer from session,then return the list-snippet 
-    """
-    session = TrainingSessionEntry.objects.get(pk=pk)
-    trainer = Trainer.objects.get(pk=int(request.POST.get('trainer_pk')))
-    type = request.GET.get('type')
-
-    if type == 'trainer':
-        session.trainer.remove(trainer)
-    else:
-        session.cotrainer.remove(trainer)
+    """Removes a trainer or co-trainer from the entry, then returns the list snippet."""
+    session = get_object_or_404(TrainingSessionEntry, pk=pk)
+    trainer = get_object_or_404(Trainer, pk=request.POST.get('trainer_pk'))
+    trainer_field(session, request.GET.get('type')).remove(trainer)
     return get_trainer_list(request, pk)
 
 @user_passes_test(is_privileged)
 @require_POST
 def add_trainer(request, pk):
-    """
-    Add trainer or cotrainer from session,then return the list-snippet 
-    """
-    session = TrainingSessionEntry.objects.get(pk=pk)
-    trainer = Trainer.objects.get(pk=int(request.POST.get('trainer_pk')))
-    type = request.GET.get('type')
-
-    if type == 'trainer':
-        session.trainer.add(trainer)
-    else:
-        session.cotrainer.add(trainer)
+    """Adds a trainer or co-trainer to the entry, then returns the list snippet."""
+    session = get_object_or_404(TrainingSessionEntry, pk=pk)
+    trainer = get_object_or_404(Trainer, pk=request.POST.get('trainer_pk'))
+    trainer_field(session, request.GET.get('type')).add(trainer)
     return get_trainer_list(request, pk)
 
 
 @user_passes_test(is_privileged)
 @require_POST
 def add_member(request, pk):
-    """
-    Add member to session,then return the list-snippet 
-    """
-    session = TrainingSessionEntry.objects.get(pk=pk)
-    member = Profile.objects.get(pk=int(request.POST.get('member_pk')))
-    type = request.GET.get('type')
+    """Adds a member to the entry, then returns the list snippet."""
+    session = get_object_or_404(TrainingSessionEntry, pk=pk)
+    member = get_object_or_404(Profile, pk=request.POST.get('member_pk'))
 
     # once per member, even if the chip is clicked twice
     TrainingSessionParticipant.objects.get_or_create(session=session, user=member.user)
@@ -148,8 +131,7 @@ def add_member(request, pk):
 @user_passes_test(is_privileged)
 @require_POST
 def add_nonmember(request, pk):
-    session = TrainingSessionEntry.objects.get(pk=pk)
-    type = request.GET.get('type')
+    session = get_object_or_404(TrainingSessionEntry, pk=pk)
     name = request.POST.get('name','').strip()
 
     # create the participant
@@ -180,31 +162,20 @@ def delete_participant(request, pk):
 
 @user_passes_test(is_privileged)
 def search(request, pk):
-    """
-    search function (trainer or member)
-    return a list of items based on the searched term and type!
-    """
-    session = TrainingSessionEntry.objects.get(pk=pk)
-    type = request.GET.get('type')
-    context = {'session':session, 'type':type}
-    try:
-        query = request.GET.get("query", "").strip().split()[0]
-    
-        if type=='member':
-            results = Profile.objects.filter(
-                Q(user__first_name__icontains=query) |
-                Q(user__last_name__icontains=query)
-            )
-        elif type in ['trainer', 'cotrainer']:
-            results = Trainer.objects.filter(active=True).filter(
-                Q(user__first_name__icontains=query) |
-                Q(user__last_name__icontains=query)
-            )
-        else:
-            results = []
-    except IndexError: #empty string
+    """Search results for adding a member, trainer or co-trainer (?type=), by the first word of the query."""
+    session = get_object_or_404(TrainingSessionEntry, pk=pk)
+    context = snippet_context(request, session)
+    type = context['type']
+    words = request.GET.get("query", "").split()
+    query = words[0] if words else None  # the first word only
+    name_matches = Q(user__first_name__icontains=query) | Q(user__last_name__icontains=query)
+    if query and type == 'member':
+        results = Profile.objects.filter(name_matches)
+    elif query and type in ['trainer', 'cotrainer']:
+        results = Trainer.objects.filter(active=True).filter(name_matches)
+    else:
         results = []
-    
+
     context.update({'object_list':results})
     
     return render(request, 'trainingsession/snippet_searchresult.html', context)
@@ -231,7 +202,7 @@ def fill_session_details(request):
 # This is the detail-view
 @user_passes_test(is_privileged)
 def session_detail_view(request, pk):
-    object = TrainingSessionEntry.objects.get(pk=pk)
+    object = get_object_or_404(TrainingSessionEntry, pk=pk)
 
     if request.method == 'POST':
         notes = request.POST.get('comment','')
@@ -245,7 +216,7 @@ def session_detail_view(request, pk):
         return redirect('trainingsession_detail', pk=object.pk)
 
     # the board can move billed entries to another training time (see session_relink)
-    relink_sessions = Session.objects.order_by("day_key", "start_time") if is_board(request.user) and (object.payed or object.invoice.exists()) else None
+    relink_sessions = Session.objects.order_by("day_key", "start_time") if is_board(request.user) and object.is_invoiced else None
     return render(request, 'trainingsession/detail.html', {'object': object, 'relink_sessions': relink_sessions})
 
 def session_form_values(form):
@@ -270,7 +241,7 @@ def session_form_context(form):
     return {"form": form, "values": session_form_values(form), "min_date": min_date}
 
 
-@user_passes_test(lambda user: is_trainer(user) or is_board(user))
+@user_passes_test(is_privileged)
 def session_create_view(request):
     form = TrainingSessionForm(request.POST or None, allow_old_dates=is_board(request.user))
     if request.method == "POST" and form.is_valid():
@@ -292,17 +263,18 @@ def session_create_view(request):
 @user_passes_test(is_privileged)
 def session_edit_view(request, pk):
     entry = get_object_or_404(TrainingSessionEntry, pk=pk)
-    if entry.payed or entry.invoice.exists():
+    if entry.is_invoiced:
         messages.add_message(request, messages.WARNING, "Diese Stunde ist bereits abgerechnet und kann nicht mehr geändert werden.")
         return redirect('trainingsession_detail', pk=pk)
     form = TrainingSessionForm(request.POST or None, instance=entry, allow_old_dates=is_board(request.user))
-    duplicate = form.duplicate() if request.method == "POST" and form.is_valid() else None
-    if duplicate:
+    duplicate = None
+    if request.method == "POST" and form.is_valid():
+        duplicate = form.duplicate()
+        if not duplicate:
+            form.save()
+            messages.add_message(request, messages.SUCCESS, "Gespeichert")
+            return redirect('trainingsession_detail', pk=pk)
         form.add_error(None, f"Für diese Trainingszeit gibt es am {duplicate.date:%d.%m.%Y} schon eine Trainingsstunde ({duplicate.start}–{duplicate.end} Uhr).")
-    elif request.method == "POST" and form.is_valid():
-        form.save()
-        messages.add_message(request, messages.SUCCESS, "Gespeichert")
-        return redirect('trainingsession_detail', pk=pk)
     return render(request, "trainingsession/index.html", {**session_form_context(form), "entry": entry, "duplicate": duplicate})
 
 
@@ -312,7 +284,7 @@ def session_relink(request, pk):
     """The board moves an entry to another training time, also when it is billed already: only the
     link changes (group view, dashboard); date, times and the group name on the invoice stay."""
     entry = get_object_or_404(TrainingSessionEntry, pk=pk)
-    target = get_object_or_404(Session, pk=request.POST.get("session") or 0) if request.POST.get("session") else None
+    target = get_object_or_404(Session, pk=request.POST["session"]) if request.POST.get("session") else None
     entry.session = target
     entry.save(update_fields=["session"])
     text = f"Verknüpft mit {target.title} ({target.weekday} {target.format_start_time} Uhr)" if target else "Keine Trainingszeit mehr verknüpft"
@@ -341,11 +313,11 @@ def session_list_view(request):
 
     # the billed sessions of the year as a table: one row per trainer, one cell per month
     sessions = TrainingSessionEntry.objects.filter(billed=True, date__year=int(year)).order_by('date')
-    months = sorted({session.date.replace(day=1).date() for session in sessions})
+    months = sorted({month_of(session.date) for session in sessions})
     cells = {}  # trainer -> {month: [sessions]}
     for session in sessions:
         for trainer in session.get_trainers:
-            cells.setdefault(trainer, {}).setdefault(session.date.replace(day=1).date(), []).append(session)
+            cells.setdefault(trainer, {}).setdefault(month_of(session.date), []).append(session)
     rows = [(trainer, [cells[trainer].get(month, []) for month in months])
             for trainer in sorted(cells, key=lambda t: (t.user.first_name, t.user.last_name, t.pk))]
 
@@ -354,13 +326,12 @@ def session_list_view(request):
     # the archive is grouped by the month an invoice was paid (default) or billed, newest first
     archive_by = 'rechnung' if request.GET.get('archiv') == 'rechnung' else 'bezahlt'
     if archive_by == 'bezahlt':
-        archive_date = lambda inv: inv.date_payed
-        payed_invoices = invoices.filter(date_payed__isnull=False).order_by('-date_payed')
+        archive_date, order = (lambda inv: inv.date_payed), '-date_payed'
     else:
-        archive_date = lambda inv: inv.date_billed or inv.date_payed
-        payed_invoices = invoices.filter(date_payed__isnull=False).order_by('-date_billed')
+        archive_date, order = (lambda inv: inv.date_billed or inv.date_payed), '-date_billed'
+    payed_invoices = invoices.filter(date_payed__isnull=False).order_by(order)
     archive = []
-    for month, group in groupby(payed_invoices, key=lambda inv: archive_date(inv).replace(day=1).date()):
+    for month, group in groupby(payed_invoices, key=lambda inv: month_of(archive_date(inv))):
         group = list(group)
         archive.append({
             'month': month,

@@ -4,6 +4,11 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from members.models import Trainer, Session, User
 
+
+def month_of(moment):
+    """The month a date(time) falls in, as the date of its 1st: the key the entry and invoice lists group by."""
+    return moment.replace(day=1).date()
+
 class TrainingSessionEntry(models.Model):
     trainer = models.ManyToManyField(Trainer, related_name='trainer', blank=True)
     cotrainer = models.ManyToManyField(Trainer, related_name='cotrainer', blank=True) # in the case we ever have different rates of payment again...
@@ -20,6 +25,11 @@ class TrainingSessionEntry(models.Model):
     def __str__(self):
         return f"{self.date.strftime('%d.%m.%Y')}-{self.group}"
     
+    @property
+    def is_invoiced(self):
+        """On an invoice (or paid): the entry can't be changed or deleted anymore, the invoice depends on it."""
+        return self.payed or self.invoice.exists()
+
     @property
     def get_trainers(self):
         trainers = list(self.trainer.all())

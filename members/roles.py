@@ -33,6 +33,11 @@ def is_board(user):
     return user.is_superuser or is_chairman(user)
 
 
+class TrainerRequiredMixin(UserPassesTestMixin):
+    def test_func(self):
+        return is_trainer(self.request.user)
+
+
 class PrivilegedRequiredMixin(UserPassesTestMixin):
     def test_func(self):
         return is_privileged(self.request.user)

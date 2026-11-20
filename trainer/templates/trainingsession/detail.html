@@ -27,7 +27,7 @@
     </div>
     {# a div: the delete form may not sit inside a <p> #}
     <div class="member_panel__hint entry_meta">
-        {% if not object.payed and not object.invoice.all %}
+        {% if not object.is_invoiced %}
         <a href="{% url 'trainingsession_edit' object.pk %}" title="Bearbeiten"><i class="fas fa-pen-square"></i></a>
         {% if is_board %}
         {# the board removes e.g. duplicates; billed ones stay, the invoice depends on them #}

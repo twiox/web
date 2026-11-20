@@ -47,6 +47,9 @@ class TrainingSessionForm(forms.ModelForm):
 
     def __init__(self, *args, allow_old_dates=False, **kwargs):
         super().__init__(*args, **kwargs)
+        # optional in the model (old entries), but every new or edited entry needs one: invoices, the
+        # duplicate check and the group dashboards all go by the date
+        self.fields["date"].required = True
         self.allow_old_dates = allow_old_dates
         self.weekday_mismatch = False
 
@@ -150,13 +153,11 @@ class GroupEmailForm(MdcFormMixin, forms.Form):
     # who else gets it (board, trainers); offered by the view, removable as chips in the form
     info_to = forms.MultipleChoiceField(required=False, widget=forms.MultipleHiddenInput)
 
-    def __init__(self, *args, can_notice=False, info_choices=(), recipient_choices=(), **kwargs):
+    def __init__(self, *args, info_choices=(), recipient_choices=(), **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["recipients"].choices = recipient_choices
         self.fields["info_to"].choices = [(address, name) for name, address in info_choices]
         self.fields["notice"].widget.attrs.pop("class", None)  # rendered as a chip
-        if not can_notice:
-            del self.fields["notice"]
 
     def clean(self):
         cleaned_data = super().clean()

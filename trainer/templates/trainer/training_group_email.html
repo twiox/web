@@ -45,12 +45,10 @@
                 <p class="member_panel__hint">Wird in der E-Mail unter deine Nachricht gesetzt (darunter folgt das Impressum des Vereins):</p>
                 {% include "trainer/emails/_group_email_sender.html" %}
             </div>
-            {% if form.notice %}
             <div class="chip_list">
                 <label class="toggle_chip">{{ form.notice }}<span>{{ form.notice.label }}</span></label>
             </div>
             <p class="member_panel__hint">Der Hinweis erscheint mit dem Betreff bei der Trainingszeit und wird nach 3 Tagen automatisch gelöscht.</p>
-            {% endif %}
 
             {# who gets it; the addresses come from the member profiles (own and additional ones) #}
             {# removable like the chips below: × leaves someone out of this e-mail; open when someone was left out before #}
