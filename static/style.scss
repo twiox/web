@@ -439,8 +439,10 @@ strong{
     margin-top: 2px;
     padding-block: 16px;
     font-size: 1.1rem;
-    a{
-        padding-block: 4px;  // the global 10px would space wrapped rows far apart on phones
+    // links and the current page spaced alike; vertically less than the global 10px of links,
+    // which would space wrapped rows far apart on phones
+    a, &__current{
+        padding: 4px $padding_small;
     }
     &__current{
         color: white;
